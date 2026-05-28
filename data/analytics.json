@@ -1,0 +1,57 @@
+{
+  "penjaga-harapan": {
+    "youtube": [
+      {
+        "month": "2025-05",
+        "jmlVideo": 5,
+        "totalViews": 21453,
+        "uniqueViewers": 0,
+        "subsGained": 251,
+        "totalLikes": 137,
+        "totalComments": 25,
+        "totalEngagement": 162,
+        "erPct": 0.76,
+        "watchHours": 190,
+        "impressions": 14074,
+        "adImpressions": 1538,
+        "avgViewsPerVideo": 4291,
+        "peakViews": 10498
+      },
+      {
+        "month": "2026-01",
+        "jmlVideo": 68,
+        "totalViews": 493283,
+        "uniqueViewers": 0,
+        "subsGained": 545,
+        "totalLikes": 8906,
+        "totalComments": 5584,
+        "totalEngagement": 14490,
+        "erPct": 2.94,
+        "watchHours": 4270,
+        "impressions": 157351,
+        "adImpressions": 33360,
+        "avgViewsPerVideo": 7254,
+        "peakViews": 86716
+      }
+    ],
+    "tiktok": [
+      {
+        "month": "2025-05",
+        "totalVideoViews": 558467,
+        "profileViews": 2762,
+        "followersEOM": 34016,
+        "followersGained": 384,
+        "totalViewers": 459157,
+        "newViewers": 164981,
+        "returningViewers": 294176,
+        "totalLikes": 17886,
+        "totalComments": 609,
+        "totalShares": 614,
+        "totalEngagement": 19110,
+        "erPct": 3.42
+      }
+    ]
+  },
+  "33-official": {},
+  "jaga-asa": {}
+}

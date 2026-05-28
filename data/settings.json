@@ -1,0 +1,162 @@
+{
+  "kpi": {
+    "penjaga-harapan": 5,
+    "33-official": 2,
+    "jaga-asa": 1
+  },
+  "users": [
+    {
+      "name": "Wedy",
+      "role": "Creator",
+      "phone": "087700082504"
+    },
+    {
+      "name": "Idham",
+      "role": "Creator",
+      "phone": "085711859411"
+    },
+    {
+      "name": "Junaidi",
+      "role": "Creator",
+      "phone": "08129906249"
+    },
+    {
+      "name": "Luthfi",
+      "role": "Creator",
+      "phone": "085289497329"
+    },
+    {
+      "name": "Dio",
+      "role": "Creator",
+      "phone": "085158237781"
+    },
+    {
+      "name": "Lisa",
+      "role": "Administrator",
+      "phone": "085169042231"
+    },
+    {
+      "name": "Siska",
+      "role": "Administrator",
+      "phone": "085774499909"
+    },
+    {
+      "name": "Lydia",
+      "role": "Planner",
+      "phone": "08999873818"
+    },
+    {
+      "name": "Haji Doni",
+      "role": "Planner",
+      "phone": "081398899075"
+    },
+    {
+      "name": "Umar",
+      "role": "Leader",
+      "phone": "089604295449"
+    }
+  ],
+  "analyticsUrls": {
+    "penjaga-harapan": {
+      "instagram": "https://www.instagram.com/penjaga_harapan/",
+      "tiktok": "https://www.tiktok.com/@penjaga.harapan",
+      "twitter": "https://x.com/penjagaharapan",
+      "facebook": "https://www.facebook.com/officialpenjagaharapan/",
+      "youtube": "https://www.youtube.com/@PenjagaHarapan"
+    }
+  },
+  "topContent": {
+    "penjaga-harapan": {
+      "good": [
+        {
+          "title": "",
+          "link": ""
+        },
+        {
+          "title": "",
+          "link": ""
+        },
+        {
+          "title": "",
+          "link": ""
+        }
+      ],
+      "bad": [
+        {
+          "title": "",
+          "link": ""
+        },
+        {
+          "title": "",
+          "link": ""
+        },
+        {
+          "title": "",
+          "link": ""
+        }
+      ]
+    },
+    "33-official": {
+      "good": [
+        {
+          "title": "",
+          "link": ""
+        },
+        {
+          "title": "",
+          "link": ""
+        },
+        {
+          "title": "",
+          "link": ""
+        }
+      ],
+      "bad": [
+        {
+          "title": "",
+          "link": ""
+        },
+        {
+          "title": "",
+          "link": ""
+        },
+        {
+          "title": "",
+          "link": ""
+        }
+      ]
+    },
+    "jaga-asa": {
+      "good": [
+        {
+          "title": "",
+          "link": ""
+        },
+        {
+          "title": "",
+          "link": ""
+        },
+        {
+          "title": "",
+          "link": ""
+        }
+      ],
+      "bad": [
+        {
+          "title": "",
+          "link": ""
+        },
+        {
+          "title": "",
+          "link": ""
+        },
+        {
+          "title": "",
+          "link": ""
+        }
+      ]
+    }
+  },
+  "adminName": "Admin",
+  "adminHash": "e541fbcd60a15da9a746974cf168c8bfd125cb638ae84c20e36c30721c89ad8a"
+}

@@ -7,7 +7,7 @@
 
 /* ── Default repo config (public repo — PAT tidak diperlukan untuk baca) ──── */
 /* Ubah sesuai repo data GitHub Anda. PAT tetap disimpan di localStorage. */
-const DEFAULT_REPO = { owner: 'Genzed-Kost', repo: 'cms-penjagaharapan', branch: 'main' };
+const DEFAULT_REPO = { owner: 'Genzed-Kost', repo: 'cmssocmed', branch: 'main' };
 
 /* ── Constants ───────────────────────────────────────────────────────────── */
 /* Gemini key disimpan di localStorage (bukan hardcode) — diisi admin di API Setup */
