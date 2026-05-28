@@ -45,13 +45,24 @@ const PLATFORM_META = {
 };
 
 const STATUS_CLASS = {
-  'Ide':       'badge-ide',
-  'Draft':     'badge-draft',
+  'Plan':      'badge-plan',
   'Review':    'badge-review',
-  'Approved':  'badge-approved',
-  'Scheduled': 'badge-scheduled',
-  'Published': 'badge-published'
+  'Revisi':    'badge-revisi',
+  'Preview':   'badge-preview',
+  'ACC':       'badge-acc',
+  'Done':      'badge-done',
+  'Published': 'badge-published',
+  'Drop':      'badge-drop',
+  'Hold':      'badge-hold',
+  // Backward-compat (data lama)
+  'Ide':       'badge-plan',
+  'Draft':     'badge-review',
+  'Approved':  'badge-acc',
+  'Scheduled': 'badge-preview'
 };
+
+const STATUSES  = ['Plan','Review','Revisi','Preview','ACC','Done','Published','Drop','Hold'];
+const FORMATS   = ['Flayer','Meme','Karikatur','Komikstrip','Animasi','Video','Short','Monolog','Carousell','Podcast'];
 
 const ACCOUNTS = [
   { id: 'penjaga-harapan', name: 'Penjaga Harapan', color: '#7c3aed' },
@@ -804,6 +815,49 @@ async function notifyCreatorAssigned(content, oldCreator) {
   await sendWaNotif(userObj.phone, msg);
 }
 
+/* ── Dashboard Ticker Reminder ──────────────────────────────────────────── */
+function renderDashTicker() {
+  const ticker = $('dashTicker');
+  const inner  = $('dashTickerInner');
+  if (!ticker || !inner) return;
+
+  const todayStr = new Date().toISOString().slice(0, 10);
+  const items    = [];
+
+  // 1. Bank of Contents: semua item yang belum lewat atau hari ini
+  (state.bankKonten || []).forEach(b => {
+    if (!b.publishDate || b.publishDate < todayStr) return;
+    const acctLabel = BK_ACCOUNTS.find(a => a.id === b.account)?.name || b.account || '';
+    const daysLeft  = Math.round((new Date(b.publishDate) - new Date(todayStr)) / 86400000);
+    const when      = daysLeft === 0 ? 'Hari ini' : daysLeft === 1 ? 'Besok' : fmtDate(b.publishDate);
+    items.push(`📋 <strong>${esc(b.title || 'Bank Konten')}</strong>${b.creator ? ` · ${esc(b.creator)}` : ''}${acctLabel ? ` · ${esc(acctLabel)}` : ''} — ${when}`);
+  });
+
+  // 2. Planner: format Liputan, Podcast, Monolog yang belum selesai
+  const tickerFormats = ['Liputan', 'Podcast', 'Monolog', 'Short'];
+  const doneStatus    = ['Published', 'Done', 'Drop'];
+  (state.contents || []).forEach(c => {
+    if (!c.publishDate || c.publishDate < todayStr) return;
+    if (doneStatus.includes(c.status)) return;
+    if (!tickerFormats.includes(c.format)) return;
+    const daysLeft = Math.round((new Date(c.publishDate) - new Date(todayStr)) / 86400000);
+    const when     = daysLeft === 0 ? 'Hari ini' : daysLeft === 1 ? 'Besok' : fmtDate(c.publishDate);
+    const icon     = c.format === 'Podcast' ? '🎙' : c.format === 'Monolog' ? '🎤' : c.format === 'Liputan' ? '📰' : '📱';
+    items.push(`${icon} <strong>${esc(c.title || 'Konten')}</strong>${c.creator ? ` · ${esc(c.creator)}` : ''} [${esc(c.format)}] — ${when}`);
+  });
+
+  if (!items.length) {
+    ticker.classList.add('hidden');
+    return;
+  }
+
+  // Sort by date (closest first) — crude but effective
+  const separator = '&nbsp;&nbsp;&nbsp;·&nbsp;&nbsp;&nbsp;';
+  inner.innerHTML = items.join(separator) + separator + items.join(separator);
+  inner.style.animationDuration = `${Math.max(18, items.length * 7)}s`;
+  ticker.classList.remove('hidden');
+}
+
 /* ══════════════════════════════════════════════════════════════════════════
    BANK KONTEN
    ══════════════════════════════════════════════════════════════════════════ */
@@ -1172,8 +1226,8 @@ function renderDashboard() {
   });
 
   const totalKpi  = Object.values(state.settings?.kpi || {}).reduce((a,b) => a + (+b||0), 0);
-  const selesai   = monthContents.filter(c => c.status === 'Published').length;
-  const progress  = monthContents.filter(c => ['Draft','Review','Approved','Scheduled'].includes(c.status)).length;
+  const selesai   = monthContents.filter(c => ['Published','Done'].includes(c.status)).length;
+  const progress  = monthContents.filter(c => ['Review','Revisi','Preview','ACC'].includes(c.status)).length;
   const teamCount = (state.settings?.users || []).length;
 
   setTxt('dStatKonten',   monthContents.length);
@@ -1186,6 +1240,7 @@ function renderDashboard() {
   renderTodoList();
   renderDashNearContent();
   renderAnalyticsCompact();
+  renderDashTicker();
 }
 
 function renderKpiList(monthContents) {
@@ -1330,7 +1385,7 @@ function renderDashPublished() {}
 function renderAnalyticsCompact() { renderAnalyticsPanel(); }
 
 /* Draw a mini SVG sparkline from an array of numbers */
-function drawSparkline(vals, color, w=80, h=28) {
+function drawSparkline(vals, color, w=80, h=28, labels=[]) {
   if (!vals || vals.length < 2) {
     return `<svg width="${w}" height="${h}" viewBox="0 0 ${w} ${h}"><line x1="0" y1="${h/2}" x2="${w}" y2="${h/2}" stroke="#e2e8f0" stroke-width="1.5" stroke-dasharray="3,3"/></svg>`;
   }
@@ -1338,13 +1393,24 @@ function drawSparkline(vals, color, w=80, h=28) {
   const min  = Math.min(...nums), max = Math.max(...nums);
   const range = max - min || 1;
   const pad   = 3;
-  const pts   = nums.map((v, i) => {
-    const x = pad + (i / (nums.length - 1)) * (w - pad * 2);
-    const y = pad + ((1 - (v - min) / range) * (h - pad * 2));
-    return `${x.toFixed(1)},${y.toFixed(1)}`;
-  }).join(' ');
-  const lastPt = pts.split(' ').at(-1).split(',');
-  return `<svg width="${w}" height="${h}" viewBox="0 0 ${w} ${h}">
+  const coords = nums.map((v, i) => ({
+    x: pad + (i / (nums.length - 1)) * (w - pad * 2),
+    y: pad + ((1 - (v - min) / range) * (h - pad * 2)),
+    v, lbl: labels[i] || ''
+  }));
+  const pts = coords.map(p => `${p.x.toFixed(1)},${p.y.toFixed(1)}`).join(' ');
+  const last = coords[coords.length - 1];
+
+  // Interactive hit circles for tooltip
+  const hitCircles = coords.map((p, i) => {
+    const tipLabel = p.lbl ? fmtMonth(p.lbl) : `#${i+1}`;
+    const tipVal   = fmtNum(p.v);
+    return `<circle class="spark-pt" cx="${p.x.toFixed(1)}" cy="${p.y.toFixed(1)}" r="5"
+      fill="${color}" opacity="${i === coords.length-1 ? '0.85' : '0'}"
+      data-tip="${tipLabel}: ${tipVal}"/>`;
+  }).join('');
+
+  return `<svg class="spark-svg" width="${w}" height="${h}" viewBox="0 0 ${w} ${h}" style="overflow:visible">
     <defs>
       <linearGradient id="sg_${color.replace('#','')}" x1="0" y1="0" x2="0" y2="1">
         <stop offset="0%" stop-color="${color}" stop-opacity=".18"/>
@@ -1353,7 +1419,8 @@ function drawSparkline(vals, color, w=80, h=28) {
     </defs>
     <polyline points="${pts} ${(w-pad).toFixed(1)},${h} ${pad},${h}" fill="url(#sg_${color.replace('#','')})" stroke="none"/>
     <polyline points="${pts}" fill="none" stroke="${color}" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-    <circle cx="${lastPt[0]}" cy="${lastPt[1]}" r="2.5" fill="${color}"/>
+    <circle cx="${last.x.toFixed(1)}" cy="${last.y.toFixed(1)}" r="2.5" fill="${color}"/>
+    ${hitCircles}
   </svg>`;
 }
 
@@ -1399,9 +1466,10 @@ function renderAnalyticsPanel() {
     const monthLbl = latest ? fmtMonth(latest.month) : '—';
 
     // Sparkline data
-    const follSpark = last6.map(r => r[platM.followerKey] || 0);
-    const viewSpark = last6.map(r => r[platM.viewKey]     || 0);
-    const hasData   = last6.length >= 2;
+    const follSpark  = last6.map(r => r[platM.followerKey] || 0);
+    const viewSpark  = last6.map(r => r[platM.viewKey]     || 0);
+    const sparkMonths = last6.map(r => r.month);
+    const hasData    = last6.length >= 2;
 
     return `<div class="anlp-card">
       <div class="anlp-card-head">
@@ -1415,12 +1483,12 @@ function renderAnalyticsPanel() {
         <div class="anlp-val-col">
           <div class="anlp-val-label">FOLLOWERS</div>
           <div class="anlp-val-num">${follVal !== undefined && follVal !== null ? fmtNum(follVal) : '<span class="anlp-no-data">—</span>'}</div>
-          ${hasData ? `<div class="anlp-spark">${drawSparkline(follSpark, platM.color)}</div>` : ''}
+          ${hasData ? `<div class="anlp-spark">${drawSparkline(follSpark, platM.color, 80, 28, sparkMonths)}</div>` : ''}
         </div>
         <div class="anlp-val-col">
           <div class="anlp-val-label">VIEWS <span style="font-weight:400;opacity:.7">(${monthLbl})</span></div>
           <div class="anlp-val-num">${viewVal !== undefined && viewVal !== null ? fmtNum(viewVal) : '<span class="anlp-no-data">—</span>'}</div>
-          ${hasData ? `<div class="anlp-spark">${drawSparkline(viewSpark, platM.color)}</div>` : ''}
+          ${hasData ? `<div class="anlp-spark">${drawSparkline(viewSpark, platM.color, 80, 28, sparkMonths)}</div>` : ''}
         </div>
       </div>
     </div>`;
@@ -1445,7 +1513,7 @@ function dashContentCard(c) {
 
   const acct     = ACCOUNTS.find(a => a.id === c.account);
   const users    = (state.settings?.users || []);
-  const statuses = ['Ide','Draft','Review','Approved','Scheduled','Published'];
+  const statuses = STATUSES;
 
   return `<div class="dash-content-card">
     <div class="dcc-top">
@@ -1891,7 +1959,7 @@ function restoreDraftToForm(d) {
   sv('postStatus',     d.postStatus     || 'Ide');
   sv('postTitle',      d.postTitle      || '');
   sv('postTheme',      d.postTheme      || '');
-  sv('postFormat',     d.postFormat     || 'Reels');
+  sv('postFormat',     d.postFormat     || 'Flayer');
   sv('postScript',     d.postScript     || '');
   sv('postCaption',    d.postCaption    || '');
   sv('postOutputLink', d.postOutputLink || '');
@@ -1959,7 +2027,7 @@ function renderNewPostForm(content) {
     ['postStatus','postCreator'].forEach(fid => { const el = $(fid); if (el) el.disabled = false; });
     $('publishedLockBanner')?.classList.add('hidden');
     ['editPostId','postDate','postTitle','postTheme','postScript','postCaption','postOutputLink','postNotes'].forEach(id => sv(id,''));
-    sv('postStatus','Ide'); sv('postCreator',''); sv('postAccount',''); sv('postFormat','Reels');
+    sv('postStatus','Plan'); sv('postCreator',''); sv('postAccount',''); sv('postFormat','Flayer');
     $$('#platformChecks input').forEach(cb => { cb.checked = false; });
 
     try {
@@ -3015,7 +3083,7 @@ async function generateDraft() {
 
   showAiLoad(`Generating draft naskah… (${count + 1}/${AI_MAX})`);
   try {
-    const isDialog = ['Podcast','Liputan','Short Video'].includes(format);
+    const isDialog = ['Podcast','Monolog','Video','Short'].includes(format);
     const text = await callGemini(
       `Kamu adalah content writer profesional untuk media sosial Indonesia, khususnya untuk akun "${acct}".\n\nBuatkan naskah/script konten lengkap:\n- Judul: ${title}\n- Tema: ${theme || 'umum'}\n- Format: ${format}\n- Akun: ${acct}\n\n${isDialog ? 'Sertakan dialog/percakapan jika diperlukan, tulis dengan format:\nHOST: [teks]\nNARASI: [teks]\nPERTANYAAN: [teks]\nJAWABAN: [teks]\n\n' : ''}Tulis naskah lengkap dan detail yang siap digunakan. Langsung mulai naskahnya.`
     );
@@ -3405,7 +3473,21 @@ document.addEventListener('DOMContentLoaded', async () => {
     toast('Filter planner direset ✓');
   });
   /* ── Analytics panel sync ──────────────────────────────────── */
-  $('btnAnlpSync')?.addEventListener('click', loadAllData);
+  // btnAnlpSync removed — data syncs automatically on load
+
+  /* ── Sparkline tooltip (platform analytics) ──────────────────── */
+  const _sparkTip = $('sparkTooltip');
+  document.addEventListener('mousemove', e => {
+    const pt = e.target.closest('.spark-pt');
+    if (pt && _sparkTip) {
+      _sparkTip.textContent = pt.dataset.tip || '';
+      _sparkTip.classList.remove('hidden');
+      _sparkTip.style.left = `${e.clientX + 12}px`;
+      _sparkTip.style.top  = `${e.clientY - 28}px`;
+    } else if (_sparkTip) {
+      _sparkTip.classList.add('hidden');
+    }
+  });
 
   /* ── KPI Harian period selector is wired in buildKpiPeriodSel() ── */
 

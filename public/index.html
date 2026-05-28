@@ -108,6 +108,12 @@
     <section id="page-dashboard" class="page active">
       <div class="page-inner">
 
+        <!-- Running Ticker Reminder -->
+        <div id="dashTicker" class="dash-ticker hidden">
+          <span class="dash-ticker-label">📢</span>
+          <div class="dash-ticker-track"><div class="dash-ticker-inner" id="dashTickerInner"></div></div>
+        </div>
+
         <!-- Period Filter Bar -->
         <div class="dash-month-bar">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
@@ -200,10 +206,6 @@
               </div>
               <div class="anlp-controls">
                 <select id="anlpAcctSel" class="inp-sm" style="min-width:110px"></select>
-                <button class="btn-sm" id="btnAnlpSync">
-                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"/></svg>
-                  SYNC
-                </button>
               </div>
             </div>
             <div class="anlp-grid" id="anlpGrid"></div>
@@ -223,12 +225,9 @@
             <select id="planFilterCreator" class="inp-sm"><option value="">Semua Creator</option></select>
             <select id="planFilterStatus" class="inp-sm">
               <option value="">Semua Status</option>
-              <option>Ide</option>
-              <option>Draft</option>
-              <option>Review</option>
-              <option>Approved</option>
-              <option>Scheduled</option>
-              <option>Published</option>
+              <option>Plan</option><option>Review</option><option>Revisi</option>
+              <option>Preview</option><option>ACC</option><option>Done</option>
+              <option>Published</option><option>Drop</option><option>Hold</option>
             </select>
             <select id="planFilterTime" class="inp-sm">
               <option value="">Semua Waktu</option>
@@ -352,8 +351,9 @@
             <input id="cntSearch" class="inp-sm" style="width:200px" placeholder="Cari konten…" />
             <select id="cntFilterStatus" class="inp-sm">
               <option value="">Semua Status</option>
-              <option>Ide</option><option>Draft</option><option>Review</option>
-              <option>Approved</option><option>Scheduled</option><option>Published</option>
+              <option>Plan</option><option>Review</option><option>Revisi</option>
+              <option>Preview</option><option>ACC</option><option>Done</option>
+              <option>Published</option><option>Drop</option><option>Hold</option>
             </select>
             <select id="cntFilterAcct" class="inp-sm">
               <option value="">Semua Akun</option>
@@ -414,8 +414,9 @@
             <div class="form-group">
               <label class="form-label">Status <span class="req-star">*</span></label>
               <select id="postStatus" class="form-inp">
-                <option>Ide</option><option>Draft</option><option>Review</option>
-                <option>Approved</option><option>Scheduled</option><option>Published</option>
+                <option>Plan</option><option>Review</option><option>Revisi</option>
+                <option>Preview</option><option>ACC</option><option>Done</option>
+                <option>Published</option><option>Drop</option><option>Hold</option>
               </select>
             </div>
           </div>
@@ -431,11 +432,12 @@
               <input type="text" id="postTheme" class="form-inp" placeholder="Tema / topik…" />
             </div>
             <div class="form-group">
-              <label class="form-label">Format Konten <span class="req-star">*</span></label>
+              <label class="form-label">Content Type <span class="req-star">*</span></label>
               <select id="postFormat" class="form-inp">
-                <option>Reels</option><option>Carousel</option><option>Single Image</option>
-                <option>Thread</option><option>Video</option><option>Story</option><option>Live</option>
-                <option>Podcast</option><option>Liputan</option><option>Short Video</option><option>Infografis</option>
+                <option>Flayer</option><option>Meme</option><option>Karikatur</option>
+                <option>Komikstrip</option><option>Animasi</option><option>Video</option>
+                <option>Short</option><option>Monolog</option><option>Carousell</option>
+                <option>Podcast</option>
               </select>
             </div>
           </div>
@@ -1062,6 +1064,9 @@
     <p id="aiLoadMsg">Generating dengan AI…</p>
   </div>
 </div>
+
+<!-- ─── SPARKLINE TOOLTIP ────────────────────────────────────────────────── -->
+<div id="sparkTooltip" class="spark-tooltip hidden"></div>
 
 <!-- ─── TOAST ─────────────────────────────────────────────────────────────── -->
 <div id="toast" class="toast hidden"></div>
