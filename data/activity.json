@@ -1,5 +1,13 @@
 [
   {
+    "id": "mppqxrkmwz1jz",
+    "user": "Umar",
+    "role": "Publisher",
+    "action": "logout",
+    "target": "keluar dari sistem",
+    "timestamp": "2026-05-28T17:07:48.310Z"
+  },
+  {
     "id": "mppql6g23ayl9",
     "user": "Umar",
     "role": "Publisher",
@@ -20,7 +28,7 @@
     "user": "Admin",
     "role": "Admin",
     "action": "Kirim WA Bank Konten",
-    "target": "ke Umar Ã¢ÂÂ \"POV Saya dapat bansos malah dikira buzzer\"",
+    "target": "ke Umar ÃÂ¢ÃÂÃÂ \"POV Saya dapat bansos malah dikira buzzer\"",
     "timestamp": "2026-05-28T16:46:45.002Z"
   },
   {
@@ -28,7 +36,7 @@
     "user": "Admin",
     "role": "Admin",
     "action": "Edit Bank Konten",
-    "target": "\"POV Saya dapat bansos malah dikira buzzer\" ÃÂ¢ÃÂÃÂ creator",
+    "target": "\"POV Saya dapat bansos malah dikira buzzer\" ÃÂÃÂ¢ÃÂÃÂÃÂÃÂ creator",
     "timestamp": "2026-05-28T16:45:56.642Z"
   },
   {
@@ -36,7 +44,7 @@
     "user": "Admin",
     "role": "Admin",
     "action": "Edit Bank Konten",
-    "target": "\"POV Saya dapat bansos malah dikira buzzer\" ÃÂÃÂ¢ÃÂÃÂÃÂÃÂ publishDate",
+    "target": "\"POV Saya dapat bansos malah dikira buzzer\" ÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ publishDate",
     "timestamp": "2026-05-28T16:45:33.280Z"
   },
   {
@@ -44,7 +52,7 @@
     "user": "Admin",
     "role": "Admin",
     "action": "Edit Bank Konten",
-    "target": "\"POV Saya dapat bansos malah dikira buzzer\" ÃÂÃÂ¢ÃÂÃÂÃÂÃÂ linkDrive",
+    "target": "\"POV Saya dapat bansos malah dikira buzzer\" ÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ linkDrive",
     "timestamp": "2026-05-28T16:45:26.945Z"
   },
   {
@@ -52,7 +60,7 @@
     "user": "Admin",
     "role": "Admin",
     "action": "Edit Bank Konten",
-    "target": "\"POV Saya dapat bansos malah dikira buzzer\" ÃÂÃÂ¢ÃÂÃÂÃÂÃÂ reference",
+    "target": "\"POV Saya dapat bansos malah dikira buzzer\" ÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ reference",
     "timestamp": "2026-05-28T16:45:24.560Z"
   },
   {
@@ -60,7 +68,7 @@
     "user": "Admin",
     "role": "Admin",
     "action": "Edit Bank Konten",
-    "target": "\"POV Saya dapat bansos malah dikira buzzer\" ÃÂÃÂ¢ÃÂÃÂÃÂÃÂ title",
+    "target": "\"POV Saya dapat bansos malah dikira buzzer\" ÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ title",
     "timestamp": "2026-05-28T16:45:21.547Z"
   },
   {
@@ -68,7 +76,7 @@
     "user": "Admin",
     "role": "Admin",
     "action": "Edit Bank Konten",
-    "target": "\"tanpa judul\" ÃÂÃÂ¢ÃÂÃÂÃÂÃÂ account",
+    "target": "\"tanpa judul\" ÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ account",
     "timestamp": "2026-05-28T16:44:59.138Z"
   },
   {
