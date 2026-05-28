@@ -895,7 +895,29 @@ async function logActivity(user, action, target) {
   if (state.activity.length > 500) state.activity = state.activity.slice(0, 500);
   try {
     state.shas.activity = await window.db.writeData('activity', state.activity, `Aktivitas: ${action}`);
+    saveDataCache(); // keep cache fresh so Activity Log always reflects latest
   } catch { /* non-critical */ }
+}
+
+/* ── Activity Log: fetch fresh from GitHub then render ───────────────────── */
+async function loadAndRenderActivity() {
+  const list = $('activityList');
+  if (list) list.innerHTML = `
+    <li class="act-empty" style="padding:24px 0;display:flex;align-items:center;justify-content:center;gap:8px">
+      <div class="spinner" style="width:16px;height:16px;border-width:2px"></div>
+      <span style="font-size:.8rem;color:var(--muted)">Memuat aktivitas terbaru…</span>
+    </li>`;
+
+  try {
+    const r = await window.db.read('activity');
+    if (r) {
+      state.activity   = r.data || [];
+      state.shas.activity = r.sha;
+      saveDataCache();
+    }
+  } catch { /* non-critical — render from current state */ }
+
+  renderActivity();
 }
 
 /* ── WhatsApp Notification ──────────────────────────────────────────────── */
@@ -1276,7 +1298,7 @@ function renderCurrentPage() {
     case 'dashboard':   renderDashboard();    break;
     case 'planner':     renderPlanner();      break;
     case 'bankkonten':  renderBankKonten();   break;
-    case 'activity':    renderActivity();     break;
+    case 'activity':    loadAndRenderActivity(); break;
     case 'contents':    renderContents();     break;
     case 'newpost':     renderNewPostForm();  break;
     case 'statistics':  renderStatistics();   break;
@@ -3667,6 +3689,13 @@ document.addEventListener('DOMContentLoaded', async () => {
   $('btnClearActFilter')?.addEventListener('click', () => {
     sv('actSearch',''); sv('actDateFrom',''); sv('actDateTo',''); renderActivity(1);
   });
+  $('btnRefreshActivity')?.addEventListener('click', () => {
+    const btn = $('btnRefreshActivity');
+    if (btn) { btn.disabled = true; btn.style.opacity = '.5'; }
+    loadAndRenderActivity().finally(() => {
+      if (btn) { btn.disabled = false; btn.style.opacity = ''; }
+    });
+  });
 
   /* ── Planner PDF (uses active filters, no modal) ───────────── */
   $('btnPlanPdf')?.addEventListener('click', downloadPlannerPdf);
@@ -3758,7 +3787,8 @@ document.addEventListener('DOMContentLoaded', async () => {
   $('btnGitSync')?.addEventListener('click', () => { clearDataCache(); loadAllData(true); });
 
   /* ── Expose globals for inline onclick ─────────────────────── */
-  window.closePantun    = closePantun;
+  window.closePantun         = closePantun;
+  window.loadAndRenderActivity = loadAndRenderActivity;
   window.toggleTodo     = toggleTodo;
   window.deleteTodo     = deleteTodo;
   window.editContent    = editContent;
