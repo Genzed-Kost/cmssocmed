@@ -1063,9 +1063,21 @@ ul { list-style: none; }
   border-radius: var(--radius);
   padding: 16px;
   display: flex; flex-direction: column; gap: 10px;
-  transition: box-shadow .15s;
+  transition: box-shadow .15s, border-color .15s;
+  cursor: pointer;
 }
-.dash-content-card:hover { box-shadow: var(--shadow-lg); }
+.dash-content-card:hover { box-shadow: var(--shadow-lg); border-color: var(--bd-dk); }
+
+/* Output link badge — prominent, shown above meta rows */
+.dcc-output-badge {
+  display: inline-flex; align-items: center; gap: 4px; align-self: flex-start;
+  font-size: .68rem; font-weight: 600;
+  color: var(--green); background: var(--green-lt);
+  border: 1px solid #bbf7d0; border-radius: 5px;
+  padding: 2px 8px; text-decoration: none;
+  transition: opacity .15s;
+}
+.dcc-output-badge:hover { opacity: .8; }
 .dcc-top {
   display: flex; align-items: center; gap: 7px;
 }
@@ -1254,6 +1266,28 @@ ul { list-style: none; }
   flex: 1; justify-content: center;
   display: flex; align-items: center; gap: 5px;
 }
+
+/* Platform links list (published overview) */
+.lem-plat-list { display: flex; flex-direction: column; }
+.lem-plat-item {
+  display: flex; align-items: center; gap: 10px;
+  padding: 9px 0; border-bottom: 1px solid var(--bd);
+}
+.lem-plat-item:last-child { border-bottom: none; }
+.lem-plat-item-icon {
+  display: flex; align-items: center; justify-content: center;
+  width: 30px; height: 30px; flex-shrink: 0;
+  border-radius: 8px; border: 1.5px solid;
+}
+.lem-plat-item-info { flex: 1; min-width: 0; }
+.lem-plat-item-name  { font-size: .75rem; font-weight: 700; display: block; line-height: 1.3; }
+.lem-plat-item-url   {
+  font-size: .7rem; color: var(--blue); display: block;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  text-decoration: none; max-width: 220px;
+}
+.lem-plat-item-url:hover { text-decoration: underline; }
+.lem-plat-item-empty { font-size: .7rem; color: var(--muted-lt); }
 
 /* ── Multi-select Creator (Podcast/Liputan) ─────────────────── */
 .form-inp-multi {

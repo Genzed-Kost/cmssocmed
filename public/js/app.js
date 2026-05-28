@@ -1736,26 +1736,27 @@ function dashContentCard(c, mode = 'upcoming') {
       </div>`
     : '';
 
-  // ── Upcoming: output link button ──────────────────────────────
-  const outputLinkRow = mode === 'upcoming'
-    ? `<div class="dcc-meta-row" style="margin-top:4px">
+  // ── Output badge (prominent, above meta rows, only when link set) ──
+  const outputBadge = (mode === 'upcoming' && c.outputLink)
+    ? `<a href="${esc(c.outputLink)}" target="_blank" rel="noopener"
+         class="dcc-output-badge" title="Buka Output" onclick="event.stopPropagation()">
+         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14,2 14,8 20,8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10,9 9,9 8,9"/></svg>
+         Output ↗
+       </a>`
+    : '';
+
+  // ── Upcoming: LINK row — only shown when link NOT yet set ─────────
+  const outputLinkRow = (mode === 'upcoming' && !c.outputLink)
+    ? `<div class="dcc-meta-row" style="margin-top:2px">
         <span class="dcc-label">LINK</span>
-        ${c.outputLink
-          ? `<span class="dcc-output-link-wrap">
-              <a href="${esc(c.outputLink)}" target="_blank" rel="noopener" class="dcc-file-link" title="Buka output">
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14,2 14,8 20,8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10,9 9,9 8,9"/></svg>
-                Output
-              </a>
-              <button type="button" class="dcc-link-edit-btn" onclick="openLinkModal('${c.id}','upcoming')" title="Edit link">
-                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
-              </button>
-            </span>`
-          : `<button type="button" class="dcc-link-btn" onclick="openLinkModal('${c.id}','upcoming')">+ Tambah</button>`
-        }
+        <button type="button" class="dcc-link-btn" onclick="event.stopPropagation();openLinkModal('${c.id}','upcoming')">+ Tambah</button>
       </div>`
     : '';
 
-  return `<div class="dash-content-card">
+  // Whole-card click → open link popup (skip interactive elements)
+  const cardClick = `onclick="if(!event.target.closest('select,button,a,input'))openLinkModal('${c.id}','${mode}')"`;
+
+  return `<div class="dash-content-card" ${cardClick}>
     <div class="dcc-top">
       <select class="dcc-status-sel ${STATUS_CLASS[c.status]||'badge-ide'}"
         onchange="updateContentField('${c.id}','status',this.value)" title="Ubah status">
@@ -1768,6 +1769,7 @@ function dashContentCard(c, mode = 'upcoming') {
     </div>
     ${acct ? `<div class="dcc-owner-tag" style="background:${acct.color}18;color:${acct.color};border-color:${acct.color}30">${acct.name}</div>` : ''}
     <div class="dcc-title">${esc(c.title||'—')}</div>
+    ${outputBadge}
     <div class="dcc-meta-row">
       <span class="dcc-label">TEMA</span>
       <span class="dcc-val">${esc(c.theme||'—')}</span>
@@ -2361,7 +2363,8 @@ function openLinkModal(contentId, mode, platform) {
         <button class="btn-md" onclick="closeLinkModal()">Batal</button>
       </div>`;
 
-  } else if (mode === 'published') {
+  } else if (mode === 'published' && platform) {
+    // ── Edit one specific platform link ──────────────────────────
     const meta = PLATFORM_META[platform] || { name: platform, color: '#64748b' };
     const existingUrl = (c.platformLinks || {})[platform] || '';
     $('linkEditTitle').textContent = 'Detail Konten';
@@ -2382,6 +2385,37 @@ function openLinkModal(contentId, mode, platform) {
           ${saveSvg} Simpan
         </button>
         <button class="btn-md" onclick="closeLinkModal()">Batal</button>
+      </div>`;
+
+  } else if (mode === 'published' && !platform) {
+    // ── Overview: show all platform links (whole-card click) ──────
+    $('linkEditTitle').textContent = 'Detail Konten';
+    const platItems = (c.platforms||[]).map(p => {
+      const pm = PLATFORM_META[p]; if (!pm) return '';
+      const url = (c.platformLinks||{})[p] || '';
+      return `<div class="lem-plat-item">
+        <span class="lem-plat-item-icon" style="color:${pm.color};background:${pm.color}18;border-color:${pm.color}33">
+          ${PLAT_ICON_SVG[p]||p}
+        </span>
+        <div class="lem-plat-item-info">
+          <span class="lem-plat-item-name" style="color:${pm.color}">${esc(pm.name)}</span>
+          ${url
+            ? `<a href="${esc(url)}" target="_blank" rel="noopener" class="lem-plat-item-url">${esc(url.length>42?url.slice(0,42)+'…':url)}</a>`
+            : `<span class="lem-plat-item-empty">Belum diisi</span>`
+          }
+        </div>
+        <button type="button" class="btn-xs" onclick="openLinkModal('${contentId}','published','${p}')">
+          ${url ? 'Edit' : '+ Link'}
+        </button>
+      </div>`;
+    }).join('');
+    $('linkEditContent').innerHTML = detailBlock + `
+      <div class="lem-divider"><span>Platform Links</span></div>
+      <div class="lem-plat-list">
+        ${platItems || '<div style="color:var(--muted-lt);font-size:.8rem;padding:4px 0">Tidak ada platform</div>'}
+      </div>
+      <div class="lem-actions">
+        <button class="btn-md" style="flex:1;justify-content:center" onclick="closeLinkModal()">Tutup</button>
       </div>`;
   }
 
