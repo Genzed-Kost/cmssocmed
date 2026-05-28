@@ -3155,9 +3155,8 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   /* ── INIT: Auth flow ────────────────────────────────────────── */
   if (isFirstRun()) {
-    // If GitHub is already configured (shared link or prior device), try
-    // restoring admin credentials silently from GitHub settings
     if (window.db.isConfigured()) {
+      // GitHub sudah dikonfigurasi (mis. via ?access= link) — coba ambil admin hash
       try {
         const _s = await window.db.readData('settings');
         if (_s?.adminHash) {
@@ -3168,10 +3167,15 @@ document.addEventListener('DOMContentLoaded', async () => {
           showWizard('new');  // GitHub ada tapi belum ada admin — instalasi pertama
         }
       } catch {
-        showWizard();  // Tidak bisa koneksi GitHub — tampilkan form connect
+        // Tidak bisa koneksi — load app biasa, user klik "Setup GitHub" untuk coba lagi
+        applyAuthState();
+        handleHash();
       }
     } else {
-      showWizard();  // GitHub belum dikonfigurasi — perangkat baru
+      // GitHub belum dikonfigurasi — load app tanpa popup
+      // Klik "Setup GitHub" di topbar untuk menghubungkan
+      applyAuthState();
+      handleHash();
     }
   } else if (!isLoggedIn()) {
     // Returning visit, no active session — show login
@@ -3182,4 +3186,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     handleHash();
     if (window.db.isConfigured()) setTimeout(loadAllData, 100);
   }
+
+  /* ── Topbar "Setup GitHub" — klik untuk buka connect form ─── */
+  $('topbarUser')?.addEventListener('click', () => {
+    if (!isLoggedIn()) showWizard();
+  });
 });

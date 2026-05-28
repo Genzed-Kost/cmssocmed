@@ -168,6 +168,12 @@ ul { list-style: none; }
   padding: 4px 8px 4px 4px;
   border: 1.5px solid var(--bd);
   border-radius: 20px;
+  cursor: pointer;
+  transition: border-color .15s, background .15s;
+}
+.topbar-user:hover {
+  border-color: var(--blue);
+  background: var(--blue-lt);
 }
 .user-avatar {
   width: 26px; height: 26px;
