@@ -1,10 +1,18 @@
 [
   {
+    "id": "mppq5nheiioce",
+    "user": "Admin",
+    "role": "Admin",
+    "action": "Edit Bank Konten",
+    "target": "\"POV Saya dapat bansos malah dikira buzzer\" — creator",
+    "timestamp": "2026-05-28T16:45:56.642Z"
+  },
+  {
     "id": "mppq55ggw6xeo",
     "user": "Admin",
     "role": "Admin",
     "action": "Edit Bank Konten",
-    "target": "\"POV Saya dapat bansos malah dikira buzzer\" — publishDate",
+    "target": "\"POV Saya dapat bansos malah dikira buzzer\" â publishDate",
     "timestamp": "2026-05-28T16:45:33.280Z"
   },
   {
@@ -12,7 +20,7 @@
     "user": "Admin",
     "role": "Admin",
     "action": "Edit Bank Konten",
-    "target": "\"POV Saya dapat bansos malah dikira buzzer\" — linkDrive",
+    "target": "\"POV Saya dapat bansos malah dikira buzzer\" â linkDrive",
     "timestamp": "2026-05-28T16:45:26.945Z"
   },
   {
@@ -20,7 +28,7 @@
     "user": "Admin",
     "role": "Admin",
     "action": "Edit Bank Konten",
-    "target": "\"POV Saya dapat bansos malah dikira buzzer\" — reference",
+    "target": "\"POV Saya dapat bansos malah dikira buzzer\" â reference",
     "timestamp": "2026-05-28T16:45:24.560Z"
   },
   {
@@ -28,7 +36,7 @@
     "user": "Admin",
     "role": "Admin",
     "action": "Edit Bank Konten",
-    "target": "\"POV Saya dapat bansos malah dikira buzzer\" — title",
+    "target": "\"POV Saya dapat bansos malah dikira buzzer\" â title",
     "timestamp": "2026-05-28T16:45:21.547Z"
   },
   {
@@ -36,7 +44,7 @@
     "user": "Admin",
     "role": "Admin",
     "action": "Edit Bank Konten",
-    "target": "\"tanpa judul\" — account",
+    "target": "\"tanpa judul\" â account",
     "timestamp": "2026-05-28T16:44:59.138Z"
   },
   {
