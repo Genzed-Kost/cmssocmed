@@ -140,6 +140,7 @@ ul { list-style: none; }
   display: flex;
   flex-direction: column;
   min-height: 100vh;
+  overflow-x: hidden;
   transition: margin-left .22s ease;
 }
 .sidebar.collapsed ~ .main-wrap { margin-left: 58px; }
@@ -1570,6 +1571,9 @@ ul { list-style: none; }
   padding: 7px 0;
   margin-bottom: 10px;
   position: relative;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
 }
 .dash-ticker::before,
 .dash-ticker::after {

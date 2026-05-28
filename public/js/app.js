@@ -22,8 +22,10 @@ const GEMINI_MODELS = [
   'gemini-1.5-pro-latest',
   'gemini-pro'
 ];
-const NEWS_KEY  = 'cmsph_news_v1';
-const NEWS_TTL  = 60 * 60 * 1000;
+const NEWS_KEY       = 'cmsph_news_v1';
+const NEWS_TTL       = 60 * 60 * 1000;
+const DATA_CACHE_KEY = 'cmsph_data_v2';
+const DATA_CACHE_TTL = 3 * 60 * 1000;   // 3 minutes — reduces GitHub API rate-limit hits
 const PAGE_SIZE = 15;
 
 /* ── Auth keys ───────────────────────────────────────────────────────────── */
@@ -676,10 +678,65 @@ function setSyncStatus(ok, label) {
   if (lbl) lbl.textContent = label || (ok ? 'Tersambung' : 'Error');
 }
 
-async function loadAllData() {
+/* ── Data cache helpers (mengurangi GitHub API calls) ──────────────────── */
+function saveDataCache() {
+  try {
+    localStorage.setItem(DATA_CACHE_KEY, JSON.stringify({
+      ts:         Date.now(),
+      contents:   state.contents,
+      activity:   state.activity,
+      todos:      state.todos,
+      settings:   state.settings,
+      analytics:  state.analytics,
+      bankKonten: state.bankKonten
+    }));
+  } catch { /* storage full — ignore */ }
+}
+
+function clearDataCache() {
+  try { localStorage.removeItem(DATA_CACHE_KEY); } catch {}
+}
+
+function _applyTopContentDefaults() {
+  if (!state.settings.topContent) state.settings.topContent = {};
+  ACCOUNTS.forEach(a => {
+    if (!state.settings.topContent[a.id]) {
+      state.settings.topContent[a.id] = {
+        good: [{title:'',link:''},{title:'',link:''},{title:'',link:''}],
+        bad:  [{title:'',link:''},{title:'',link:''},{title:'',link:''}]
+      };
+    }
+  });
+}
+
+async function loadAllData(force = false) {
   if (!window.db.isConfigured()) { setSyncStatus(null, 'Belum terhubung'); return; }
+
+  // ── Try localStorage cache first (skip API calls if data is fresh) ──
+  if (!force) {
+    try {
+      const cached = JSON.parse(localStorage.getItem(DATA_CACHE_KEY) || 'null');
+      if (cached && (Date.now() - cached.ts) < DATA_CACHE_TTL) {
+        state.contents   = cached.contents   || [];
+        state.activity   = cached.activity   || [];
+        state.todos      = cached.todos      || [];
+        state.settings   = cached.settings   || { kpi:{}, users:[], analyticsUrls:{} };
+        state.analytics  = cached.analytics  || {};
+        state.bankKonten = cached.bankKonten || [];
+        // SHAs sengaja tidak di-cache — db.writeData() akan auto-fetch SHA saat write
+        state.shas = {};
+        _applyTopContentDefaults();
+        checkBankKontenReminders();
+        setPubUsers(state.settings.users || []);
+        setSyncStatus(true, `Cache (${Math.round((Date.now() - cached.ts) / 1000)}s)`);
+        renderCurrentPage();
+        return;
+      }
+    } catch { /* corrupt cache — fall through to fetch */ }
+  }
+
+  // ── Fresh fetch from GitHub ─────────────────────────────────────────
   setSyncStatus(null, 'Memuat data…');
-  // Spin the sync icon
   const syncIcon = $('btnGitSync');
   if (syncIcon) syncIcon.classList.add('spinning');
   try {
@@ -696,16 +753,7 @@ async function loadAllData() {
     state.todos      = tR?.data   || [];
     state.bankKonten = bkR?.data  || [];
     state.settings   = sR?.data   || { kpi: {}, users: [], analyticsUrls: {} };
-    // Ensure topContent slots exist for every account
-    if (!state.settings.topContent) state.settings.topContent = {};
-    ACCOUNTS.forEach(a => {
-      if (!state.settings.topContent[a.id]) {
-        state.settings.topContent[a.id] = {
-          good: [{title:'',link:''},{title:'',link:''},{title:'',link:''}],
-          bad:  [{title:'',link:''},{title:'',link:''},{title:'',link:''}]
-        };
-      }
-    });
+    _applyTopContentDefaults();
     state.analytics = anlR?.data || {};
     state.shas = {
       contents:    cR?.sha,
@@ -727,6 +775,8 @@ async function loadAllData() {
       window.db.writeData('settings', state.settings, 'Migrate: persist admin credentials')
         .then(sha => { state.shas.settings = sha; }).catch(() => {});
     }
+    // Save to cache so next load is instant
+    saveDataCache();
     setSyncStatus(true, `Sinkron ${new Date().toLocaleTimeString('id-ID',{hour:'2-digit',minute:'2-digit'})}`);
     renderCurrentPage();
   } catch (e) {
@@ -982,6 +1032,7 @@ async function addBankKontenRow() {
 
   try {
     state.shas.bankKonten = await window.db.writeData('contentBank', state.bankKonten, 'Bank Konten: tambah baris baru');
+    saveDataCache();
     await logActivity(currentUser(), 'Tambah Bank Konten', 'baris baru');
     // Focus title input of the new row
     setTimeout(() => {
@@ -1019,6 +1070,7 @@ function debouncedSaveBkItem(id, field, value) {
   _bkSaveTimers[id] = setTimeout(async () => {
     try {
       state.shas.bankKonten = await window.db.writeData('contentBank', state.bankKonten, `Bank Konten: edit ${field}`);
+      saveDataCache();
       await logActivity(currentUser(), 'Edit Bank Konten', `"${item.title || 'tanpa judul'}" — ${field}`);
     } catch (e) {
       toast('Gagal simpan: ' + e.message, 'error');
@@ -2069,6 +2121,7 @@ async function deleteContent(id) {
     if (state.currentPage === 'dashboard') renderDashboard();
     try {
       state.shas.contents = await window.db.writeData('contents', state.contents, `Hapus: ${title}`);
+      saveDataCache();
       await logActivity(currentUser(), 'hapus konten', title);
       toast('Konten dihapus');
     } catch (e) { toast('Gagal: ' + e.message, 'error'); }
@@ -2132,6 +2185,7 @@ async function savePost() {
 
   try {
     state.shas.contents = await window.db.writeData('contents', state.contents, `${id?'Edit':'Tambah'}: ${title}`);
+    saveDataCache();
     // Detailed activity log
     const logDetail = id
       ? `"${title}"`
@@ -2343,6 +2397,7 @@ async function addUser() {
   $('addUserForm').classList.add('hidden');
   try {
     state.shas.settings = await window.db.writeData('settings', settings, `Tambah user: ${name} (${role})`);
+    saveDataCache();
     await logActivity(currentUser(), 'tambah anggota', `${name} (${role})`);
     toast(`${name} (${role}) ditambahkan`, 'success');
   } catch (e) { toast('Gagal: ' + e.message, 'error'); }
@@ -2357,6 +2412,7 @@ async function deleteUser(name) {
     renderUserList();
     try {
       state.shas.settings = await window.db.writeData('settings', settings, `Hapus user: ${name}`);
+      saveDataCache();
       await logActivity(currentUser(), 'hapus anggota', `${name}`);
       toast(`${name} dihapus`);
     } catch (e) { toast('Gagal: ' + e.message, 'error'); }
@@ -3601,7 +3657,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   });
 
   /* ── GitHub sync ────────────────────────────────────────────── */
-  $('btnGitSync')?.addEventListener('click', loadAllData);
+  $('btnGitSync')?.addEventListener('click', () => { clearDataCache(); loadAllData(true); });
 
   /* ── Expose globals for inline onclick ─────────────────────── */
   window.toggleTodo     = toggleTodo;
