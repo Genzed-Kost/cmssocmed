@@ -52,8 +52,9 @@
     },
     {
       "name": "Umar",
-      "role": "Leader",
-      "phone": "089604295449"
+      "role": "Publisher",
+      "phone": "089604295449",
+      "passwordHash": ""
     }
   ],
   "analyticsUrls": {
