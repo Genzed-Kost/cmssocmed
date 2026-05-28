@@ -1080,10 +1080,50 @@ ul { list-style: none; }
   letter-spacing: .06em; font-weight: 600; text-transform: uppercase;
   flex-shrink: 0;
 }
-.dcc-val  { color: var(--muted); text-align: right; }
-.dcc-creator { color: var(--blue); font-weight: 500; }
-.dash-empty { font-size: .82rem; color: var(--muted-lt); padding: 6px 0; }
+.dcc-val       { color: var(--muted); text-align: right; }
+.dcc-owner-val { color: var(--text); font-weight: 500; text-align: right; }
+.dcc-creator   { color: var(--blue); font-weight: 500; }
+.dcc-link-out  {
+  color: var(--blue); font-size: .72rem; font-weight: 600;
+  text-decoration: none; white-space: nowrap;
+}
+.dcc-link-out:hover { text-decoration: underline; }
+.dash-empty    { font-size: .82rem; color: var(--muted-lt); padding: 6px 0; }
 .dcc-plat-icon { display: flex; align-items: center; }
+
+/* ── Per-platform link inputs (published cards) ──────────────── */
+.dcc-plat-links {
+  border-top: 1px solid var(--bd);
+  margin-top: 8px; padding-top: 8px;
+  display: flex; flex-direction: column; gap: 5px;
+}
+.dcc-plat-link-row {
+  display: flex; align-items: center; gap: 5px;
+}
+.dcc-plat-link-lbl {
+  flex-shrink: 0; display: flex; align-items: center;
+  width: 18px;
+}
+.dcc-plat-link-inp {
+  flex: 1; min-width: 0;
+  padding: 3px 6px;
+  border: 1px solid var(--bd);
+  border-radius: 5px;
+  font-size: .7rem; color: var(--text);
+  background: var(--surface);
+  transition: border-color .15s;
+}
+.dcc-plat-link-inp:focus {
+  outline: none; border-color: var(--blue); background: var(--blue-lt);
+}
+.dcc-plat-link-go {
+  flex-shrink: 0;
+  color: var(--blue); font-size: .72rem; font-weight: 700;
+  text-decoration: none; padding: 1px 4px;
+  border-radius: 4px; background: var(--blue-lt);
+  transition: opacity .15s;
+}
+.dcc-plat-link-go:hover { opacity: .75; }
 
 /* ── Dashboard Period Filter Bar ─────────────────────────────── */
 .dash-month-bar {

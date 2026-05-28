@@ -1397,13 +1397,20 @@ function renderDashboard() {
     return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
   });
 
-  const totalKpi  = Object.values(state.settings?.kpi || {}).reduce((a,b) => a + (+b||0), 0);
-  const selesai   = monthContents.filter(c => ['Published','Done'].includes(c.status)).length;
-  const progress  = monthContents.filter(c => ['Review','Revisi','Preview','ACC'].includes(c.status)).length;
+  // Monthly target = (KPI PH + KPI 33official) × days in current month
+  const kpi = state.settings?.kpi || {};
+  const _now = new Date();
+  const daysThisMonth = new Date(_now.getFullYear(), _now.getMonth() + 1, 0).getDate();
+  const dailyKpi  = (+(kpi['penjaga-harapan']||0)) + (+(kpi['33-official']||0));
+  const monthlyTarget = dailyKpi ? dailyKpi * daysThisMonth : null;
+
+  const selesai   = monthContents.filter(c => c.status === 'Published').length;
+  // ON PROGRESS = semua konten yang belum Published (Plan, Review, Revisi, Preview, ACC, Done, Hold, Drop)
+  const progress  = monthContents.filter(c => c.status !== 'Published').length;
   const teamCount = (state.settings?.users || []).length;
 
   setTxt('dStatKonten',   monthContents.length);
-  setTxt('dStatTarget',   totalKpi || '?');
+  setTxt('dStatTarget',   monthlyTarget ?? '?');
   setTxt('dStatSelesai',  selesai);
   setTxt('dStatProgress', progress);
   setTxt('dStatTeam',     teamCount);
@@ -1535,7 +1542,7 @@ function renderDashNearContent() {
           <a href="#planner" class="link-sm">LIHAT SEMUA</a>
         </div>
         <div class="dash-content-grid">
-          ${upcoming.length ? upcoming.map(c => dashContentCard(c)).join('') : '<div class="dash-empty">Belum ada konten mendatang</div>'}
+          ${upcoming.length ? upcoming.map(c => dashContentCard(c, 'upcoming')).join('') : '<div class="dash-empty">Belum ada konten mendatang</div>'}
         </div>
       </div>
       <div class="near-split-col">
@@ -1544,7 +1551,7 @@ function renderDashNearContent() {
           <a href="#planner" class="link-sm">LIHAT SEMUA</a>
         </div>
         <div class="dash-content-grid">
-          ${published.length ? published.map(c => dashContentCard(c)).join('') : '<div class="dash-empty">Belum ada konten terpublish</div>'}
+          ${published.length ? published.map(c => dashContentCard(c, 'published')).join('') : '<div class="dash-empty">Belum ada konten terpublish</div>'}
         </div>
       </div>
     </div>`;
@@ -1669,7 +1676,7 @@ function renderAnalyticsPanel() {
 
 /* ── Dashboard Planner Sections ─────────────────────────────────────────── */
 
-function dashContentCard(c) {
+function dashContentCard(c, mode = 'upcoming') {
   const platIconMap = {
     instagram: `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="5"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"/></svg>`,
     tiktok:    `<svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M19.59 6.69a4.83 4.83 0 01-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 01-2.88 2.5 2.89 2.89 0 01-2.89-2.89 2.89 2.89 0 012.89-2.89c.28 0 .54.04.79.1V9.01a6.32 6.32 0 00-.79-.05 6.34 6.34 0 00-6.34 6.34 6.34 6.34 0 006.34 6.34 6.34 6.34 0 006.33-6.34V8.8a8.18 8.18 0 004.78 1.52V6.9a4.85 4.85 0 01-1.01-.21z"/></svg>`,
@@ -1686,6 +1693,43 @@ function dashContentCard(c) {
   const acct     = ACCOUNTS.find(a => a.id === c.account);
   const users    = (state.settings?.users || []);
   const statuses = STATUSES;
+
+  // ── Owner row (createdBy) ──────────────────────────────────────
+  const ownerRow = `<div class="dcc-meta-row">
+    <span class="dcc-label">OWNER</span>
+    <span class="dcc-val dcc-owner-val">${esc(c.createdBy || '—')}</span>
+  </div>`;
+
+  // ── Upcoming: single output link ──────────────────────────────
+  const outputLinkRow = mode === 'upcoming'
+    ? (c.outputLink
+        ? `<div class="dcc-meta-row">
+            <span class="dcc-label">LINK</span>
+            <a href="${esc(c.outputLink)}" target="_blank" rel="noopener" class="dcc-link-out">Output ↗</a>
+           </div>`
+        : '')
+    : '';
+
+  // ── Published: per-platform links (inline editable) ───────────
+  const platLinksSection = mode === 'published' && (c.platforms||[]).length
+    ? `<div class="dcc-plat-links">
+        <div class="dcc-label" style="margin-bottom:6px">LINKS</div>
+        ${(c.platforms||[]).map(p => {
+          const meta = PLATFORM_META[p]; if (!meta) return '';
+          const existingUrl = (c.platformLinks||{})[p] || '';
+          return `<div class="dcc-plat-link-row">
+            <span class="dcc-plat-link-lbl" style="color:${meta.color}" title="${meta.name}">${platIconMap[p]||p}</span>
+            <input class="dcc-plat-link-inp" type="url"
+              value="${esc(existingUrl)}"
+              placeholder="Tempel link ${meta.name.split(' ')[0]}…"
+              oninput="debouncePlatformLink('${c.id}','${p}',this.value)" />
+            <a href="${esc(existingUrl||'#')}" target="_blank" rel="noopener"
+              class="dcc-plat-link-go" data-plat-anchor="${c.id}_${p}"
+              style="${existingUrl?'':'display:none'}">↗</a>
+          </div>`;
+        }).join('')}
+      </div>`
+    : '';
 
   return `<div class="dash-content-card">
     <div class="dcc-top">
@@ -1715,7 +1759,37 @@ function dashContentCard(c) {
       <span class="dcc-label">PLATFORM</span>
       <div style="display:flex;gap:6px;align-items:center">${plats||'<span class="dcc-val">—</span>'}</div>
     </div>
+    ${ownerRow}
+    ${outputLinkRow}
+    ${platLinksSection}
   </div>`;
+}
+
+/* ── Per-platform link for published cards (debounced) ───────────────────── */
+const _platLinkTimers = {};
+function debouncePlatformLink(contentId, platform, url) {
+  clearTimeout(_platLinkTimers[contentId + platform]);
+  _platLinkTimers[contentId + platform] = setTimeout(async () => {
+    const c = state.contents.find(x => x.id === contentId);
+    if (!c) return;
+    if (!c.platformLinks) c.platformLinks = {};
+    c.platformLinks[platform] = url.trim();
+    c.updatedAt = new Date().toISOString();
+    try {
+      state.shas.contents = await window.db.writeData('contents', state.contents, `Platform link: ${c.title} — ${platform}`);
+      saveDataCache();
+      // Update the ↗ anchor without re-rendering the full card
+      const anchor = document.querySelector(`[data-plat-anchor="${contentId}_${platform}"]`);
+      if (anchor) {
+        if (url.trim()) {
+          anchor.href = url.trim();
+          anchor.style.display = '';
+        } else {
+          anchor.style.display = 'none';
+        }
+      }
+    } catch (e) { toast('Gagal simpan link: ' + e.message, 'error'); }
+  }, 800);
 }
 
 async function updateContentField(id, field, value) {
@@ -2299,8 +2373,9 @@ async function savePost() {
   if (id) {
     const idx = state.contents.findIndex(x => x.id === id);
     if (idx !== -1) state.contents[idx] = { ...state.contents[idx], ...data, updatedAt: new Date().toISOString() };
+    // NOTE: platformLinks & createdBy intentionally NOT in data, so they're preserved from existing
   } else {
-    state.contents.unshift({ id: uid(), ...data, createdAt: new Date().toISOString() });
+    state.contents.unshift({ id: uid(), ...data, platformLinks: {}, createdBy: currentUser(), createdAt: new Date().toISOString() });
   }
 
   try {
@@ -3787,8 +3862,9 @@ document.addEventListener('DOMContentLoaded', async () => {
   $('btnGitSync')?.addEventListener('click', () => { clearDataCache(); loadAllData(true); });
 
   /* ── Expose globals for inline onclick ─────────────────────── */
-  window.closePantun         = closePantun;
+  window.closePantun           = closePantun;
   window.loadAndRenderActivity = loadAndRenderActivity;
+  window.debouncePlatformLink  = debouncePlatformLink;
   window.toggleTodo     = toggleTodo;
   window.deleteTodo     = deleteTodo;
   window.editContent    = editContent;
