@@ -1736,12 +1736,15 @@ function dashContentCard(c, mode = 'upcoming') {
       </div>`
     : '';
 
-  // ── Output badge (prominent, above meta rows, only when link set) ──
+  // ── Output badge — folder icon, shown when outputLink is set ──────
   const outputBadge = (mode === 'upcoming' && c.outputLink)
     ? `<a href="${esc(c.outputLink)}" target="_blank" rel="noopener"
-         class="dcc-output-badge" title="Buka Output" onclick="event.stopPropagation()">
-         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14,2 14,8 20,8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10,9 9,9 8,9"/></svg>
-         Output ↗
+         class="dcc-output-badge" title="Buka Output: ${esc(c.outputLink)}" onclick="event.stopPropagation()">
+         <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor">
+           <path d="M22 9H13.4L11.7 7.3A1 1 0 0011 7H6a1 1 0 00-1 1v1H3a1 1 0 00-1 1v9a2 2 0 002 2h16a2 2 0 002-2V11a2 2 0 00-2-2z" opacity=".55"/>
+           <path d="M20 11H4a1 1 0 00-1 1v7a1 1 0 001 1h16a1 1 0 001-1v-7a1 1 0 00-1-1z"/>
+         </svg>
+         Output
        </a>`
     : '';
 
@@ -2349,7 +2352,10 @@ function openLinkModal(contentId, mode, platform) {
       <div class="lem-divider"><span>Output Link</span></div>
       <div class="lem-link-row">
         <span class="lem-link-icon lem-link-icon--output">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14,2 14,8 20,8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10,9 9,9 8,9"/></svg>
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M22 9H13.4L11.7 7.3A1 1 0 0011 7H6a1 1 0 00-1 1v1H3a1 1 0 00-1 1v9a2 2 0 002 2h16a2 2 0 002-2V11a2 2 0 00-2-2z" opacity=".55"/>
+            <path d="M20 11H4a1 1 0 00-1 1v7a1 1 0 001 1h16a1 1 0 001-1v-7a1 1 0 00-1-1z"/>
+          </svg>
         </span>
         <input class="form-inp lem-inp" type="url" id="linkEditInp"
           value="${esc(c.outputLink || '')}"

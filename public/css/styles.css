@@ -1068,16 +1068,16 @@ ul { list-style: none; }
 }
 .dash-content-card:hover { box-shadow: var(--shadow-lg); border-color: var(--bd-dk); }
 
-/* Output link badge — prominent, shown above meta rows */
+/* Output link badge — folder icon, shown above meta rows when link set */
 .dcc-output-badge {
-  display: inline-flex; align-items: center; gap: 4px; align-self: flex-start;
-  font-size: .68rem; font-weight: 600;
+  display: inline-flex; align-items: center; gap: 5px; align-self: flex-start;
+  font-size: .7rem; font-weight: 600;
   color: var(--green); background: var(--green-lt);
-  border: 1px solid #bbf7d0; border-radius: 5px;
-  padding: 2px 8px; text-decoration: none;
-  transition: opacity .15s;
+  border: 1px solid #bbf7d0; border-radius: 6px;
+  padding: 3px 9px; text-decoration: none;
+  transition: background .15s, opacity .15s;
 }
-.dcc-output-badge:hover { opacity: .8; }
+.dcc-output-badge:hover { background: #dcfce7; opacity: .9; }
 .dcc-top {
   display: flex; align-items: center; gap: 7px;
 }
