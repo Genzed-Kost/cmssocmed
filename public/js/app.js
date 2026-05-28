@@ -124,7 +124,8 @@ const STATUS_CLASS = {
 };
 
 const STATUSES  = ['Plan','Review','Revisi','Preview','ACC','Done','Published','Drop','Hold'];
-const FORMATS   = ['Flayer','Meme','Karikatur','Komikstrip','Animasi','Video','Short','Monolog','Carousell','Podcast'];
+const FORMATS   = ['Flayer','Meme','Karikatur','Komikstrip','Animasi','Video','Short','Monolog','Carousell','Podcast','Liputan'];
+const FORMATS_DUAL_ROLE = ['Podcast','Liputan']; // formats that need Creator + Editor fields
 
 const ACCOUNTS = [
   { id: 'penjaga-harapan', name: 'Penjaga Harapan', color: '#7c3aed' },
@@ -1684,9 +1685,16 @@ function dashContentCard(c, mode = 'upcoming') {
     facebook:  `<svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>`,
     youtube:   `<svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M23.495 6.205a3.007 3.007 0 00-2.088-2.088c-1.87-.501-9.396-.501-9.396-.501s-7.507-.01-9.396.501A3.007 3.007 0 00.527 6.205a31.247 31.247 0 00-.522 5.805 31.247 31.247 0 00.522 5.783 3.007 3.007 0 002.088 2.088c1.868.502 9.396.502 9.396.502s7.506 0 9.396-.502a3.007 3.007 0 002.088-2.088 31.247 31.247 0 00.5-5.783 31.247 31.247 0 00-.5-5.805zM9.609 15.601V8.408l6.264 3.602z"/></svg>`
   };
+  // Platform icons — for published mode each is a clickable button
   const plats = (c.platforms||[]).map(p => {
     const meta = PLATFORM_META[p];
     if (!meta) return '';
+    if (mode === 'published') {
+      const hasLink = !!((c.platformLinks||{})[p]);
+      return `<button type="button" class="dcc-plat-btn${hasLink?' has-link':''}"
+        style="color:${meta.color}" title="${hasLink?'Edit link '+meta.name:'Tambah link '+meta.name}"
+        onclick="openLinkModal('${c.id}','published','${p}')">${platIconMap[p]||p}</button>`;
+    }
     return `<span class="dcc-plat-icon" style="color:${meta.color}" title="${meta.name}">${platIconMap[p]||p}</span>`;
   }).join('');
 
@@ -1700,34 +1708,22 @@ function dashContentCard(c, mode = 'upcoming') {
     <span class="dcc-val dcc-owner-val">${esc(c.createdBy || '—')}</span>
   </div>`;
 
-  // ── Upcoming: single output link ──────────────────────────────
-  const outputLinkRow = mode === 'upcoming'
-    ? (c.outputLink
-        ? `<div class="dcc-meta-row">
-            <span class="dcc-label">LINK</span>
-            <a href="${esc(c.outputLink)}" target="_blank" rel="noopener" class="dcc-link-out">Output ↗</a>
-           </div>`
-        : '')
+  // ── Editor row (for Podcast / Liputan) ────────────────────────
+  const editorRow = (c.editor && FORMATS_DUAL_ROLE.includes(c.format))
+    ? `<div class="dcc-meta-row">
+        <span class="dcc-label">EDITOR</span>
+        <span class="dcc-val">${esc(c.editor)}</span>
+      </div>`
     : '';
 
-  // ── Published: per-platform links (inline editable) ───────────
-  const platLinksSection = mode === 'published' && (c.platforms||[]).length
-    ? `<div class="dcc-plat-links">
-        <div class="dcc-label" style="margin-bottom:6px">LINKS</div>
-        ${(c.platforms||[]).map(p => {
-          const meta = PLATFORM_META[p]; if (!meta) return '';
-          const existingUrl = (c.platformLinks||{})[p] || '';
-          return `<div class="dcc-plat-link-row">
-            <span class="dcc-plat-link-lbl" style="color:${meta.color}" title="${meta.name}">${platIconMap[p]||p}</span>
-            <input class="dcc-plat-link-inp" type="url"
-              value="${esc(existingUrl)}"
-              placeholder="Tempel link ${meta.name.split(' ')[0]}…"
-              oninput="debouncePlatformLink('${c.id}','${p}',this.value)" />
-            <a href="${esc(existingUrl||'#')}" target="_blank" rel="noopener"
-              class="dcc-plat-link-go" data-plat-anchor="${c.id}_${p}"
-              style="${existingUrl?'':'display:none'}">↗</a>
-          </div>`;
-        }).join('')}
+  // ── Upcoming: output link button ──────────────────────────────
+  const outputLinkRow = mode === 'upcoming'
+    ? `<div class="dcc-meta-row" style="margin-top:4px">
+        <span class="dcc-label">LINK</span>
+        ${c.outputLink
+          ? `<a href="${esc(c.outputLink)}" target="_blank" rel="noopener" class="dcc-link-btn">Output ↗</a>`
+          : `<button type="button" class="dcc-link-btn" onclick="openLinkModal('${c.id}','upcoming')">+ Tambah</button>`
+        }
       </div>`
     : '';
 
@@ -1759,9 +1755,9 @@ function dashContentCard(c, mode = 'upcoming') {
       <span class="dcc-label">PLATFORM</span>
       <div style="display:flex;gap:6px;align-items:center">${plats||'<span class="dcc-val">—</span>'}</div>
     </div>
+    ${editorRow}
     ${ownerRow}
     ${outputLinkRow}
-    ${platLinksSection}
   </div>`;
 }
 
@@ -2233,22 +2229,116 @@ function updateAiLimitDisplay() {
   }
 }
 
+/* ── Format change: show/hide Editor field ─────────────────────────────── */
+function onFormatChange(fmt) {
+  const isDual = FORMATS_DUAL_ROLE.includes(fmt);
+  $('postEditorRow')?.classList.toggle('hidden', !isDual);
+  const lbl = $('postCreatorLabel');
+  if (lbl) lbl.innerHTML = isDual
+    ? 'Creator <small style="font-weight:400;color:var(--muted)">(produksi)</small> <span class="req-star">*</span>'
+    : 'Creator <span class="req-star">*</span>';
+}
+
+/* ── Link Edit Modal ─────────────────────────────────────────────────────── */
+function openLinkModal(contentId, mode, platform) {
+  const c = state.contents.find(x => x.id === contentId);
+  if (!c) return;
+  const modal = $('linkEditModal');
+  if (!modal) return;
+
+  if (mode === 'upcoming') {
+    $('linkEditTitle').textContent = `Link Output — ${c.title || ''}`;
+    $('linkEditContent').innerHTML = `
+      <div class="form-group" style="margin:0">
+        <label class="form-label">URL hasil konten</label>
+        <input class="form-inp" type="url" id="linkEditInp"
+          value="${esc(c.outputLink || '')}"
+          placeholder="https://youtube.com/watch?v=..." />
+      </div>
+      <div style="display:flex;gap:8px;margin-top:14px">
+        <button class="btn-md blue" style="flex:1;justify-content:center"
+          onclick="saveLinkFromModal('${contentId}','upcoming')">Simpan</button>
+        <button class="btn-md" onclick="closeLinkModal()">Batal</button>
+      </div>`;
+  } else if (mode === 'published') {
+    const meta = PLATFORM_META[platform] || { name: platform, color: '#666' };
+    const existingUrl = (c.platformLinks || {})[platform] || '';
+    $('linkEditTitle').textContent = `Link ${meta.name} — ${c.title || ''}`;
+    $('linkEditContent').innerHTML = `
+      <div class="form-group" style="margin:0">
+        <label class="form-label" style="color:${meta.color}">${meta.name}</label>
+        <input class="form-inp" type="url" id="linkEditInp"
+          value="${esc(existingUrl)}"
+          placeholder="https://..." />
+      </div>
+      ${existingUrl ? `<a href="${esc(existingUrl)}" target="_blank" rel="noopener"
+        style="font-size:.75rem;color:var(--blue);display:block;margin-top:6px">
+        Buka link yang tersimpan ↗</a>` : ''}
+      <div style="display:flex;gap:8px;margin-top:14px">
+        <button class="btn-md blue" style="flex:1;justify-content:center"
+          onclick="saveLinkFromModal('${contentId}','published','${platform}')">Simpan</button>
+        <button class="btn-md" onclick="closeLinkModal()">Batal</button>
+      </div>`;
+  }
+
+  modal.classList.remove('hidden');
+  setTimeout(() => $('linkEditInp')?.select(), 60);
+}
+
+async function saveLinkFromModal(contentId, mode, platform) {
+  const url = gv('linkEditInp').trim();
+  const c = state.contents.find(x => x.id === contentId);
+  if (!c) { closeLinkModal(); return; }
+  const btn = $('linkEditModal')?.querySelector('.btn-md.blue');
+  if (btn) { btn.textContent = 'Menyimpan…'; btn.disabled = true; }
+
+  try {
+    if (mode === 'upcoming') {
+      c.outputLink = url;
+    } else {
+      if (!c.platformLinks) c.platformLinks = {};
+      c.platformLinks[platform] = url;
+    }
+    c.updatedAt = new Date().toISOString();
+    state.shas.contents = await window.db.writeData('contents', state.contents,
+      mode === 'upcoming' ? `Output link: ${c.title}` : `Platform link ${platform}: ${c.title}`);
+    saveDataCache();
+    toast('Link disimpan ✓', 'success');
+    closeLinkModal();
+    // Refresh dashboard cards
+    if (state.currentPage === 'dashboard') renderDashNearContent();
+  } catch (e) {
+    toast('Gagal simpan: ' + e.message, 'error');
+    if (btn) { btn.textContent = 'Simpan'; btn.disabled = false; }
+  }
+}
+
+function closeLinkModal() {
+  $('linkEditModal')?.classList.add('hidden');
+}
+
 function renderNewPostForm(content) {
+  const users = state.settings?.users || [];
+  // Populate Creator select
   const creatorSel = $('postCreator');
   if (creatorSel) {
-    const users = state.settings?.users || [];
-    const cur   = creatorSel.value;
+    const cur = creatorSel.value;
     creatorSel.innerHTML = '<option value="">— Pilih Creator —</option>' +
-      users.map(u => {
-        const n = getUserName(u);
-        return `<option value="${esc(n)}" ${n===cur?'selected':''}>${esc(n)}</option>`;
-      }).join('');
+      users.map(u => { const n = getUserName(u); return `<option value="${esc(n)}" ${n===cur?'selected':''}>${esc(n)}</option>`; }).join('');
+  }
+  // Populate Editor select
+  const editorSel = $('postEditor');
+  if (editorSel) {
+    const cur = editorSel.value;
+    editorSel.innerHTML = '<option value="">— Pilih Editor —</option>' +
+      users.map(u => { const n = getUserName(u); return `<option value="${esc(n)}" ${n===cur?'selected':''}>${esc(n)}</option>`; }).join('');
   }
 
   if (content) {
     sv('editPostId',     content.id);
     sv('postDate',       content.publishDate || '');
     sv('postCreator',    content.creator     || '');
+    sv('postEditor',     content.editor      || '');
     sv('postAccount',    content.account     || '');
     sv('postStatus',     content.status      || 'Ide');
     sv('postTitle',      content.title       || '');
@@ -2261,6 +2351,7 @@ function renderNewPostForm(content) {
     $$('#platformChecks input').forEach(cb => {
       cb.checked = (content.platforms||[]).includes(cb.value);
     });
+    onFormatChange(content.format || '');  // show/hide editor row
     // Lock status & creator when Published
     const isPublished = content.status === 'Published';
     ['postStatus','postCreator'].forEach(fid => {
@@ -2273,7 +2364,8 @@ function renderNewPostForm(content) {
     ['postStatus','postCreator'].forEach(fid => { const el = $(fid); if (el) el.disabled = false; });
     $('publishedLockBanner')?.classList.add('hidden');
     ['editPostId','postDate','postTitle','postTheme','postScript','postCaption','postOutputLink','postNotes'].forEach(id => sv(id,''));
-    sv('postStatus','Plan'); sv('postCreator',''); sv('postAccount',''); sv('postFormat','Flayer');
+    sv('postStatus','Plan'); sv('postCreator',''); sv('postEditor',''); sv('postAccount',''); sv('postFormat','Flayer');
+    onFormatChange('Flayer');  // reset editor row visibility
     $$('#platformChecks input').forEach(cb => { cb.checked = false; });
 
     try {
@@ -2357,6 +2449,7 @@ async function savePost() {
     title, platforms,
     publishDate: gv('postDate'),
     creator,
+    editor:      gv('postEditor') || '',   // hanya untuk Podcast/Liputan
     account:     acctId,
     status:      gv('postStatus'),
     theme,
@@ -3865,6 +3958,11 @@ document.addEventListener('DOMContentLoaded', async () => {
   window.closePantun           = closePantun;
   window.loadAndRenderActivity = loadAndRenderActivity;
   window.debouncePlatformLink  = debouncePlatformLink;
+  window.openLinkModal         = openLinkModal;
+  window.saveLinkFromModal     = saveLinkFromModal;
+  window.closeLinkModal        = closeLinkModal;
+  window.onFormatChange        = onFormatChange;
+  window.renderDashNearContent = renderDashNearContent;
   window.toggleTodo     = toggleTodo;
   window.deleteTodo     = deleteTodo;
   window.editContent    = editContent;

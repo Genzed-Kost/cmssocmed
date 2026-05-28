@@ -15,7 +15,12 @@
 <!-- ─── SIDEBAR ─────────────────────────────────────────────────────────── -->
 <aside id="sidebar" class="sidebar">
   <div class="sidebar-logo">
-    <div class="logo-mark">PH</div>
+    <div class="logo-mark" id="sidebarLogoMark">
+      <img src="logo.png" alt="PH" class="logo-img"
+        onload="this.closest('.logo-mark').classList.add('has-logo')"
+        onerror="this.remove()" />
+      <span class="logo-ph-text">PH</span>
+    </div>
     <div class="logo-text">
       <span class="logo-main">Penjaga</span>
       <span class="logo-sub">Harapan CMS</span>
@@ -398,11 +403,21 @@
               <input type="date" id="postDate" class="form-inp" />
             </div>
             <div class="form-group">
-              <label class="form-label">Creator <span class="req-star">*</span></label>
+              <label id="postCreatorLabel" class="form-label">Creator <span class="req-star">*</span></label>
               <select id="postCreator" class="form-inp">
                 <option value="">— Pilih Creator —</option>
               </select>
             </div>
+          </div>
+
+          <!-- Editor field — hanya muncul saat format Podcast / Liputan -->
+          <div id="postEditorRow" class="form-group hidden">
+            <label class="form-label">Editor
+              <span class="form-hint" style="margin:0;font-size:.7rem;color:var(--muted)">(pasca produksi)</span>
+            </label>
+            <select id="postEditor" class="form-inp">
+              <option value="">— Pilih Editor —</option>
+            </select>
           </div>
 
           <div class="form-row-2">
@@ -437,11 +452,11 @@
             </div>
             <div class="form-group">
               <label class="form-label">Content Type <span class="req-star">*</span></label>
-              <select id="postFormat" class="form-inp">
+              <select id="postFormat" class="form-inp" onchange="onFormatChange(this.value)">
                 <option>Flayer</option><option>Meme</option><option>Karikatur</option>
                 <option>Komikstrip</option><option>Animasi</option><option>Video</option>
                 <option>Short</option><option>Monolog</option><option>Carousell</option>
-                <option>Podcast</option>
+                <option>Podcast</option><option>Liputan</option>
               </select>
             </div>
           </div>
@@ -911,7 +926,7 @@
   <div class="login-card">
     <div class="login-hero">
       <div class="login-hero-mark">PH</div>
-      <div class="login-hero-title">Social Media CMS</div>
+      <div class="login-hero-title">Penjaga Harapan CMS</div>
       <div class="login-hero-sub">Platform manajemen konten tim</div>
     </div>
     <div class="login-form">
@@ -1085,6 +1100,21 @@
 </div>
 
 <!-- ─── SPARKLINE TOOLTIP ────────────────────────────────────────────────── -->
+<!-- ─── LINK EDIT MODAL ─────────────────────────────────────────────────── -->
+<div id="linkEditModal" class="modal-overlay hidden" onclick="if(event.target===this)closeLinkModal()">
+  <div class="modal link-edit-modal">
+    <div class="link-edit-head">
+      <span id="linkEditTitle" class="link-edit-label">Edit Link</span>
+      <button class="modal-close-btn" onclick="closeLinkModal()">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 6L6 18M6 6l12 12"/></svg>
+      </button>
+    </div>
+    <div class="link-edit-body">
+      <div id="linkEditContent"></div>
+    </div>
+  </div>
+</div>
+
 <div id="sparkTooltip" class="spark-tooltip hidden"></div>
 
 <!-- ─── TOAST ─────────────────────────────────────────────────────────────── -->

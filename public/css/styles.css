@@ -74,13 +74,20 @@ ul { list-style: none; }
   min-height: var(--topbar-h);
 }
 .logo-mark {
-  width: 32px; height: 32px;
+  width: 36px; height: 36px;
   background: linear-gradient(135deg, var(--blue) 0%, var(--purple) 100%);
   border-radius: 8px;
   display: flex; align-items: center; justify-content: center;
   color: #fff; font-weight: 800; font-size: .75rem;
   flex-shrink: 0;
+  overflow: hidden;
+  position: relative;
 }
+/* When logo image loads successfully */
+.logo-mark.has-logo { background: transparent; box-shadow: none; }
+.logo-mark.has-logo .logo-ph-text { display: none; }
+.logo-img { width: 100%; height: 100%; object-fit: contain; display: block; }
+.logo-ph-text { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: .75rem; }
 .logo-text { flex: 1; overflow: hidden; }
 .logo-main { display: block; font-weight: 700; font-size: .85rem; white-space: nowrap; }
 .logo-sub  { display: block; font-size: .67rem; color: var(--muted); white-space: nowrap; }
@@ -1083,47 +1090,55 @@ ul { list-style: none; }
 .dcc-val       { color: var(--muted); text-align: right; }
 .dcc-owner-val { color: var(--text); font-weight: 500; text-align: right; }
 .dcc-creator   { color: var(--blue); font-weight: 500; }
-.dcc-link-out  {
-  color: var(--blue); font-size: .72rem; font-weight: 600;
-  text-decoration: none; white-space: nowrap;
-}
-.dcc-link-out:hover { text-decoration: underline; }
-.dash-empty    { font-size: .82rem; color: var(--muted-lt); padding: 6px 0; }
-.dcc-plat-icon { display: flex; align-items: center; }
-
-/* ── Per-platform link inputs (published cards) ──────────────── */
-.dcc-plat-links {
-  border-top: 1px solid var(--bd);
-  margin-top: 8px; padding-top: 8px;
-  display: flex; flex-direction: column; gap: 5px;
-}
-.dcc-plat-link-row {
-  display: flex; align-items: center; gap: 5px;
-}
-.dcc-plat-link-lbl {
-  flex-shrink: 0; display: flex; align-items: center;
-  width: 18px;
-}
-.dcc-plat-link-inp {
-  flex: 1; min-width: 0;
-  padding: 3px 6px;
-  border: 1px solid var(--bd);
-  border-radius: 5px;
-  font-size: .7rem; color: var(--text);
-  background: var(--surface);
-  transition: border-color .15s;
-}
-.dcc-plat-link-inp:focus {
-  outline: none; border-color: var(--blue); background: var(--blue-lt);
-}
-.dcc-plat-link-go {
-  flex-shrink: 0;
-  color: var(--blue); font-size: .72rem; font-weight: 700;
-  text-decoration: none; padding: 1px 4px;
-  border-radius: 4px; background: var(--blue-lt);
+.dcc-link-btn  {
+  display: inline-flex; align-items: center; gap: 4px;
+  color: var(--blue); font-size: .7rem; font-weight: 600;
+  background: var(--blue-lt); border: 1px solid #bfdbfe;
+  border-radius: 5px; padding: 3px 8px;
+  cursor: pointer; text-decoration: none;
   transition: opacity .15s;
 }
-.dcc-plat-link-go:hover { opacity: .75; }
+.dcc-link-btn:hover { opacity: .78; }
+.dash-empty    { font-size: .82rem; color: var(--muted-lt); padding: 6px 0; }
+
+/* Platform icon — normal and clickable (published card) */
+.dcc-plat-icon { display: flex; align-items: center; }
+.dcc-plat-btn  {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 26px; height: 26px;
+  border-radius: 7px; border: 1.5px solid transparent;
+  background: transparent;
+  cursor: pointer; transition: background .15s, border-color .15s, transform .1s;
+  position: relative;
+}
+.dcc-plat-btn:hover { background: var(--bg); transform: scale(1.1); }
+.dcc-plat-btn.has-link { border-color: currentColor; background: color-mix(in srgb, currentColor 8%, transparent); }
+/* Small dot indicator = link saved */
+.dcc-plat-btn.has-link::after {
+  content: ''; position: absolute; bottom: 1px; right: 1px;
+  width: 5px; height: 5px; border-radius: 50%;
+  background: #16a34a; border: 1px solid #fff;
+}
+
+/* ── Link Edit Modal ────────────────────────────────────────── */
+.link-edit-modal { max-width: 400px; }
+.link-edit-head  {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 14px 18px 12px; border-bottom: 1px solid var(--bd);
+}
+.link-edit-label {
+  font-weight: 700; font-size: .88rem;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  max-width: 280px;
+}
+.modal-close-btn {
+  width: 26px; height: 26px; border: none; background: transparent;
+  color: var(--muted); cursor: pointer; display: flex; align-items: center;
+  justify-content: center; border-radius: 5px; flex-shrink: 0;
+}
+.modal-close-btn:hover { background: var(--bg); color: var(--text); }
+.link-edit-body  { padding: 16px 18px 18px; }
+
 
 /* ── Dashboard Period Filter Bar ─────────────────────────────── */
 .dash-month-bar {
