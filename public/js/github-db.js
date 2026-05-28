@@ -25,7 +25,12 @@ class GitHubDB {
 
   isConfigured() {
     const c = this.loadConfig();
-    return !!(c && c.owner && c.repo && c.pat);
+    return !!(c && c.owner && c.repo);  // PAT tidak wajib untuk baca repo public
+  }
+
+  hasPAT() {
+    const c = this.loadConfig();
+    return !!(c && c.pat);
   }
 
   getConfig() { return this.loadConfig(); }
@@ -57,7 +62,14 @@ class GitHubDB {
     const branch = c.branch || 'main';
     const url = this._url(path) + `?ref=${branch}&t=${Date.now()}`;
 
-    const res = await fetch(url, { headers: this._headers() });
+    // Gunakan auth jika ada PAT, tanpa auth untuk repo public
+    const headers = {
+      'Accept': 'application/vnd.github.v3+json',
+      'X-GitHub-Api-Version': '2022-11-28'
+    };
+    if (c.pat) headers['Authorization'] = `Bearer ${c.pat}`;
+
+    const res = await fetch(url, { headers });
     if (res.status === 404) return null;
     if (!res.ok) {
       const err = await res.json().catch(() => ({}));

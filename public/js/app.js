@@ -5,6 +5,10 @@
 
 'use strict';
 
+/* ── Default repo config (public repo — PAT tidak diperlukan untuk baca) ──── */
+/* Ubah sesuai repo data GitHub Anda. PAT tetap disimpan di localStorage. */
+const DEFAULT_REPO = { owner: 'Genzed-Kost', repo: 'cms-penjagaharapan', branch: 'main' };
+
 /* ── Constants ───────────────────────────────────────────────────────────── */
 /* Gemini key disimpan di localStorage (bukan hardcode) — diisi admin di API Setup */
 const GEMINI_LS_KEY = 'cmsph_gemini_v1';
@@ -3153,27 +3157,27 @@ document.addEventListener('DOMContentLoaded', async () => {
     } catch {}
   }
 
+  /* ── INIT: Pre-configure dengan default repo jika belum ada config ── */
+  if (!window.db.isConfigured()) {
+    window.db.saveConfig(DEFAULT_REPO);  // tanpa PAT — hanya untuk baca repo public
+  }
+
   /* ── INIT: Auth flow ────────────────────────────────────────── */
   if (isFirstRun()) {
-    if (window.db.isConfigured()) {
-      // GitHub sudah dikonfigurasi (mis. via ?access= link) — coba ambil admin hash
-      try {
-        const _s = await window.db.readData('settings');
-        if (_s?.adminHash) {
-          saveAuth({ adminName: _s.adminName || 'Admin', adminHash: _s.adminHash });
-          setPubUsers(_s.users || []);
-          showLogin();
-        } else {
-          showWizard('new');  // GitHub ada tapi belum ada admin — instalasi pertama
-        }
-      } catch {
-        // Tidak bisa koneksi — load app biasa, user klik "Setup GitHub" untuk coba lagi
-        applyAuthState();
-        handleHash();
+    // Coba ambil admin hash dari GitHub settings (berhasil jika repo public)
+    try {
+      const _s = await window.db.readData('settings');
+      if (_s?.adminHash) {
+        saveAuth({ adminName: _s.adminName || 'Admin', adminHash: _s.adminHash });
+        setPubUsers(_s.users || []);
+        showLogin();
+      } else {
+        // Repo ada tapi belum ada admin — instalasi pertama
+        showWizard('new');
       }
-    } else {
-      // GitHub belum dikonfigurasi — load app tanpa popup
-      // Klik "Setup GitHub" di topbar untuk menghubungkan
+    } catch {
+      // Tidak bisa baca settings — mungkin repo private atau belum ada
+      // Load app tanpa popup, klik topbar "Setup GitHub" untuk konfigurasi
       applyAuthState();
       handleHash();
     }
