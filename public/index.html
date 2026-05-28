@@ -900,20 +900,22 @@
   </div>
 </div>
 
-<!-- ─── LOGIN MODAL ───────────────────────────────────────────────────────── -->
-<div id="loginModal" class="modal-overlay hidden">
-  <div class="modal login-modal">
-    <div class="login-logo">
-      <div class="login-logo-mark">PH</div>
-      <div class="login-logo-title">Penjaga Harapan CMS</div>
-      <div class="login-logo-sub">Masuk untuk melanjutkan</div>
+<!-- ─── LOGIN PAGE (full-screen) ─────────────────────────────────────────── -->
+<div id="loginPage" class="login-page hidden">
+  <div class="login-bg-orb login-bg-orb--a"></div>
+  <div class="login-bg-orb login-bg-orb--b"></div>
+  <div class="login-card">
+    <div class="login-hero">
+      <div class="login-hero-mark">PH</div>
+      <div class="login-hero-title">Penjaga Harapan CMS</div>
+      <div class="login-hero-sub">Platform manajemen konten tim</div>
     </div>
-    <div class="login-body">
-      <div class="form-group">
+    <div class="login-form">
+      <div class="form-group" style="margin:0">
         <label class="form-label">Masuk sebagai</label>
         <select id="loginUserSel" class="form-inp"></select>
       </div>
-      <div id="loginPwWrap" class="form-group">
+      <div id="loginPwWrap" class="form-group" style="margin:0">
         <label class="form-label">Password</label>
         <div class="inp-eye-wrap">
           <input type="password" id="loginPw" class="form-inp" placeholder="Masukkan password…" />
@@ -922,8 +924,21 @@
           </button>
         </div>
       </div>
-      <button class="btn-md blue" style="width:100%;justify-content:center" id="btnDoLogin">Masuk →</button>
+      <button class="btn-md blue" style="width:100%;justify-content:center;margin-top:4px" id="btnDoLogin">Masuk →</button>
     </div>
+    <div class="login-footer-note">Penjaga Harapan · CMS v2.0</div>
+  </div>
+</div>
+
+<!-- ─── PANTUN OVERLAY ────────────────────────────────────────────────────── -->
+<div id="pantunOverlay" class="pantun-overlay hidden">
+  <div class="pantun-card">
+    <div class="pantun-icon-wrap"><span id="pantunIcon">✨</span></div>
+    <div id="pantunRoleBadge" class="pantun-role-badge">Tim</div>
+    <div class="pantun-divider"></div>
+    <div id="pantunText" class="pantun-text"></div>
+    <div id="pantunUser" class="pantun-user"></div>
+    <button class="btn-xs pantun-btn" onclick="closePantun()">Lanjutkan →</button>
   </div>
 </div>
 

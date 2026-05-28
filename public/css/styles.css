@@ -852,23 +852,131 @@ ul { list-style: none; }
 
 .repo-create-row { display: flex; align-items: center; gap: 10px; margin-top: 4px; }
 
-/* ── Login Modal ──────────────────────────────────────────────── */
-.login-modal { max-width: 360px; }
-.login-logo {
-  display: flex; flex-direction: column; align-items: center;
-  padding: 28px 0 18px;
-}
-.login-logo-mark {
-  width: 52px; height: 52px; margin-bottom: 12px;
-  background: linear-gradient(135deg, var(--blue) 0%, var(--purple) 100%);
-  border-radius: 14px;
+/* ════════════════════════════════════════════════════════════
+   FULL-SCREEN LOGIN PAGE
+   ════════════════════════════════════════════════════════════ */
+
+.login-page {
+  position: fixed; inset: 0; z-index: 9000;
+  background: linear-gradient(135deg, #eff6ff 0%, #f5f3ff 55%, #ecfdf5 100%);
   display: flex; align-items: center; justify-content: center;
-  color: #fff; font-weight: 800; font-size: 1.1rem;
-  box-shadow: 0 4px 14px rgba(37,99,235,.3);
+  padding: 16px;
+  overflow: hidden;
 }
+.login-page.hidden { display: none; }
+
+/* Decorative floating orbs */
+.login-bg-orb {
+  position: absolute; border-radius: 50%;
+  pointer-events: none; opacity: .35;
+}
+.login-bg-orb--a {
+  width: 380px; height: 380px; top: -120px; left: -100px;
+  background: radial-gradient(circle, #bfdbfe 0%, transparent 70%);
+  animation: orbFloat 7s ease-in-out infinite;
+}
+.login-bg-orb--b {
+  width: 300px; height: 300px; bottom: -80px; right: -80px;
+  background: radial-gradient(circle, #ddd6fe 0%, transparent 70%);
+  animation: orbFloat 9s ease-in-out infinite reverse;
+}
+@keyframes orbFloat {
+  0%, 100% { transform: translateY(0) scale(1); }
+  50%       { transform: translateY(-18px) scale(1.04); }
+}
+
+.login-card {
+  position: relative; z-index: 1;
+  background: #fff;
+  border-radius: 22px;
+  box-shadow: 0 10px 50px rgba(0,0,0,.13), 0 2px 8px rgba(0,0,0,.07);
+  width: 100%; max-width: 390px;
+  overflow: hidden;
+  animation: loginCardIn .38s cubic-bezier(.22,1,.36,1);
+}
+@keyframes loginCardIn {
+  from { opacity: 0; transform: translateY(22px) scale(.96); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.login-hero {
+  background: linear-gradient(135deg, var(--blue) 0%, var(--purple) 100%);
+  padding: 34px 24px 26px;
+  text-align: center;
+}
+.login-hero-mark {
+  width: 60px; height: 60px; margin: 0 auto 14px;
+  background: rgba(255,255,255,.2);
+  border: 2px solid rgba(255,255,255,.35);
+  border-radius: 17px;
+  display: flex; align-items: center; justify-content: center;
+  color: #fff; font-weight: 800; font-size: 1.25rem;
+}
+.login-hero-title { color: #fff; font-size: 1.1rem; font-weight: 800; }
+.login-hero-sub   { color: rgba(255,255,255,.7); font-size: .74rem; margin-top: 4px; }
+
+.login-form {
+  padding: 24px 24px 20px;
+  display: flex; flex-direction: column; gap: 14px;
+}
+.login-footer-note {
+  text-align: center; font-size: .68rem;
+  color: var(--bd-dk); padding: 0 0 18px;
+}
+
+/* ════════════════════════════════════════════════════════════
+   PANTUN OVERLAY
+   ════════════════════════════════════════════════════════════ */
+
+.pantun-overlay {
+  position: fixed; inset: 0; z-index: 9600;
+  background: rgba(15,23,42,.6);
+  display: flex; align-items: center; justify-content: center;
+  padding: 16px;
+  animation: pantunBgIn .25s ease;
+}
+.pantun-overlay.hidden { display: none; }
+@keyframes pantunBgIn { from { opacity: 0; } to { opacity: 1; } }
+
+.pantun-card {
+  background: #fff; border-radius: 20px;
+  padding: 30px 28px 24px;
+  max-width: 380px; width: 100%;
+  text-align: center;
+  box-shadow: 0 16px 48px rgba(0,0,0,.2);
+  animation: pantunCardIn .32s cubic-bezier(.22,1,.36,1);
+}
+@keyframes pantunCardIn {
+  from { opacity: 0; transform: scale(.88) translateY(14px); }
+  to   { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+.pantun-icon-wrap { font-size: 2.4rem; line-height: 1; margin-bottom: 12px; }
+.pantun-role-badge {
+  display: inline-block; padding: 3px 14px; border-radius: 99px;
+  background: var(--blue-lt); color: var(--blue);
+  font-size: .72rem; font-weight: 700;
+  letter-spacing: .4px; text-transform: uppercase; margin-bottom: 12px;
+}
+.pantun-divider {
+  width: 36px; height: 3px;
+  background: linear-gradient(90deg, var(--blue), var(--purple));
+  border-radius: 99px; margin: 0 auto 16px;
+}
+.pantun-text {
+  font-size: .93rem; line-height: 1.85;
+  color: var(--text); white-space: pre-line; font-style: italic;
+}
+.pantun-user  { margin-top: 14px; font-size: .75rem; color: var(--muted); }
+.pantun-btn   { margin-top: 18px !important; padding: 7px 20px !important; }
+
+/* Legacy login-modal selector (kept for backward compat) */
+.login-modal  { max-width: 360px; }
+.login-logo   { display: flex; flex-direction: column; align-items: center; padding: 28px 0 18px; }
+.login-logo-mark { width: 52px; height: 52px; margin-bottom: 12px; background: linear-gradient(135deg, var(--blue) 0%, var(--purple) 100%); border-radius: 14px; display: flex; align-items: center; justify-content: center; color: #fff; font-weight: 800; font-size: 1.1rem; }
 .login-logo-title { font-size: 1.05rem; font-weight: 800; }
 .login-logo-sub   { font-size: .74rem; color: var(--muted); margin-top: 3px; }
-.login-body { padding: 0 20px 24px; display: flex; flex-direction: column; gap: 13px; }
+.login-body   { padding: 0 20px 24px; display: flex; flex-direction: column; gap: 13px; }
 
 /* ── Statistics Page ─────────────────────────────────────────── */
 .stat-acct-bar { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 18px; }

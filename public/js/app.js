@@ -28,6 +28,66 @@ const DATA_CACHE_KEY = 'cmsph_data_v2';
 const DATA_CACHE_TTL = 3 * 60 * 1000;   // 3 minutes — reduces GitHub API rate-limit hits
 const PAGE_SIZE = 15;
 
+/* ── Pantun data (login & logout per role) ─────────────────────────────── */
+const PANTUN = {
+  login: {
+    admin: {
+      icon: '👑',
+      teks: 'Kapal berlayar ke pulau jauh,\nMembawa rempah penuh peti kayu.\nSelamat datang, Admin yang teguh,\nSemua sistem siap untukmu.'
+    },
+    creator: {
+      icon: '🎨',
+      teks: 'Bunga melati di pagi hari,\nHarum semerbak memenuhi taman.\nSelamat datang, Creator kami,\nKarya indahmu selalu dinantikan.'
+    },
+    director: {
+      icon: '🦅',
+      teks: 'Elang terbang tinggi di angkasa,\nMatanya tajam memandang bumi.\nSelamat datang, pemimpin perkasa,\nVisimu nyata memandu kami.'
+    },
+    supervisor: {
+      icon: '🌳',
+      teks: 'Pohon beringin di alun-alun,\nTeduh rindang melindungi rakyat.\nSelamat datang, sosok yang andal,\nBimbinganmu menjadi kekuatan.'
+    },
+    writer: {
+      icon: '✍️',
+      teks: 'Tinta mengalir di atas kertas,\nMenulis kisah penuh makna jiwa.\nSelamat datang, penulis cerdas,\nKata-katamu menyentuh semua.'
+    },
+    editor: {
+      icon: '📝',
+      teks: 'Intan permata digosok terang,\nKilauannya indah memukau mata.\nSelamat datang, Editor pilang,\nSentuhan terbaikmu sempurna kata.'
+    },
+    designer: {
+      icon: '🎭',
+      teks: 'Pelangi indah setelah hujan,\nWarnanya cerah menghias langit.\nSelamat datang, seniman andalan,\nDesainmu selalu memukau penikmat.'
+    },
+    default: {
+      icon: '✨',
+      teks: 'Pohon berbuah di tepi sungai,\nBuahnya ranum dan segar rasanya.\nSelamat datang, semangat tak lunai,\nMari kita berkarya bersama.'
+    }
+  },
+  logout: {
+    admin: {
+      icon: '🌅',
+      teks: 'Senja datang di tepi pantai,\nBurung camar pulang ke sarang.\nTerima kasih, Admin yang pandai,\nSampai jumpa di hari yang terang.'
+    },
+    creator: {
+      icon: '🌟',
+      teks: 'Angsa berenang di telaga bening,\nAirnya jernih berkilau cahaya.\nTerima kasih, Creator bersemangat,\nKaryamu terus jadi harapan jiwa.'
+    },
+    director: {
+      icon: '🌙',
+      teks: 'Bintang bersinar di langit malam,\nMenerangi bumi yang sunyi sepi.\nTerima kasih, pemimpin budiman,\nJasamu selalu kami kenang abadi.'
+    },
+    supervisor: {
+      icon: '🍂',
+      teks: 'Daun gugur di musim kemarau,\nTanda alam berganti rupa.\nTerima kasih, sudah bersemangat,\nSampai jumpa di kesempatan yang ada.'
+    },
+    default: {
+      icon: '🌙',
+      teks: 'Hari telah senja matahari pulang,\nBintang berkelip mengganti siang.\nTerima kasih telah bersemangat,\nSampai jumpa di lain waktu yang terang.'
+    }
+  }
+};
+
 /* ── Auth keys ───────────────────────────────────────────────────────────── */
 const AUTH_KEY = 'cmsph_auth_v1';   // { adminName, adminHash } — persisted
 const SESS_KEY = 'cmsph_sess_v1';   // { role, name }           — session only
@@ -579,8 +639,39 @@ async function connectExistingDevice() {
    LOGIN
    ══════════════════════════════════════════════════════════════════════════ */
 
+/* ── Pantun display ──────────────────────────────────────────────────────── */
+function showPantun(type, roleName, userName) {
+  const key  = (roleName || '').toLowerCase();
+  const pool = PANTUN[type] || PANTUN.login;
+  const data = pool[key] || pool.default;
+
+  const ov = $('pantunOverlay');
+  if (!ov) return;
+  $('pantunIcon').textContent      = data.icon;
+  $('pantunRoleBadge').textContent = roleName || 'Tim';
+  $('pantunText').textContent      = data.teks;
+  $('pantunUser').textContent      = userName ? `— ${userName}` : '';
+
+  // Role badge colour based on type
+  const badge = $('pantunRoleBadge');
+  if (type === 'logout') {
+    badge.style.background = '#fef2f2'; badge.style.color = '#dc2626';
+  } else {
+    badge.style.background = ''; badge.style.color = '';
+  }
+
+  ov.classList.remove('hidden');
+  // Auto-close after 4 s
+  clearTimeout(ov._ptTimer);
+  ov._ptTimer = setTimeout(closePantun, 4000);
+}
+
+function closePantun() {
+  $('pantunOverlay')?.classList.add('hidden');
+}
+
 async function showLogin() {
-  $('loginModal').classList.remove('hidden');
+  $('loginPage').classList.remove('hidden');
   populateLoginSelect();
   sv('loginPw', '');
   toggleLoginPw();
@@ -643,7 +734,7 @@ async function doLogin() {
       setSess({ role: 'creator', name: sel.value });
     }
     const loginName = isAdm ? getAuth().adminName : sel.value;
-    $('loginModal').classList.add('hidden');
+    $('loginPage').classList.add('hidden');
     sv('loginPw', '');
     applyAuthState();
     handleHash();
@@ -651,6 +742,8 @@ async function doLogin() {
       await loadAllData();
       const loginRole = isAdm ? 'Admin' : (getUserRole((state.settings?.users||[]).find(u=>getUserName(u)===loginName)||null)||'Creator');
       logActivity(loginName, 'login', `masuk ke sistem sebagai ${loginRole}`);
+      // Pantun selamat datang
+      showPantun('login', loginRole, loginName);
     }, 200);
   } finally {
     btn.textContent = 'Masuk →'; btn.disabled = false;
@@ -659,12 +752,17 @@ async function doLogin() {
 
 function doLogout() {
   const name = currentUser();
+  const sess = getSess();
+  const role = sess?.role === 'admin' ? 'Admin'
+    : (getUserRole((state.settings?.users||[]).find(u=>getUserName(u)===name)||null)||'Creator');
   logActivity(name, 'logout', 'keluar dari sistem').catch(() => {});
   clearSess();
   // Clear page
   $$('.page').forEach(s => s.classList.remove('active'));
   showLogin();
   applyAuthState();
+  // Pantun selamat tinggal (shown above login page)
+  showPantun('logout', role, name);
 }
 
 /* ══════════════════════════════════════════════════════════════════════════
@@ -3660,6 +3758,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   $('btnGitSync')?.addEventListener('click', () => { clearDataCache(); loadAllData(true); });
 
   /* ── Expose globals for inline onclick ─────────────────────── */
+  window.closePantun    = closePantun;
   window.toggleTodo     = toggleTodo;
   window.deleteTodo     = deleteTodo;
   window.editContent    = editContent;
@@ -3719,10 +3818,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         showWizard('new');
       }
     } catch {
-      // Tidak bisa baca settings — mungkin repo private atau belum ada
-      // Load app tanpa popup, klik topbar "Setup GitHub" untuk konfigurasi
-      applyAuthState();
-      handleHash();
+      // Tidak bisa baca settings (rate limit / private repo) — tetap tampilkan login
+      showLogin();
     }
   } else if (!isLoggedIn()) {
     // Returning visit, no active session — show login
