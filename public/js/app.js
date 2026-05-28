@@ -1736,27 +1736,21 @@ function dashContentCard(c, mode = 'upcoming') {
       </div>`
     : '';
 
-  // ── Output badge — folder icon, shown when outputLink is set ──────
-  const outputBadge = (mode === 'upcoming' && c.outputLink)
-    ? `<a href="${esc(c.outputLink)}" target="_blank" rel="noopener"
-         class="dcc-output-badge" title="Buka Output: ${esc(c.outputLink)}" onclick="event.stopPropagation()">
-         <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor">
-           <path d="M22 9H13.4L11.7 7.3A1 1 0 0011 7H6a1 1 0 00-1 1v1H3a1 1 0 00-1 1v9a2 2 0 002 2h16a2 2 0 002-2V11a2 2 0 00-2-2z" opacity=".55"/>
-           <path d="M20 11H4a1 1 0 00-1 1v7a1 1 0 001 1h16a1 1 0 001-1v-7a1 1 0 00-1-1z"/>
-         </svg>
-         Output
-       </a>`
-    : '';
-
-  // ── Upcoming: LINK row — only shown when link NOT yet set ─────────
-  const outputLinkRow = (mode === 'upcoming' && !c.outputLink)
-    ? `<div class="dcc-meta-row" style="margin-top:2px">
-        <span class="dcc-label">LINK</span>
-        <button type="button" class="dcc-link-btn" onclick="event.stopPropagation();openLinkModal('${c.id}','upcoming')">+ Tambah</button>
+  // ── Output icon — centered folder, only when outputLink set ─────
+  const folderIconSvg = `<svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor">
+    <path d="M22 9H13.4L11.7 7.3A1 1 0 0011 7H6a1 1 0 00-1 1v1H3a1 1 0 00-1 1v9a2 2 0 002 2h16a2 2 0 002-2V11a2 2 0 00-2-2z" opacity=".45"/>
+    <path d="M20 11H4a1 1 0 00-1 1v7a1 1 0 001 1h16a1 1 0 001-1v-7a1 1 0 00-1-1z"/>
+  </svg>`;
+  const outputIcon = (mode === 'upcoming' && c.outputLink)
+    ? `<div class="dcc-output-icon-wrap">
+        <a href="${esc(c.outputLink)}" target="_blank" rel="noopener"
+           class="dcc-output-icon" title="Output tersimpan — klik untuk buka" onclick="event.stopPropagation()">
+          ${folderIconSvg}
+        </a>
       </div>`
     : '';
 
-  // Whole-card click → open link popup (skip interactive elements)
+  // Whole-card click → open popup (skip interactive elements)
   const cardClick = `onclick="if(!event.target.closest('select,button,a,input'))openLinkModal('${c.id}','${mode}')"`;
 
   return `<div class="dash-content-card" ${cardClick}>
@@ -1772,7 +1766,7 @@ function dashContentCard(c, mode = 'upcoming') {
     </div>
     ${acct ? `<div class="dcc-owner-tag" style="background:${acct.color}18;color:${acct.color};border-color:${acct.color}30">${acct.name}</div>` : ''}
     <div class="dcc-title">${esc(c.title||'—')}</div>
-    ${outputBadge}
+    ${outputIcon}
     <div class="dcc-meta-row">
       <span class="dcc-label">TEMA</span>
       <span class="dcc-val">${esc(c.theme||'—')}</span>
@@ -1795,7 +1789,6 @@ function dashContentCard(c, mode = 'upcoming') {
     </div>
     ${editorRow}
     ${ownerRow}
-    ${outputLinkRow}
   </div>`;
 }
 
@@ -2293,141 +2286,174 @@ function onFormatChange(fmt) {
   }
 }
 
-/* ── Link Edit Modal ─────────────────────────────────────────────────────── */
+/* ── Link / Detail Modal ─────────────────────────────────────────────────── */
 function openLinkModal(contentId, mode, platform) {
   const c = state.contents.find(x => x.id === contentId);
   if (!c) return;
   const modal = $('linkEditModal');
   if (!modal) return;
 
-  /* ── Shared SVGs ── */
-  const extIconSvg = `<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>`;
-  const saveSvg     = `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>`;
+  /* ── Shared helpers ── */
+  const acct       = ACCOUNTS.find(a => a.id === c.account);
+  const creatorTxt = Array.isArray(c.creator) ? c.creator.join(', ') : (c.creator || '—');
+  const editorTxt  = (c.editor && FORMATS_DUAL_ROLE.includes(c.format)) ? c.editor : null;
+  const extSvg     = `<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>`;
+  const saveSvg    = `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"/><polyline points="17 21 17 13 7 13"/><polyline points="7 3 7 8 15 8"/></svg>`;
+  const editSvg    = `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>`;
 
-  /* ── Content info (read-only) ── */
-  const acct         = ACCOUNTS.find(a => a.id === c.account);
-  const creatorTxt   = Array.isArray(c.creator) ? c.creator.join(', ') : (c.creator || '');
-  const editorTxt    = (c.editor && FORMATS_DUAL_ROLE.includes(c.format)) ? c.editor : '';
-
-  // Status + account tags
-  const topTags = [
-    c.status ? `<span class="badge ${STATUS_CLASS[c.status]||'badge-ide'}">${esc(c.status)}</span>` : '',
-    acct     ? `<span class="lem-acct-tag" style="background:${acct.color}18;color:${acct.color};border-color:${acct.color}30">${esc(acct.name)}</span>` : ''
-  ].filter(Boolean).join('');
-
-  // Meta chips (date, format, creator, editor)
-  const chips = [
-    c.publishDate ? `<span class="lem-chip">📅 ${esc(fmtDate(c.publishDate))}</span>` : '',
-    c.format      ? `<span class="lem-chip">🎬 ${esc(c.format)}</span>`                : '',
-    creatorTxt    ? `<span class="lem-chip">👤 ${esc(creatorTxt)}</span>`              : '',
-    editorTxt     ? `<span class="lem-chip">✂️ ${esc(editorTxt)}</span>`               : ''
-  ].filter(Boolean).join('');
-
-  // Platform icons (all platforms of the content, read-only)
-  const platChips = (c.platforms||[]).map(p => {
+  /* ── Platform icons (colored, read-only) ── */
+  const platIconsHtml = (c.platforms||[]).map(p => {
     const pm = PLATFORM_META[p]; if (!pm) return '';
-    const hasLink = !!((c.platformLinks||{})[p]);
-    return `<span class="lem-plat-chip${hasLink?' has-link':''}" style="color:${pm.color}" title="${esc(pm.name)}${hasLink?' ✓':''}">${PLAT_ICON_SVG[p]||p}</span>`;
+    return `<span style="color:${pm.color}" title="${esc(pm.name)}">${PLAT_ICON_SVG[p]||p}</span>`;
   }).join('');
 
-  // Extra info rows
-  const infoRows = [
-    c.theme     ? `<div class="lem-info-row"><span class="lem-info-lbl">Tema</span><span class="lem-info-val">${esc(c.theme)}</span></div>`     : '',
-    c.createdBy ? `<div class="lem-info-row"><span class="lem-info-lbl">Owner</span><span class="lem-info-val">${esc(c.createdBy)}</span></div>` : '',
-    platChips   ? `<div class="lem-info-row"><span class="lem-info-lbl">Platform</span><span class="lem-plat-chips">${platChips}</span></div>`   : ''
-  ].filter(Boolean).join('');
-
-  const detailBlock = `
-    <div class="lem-detail">
-      ${topTags ? `<div class="lem-detail-tags">${topTags}</div>` : ''}
-      <div class="lem-detail-title">${esc(c.title||'—')}</div>
-      ${chips    ? `<div class="lem-chips">${chips}</div>`   : ''}
-      ${infoRows ? `<div class="lem-info-block">${infoRows}</div>` : ''}
+  /* ── Info table ── */
+  const infoTable = `
+    <div class="lem-info-table">
+      <div class="lem-info-col">
+        <div class="lem-info-col-lbl">CREATOR</div>
+        <div class="lem-info-col-val lem-creator-val">${esc(creatorTxt)}</div>
+        ${editorTxt ? `<div class="lem-info-col-sub">EDITOR: ${esc(editorTxt)}</div>` : ''}
+      </div>
+      <div class="lem-info-col">
+        <div class="lem-info-col-lbl">OWNER</div>
+        <div class="lem-info-col-val">${esc(c.createdBy||'—')}</div>
+      </div>
+      <div class="lem-info-col">
+        <div class="lem-info-col-lbl">TEMA</div>
+        <div class="lem-info-col-val">${esc(c.theme||'—')}</div>
+      </div>
+      <div class="lem-info-col">
+        <div class="lem-info-col-lbl">FORMAT</div>
+        <div class="lem-info-col-val">${esc(c.format||'—')}</div>
+      </div>
+      <div class="lem-info-col">
+        <div class="lem-info-col-lbl">PLATFORMS</div>
+        <div class="lem-info-col-val lem-info-plats">${platIconsHtml||'—'}</div>
+      </div>
     </div>`;
 
-  /* ── Link section ── */
-  if (mode === 'upcoming') {
-    $('linkEditTitle').textContent = 'Detail Konten';
-    $('linkEditContent').innerHTML = detailBlock + `
-      <div class="lem-divider"><span>Output Link</span></div>
-      <div class="lem-link-row">
-        <span class="lem-link-icon lem-link-icon--output">
-          <svg width="17" height="17" viewBox="0 0 24 24" fill="currentColor">
-            <path d="M22 9H13.4L11.7 7.3A1 1 0 0011 7H6a1 1 0 00-1 1v1H3a1 1 0 00-1 1v9a2 2 0 002 2h16a2 2 0 002-2V11a2 2 0 00-2-2z" opacity=".55"/>
-            <path d="M20 11H4a1 1 0 00-1 1v7a1 1 0 001 1h16a1 1 0 001-1v-7a1 1 0 00-1-1z"/>
-          </svg>
-        </span>
-        <input class="form-inp lem-inp" type="url" id="linkEditInp"
-          value="${esc(c.outputLink || '')}"
-          placeholder="https://youtube.com/watch?v=..." />
+  /* ── Content sections ── */
+  const scriptSec = c.script
+    ? `<div class="lem-section">
+        <div class="lem-section-lbl">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14,2 14,8 20,8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+          SCRIPT / NASKAH
+        </div>
+        <div class="lem-section-body">${esc(c.script)}</div>
+      </div>` : '';
+
+  const captionSec = c.caption
+    ? `<div class="lem-section">
+        <div class="lem-section-lbl">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+          CAPTION
+        </div>
+        <div class="lem-section-body">${esc(c.caption)}</div>
+      </div>` : '';
+
+  const notesSec = `<div class="lem-section lem-section--notes">
+      <div class="lem-section-lbl">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.59 13.41l-7.17 7.17a2 2 0 01-2.83 0L2 12V2h10l8.59 8.59a2 2 0 010 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>
+        CATATAN KHUSUS
       </div>
-      ${c.outputLink ? `<a href="${esc(c.outputLink)}" target="_blank" rel="noopener" class="lem-open-link">Buka link tersimpan ${extIconSvg}</a>` : ''}
-      <div class="lem-actions">
-        <button class="btn-md blue lem-save-btn" onclick="saveLinkFromModal('${contentId}','upcoming')">
-          ${saveSvg} Simpan
-        </button>
-        <button class="btn-md" onclick="closeLinkModal()">Batal</button>
-      </div>`;
+      <div class="lem-section-body">${esc(c.notes||'Tidak ada catatan.')}</div>
+    </div>`;
+
+  /* ── Edit semua data button ── */
+  const editBtn = `<button class="btn-md blue lem-edit-all-btn" onclick="closeLinkModal();editContent('${contentId}')">
+    ${editSvg} Edit Semua Data
+  </button>`;
+
+  /* ── Build header + base block ── */
+  $('linkEditTitle').textContent = c.title || '—';
+  const subhead = `<div class="lem-subhead">
+    ${c.status ? `<span class="badge ${STATUS_CLASS[c.status]||'badge-ide'}">${esc(c.status)}</span>` : ''}
+    ${c.publishDate ? `<span class="lem-subhead-date">
+      <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+      ${esc(fmtDate(c.publishDate))}
+    </span>` : ''}
+    ${acct ? `<span class="lem-subhead-acct" style="color:${acct.color};border-color:${acct.color}40;background:${acct.color}10">${esc(acct.name)}</span>` : ''}
+  </div>`;
+
+  const baseHtml = subhead + infoTable + scriptSec + captionSec + notesSec;
+
+  /* ── Mode-specific link section ── */
+  if (mode === 'upcoming') {
+    $('linkEditContent').innerHTML = baseHtml + `
+      <div class="lem-output-section">
+        <div class="lem-section-lbl">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71"/></svg>
+          OUTPUT LINK
+        </div>
+        <div class="lem-output-row">
+          <input class="form-inp lem-output-inp" type="url" id="linkEditInp"
+            value="${esc(c.outputLink || '')}"
+            placeholder="Masukkan URL / link output (Google Drive, dll)..." />
+          <button class="btn-md green lem-save-btn" onclick="saveLinkFromModal('${contentId}','upcoming')">
+            ${saveSvg} Simpan
+          </button>
+        </div>
+        ${c.outputLink ? `<a href="${esc(c.outputLink)}" target="_blank" rel="noopener" class="lem-open-link">Buka link tersimpan ${extSvg}</a>` : ''}
+      </div>
+      <div class="lem-modal-footer">${editBtn}</div>`;
 
   } else if (mode === 'published' && platform) {
-    // ── Edit one specific platform link ──────────────────────────
+    /* ── Edit satu platform link ── */
     const meta = PLATFORM_META[platform] || { name: platform, color: '#64748b' };
-    const existingUrl = (c.platformLinks || {})[platform] || '';
-    $('linkEditTitle').textContent = 'Detail Konten';
-    $('linkEditContent').innerHTML = detailBlock + `
-      <div class="lem-divider"><span style="color:${meta.color}">${esc(meta.name)} Link</span></div>
-      <div class="lem-link-row">
-        <span class="lem-link-icon" style="color:${meta.color};background:${meta.color}18;border-color:${meta.color}33">
-          ${PLAT_ICON_SVG[platform] || ''}
-        </span>
-        <input class="form-inp lem-inp" type="url" id="linkEditInp"
-          value="${esc(existingUrl)}"
-          placeholder="https://..." />
+    const existingUrl = (c.platformLinks||{})[platform] || '';
+    $('linkEditContent').innerHTML = baseHtml + `
+      <div class="lem-output-section">
+        <div class="lem-section-lbl" style="color:${meta.color}">
+          <span style="display:inline-flex;width:14px;height:14px;align-items:center;justify-content:center">${PLAT_ICON_SVG[platform]||''}</span>
+          ${esc(meta.name).toUpperCase()} LINK
+        </div>
+        <div class="lem-output-row">
+          <input class="form-inp lem-output-inp" type="url" id="linkEditInp"
+            value="${esc(existingUrl)}"
+            placeholder="https://..." />
+          <button class="btn-md lem-save-btn" style="background:${meta.color};color:#fff;border-color:${meta.color}"
+            onclick="saveLinkFromModal('${contentId}','published','${platform}')">
+            ${saveSvg} Simpan
+          </button>
+        </div>
+        ${existingUrl ? `<a href="${esc(existingUrl)}" target="_blank" rel="noopener" class="lem-open-link">Buka link tersimpan ${extSvg}</a>` : ''}
       </div>
-      ${existingUrl ? `<a href="${esc(existingUrl)}" target="_blank" rel="noopener" class="lem-open-link">Buka link tersimpan ${extIconSvg}</a>` : ''}
-      <div class="lem-actions">
-        <button class="btn-md lem-save-btn" style="background:${meta.color};color:#fff;border-color:${meta.color}"
-          onclick="saveLinkFromModal('${contentId}','published','${platform}')">
-          ${saveSvg} Simpan
-        </button>
-        <button class="btn-md" onclick="closeLinkModal()">Batal</button>
-      </div>`;
+      <div class="lem-modal-footer">${editBtn}</div>`;
 
   } else if (mode === 'published' && !platform) {
-    // ── Overview: show all platform links (whole-card click) ──────
-    $('linkEditTitle').textContent = 'Detail Konten';
+    /* ── Overview semua platform links ── */
     const platItems = (c.platforms||[]).map(p => {
       const pm = PLATFORM_META[p]; if (!pm) return '';
       const url = (c.platformLinks||{})[p] || '';
       return `<div class="lem-plat-item">
-        <span class="lem-plat-item-icon" style="color:${pm.color};background:${pm.color}18;border-color:${pm.color}33">
-          ${PLAT_ICON_SVG[p]||p}
-        </span>
+        <span class="lem-plat-item-icon" style="color:${pm.color};background:${pm.color}18;border-color:${pm.color}33">${PLAT_ICON_SVG[p]||p}</span>
         <div class="lem-plat-item-info">
           <span class="lem-plat-item-name" style="color:${pm.color}">${esc(pm.name)}</span>
           ${url
-            ? `<a href="${esc(url)}" target="_blank" rel="noopener" class="lem-plat-item-url">${esc(url.length>42?url.slice(0,42)+'…':url)}</a>`
-            : `<span class="lem-plat-item-empty">Belum diisi</span>`
-          }
+            ? `<a href="${esc(url)}" target="_blank" rel="noopener" class="lem-plat-item-url">${esc(url.length>44?url.slice(0,44)+'…':url)}</a>`
+            : `<span class="lem-plat-item-empty">Belum diisi</span>`}
         </div>
-        <button type="button" class="btn-xs" onclick="openLinkModal('${contentId}','published','${p}')">
-          ${url ? 'Edit' : '+ Link'}
-        </button>
+        <button type="button" class="btn-xs" onclick="openLinkModal('${contentId}','published','${p}')">${url?'Edit':'+ Link'}</button>
       </div>`;
     }).join('');
-    $('linkEditContent').innerHTML = detailBlock + `
-      <div class="lem-divider"><span>Platform Links</span></div>
-      <div class="lem-plat-list">
-        ${platItems || '<div style="color:var(--muted-lt);font-size:.8rem;padding:4px 0">Tidak ada platform</div>'}
+    $('linkEditContent').innerHTML = baseHtml + `
+      <div class="lem-output-section">
+        <div class="lem-section-lbl">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71"/></svg>
+          PLATFORM LINKS
+        </div>
+        <div class="lem-plat-list">${platItems||'<span style="color:var(--muted-lt);font-size:.8rem">Tidak ada platform</span>'}</div>
       </div>
-      <div class="lem-actions">
-        <button class="btn-md" style="flex:1;justify-content:center" onclick="closeLinkModal()">Tutup</button>
-      </div>`;
+      <div class="lem-modal-footer">${editBtn}</div>`;
   }
 
   modal.classList.remove('hidden');
   setTimeout(() => { const inp = $('linkEditInp'); if (inp) { inp.focus(); inp.select(); } }, 60);
 }
+
+/* expose for inline onclick */
+window.editFromModal = (id) => { closeLinkModal(); editContent(id); };
 
 async function saveLinkFromModal(contentId, mode, platform) {
   const url = gv('linkEditInp').trim();

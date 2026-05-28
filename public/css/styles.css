@@ -380,8 +380,10 @@ ul { list-style: none; }
   transition: background .15s;
 }
 .btn-md:hover  { background: var(--bg); }
-.btn-md.blue   { background: var(--blue); border-color: var(--blue); color: #fff; }
-.btn-md.blue:hover { background: #1d4ed8; }
+.btn-md.blue   { background: var(--blue);  border-color: var(--blue);  color: #fff; }
+.btn-md.blue:hover  { background: #1d4ed8; }
+.btn-md.green  { background: var(--green); border-color: var(--green); color: #fff; }
+.btn-md.green:hover { background: #15803d; }
 
 .ai-btn {
   display: flex; align-items: center; gap: 5px;
@@ -1113,6 +1115,18 @@ ul { list-style: none; }
 }
 .dcc-link-btn:hover { opacity: .78; }
 
+/* Folder/document icon — centered above meta rows when outputLink is set */
+.dcc-output-icon-wrap {
+  display: flex; justify-content: center; align-items: center;
+  padding: 2px 0 4px;
+}
+.dcc-output-icon {
+  display: inline-flex; align-items: center; justify-content: center;
+  color: var(--green); opacity: .85;
+  text-decoration: none; transition: opacity .15s, transform .15s;
+}
+.dcc-output-icon:hover { opacity: 1; transform: scale(1.15); }
+
 /* File-open icon link (when outputLink is set) */
 .dcc-output-link-wrap { display: inline-flex; align-items: center; gap: 4px; }
 .dcc-file-link {
@@ -1165,110 +1179,113 @@ ul { list-style: none; }
 }
 .dcc-plat-link-wrap:hover .dcc-plat-edit-btn { display: inline-flex; }
 
-/* ── Link Edit Modal ────────────────────────────────────────── */
-.link-edit-modal { max-width: 500px; }
+/* ══ Content Detail Modal (popup kartu dashboard) ═══════════════ */
+.link-edit-modal { max-width: 540px; }
 .link-edit-head  {
-  display: flex; align-items: center; justify-content: space-between;
-  padding: 14px 18px 12px; border-bottom: 1px solid var(--bd);
-  flex-shrink: 0;
+  display: flex; align-items: flex-start; justify-content: space-between;
+  padding: 18px 20px 14px; border-bottom: 1px solid var(--bd);
+  flex-shrink: 0; gap: 10px;
 }
 .link-edit-label {
-  font-weight: 700; font-size: .88rem;
-  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-  max-width: 360px;
+  font-weight: 800; font-size: 1.1rem; line-height: 1.3;
+  color: var(--text); word-break: break-word;
 }
 .modal-close-btn {
-  width: 26px; height: 26px; border: none; background: transparent;
+  width: 28px; height: 28px; border: none; background: transparent;
   color: var(--muted); cursor: pointer; display: flex; align-items: center;
-  justify-content: center; border-radius: 5px; flex-shrink: 0;
+  justify-content: center; border-radius: 6px; flex-shrink: 0; margin-top: 2px;
 }
 .modal-close-btn:hover { background: var(--bg); color: var(--text); }
 .link-edit-body  {
-  padding: 16px 18px 20px;
-  overflow-y: auto; max-height: 80vh;
+  padding: 0 20px 20px;
+  overflow-y: auto; max-height: 78vh;
 }
 
-/* ── Detail content block (read-only) ──────────────────────── */
-.lem-detail { margin-bottom: 4px; }
-.lem-detail-tags {
-  display: flex; align-items: center; gap: 6px; flex-wrap: wrap;
-  margin-bottom: 8px;
+/* ── Subhead: status + date + account ───────────────────────── */
+.lem-subhead {
+  display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+  padding: 10px 0 12px; border-bottom: 1px solid var(--bd);
+  margin-bottom: 14px;
 }
-.lem-acct-tag {
-  display: inline-flex; padding: 2px 8px; border-radius: 5px;
-  border: 1px solid; font-size: .7rem; font-weight: 600;
+.lem-subhead-date {
+  display: inline-flex; align-items: center; gap: 4px;
+  font-size: .78rem; color: var(--muted);
 }
-.lem-detail-title {
-  font-size: 1rem; font-weight: 700; line-height: 1.35;
-  color: var(--text); margin-bottom: 8px;
+.lem-subhead-acct {
+  display: inline-flex; padding: 2px 8px;
+  border-radius: 5px; border: 1px solid;
+  font-size: .7rem; font-weight: 600;
 }
 
-/* Meta chips */
-.lem-chips { display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 10px; }
-.lem-chip  {
-  display: inline-flex; align-items: center; gap: 3px;
-  font-size: .7rem; color: var(--muted);
+/* ── Info table (horizontal columns) ───────────────────────── */
+.lem-info-table {
+  display: flex; gap: 0; margin-bottom: 16px;
   background: var(--bg); border: 1px solid var(--bd);
-  border-radius: 5px; padding: 2px 7px;
+  border-radius: 10px; overflow: hidden;
+}
+.lem-info-col {
+  flex: 1; padding: 10px 12px; min-width: 0;
+  border-right: 1px solid var(--bd);
+}
+.lem-info-col:last-child { border-right: none; }
+.lem-info-col-lbl {
+  font-size: .6rem; font-weight: 700; letter-spacing: .06em;
+  color: var(--muted-lt); text-transform: uppercase; margin-bottom: 4px;
+}
+.lem-info-col-val {
+  font-size: .8rem; font-weight: 600; color: var(--text);
+  word-break: break-word;
+}
+.lem-info-col-sub { font-size: .68rem; color: var(--muted); margin-top: 2px; }
+.lem-creator-val  { color: var(--blue); }
+.lem-info-plats   { display: flex; gap: 5px; align-items: center; flex-wrap: wrap; }
+
+/* ── Content sections (script / caption / notes) ────────────── */
+.lem-section { margin-bottom: 12px; }
+.lem-section-lbl {
+  display: flex; align-items: center; gap: 5px;
+  font-size: .68rem; font-weight: 700; letter-spacing: .07em;
+  color: var(--muted); text-transform: uppercase; margin-bottom: 6px;
+}
+.lem-section-body {
+  font-size: .82rem; color: var(--text); line-height: 1.55;
+  background: var(--bg); border: 1px solid var(--bd);
+  border-radius: 8px; padding: 10px 12px;
+  white-space: pre-wrap; word-break: break-word;
+}
+.lem-section--notes .lem-section-lbl { color: #92400e; }
+.lem-section--notes .lem-section-body {
+  background: #fffbeb; border-color: #fde68a; color: #78350f;
 }
 
-/* Info rows (Tema, Owner, Platform) */
-.lem-info-block { display: flex; flex-direction: column; gap: 5px; margin-bottom: 4px; }
-.lem-info-row   { display: flex; align-items: center; gap: 8px; font-size: .78rem; }
-.lem-info-lbl   { color: var(--muted-lt); font-size: .68rem; font-weight: 600; text-transform: uppercase; letter-spacing: .04em; min-width: 52px; flex-shrink: 0; }
-.lem-info-val   { color: var(--text); }
-
-/* Platform chips in modal (read-only) */
-.lem-plat-chips { display: flex; gap: 5px; align-items: center; flex-wrap: wrap; }
-.lem-plat-chip  {
-  display: inline-flex; align-items: center; justify-content: center;
-  width: 24px; height: 24px; border-radius: 6px;
-  border: 1.5px solid transparent; background: transparent;
-  opacity: .6;
+/* ── Output link section ────────────────────────────────────── */
+.lem-output-section { margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--bd); }
+.lem-output-row {
+  display: flex; gap: 8px; align-items: center; margin-top: 8px;
 }
-.lem-plat-chip.has-link {
-  opacity: 1; border-color: currentColor;
-  background: color-mix(in srgb, currentColor 10%, transparent);
+.lem-output-inp { flex: 1; margin: 0 !important; }
+.lem-save-btn {
+  display: inline-flex; align-items: center; gap: 5px;
+  white-space: nowrap; flex-shrink: 0;
 }
-
-/* Divider between detail and link section */
-.lem-divider {
-  display: flex; align-items: center; gap: 10px;
-  margin: 14px 0 12px; font-size: .7rem; font-weight: 700;
-  text-transform: uppercase; letter-spacing: .06em; color: var(--muted);
-}
-.lem-divider::before, .lem-divider::after {
-  content: ''; flex: 1; height: 1px; background: var(--bd);
-}
-
-/* Link input row (icon + input side by side) */
-.lem-link-row {
-  display: flex; align-items: center; gap: 8px;
-}
-.lem-link-icon {
-  display: inline-flex; align-items: center; justify-content: center;
-  width: 34px; height: 34px; flex-shrink: 0;
-  border-radius: 8px; border: 1.5px solid var(--bd); background: var(--bg);
-}
-.lem-link-icon--output { color: var(--blue); background: var(--blue-lt); border-color: #bfdbfe; }
-.lem-inp { flex: 1; margin: 0 !important; font-size: .875rem; }
-
 .lem-open-link {
   display: inline-flex; align-items: center; gap: 4px;
   font-size: .75rem; color: var(--blue); text-decoration: none;
-  margin-top: 8px; opacity: .85;
+  margin-top: 7px; opacity: .85;
 }
 .lem-open-link:hover { opacity: 1; text-decoration: underline; }
-.lem-actions {
-  display: flex; gap: 8px; margin-top: 14px;
+
+/* ── Footer: Edit Semua Data ────────────────────────────────── */
+.lem-modal-footer {
+  margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--bd);
+  display: flex; justify-content: flex-end;
 }
-.lem-save-btn {
-  flex: 1; justify-content: center;
-  display: flex; align-items: center; gap: 5px;
+.lem-edit-all-btn {
+  display: inline-flex; align-items: center; gap: 6px;
 }
 
-/* Platform links list (published overview) */
-.lem-plat-list { display: flex; flex-direction: column; }
+/* ── Platform links list ─────────────────────────────────────── */
+.lem-plat-list { display: flex; flex-direction: column; margin-top: 8px; }
 .lem-plat-item {
   display: flex; align-items: center; gap: 10px;
   padding: 9px 0; border-bottom: 1px solid var(--bd);
@@ -1284,7 +1301,7 @@ ul { list-style: none; }
 .lem-plat-item-url   {
   font-size: .7rem; color: var(--blue); display: block;
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-  text-decoration: none; max-width: 220px;
+  text-decoration: none; max-width: 240px;
 }
 .lem-plat-item-url:hover { text-decoration: underline; }
 .lem-plat-item-empty { font-size: .7rem; color: var(--muted-lt); }
