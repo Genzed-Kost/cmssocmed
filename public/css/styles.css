@@ -1447,3 +1447,95 @@ ul { list-style: none; }
   color: #dc2626; border-radius: 6px;
   padding: 8px 12px; font-size: .78rem; margin-bottom: 12px;
 }
+
+/* ══════════════════════════════════════════════════════════════════
+   BANK KONTEN
+   ══════════════════════════════════════════════════════════════════ */
+
+/* Row highlight when publishDate = today */
+.bk-row-today td { background: #fffbeb !important; }
+.bk-row-today:hover td { background: #fef9c3 !important; }
+
+/* No column */
+.bk-no {
+  text-align: center;
+  color: var(--muted);
+  font-size: .75rem;
+  font-weight: 600;
+}
+
+/* Inline editable inputs */
+.bk-inp {
+  width: 100%;
+  padding: 5px 8px;
+  border: 1.5px solid transparent;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--text);
+  font-size: .83rem;
+  transition: border-color .15s, background .15s;
+}
+.bk-inp:hover  { border-color: var(--bd); }
+.bk-inp:focus  { outline: none; border-color: var(--blue); background: var(--blue-lt); }
+
+/* Creator select */
+.bk-sel {
+  flex: 1;
+  min-width: 0;
+  padding: 5px 6px;
+  border: 1.5px solid transparent;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--text);
+  font-size: .83rem;
+  cursor: pointer;
+  transition: border-color .15s, background .15s;
+}
+.bk-sel:hover,
+.bk-sel:focus  { outline: none; border-color: var(--blue); background: var(--blue-lt); }
+
+/* Creator cell wrapper: select + WA button */
+.bk-creator-wrap {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+/* WhatsApp send button */
+.bk-wa-btn {
+  flex-shrink: 0;
+  width: 30px;
+  height: 30px;
+  border: none;
+  border-radius: 7px;
+  background: #25d366;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: opacity .15s, transform .1s;
+}
+.bk-wa-btn:hover             { opacity: .82; transform: scale(1.08); }
+.bk-wa-btn--disabled         { background: var(--bd); color: var(--muted); cursor: not-allowed; opacity: .55; }
+.bk-wa-btn--disabled:hover   { transform: none; opacity: .55; }
+
+/* Delete button */
+.bk-actions  { text-align: center; }
+.bk-del-btn  { color: var(--muted); }
+.bk-del-btn:hover { color: var(--red); }
+
+/* Reminder banner (shown when today has content) */
+.bk-reminder-banner {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--yellow-lt);
+  border: 1.5px solid #fbbf24;
+  border-radius: var(--radius);
+  padding: 10px 14px;
+  margin-bottom: 12px;
+  font-size: .82rem;
+  color: var(--text);
+  line-height: 1.4;
+}

@@ -69,13 +69,14 @@ const ROLE_COLORS = {
 };
 
 const PAGE_TITLES = {
-  dashboard:  'Dashboard',
-  planner:    'Planner',
-  activity:   'Activity Log',
-  contents:   'New Contents',
-  newpost:    'New Post',
-  statistics: 'Statistik',
-  apisetup:   'API Setup'
+  dashboard:   'Dashboard',
+  planner:     'Planner',
+  bankkonten:  'Bank Konten',
+  activity:    'Activity Log',
+  contents:    'New Contents',
+  newpost:     'New Post',
+  statistics:  'Statistik',
+  apisetup:    'API Setup'
 };
 
 const chartInstances = {};   // canvasId → Chart instance
@@ -182,6 +183,7 @@ let state = {
   contents:       [],
   activity:       [],
   todos:          [],
+  bankKonten:     [],
   settings:       { kpi: {}, users: [], analyticsUrls: {} },
   analytics:      {},
   shas:           {},
@@ -669,17 +671,19 @@ async function loadAllData() {
   const syncIcon = $('btnGitSync');
   if (syncIcon) syncIcon.classList.add('spinning');
   try {
-    const [cR, aR, tR, sR, anlR] = await Promise.all([
+    const [cR, aR, tR, sR, anlR, bkR] = await Promise.all([
       window.db.read('contents'),
       window.db.read('activity'),
       window.db.read('todos'),
       window.db.read('settings'),
-      window.db.read('analytics')
+      window.db.read('analytics'),
+      window.db.read('contentBank')
     ]);
-    state.contents  = cR?.data   || [];
-    state.activity  = aR?.data   || [];
-    state.todos     = tR?.data   || [];
-    state.settings  = sR?.data   || { kpi: {}, users: [], analyticsUrls: {} };
+    state.contents   = cR?.data   || [];
+    state.activity   = aR?.data   || [];
+    state.todos      = tR?.data   || [];
+    state.bankKonten = bkR?.data  || [];
+    state.settings   = sR?.data   || { kpi: {}, users: [], analyticsUrls: {} };
     // Ensure topContent slots exist for every account
     if (!state.settings.topContent) state.settings.topContent = {};
     ACCOUNTS.forEach(a => {
@@ -692,12 +696,15 @@ async function loadAllData() {
     });
     state.analytics = anlR?.data || {};
     state.shas = {
-      contents:  cR?.sha,
-      activity:  aR?.sha,
-      todos:     tR?.sha,
-      settings:  sR?.sha,
-      analytics: anlR?.sha
+      contents:    cR?.sha,
+      activity:    aR?.sha,
+      todos:       tR?.sha,
+      settings:    sR?.sha,
+      analytics:   anlR?.sha,
+      bankKonten:  bkR?.sha
     };
+    // Check Bank Konten reminders after data loaded (jam 8 pagi on publish date)
+    checkBankKontenReminders();
     // Cache public user list for login screen
     setPubUsers(state.settings.users || []);
     // Auto-migrate: push adminHash to GitHub settings if missing (for existing installs)
@@ -797,6 +804,220 @@ async function notifyCreatorAssigned(content, oldCreator) {
 }
 
 /* ══════════════════════════════════════════════════════════════════════════
+   BANK KONTEN
+   ══════════════════════════════════════════════════════════════════════════ */
+
+function renderBankKonten() {
+  const users  = state.settings?.users || [];
+  const items  = state.bankKonten || [];
+  const body   = $('bkBody');
+  if (!body) return;
+
+  setTxt('bkCount', items.length);
+  setTxt('bkCountFoot', items.length ? `${items.length} konten tersimpan` : '');
+
+  if (items.length === 0) {
+    body.innerHTML = '<tr><td colspan="6" class="empty-cell">Belum ada data. Klik "+ Tambah Konten" untuk memulai.</td></tr>';
+    return;
+  }
+
+  const userOpts = (selected = '') =>
+    ['', ...users.map(u => getUserName(u))].map(n =>
+      `<option value="${esc(n)}" ${n === selected ? 'selected' : ''}>${n ? esc(n) : '— Pilih Creator —'}</option>`
+    ).join('');
+
+  const todayStr = new Date().toISOString().slice(0, 10);
+
+  body.innerHTML = items.map((item, i) => {
+    const creatorObj = users.find(u => getUserName(u) === item.creator);
+    const canWa = !!(item.creator && creatorObj?.phone);
+    const isToday = item.publishDate === todayStr;
+    return `<tr class="bk-row${isToday ? ' bk-row-today' : ''}" data-id="${item.id}">
+      <td class="bk-no">${i + 1}</td>
+      <td>
+        <input type="text" class="bk-inp" data-id="${item.id}" data-field="title"
+          value="${esc(item.title || '')}" placeholder="Judul konten…" />
+      </td>
+      <td>
+        <input type="text" class="bk-inp" data-id="${item.id}" data-field="reference"
+          value="${esc(item.reference || '')}" placeholder="https://…" />
+      </td>
+      <td>
+        <div class="bk-creator-wrap">
+          <select class="bk-sel" data-id="${item.id}" data-field="creator">
+            ${userOpts(item.creator || '')}
+          </select>
+          <button type="button" class="bk-wa-btn${canWa ? '' : ' bk-wa-btn--disabled'}"
+            data-id="${item.id}" title="${canWa ? `Kirim WA ke ${esc(item.creator)}` : 'Pilih creator yang punya no. WA'}">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/>
+            </svg>
+          </button>
+        </div>
+      </td>
+      <td>
+        <input type="date" class="bk-inp" data-id="${item.id}" data-field="publishDate"
+          value="${esc(item.publishDate || '')}" />
+      </td>
+      <td class="bk-actions">
+        <button type="button" class="icon-btn bk-del-btn" data-id="${item.id}" title="Hapus baris">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <polyline points="3 6 5 6 21 6"/>
+            <path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/>
+            <path d="M10 11v6M14 11v6M9 6V4h6v2"/>
+          </svg>
+        </button>
+      </td>
+    </tr>`;
+  }).join('');
+
+  // Update reminder banner
+  _updateBkReminderBanner();
+}
+
+function _updateBkReminderBanner() {
+  const banner = $('bkReminderBanner');
+  if (!banner) return;
+  const todayStr = new Date().toISOString().slice(0, 10);
+  const todayItems = (state.bankKonten || []).filter(x => x.publishDate === todayStr && x.creator);
+  if (!todayItems.length) { banner.classList.add('hidden'); return; }
+  const names = todayItems.slice(0, 3).map(x => `<strong>${esc(x.title || 'tanpa judul')}</strong>`).join(', ');
+  const more  = todayItems.length > 3 ? ` +${todayItems.length - 3} lainnya` : '';
+  banner.innerHTML = `⏰ <span>Konten tayang <strong>hari ini</strong>: ${names}${more}. Pastikan creator sudah siap!</span>`;
+  banner.classList.remove('hidden');
+}
+
+async function addBankKontenRow() {
+  const sess = getSess();
+  const newItem = {
+    id:           'bk_' + uid(),
+    title:        '',
+    reference:    '',
+    creator:      (sess?.role !== 'admin' && sess?.name) ? sess.name : '',
+    publishDate:  '',
+    remindedDate: null,
+    createdBy:    currentUser(),
+    createdAt:    new Date().toISOString(),
+    updatedAt:    new Date().toISOString()
+  };
+  state.bankKonten.push(newItem);
+  renderBankKonten();
+
+  try {
+    state.shas.bankKonten = await window.db.writeData('contentBank', state.bankKonten, 'Bank Konten: tambah baris baru');
+    await logActivity(currentUser(), 'Tambah Bank Konten', 'baris baru');
+    // Focus title input of the new row
+    setTimeout(() => {
+      $('bkBody')?.querySelector(`tr[data-id="${newItem.id}"] .bk-inp`)?.focus();
+    }, 60);
+  } catch (e) {
+    state.bankKonten.pop();
+    renderBankKonten();
+    toast('Gagal tambah baris: ' + e.message, 'error');
+  }
+}
+
+const _bkSaveTimers = {};
+function debouncedSaveBkItem(id, field, value) {
+  const item = state.bankKonten.find(x => x.id === id);
+  if (!item) return;
+  const oldVal = item[field];
+  if (oldVal === value) return;   // tidak ada perubahan
+  item[field]    = value;
+  item.updatedAt = new Date().toISOString();
+
+  // Langsung update tombol WA saat creator berubah
+  if (field === 'creator') {
+    const tr = $('bkBody')?.querySelector(`tr[data-id="${id}"]`);
+    const waBtn = tr?.querySelector('.bk-wa-btn');
+    if (waBtn) {
+      const co  = (state.settings?.users || []).find(u => getUserName(u) === value);
+      const ok  = !!(value && co?.phone);
+      waBtn.classList.toggle('bk-wa-btn--disabled', !ok);
+      waBtn.title = ok ? `Kirim WA ke ${value}` : 'Pilih creator yang punya no. WA';
+    }
+  }
+
+  clearTimeout(_bkSaveTimers[id]);
+  _bkSaveTimers[id] = setTimeout(async () => {
+    try {
+      state.shas.bankKonten = await window.db.writeData('contentBank', state.bankKonten, `Bank Konten: edit ${field}`);
+      await logActivity(currentUser(), 'Edit Bank Konten', `"${item.title || 'tanpa judul'}" — ${field}`);
+    } catch (e) {
+      toast('Gagal simpan: ' + e.message, 'error');
+      item[field] = oldVal;   // revert on error
+    }
+  }, 800);
+}
+
+async function sendBankKontenWa(id) {
+  const item = state.bankKonten.find(x => x.id === id);
+  if (!item || !item.creator) { toast('Pilih creator terlebih dahulu', 'error'); return; }
+
+  const users      = state.settings?.users || [];
+  const creatorObj = users.find(u => getUserName(u) === item.creator);
+  if (!creatorObj?.phone) { toast('Creator tidak memiliki nomor WhatsApp', 'error'); return; }
+
+  const dateStr = item.publishDate ? fmtDate(item.publishDate) : 'belum ditentukan';
+  const refLine = item.reference ? `\n🔗 *Referensi:* ${item.reference}` : '';
+  const msg = `Halo ${item.creator}! 📢\n\nKonten *${item.title || '(belum ada judul)'}* dijadwalkan tayang *${dateStr}*.${refLine}\n\nYuk segera siapkan kontennya! 💪\n\n_- Penjaga Harapan CMS_`;
+
+  if (getWaToken()) {
+    await sendWaNotif(creatorObj.phone, msg);
+    toast(`Pesan terkirim ke ${item.creator} ✓`, 'success');
+  } else {
+    const clean = creatorObj.phone.replace(/\D/g, '');
+    const num   = clean.startsWith('0') ? '62' + clean.slice(1) : clean;
+    window.open(`https://wa.me/${num}?text=${encodeURIComponent(msg)}`, '_blank');
+  }
+  await logActivity(currentUser(), 'Kirim WA Bank Konten', `ke ${item.creator} — "${item.title || 'tanpa judul'}"`);
+}
+
+async function checkBankKontenReminders() {
+  if (!state.bankKonten?.length) return;
+  const now      = new Date();
+  const todayStr = now.toISOString().slice(0, 10);
+  if (now.getHours() < 8) return;   // belum jam 8 pagi
+
+  const toRemind = state.bankKonten.filter(item =>
+    item.publishDate === todayStr &&
+    item.remindedDate !== todayStr &&
+    item.creator
+  );
+  if (!toRemind.length) return;
+
+  // Update banner di halaman Bank Konten (jika sedang dibuka)
+  _updateBkReminderBanner();
+
+  if (!getWaToken()) {
+    // Tidak ada token → hanya tampilkan toast info
+    const names = toRemind.slice(0, 2).map(x => x.title || 'tanpa judul').join(', ');
+    const extra = toRemind.length > 2 ? ` +${toRemind.length - 2} lagi` : '';
+    toast(`⏰ ${toRemind.length} konten tayang hari ini: ${names}${extra}`, '');
+    return;
+  }
+
+  // Ada Fonnte token → kirim WA otomatis
+  const users = state.settings?.users || [];
+  for (const item of toRemind) {
+    const co = users.find(u => getUserName(u) === item.creator);
+    if (co?.phone) {
+      const refLine = item.reference ? `\n🔗 *Referensi:* ${item.reference}` : '';
+      const msg = `Halo ${item.creator}! ⏰ *Jadwal Tayang Hari Ini*\n\nKonten *${item.title || '(tanpa judul)'}* dijadwalkan tayang ${fmtDate(item.publishDate)}.${refLine}\n\nSegera siapkan kontennya! 🚀\n\n_- Penjaga Harapan CMS_`;
+      await sendWaNotif(co.phone, msg);
+    }
+    item.remindedDate = todayStr;
+  }
+
+  // Simpan remindedDate ke GitHub (agar tidak kirim ulang)
+  try {
+    state.shas.bankKonten = await window.db.writeData('contentBank', state.bankKonten, 'Bank Konten: catat reminder terkirim');
+  } catch { /* non-critical */ }
+
+  toast(`✓ Reminder WA terkirim ke ${toRemind.length} creator`, 'success');
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
    ROUTING
    ══════════════════════════════════════════════════════════════════════════ */
 
@@ -825,13 +1046,14 @@ function navigate(page) {
 
 function renderCurrentPage() {
   switch (state.currentPage) {
-    case 'dashboard':  renderDashboard();    break;
-    case 'planner':    renderPlanner();      break;
-    case 'activity':   renderActivity();     break;
-    case 'contents':   renderContents();     break;
-    case 'newpost':    renderNewPostForm();  break;
-    case 'statistics': renderStatistics();   break;
-    case 'apisetup':   renderApiSetup();     break;
+    case 'dashboard':   renderDashboard();    break;
+    case 'planner':     renderPlanner();      break;
+    case 'bankkonten':  renderBankKonten();   break;
+    case 'activity':    renderActivity();     break;
+    case 'contents':    renderContents();     break;
+    case 'newpost':     renderNewPostForm();  break;
+    case 'statistics':  renderStatistics();   break;
+    case 'apisetup':    renderApiSetup();     break;
   }
 }
 
@@ -3126,6 +3348,53 @@ document.addEventListener('DOMContentLoaded', async () => {
   $('btnCloseStatInput')?.addEventListener('click', () => $('statInputCard')?.classList.add('hidden'));
   $('btnSaveStats')?.addEventListener('click', saveAnalyticsEntry);
   // statMetric removed — platform tabs handle switching now
+
+  /* ── Bank Konten ─────────────────────────────────────────────── */
+  $('btnAddBkRow')?.addEventListener('click', addBankKontenRow);
+
+  // Inline edit: save on change (debounced 800ms)
+  $('bkBody')?.addEventListener('change', e => {
+    const inp = e.target.closest('[data-id][data-field]');
+    if (!inp) return;
+    debouncedSaveBkItem(inp.dataset.id, inp.dataset.field, inp.value);
+  });
+
+  // Clicks: WA button + delete button
+  $('bkBody')?.addEventListener('click', e => {
+    // WA send
+    const waBtn = e.target.closest('.bk-wa-btn:not(.bk-wa-btn--disabled)');
+    if (waBtn) { sendBankKontenWa(waBtn.dataset.id); return; }
+
+    // Delete row
+    const delBtn = e.target.closest('.bk-del-btn');
+    if (delBtn) {
+      const id   = delBtn.dataset.id;
+      const item = state.bankKonten.find(x => x.id === id);
+      if (!item) return;
+      showConfirm(
+        `Hapus konten "${item.title || 'tanpa judul'}" dari Bank Konten?`,
+        async () => {
+          state.bankKonten = state.bankKonten.filter(x => x.id !== id);
+          try {
+            state.shas.bankKonten = await window.db.writeData('contentBank', state.bankKonten, `Bank Konten: hapus "${item.title}"`);
+            await logActivity(currentUser(), 'Hapus Bank Konten', `"${item.title || 'tanpa judul'}"`);
+            renderBankKonten();
+            toast('Konten dihapus ✓', 'success');
+          } catch (err) {
+            toast('Gagal hapus: ' + err.message, 'error');
+            // Re-add item on failure
+            state.bankKonten.splice(state.bankKonten.length, 0, item);
+            renderBankKonten();
+          }
+        }
+      );
+    }
+  });
+
+  // Page visibility: cek reminder saat tab aktif kembali
+  document.addEventListener('visibilitychange', () => {
+    if (!document.hidden && state.bankKonten?.length) checkBankKontenReminders();
+  });
 
   /* ── GitHub sync ────────────────────────────────────────────── */
   $('btnGitSync')?.addEventListener('click', loadAllData);

@@ -239,9 +239,10 @@ class GitHubDB {
 
   async initDataFiles() {
     const defaults = {
-      'contents.json': [],
-      'activity.json': [],
-      'todos.json':    [],
+      'contents.json':    [],
+      'activity.json':    [],
+      'todos.json':       [],
+      'contentBank.json': [],
       'settings.json': {
         kpi:   { 'penjaga-harapan': 5, '33-official': 2, 'jaga-asa': 1 },
         users: [],

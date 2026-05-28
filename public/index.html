@@ -34,6 +34,10 @@
       <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
       <span>Planner</span>
     </a>
+    <a href="#bankkonten"   class="nav-item" data-page="bankkonten">
+      <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg>
+      <span>Bank Konten</span>
+    </a>
     <a href="#activity"     class="nav-item" data-page="activity">
       <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
       <span>Activity Log</span>
@@ -270,6 +274,49 @@
           <span id="planCount">0 konten</span>
           <div class="pagination" id="planPagination"></div>
         </div>
+      </div>
+    </section>
+
+    <!-- ═══ BANK KONTEN ═══════════════════════════════════════════════════ -->
+    <section id="page-bankkonten" class="page">
+      <div class="page-inner">
+
+        <!-- Reminder banner (shown when today's content is detected) -->
+        <div id="bkReminderBanner" class="bk-reminder-banner hidden"></div>
+
+        <div class="toolbar">
+          <div class="toolbar-left">
+            <span style="font-size:.8rem;color:var(--muted)">Total: <strong id="bkCount">0</strong> konten</span>
+          </div>
+          <div class="toolbar-right">
+            <button class="btn-sm blue" id="btnAddBkRow">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+              Tambah Konten
+            </button>
+          </div>
+        </div>
+
+        <div class="table-wrap">
+          <table class="data-table" id="bkTable">
+            <thead>
+              <tr>
+                <th style="width:44px;text-align:center">NO</th>
+                <th>NAMA KONTEN / JUDUL</th>
+                <th style="width:220px">REFERENSI / LINK</th>
+                <th style="width:178px">CREATOR</th>
+                <th style="width:148px">TANGGAL TAYANG</th>
+                <th style="width:52px;text-align:center">AKSI</th>
+              </tr>
+            </thead>
+            <tbody id="bkBody">
+              <tr><td colspan="6" class="empty-cell">Belum ada data. Klik "+ Tambah Konten" untuk memulai.</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="table-footer">
+          <span id="bkCountFoot" style="font-size:.78rem;color:var(--muted)"></span>
+        </div>
+
       </div>
     </section>
 
