@@ -563,11 +563,24 @@ async function connectExistingDevice() {
    LOGIN
    ══════════════════════════════════════════════════════════════════════════ */
 
-function showLogin() {
+async function showLogin() {
   $('loginModal').classList.remove('hidden');
   populateLoginSelect();
   sv('loginPw', '');
   toggleLoginPw();
+  // Refresh user list dari GitHub agar selalu up-to-date (background)
+  if (window.db.isConfigured()) {
+    try {
+      const _s = await window.db.readData('settings');
+      if (_s?.users?.length) {
+        setPubUsers(_s.users);
+        if (_s.adminHash && !getAuth()) {
+          saveAuth({ adminName: _s.adminName || 'Admin', adminHash: _s.adminHash });
+        }
+        populateLoginSelect(); // re-render dengan data fresh
+      }
+    } catch {}
+  }
 }
 
 function populateLoginSelect() {
