@@ -71,7 +71,7 @@ const ROLE_COLORS = {
 const PAGE_TITLES = {
   dashboard:   'Dashboard',
   planner:     'Planner',
-  bankkonten:  'Bank Konten',
+  bankkonten:  'Bank of Contents',
   activity:    'Activity Log',
   contents:    'New Contents',
   newpost:     'New Post',
@@ -194,6 +194,7 @@ let state = {
   urlActiveAcct:  'penjaga-harapan',
   statActiveAcct: 'penjaga-harapan',
   statActivePlat: 'youtube',
+  top3Month:      null,         // selected month for Top 3 (null = latest)
   dashMonth:      null,       // null = current month (used only when no date range)
   dashDateFrom:   null,       // ISO date string or null
   dashDateTo:     null,       // ISO date string or null
@@ -807,6 +808,14 @@ async function notifyCreatorAssigned(content, oldCreator) {
    BANK KONTEN
    ══════════════════════════════════════════════════════════════════════════ */
 
+const BK_ACCOUNTS = [
+  { id: 'penjaga-harapan', name: 'Penjaga Harapan' },
+  { id: '33officialid',    name: '33 Official'      },
+  { id: 'jaga-asa',        name: 'Jaga Asa'         }
+];
+
+const WA_SVG = `<svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/></svg>`;
+
 function renderBankKonten() {
   const users  = state.settings?.users || [];
   const items  = state.bankKonten || [];
@@ -817,7 +826,7 @@ function renderBankKonten() {
   setTxt('bkCountFoot', items.length ? `${items.length} konten tersimpan` : '');
 
   if (items.length === 0) {
-    body.innerHTML = '<tr><td colspan="6" class="empty-cell">Belum ada data. Klik "+ Tambah Konten" untuk memulai.</td></tr>';
+    body.innerHTML = '<tr><td colspan="8" class="empty-cell">Belum ada data. Klik "+ Tambah Konten" untuk memulai.</td></tr>';
     return;
   }
 
@@ -826,21 +835,36 @@ function renderBankKonten() {
       `<option value="${esc(n)}" ${n === selected ? 'selected' : ''}>${n ? esc(n) : '— Pilih Creator —'}</option>`
     ).join('');
 
+  const acctOpts = (selected = '') =>
+    BK_ACCOUNTS.map(a =>
+      `<option value="${a.id}" ${a.id === selected ? 'selected' : ''}>${a.name}</option>`
+    ).join('');
+
   const todayStr = new Date().toISOString().slice(0, 10);
 
   body.innerHTML = items.map((item, i) => {
     const creatorObj = users.find(u => getUserName(u) === item.creator);
-    const canWa = !!(item.creator && creatorObj?.phone);
+    const canWa  = !!(item.creator && creatorObj?.phone);
     const isToday = item.publishDate === todayStr;
     return `<tr class="bk-row${isToday ? ' bk-row-today' : ''}" data-id="${item.id}">
       <td class="bk-no">${i + 1}</td>
+      <td>
+        <select class="bk-sel bk-acct-sel" data-id="${item.id}" data-field="account">
+          <option value="">— Pilih Akun —</option>
+          ${acctOpts(item.account || '')}
+        </select>
+      </td>
       <td>
         <input type="text" class="bk-inp" data-id="${item.id}" data-field="title"
           value="${esc(item.title || '')}" placeholder="Judul konten…" />
       </td>
       <td>
         <input type="text" class="bk-inp" data-id="${item.id}" data-field="reference"
-          value="${esc(item.reference || '')}" placeholder="https://…" />
+          value="${esc(item.reference || '')}" placeholder="https://referensi…" />
+      </td>
+      <td>
+        <input type="text" class="bk-inp" data-id="${item.id}" data-field="linkDrive"
+          value="${esc(item.linkDrive || '')}" placeholder="https://drive.google.com/…" />
       </td>
       <td>
         <div class="bk-creator-wrap">
@@ -849,9 +873,7 @@ function renderBankKonten() {
           </select>
           <button type="button" class="bk-wa-btn${canWa ? '' : ' bk-wa-btn--disabled'}"
             data-id="${item.id}" title="${canWa ? `Kirim WA ke ${esc(item.creator)}` : 'Pilih creator yang punya no. WA'}">
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor">
-              <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/>
-            </svg>
+            ${WA_SVG}
           </button>
         </div>
       </td>
@@ -871,7 +893,6 @@ function renderBankKonten() {
     </tr>`;
   }).join('');
 
-  // Update reminder banner
   _updateBkReminderBanner();
 }
 
@@ -891,8 +912,10 @@ async function addBankKontenRow() {
   const sess = getSess();
   const newItem = {
     id:           'bk_' + uid(),
+    account:      '',
     title:        '',
     reference:    '',
+    linkDrive:    '',
     creator:      (sess?.role !== 'admin' && sess?.name) ? sess.name : '',
     publishDate:  '',
     remindedDate: null,
@@ -2463,18 +2486,23 @@ function renderStatChart() {
       <button class="btn-sm blue" onclick="document.getElementById('btnToggleStatInput').click()">+ Input Data Pertama</button>
     </div>`;
     if (window._statChart) { window._statChart.destroy(); window._statChart = null; }
+    const dt = $('statDataTable'); if (dt) dt.innerHTML = '';
     return;
   }
 
-  /* ── Summary cards (latest month) ──────────────────────────────── */
-  const latest    = rows[rows.length - 1];
+  /* ── Summary cards (total kumulatif seluruh data) ───────────────── */
   const keyFields = platM.fields.slice(0, 4);
+  // Hitung total kumulatif (SUM semua bulan)
+  const totals = {};
+  keyFields.forEach(f => {
+    totals[f.key] = rows.reduce((s, r) => s + (+r[f.key] || 0), 0);
+  });
   if (summaryWrap) summaryWrap.innerHTML = `<div class="stat-summary-row">
     ${keyFields.map(f => `
       <div class="stat-summary-card">
         <div class="stat-sum-label">${f.label}</div>
-        <div class="stat-sum-val" style="color:${platM.color}">${fmtStatVal(latest[f.key], f.fmt)}</div>
-        <div class="stat-sum-period">${fmtMonth(latest.month)}</div>
+        <div class="stat-sum-val" style="color:${platM.color}">${fmtStatVal(totals[f.key], f.fmt)}</div>
+        <div class="stat-sum-period">Total ${rows.length} bulan</div>
       </div>`).join('')}
   </div>`;
 
@@ -2558,6 +2586,49 @@ function renderStatChart() {
       }
     }
   });
+
+  // Render admin-only data table below chart
+  renderStatDataTable(acctId, platId, rows);
+}
+
+/* ── Admin-only monthly data table ─────────────────────────────────────── */
+function renderStatDataTable(acctId, platId, rows) {
+  const wrap  = $('statDataTable');
+  if (!wrap) return;
+
+  if (!isAdmin() || !rows.length) { wrap.innerHTML = ''; return; }
+
+  const platM = PLATFORM_FIELDS[platId];
+  if (!platM) { wrap.innerHTML = ''; return; }
+
+  const sorted = [...rows].sort((a, b) => b.month.localeCompare(a.month)); // terbaru di atas
+
+  const headerCells = platM.fields.map(f => `<th>${f.label}</th>`).join('');
+  const bodyRows = sorted.map(r => {
+    const cells = platM.fields.map(f =>
+      `<td style="text-align:right">${fmtStatVal(r[f.key], f.fmt)}</td>`
+    ).join('');
+    return `<tr><td style="white-space:nowrap;font-weight:500">${fmtMonth(r.month)}</td>${cells}</tr>`;
+  }).join('');
+
+  wrap.innerHTML = `
+    <div class="card" style="margin-top:16px">
+      <div class="card-head">
+        <span class="card-title">📋 Data Bulanan — ${platM.label} · ${getAcctName(acctId)}</span>
+        <span class="badge-status ok" style="font-size:.68rem">Admin Only</span>
+      </div>
+      <div style="overflow-x:auto">
+        <table class="data-table" style="font-size:.78rem">
+          <thead>
+            <tr>
+              <th style="white-space:nowrap">BULAN</th>
+              ${headerCells}
+            </tr>
+          </thead>
+          <tbody>${bodyRows}</tbody>
+        </table>
+      </div>
+    </div>`;
 }
 
 /* ── Download helpers ───────────────────────────────────────────────────── */
@@ -2639,85 +2710,136 @@ function downloadStatTable() {
   toast('Tabel sedang didownload ✓', 'success');
 }
 
-/* ── Top 3 Good / Bad content — admin curates links, all users see previews ── */
+/* ── Top 3 per-bulan — semua user bisa edit ─────────────────────────────── */
+
+function _getTop3MonthOptions(acctId) {
+  // Kumpulkan semua bulan dari semua platform untuk akun ini
+  const platRows = Object.values(state.analytics?.[acctId] || {}).flat();
+  const months = [...new Set(platRows.map(r => r.month))].sort().reverse();
+  if (!months.includes(getCurrentYM())) months.unshift(getCurrentYM());
+  return months;
+}
+
+function _ensureTop3(acctId, month) {
+  const empty3 = () => [{title:'',link:''},{title:'',link:''},{title:'',link:''}];
+  if (!state.settings.topContent) state.settings.topContent = {};
+  if (!state.settings.topContent[acctId]) state.settings.topContent[acctId] = {};
+  const acctData = state.settings.topContent[acctId];
+
+  // Migrasi format lama ({ good, bad }) → per-bulan
+  if (acctData.good && !acctData[month]) {
+    const refMonth = Object.keys(acctData).find(k => acctData[k]?.good) || month;
+    if (!acctData[refMonth]?.good) {
+      const oldGood = acctData.good;
+      const oldBad  = acctData.bad;
+      // Hapus key lama, simpan ke bulan saat ini
+      delete state.settings.topContent[acctId].good;
+      delete state.settings.topContent[acctId].bad;
+      state.settings.topContent[acctId][getCurrentYM()] = { good: oldGood, bad: oldBad };
+    }
+  }
+
+  if (!acctData[month]) {
+    acctData[month] = { good: empty3(), bad: empty3() };
+  }
+  if (!acctData[month].good) acctData[month].good = empty3();
+  if (!acctData[month].bad)  acctData[month].bad  = empty3();
+  return acctData[month];
+}
+
 function renderStatGoodBad(acctId) {
   const wrap = $('statGoodBadWrap');
   if (!wrap) return;
-  const admin = isAdmin();
-  const acct  = ACCOUNTS.find(a => a.id === acctId);
+  const acct = ACCOUNTS.find(a => a.id === acctId);
 
-  // Ensure slots exist
-  if (!state.settings.topContent) state.settings.topContent = {};
-  if (!state.settings.topContent[acctId]) {
-    state.settings.topContent[acctId] = {
-      good: [{title:'',link:''},{title:'',link:''},{title:'',link:''}],
-      bad:  [{title:'',link:''},{title:'',link:''},{title:'',link:''}]
-    };
-  }
-  const topData = state.settings.topContent[acctId];
+  // Resolve bulan aktif
+  const months  = _getTop3MonthOptions(acctId);
+  const selMonth = state.top3Month && months.includes(state.top3Month)
+    ? state.top3Month
+    : months[0] || getCurrentYM();
+  state.top3Month = selMonth;
+
+  const topData = _ensureTop3(acctId, selMonth);
+
+  // Month selector HTML
+  const monthSelHtml = `
+    <div class="top3-month-bar">
+      <span style="font-size:.75rem;color:var(--muted);font-weight:500">📅 Bulan:</span>
+      <select class="inp-sm" id="top3MonthSel" onchange="switchTop3Month(this.value)" style="min-width:120px">
+        ${months.map(m => `<option value="${m}" ${m === selMonth ? 'selected' : ''}>${fmtMonth(m)}</option>`).join('')}
+      </select>
+    </div>`;
 
   function sectionHtml(type, items, label, icon, headCls) {
     const acctColor = acct?.color || '#6366f1';
     const head = `<div class="sgb-section-head ${headCls}">
       <span class="sgb-icon">${icon}</span>
       <span>${label}</span>
-      <span class="sgb-acct" style="color:${acctColor}">${acct?.name||''}</span>
+      <span class="sgb-acct" style="color:${acctColor}">${acct?.name||''} · ${fmtMonth(selMonth)}</span>
     </div>`;
 
-    if (admin) {
-      const rows = items.map((item, i) => `
-        <div class="sgb-input-row">
-          <input type="text" class="inp-sm" placeholder="Judul konten…"
-            value="${esc(item.title||'')}" style="flex:1;min-width:0"
-            oninput="updateTopSlot('${esc(acctId)}','${type}',${i},'title',this.value)" />
-          <input type="url" class="inp-sm" placeholder="https://link-konten…"
-            value="${esc(item.link||'')}" style="flex:2;min-width:0"
-            oninput="updateTopSlot('${esc(acctId)}','${type}',${i},'link',this.value)" />
-        </div>`).join('');
-      return `<div class="sgb-col">
-        ${head}
-        <div class="sgb-admin-form">
-          ${rows}
-          <button class="btn-xs blue" style="margin-top:6px"
-            onclick="saveTopContent('${esc(acctId)}')">💾 Simpan Top Content</button>
-        </div>
-      </div>`;
-    } else {
-      const valid = items.filter(it => it.link);
-      const cards = valid.length
-        ? valid.map(it => `<div class="sgb-card sgb-${type}">
-            <div class="sgb-card-title">${esc(it.title || '(Tanpa Judul)')}</div>
-            <div class="sgb-card-actions">
-              <a href="${esc(it.link)}" target="_blank" class="btn-xs blue">🔗 Buka</a>
-              <button class="btn-xs" onclick="previewContent('${esc(it.link)}','${esc(it.title||'')}')">👁 Preview</button>
-            </div>
-          </div>`).join('')
-        : `<div class="sgb-empty">Belum ada konten yang dikurasi</div>`;
-      return `<div class="sgb-col">${head}<div class="sgb-list">${cards}</div></div>`;
-    }
+    // Semua user bisa edit
+    const inputRows = items.map((item, i) => `
+      <div class="sgb-input-row">
+        <input type="text" class="inp-sm" placeholder="Judul konten…"
+          value="${esc(item.title||'')}" style="flex:1;min-width:0"
+          oninput="updateTopSlot('${esc(acctId)}','${type}',${i},'title',this.value,'${selMonth}')" />
+        <input type="url" class="inp-sm" placeholder="https://link-konten…"
+          value="${esc(item.link||'')}" style="flex:2;min-width:0"
+          oninput="updateTopSlot('${esc(acctId)}','${type}',${i},'link',this.value,'${selMonth}')" />
+      </div>`).join('');
+
+    // Preview cards (untuk semua user — tampilkan hasil simpan)
+    const valid = items.filter(it => it.link);
+    const cards = valid.length
+      ? valid.map(it => `<a href="${esc(it.link)}" target="_blank" class="sgb-card sgb-${type}">
+          <div class="sgb-card-title">${esc(it.title || '(Tanpa Judul)')}</div>
+          <div class="sgb-card-actions">
+            <span class="btn-xs blue">🔗 Buka</span>
+            <button type="button" class="btn-xs" onclick="event.preventDefault();previewContent('${esc(it.link)}','${esc(it.title||'')}')">👁 Preview</button>
+          </div>
+        </a>`).join('')
+      : '';
+
+    return `<div class="sgb-col">
+      ${head}
+      <div class="sgb-admin-form">${inputRows}
+        <button class="btn-xs blue" style="margin-top:6px"
+          onclick="saveTopContent('${esc(acctId)}','${selMonth}')">💾 Simpan Top Content</button>
+      </div>
+      ${cards ? `<div class="sgb-list" style="margin-top:8px">${cards}</div>` : ''}
+    </div>`;
   }
 
-  wrap.innerHTML = `<div class="sgb-row">
-    ${sectionHtml('good', topData.good, 'Top 3 Good Content',     '🏆', 'good')}
-    ${sectionHtml('bad',  topData.bad,  'Top 3 Perlu Perhatian',  '⚠️', 'bad')}
-  </div>`;
+  wrap.innerHTML = `
+    ${monthSelHtml}
+    <div class="sgb-row">
+      ${sectionHtml('good', topData.good, 'Top 3 Good Content',     '🏆', 'good')}
+      ${sectionHtml('bad',  topData.bad,  'Top 3 Perlu Perhatian',  '⚠️', 'bad')}
+    </div>`;
 }
 
-function updateTopSlot(acctId, type, idx, field, val) {
-  if (!state.settings.topContent)            state.settings.topContent = {};
-  if (!state.settings.topContent[acctId])    state.settings.topContent[acctId] = {
-    good: [{title:'',link:''},{title:'',link:''},{title:'',link:''}],
-    bad:  [{title:'',link:''},{title:'',link:''},{title:'',link:''}]
-  };
-  state.settings.topContent[acctId][type][idx][field] = val;
+function switchTop3Month(month) {
+  state.top3Month = month;
+  renderStatGoodBad(state.statActiveAcct);
 }
 
-async function saveTopContent(acctId) {
+function updateTopSlot(acctId, type, idx, field, val, month) {
+  const m = month || state.top3Month || getCurrentYM();
+  _ensureTop3(acctId, m);
+  state.settings.topContent[acctId][m][type][idx][field] = val;
+}
+
+async function saveTopContent(acctId, month) {
   if (!state.settings) return;
+  const m = month || state.top3Month || getCurrentYM();
+  _ensureTop3(acctId, m);
   showFlagLoader(600);
   try {
-    state.shas.settings = await window.db.writeData('settings', state.settings, `Update Top Content: ${acctId}`);
-    toast('Top Content disimpan ✓', 'success');
+    state.shas.settings = await window.db.writeData('settings', state.settings, `Top Content: ${acctId} ${m}`);
+    await logActivity(currentUser(), 'Update Top Content', `${getAcctName(acctId)} — ${fmtMonth(m)}`);
+    toast(`Top Content ${fmtMonth(m)} disimpan ✓`, 'success');
+    renderStatGoodBad(acctId);   // re-render agar preview terbaru muncul
   } catch(e) { toast('Gagal menyimpan: ' + e.message, 'error'); }
 }
 
@@ -3423,6 +3545,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   window.saveWaTokenFromForm  = saveWaTokenFromForm;
   window.updateTopSlot        = updateTopSlot;
   window.saveTopContent       = saveTopContent;
+  window.switchTop3Month      = switchTop3Month;
   window.generateShareLink    = generateShareLink;
 
   /* ── INIT: Check for ?access= shared link from admin ───────── */

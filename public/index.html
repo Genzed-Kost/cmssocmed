@@ -36,7 +36,7 @@
     </a>
     <a href="#bankkonten"   class="nav-item" data-page="bankkonten">
       <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg>
-      <span>Bank Konten</span>
+      <span>Bank of Contents</span>
     </a>
     <a href="#activity"     class="nav-item" data-page="activity">
       <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
@@ -300,16 +300,18 @@
           <table class="data-table" id="bkTable">
             <thead>
               <tr>
-                <th style="width:44px;text-align:center">NO</th>
+                <th style="width:38px;text-align:center">NO</th>
+                <th style="width:145px">AKUN</th>
                 <th>NAMA KONTEN / JUDUL</th>
-                <th style="width:220px">REFERENSI / LINK</th>
-                <th style="width:178px">CREATOR</th>
-                <th style="width:148px">TANGGAL TAYANG</th>
-                <th style="width:52px;text-align:center">AKSI</th>
+                <th style="width:170px">REFERENSI / LINK</th>
+                <th style="width:170px">LINK DRIVE</th>
+                <th style="width:160px">CREATOR</th>
+                <th style="width:135px">TANGGAL TAYANG</th>
+                <th style="width:48px;text-align:center">AKSI</th>
               </tr>
             </thead>
             <tbody id="bkBody">
-              <tr><td colspan="6" class="empty-cell">Belum ada data. Klik "+ Tambah Konten" untuk memulai.</td></tr>
+              <tr><td colspan="8" class="empty-cell">Belum ada data. Klik "+ Tambah Konten" untuk memulai.</td></tr>
             </tbody>
           </table>
         </div>
@@ -529,7 +531,10 @@
           <canvas id="statBarChart"></canvas>
         </div>
 
-        <!-- Good/Bad content section (static anchor) -->
+        <!-- Monthly data table (admin only) -->
+        <div id="statDataTable"></div>
+
+        <!-- Good/Bad content section -->
         <div id="statGoodBadWrap"></div>
 
         <!-- Input form (collapsible, admin only) -->

@@ -1448,8 +1448,14 @@ ul { list-style: none; }
   padding: 8px 12px; font-size: .78rem; margin-bottom: 12px;
 }
 
+/* ── Statistik: Top 3 month bar ────────────────────────────────── */
+.top3-month-bar {
+  display: flex; align-items: center; gap: 8px;
+  margin-bottom: 10px; padding: 10px 0 4px;
+}
+
 /* ══════════════════════════════════════════════════════════════════
-   BANK KONTEN
+   BANK OF CONTENTS
    ══════════════════════════════════════════════════════════════════ */
 
 /* Row highlight when publishDate = today */
@@ -1493,6 +1499,9 @@ ul { list-style: none; }
 }
 .bk-sel:hover,
 .bk-sel:focus  { outline: none; border-color: var(--blue); background: var(--blue-lt); }
+
+/* Account selector — full width in cell */
+.bk-acct-sel { width: 100%; }
 
 /* Creator cell wrapper: select + WA button */
 .bk-creator-wrap {
