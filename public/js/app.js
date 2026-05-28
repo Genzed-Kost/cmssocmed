@@ -127,6 +127,15 @@ const STATUSES  = ['Plan','Review','Revisi','Preview','ACC','Done','Published','
 const FORMATS   = ['Flayer','Meme','Karikatur','Komikstrip','Animasi','Video','Short','Monolog','Carousell','Podcast','Liputan'];
 const FORMATS_DUAL_ROLE = ['Podcast','Liputan']; // formats that need Creator + Editor fields
 
+/* ── Platform icon SVGs (shared across card + link modal) ───────────────── */
+const PLAT_ICON_SVG = {
+  instagram: `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="5"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"/></svg>`,
+  tiktok:    `<svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M19.59 6.69a4.83 4.83 0 01-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 01-2.88 2.5 2.89 2.89 0 01-2.89-2.89 2.89 2.89 0 012.89-2.89c.28 0 .54.04.79.1V9.01a6.32 6.32 0 00-.79-.05 6.34 6.34 0 00-6.34 6.34 6.34 6.34 0 006.34 6.34 6.34 6.34 0 006.33-6.34V8.8a8.18 8.18 0 004.78 1.52V6.9a4.85 4.85 0 01-1.01-.21z"/></svg>`,
+  twitter:   `<svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>`,
+  facebook:  `<svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>`,
+  youtube:   `<svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M23.495 6.205a3.007 3.007 0 00-2.088-2.088c-1.87-.501-9.396-.501-9.396-.501s-7.507-.01-9.396.501A3.007 3.007 0 00.527 6.205a31.247 31.247 0 00-.522 5.805 31.247 31.247 0 00.522 5.783 3.007 3.007 0 002.088 2.088c1.868.502 9.396.502 9.396.502s7.506 0 9.396-.502a3.007 3.007 0 002.088-2.088 31.247 31.247 0 00.5-5.783 31.247 31.247 0 00-.5-5.805zM9.609 15.601V8.408l6.264 3.602z"/></svg>`
+};
+
 const ACCOUNTS = [
   { id: 'penjaga-harapan', name: 'Penjaga Harapan', color: '#7c3aed' },
   { id: '33-official',     name: '33 Official',     color: '#16a34a' },
@@ -968,22 +977,29 @@ async function sendWaNotif(phone, message) {
 }
 
 async function notifyCreatorAssigned(content, oldCreator) {
-  if (!content.creator || content.creator === oldCreator) return;
+  if (!content.creator) return;
   if (!getWaToken()) return;
   const users   = state.settings?.users || [];
-  const userObj = users.find(u => getUserName(u) === content.creator);
-  if (!userObj?.phone) return;
-  const role     = getUserRole(userObj) || 'Creator';
-  const acctObj  = ACCOUNTS.find(a => a.id === content.account);
-  const acctName = acctObj?.name || content.account || '—';
-  const dateStr  = fmtDate(content.publishDate) || '—';
-  const script   = (content.script || '').trim();
-  const cmsUrl   = window.location.origin;
-  const addScript = WA_SCRIPT_ROLES.includes(role) ? script : '';
-  const msg = WA_MSG_TEMPLATES[role]
-    ? WA_MSG_TEMPLATES[role](content.creator, content.title||'—', content.theme||'—', dateStr, acctName, addScript, cmsUrl)
-    : waGenericMsg(role, content.creator, content.title||'—', content.theme||'—', dateStr, acctName, cmsUrl);
-  await sendWaNotif(userObj.phone, msg);
+  // Normalize to arrays for comparison
+  const newArr = Array.isArray(content.creator) ? content.creator : [content.creator];
+  const oldArr = Array.isArray(oldCreator) ? oldCreator : (oldCreator ? [oldCreator] : []);
+  // Only notify newly assigned creators
+  for (const creatorName of newArr) {
+    if (oldArr.includes(creatorName)) continue;  // was already assigned
+    const userObj = users.find(u => getUserName(u) === creatorName);
+    if (!userObj?.phone) continue;
+    const role     = getUserRole(userObj) || 'Creator';
+    const acctObj  = ACCOUNTS.find(a => a.id === content.account);
+    const acctName = acctObj?.name || content.account || '—';
+    const dateStr  = fmtDate(content.publishDate) || '—';
+    const script   = (content.script || '').trim();
+    const cmsUrl   = window.location.origin;
+    const addScript = WA_SCRIPT_ROLES.includes(role) ? script : '';
+    const msg = WA_MSG_TEMPLATES[role]
+      ? WA_MSG_TEMPLATES[role](creatorName, content.title||'—', content.theme||'—', dateStr, acctName, addScript, cmsUrl)
+      : waGenericMsg(role, creatorName, content.title||'—', content.theme||'—', dateStr, acctName, cmsUrl);
+    await sendWaNotif(userObj.phone, msg);
+  }
 }
 
 /* ── Dashboard Ticker Reminder ──────────────────────────────────────────── */
@@ -1678,21 +1694,25 @@ function renderAnalyticsPanel() {
 /* ── Dashboard Planner Sections ─────────────────────────────────────────── */
 
 function dashContentCard(c, mode = 'upcoming') {
-  const platIconMap = {
-    instagram: `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="5"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"/></svg>`,
-    tiktok:    `<svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M19.59 6.69a4.83 4.83 0 01-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 01-2.88 2.5 2.89 2.89 0 01-2.89-2.89 2.89 2.89 0 012.89-2.89c.28 0 .54.04.79.1V9.01a6.32 6.32 0 00-.79-.05 6.34 6.34 0 00-6.34 6.34 6.34 6.34 0 006.34 6.34 6.34 6.34 0 006.33-6.34V8.8a8.18 8.18 0 004.78 1.52V6.9a4.85 4.85 0 01-1.01-.21z"/></svg>`,
-    twitter:   `<svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>`,
-    facebook:  `<svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>`,
-    youtube:   `<svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M23.495 6.205a3.007 3.007 0 00-2.088-2.088c-1.87-.501-9.396-.501-9.396-.501s-7.507-.01-9.396.501A3.007 3.007 0 00.527 6.205a31.247 31.247 0 00-.522 5.805 31.247 31.247 0 00.522 5.783 3.007 3.007 0 002.088 2.088c1.868.502 9.396.502 9.396.502s7.506 0 9.396-.502a3.007 3.007 0 002.088-2.088 31.247 31.247 0 00.5-5.783 31.247 31.247 0 00-.5-5.805zM9.609 15.601V8.408l6.264 3.602z"/></svg>`
-  };
+  const platIconMap = PLAT_ICON_SVG;
   // Platform icons — for published mode each is a clickable button
   const plats = (c.platforms||[]).map(p => {
     const meta = PLATFORM_META[p];
     if (!meta) return '';
     if (mode === 'published') {
-      const hasLink = !!((c.platformLinks||{})[p]);
-      return `<button type="button" class="dcc-plat-btn${hasLink?' has-link':''}"
-        style="color:${meta.color}" title="${hasLink?'Edit link '+meta.name:'Tambah link '+meta.name}"
+      const platUrl = (c.platformLinks||{})[p] || '';
+      if (platUrl) {
+        return `<span class="dcc-plat-link-wrap">
+          <a href="${esc(platUrl)}" target="_blank" rel="noopener"
+             class="dcc-plat-btn has-link" style="color:${meta.color}" title="${esc(meta.name)} ↗">${platIconMap[p]||p}</a>
+          <button type="button" class="dcc-plat-edit-btn" style="color:${meta.color}"
+            onclick="openLinkModal('${c.id}','published','${p}')" title="Edit link ${esc(meta.name)}">
+            <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+          </button>
+        </span>`;
+      }
+      return `<button type="button" class="dcc-plat-btn"
+        style="color:${meta.color}" title="Tambah link ${esc(meta.name)}"
         onclick="openLinkModal('${c.id}','published','${p}')">${platIconMap[p]||p}</button>`;
     }
     return `<span class="dcc-plat-icon" style="color:${meta.color}" title="${meta.name}">${platIconMap[p]||p}</span>`;
@@ -1721,7 +1741,15 @@ function dashContentCard(c, mode = 'upcoming') {
     ? `<div class="dcc-meta-row" style="margin-top:4px">
         <span class="dcc-label">LINK</span>
         ${c.outputLink
-          ? `<a href="${esc(c.outputLink)}" target="_blank" rel="noopener" class="dcc-link-btn">Output ↗</a>`
+          ? `<span class="dcc-output-link-wrap">
+              <a href="${esc(c.outputLink)}" target="_blank" rel="noopener" class="dcc-file-link" title="Buka output">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14,2 14,8 20,8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10,9 9,9 8,9"/></svg>
+                Output
+              </a>
+              <button type="button" class="dcc-link-edit-btn" onclick="openLinkModal('${c.id}','upcoming')" title="Edit link">
+                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+              </button>
+            </span>`
           : `<button type="button" class="dcc-link-btn" onclick="openLinkModal('${c.id}','upcoming')">+ Tambah</button>`
         }
       </div>`
@@ -1746,10 +1774,15 @@ function dashContentCard(c, mode = 'upcoming') {
     </div>
     <div class="dcc-meta-row">
       <span class="dcc-label">CREATOR</span>
-      <select class="dcc-creator-sel" onchange="updateContentField('${c.id}','creator',this.value)" title="Ubah creator">
-        <option value="">— pilih —</option>
-        ${users.map(u=>{const n=getUserName(u);return `<option value="${esc(n)}" ${n===c.creator?'selected':''}>${esc(n)}</option>`;}).join('')}
-      </select>
+      ${(()=>{
+        const arr=Array.isArray(c.creator)?c.creator:(c.creator?[c.creator]:[]);
+        if(arr.length>1) return `<span class="dcc-val dcc-creator">${esc(arr.join(', '))}</span>`;
+        const sel0=arr[0]||'';
+        return `<select class="dcc-creator-sel" onchange="updateContentField('${c.id}','creator',this.value)" title="Ubah creator">
+          <option value="">— pilih —</option>
+          ${users.map(u=>{const n=getUserName(u);return `<option value="${esc(n)}" ${n===sel0?'selected':''}>${esc(n)}</option>`;}).join('')}
+        </select>`;
+      })()}
     </div>
     <div class="dcc-meta-row">
       <span class="dcc-label">PLATFORM</span>
@@ -1874,7 +1907,7 @@ function renderDashPublished() {
     el.innerHTML = `<div class="dash-empty">Belum ada konten terpublish${state.dashDateFrom || state.dashDateTo ? ' dalam periode ini' : ''}</div>`;
     return;
   }
-  el.innerHTML = published.map(c => dashContentCard(c)).join('');
+  el.innerHTML = published.map(c => dashContentCard(c, 'published')).join('');
 }
 
 /* ── To-Do ───────────────────────────────────────────────────────────────── */
@@ -2159,7 +2192,7 @@ function renderContents() {
       <div class="cnt-meta">
         <div class="cnt-row"><span>${fmtDate(c.publishDate)}</span><span>·</span><span>${esc(getAcctName(c.account))}</span></div>
         <div class="cnt-row">${plats||'<span style="color:var(--muted)">—</span>'}</div>
-        ${c.creator?`<div class="cnt-row">👤 ${esc(c.creator)}</div>`:''}
+        ${c.creator?`<div class="cnt-row">👤 ${esc(Array.isArray(c.creator)?c.creator.join(', '):c.creator)}</div>`:''}
       </div>
       <div class="cnt-actions">
         <button class="btn-xs" onclick="editContent('${c.id}')">Edit</button>
@@ -2235,8 +2268,24 @@ function onFormatChange(fmt) {
   $('postEditorRow')?.classList.toggle('hidden', !isDual);
   const lbl = $('postCreatorLabel');
   if (lbl) lbl.innerHTML = isDual
-    ? 'Creator <small style="font-weight:400;color:var(--muted)">(produksi)</small> <span class="req-star">*</span>'
+    ? 'Creator <small style="font-weight:400;color:var(--muted)">(produksi · bisa pilih lebih dari 1)</small> <span class="req-star">*</span>'
     : 'Creator <span class="req-star">*</span>';
+
+  const sel = $('postCreator');
+  if (!sel) return;
+  if (isDual) {
+    sel.multiple = true;
+    sel.setAttribute('size', '4');
+    sel.classList.add('form-inp-multi');
+  } else {
+    // Clear multi-selection, keep single select
+    const prev = sel.value;
+    sel.multiple = false;
+    sel.removeAttribute('size');
+    sel.classList.remove('form-inp-multi');
+    // Restore selection if possible
+    if (prev) sel.value = prev;
+  }
 }
 
 /* ── Link Edit Modal ─────────────────────────────────────────────────────── */
@@ -2246,43 +2295,64 @@ function openLinkModal(contentId, mode, platform) {
   const modal = $('linkEditModal');
   if (!modal) return;
 
+  const extIconSvg = `<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>`;
+
   if (mode === 'upcoming') {
-    $('linkEditTitle').textContent = `Link Output — ${c.title || ''}`;
+    $('linkEditTitle').textContent = c.title || 'Output Link';
     $('linkEditContent').innerHTML = `
-      <div class="form-group" style="margin:0">
-        <label class="form-label">URL hasil konten</label>
-        <input class="form-inp" type="url" id="linkEditInp"
-          value="${esc(c.outputLink || '')}"
-          placeholder="https://youtube.com/watch?v=..." />
+      <div class="lem-hero lem-hero--output">
+        <span class="lem-hero-icon">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14,2 14,8 20,8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10,9 9,9 8,9"/></svg>
+        </span>
+        <div>
+          <div class="lem-hero-label">Output Link</div>
+          <div class="lem-hero-hint">URL konten yang sudah dipublish</div>
+        </div>
       </div>
-      <div style="display:flex;gap:8px;margin-top:14px">
-        <button class="btn-md blue" style="flex:1;justify-content:center"
-          onclick="saveLinkFromModal('${contentId}','upcoming')">Simpan</button>
+      <input class="form-inp lem-inp" type="url" id="linkEditInp"
+        value="${esc(c.outputLink || '')}"
+        placeholder="https://youtube.com/watch?v=..." />
+      ${c.outputLink ? `<a href="${esc(c.outputLink)}" target="_blank" rel="noopener" class="lem-open-link">
+        Buka link tersimpan ${extIconSvg}</a>` : ''}
+      <div class="lem-actions">
+        <button class="btn-md blue lem-save-btn"
+          onclick="saveLinkFromModal('${contentId}','upcoming')">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+          Simpan
+        </button>
         <button class="btn-md" onclick="closeLinkModal()">Batal</button>
       </div>`;
+
   } else if (mode === 'published') {
-    const meta = PLATFORM_META[platform] || { name: platform, color: '#666' };
+    const meta = PLATFORM_META[platform] || { name: platform, color: '#64748b' };
     const existingUrl = (c.platformLinks || {})[platform] || '';
-    $('linkEditTitle').textContent = `Link ${meta.name} — ${c.title || ''}`;
+    const platIcon = PLAT_ICON_SVG[platform] || '';
+    $('linkEditTitle').textContent = c.title || meta.name;
     $('linkEditContent').innerHTML = `
-      <div class="form-group" style="margin:0">
-        <label class="form-label" style="color:${meta.color}">${meta.name}</label>
-        <input class="form-inp" type="url" id="linkEditInp"
-          value="${esc(existingUrl)}"
-          placeholder="https://..." />
+      <div class="lem-hero" style="--plat:${meta.color}">
+        <span class="lem-hero-icon lem-plat-icon-wrap" style="color:${meta.color};background:${meta.color}18;border-color:${meta.color}33">${platIcon}</span>
+        <div>
+          <div class="lem-hero-label" style="color:${meta.color}">${esc(meta.name)}</div>
+          <div class="lem-hero-hint">Link postingan di ${esc(meta.name)}</div>
+        </div>
       </div>
-      ${existingUrl ? `<a href="${esc(existingUrl)}" target="_blank" rel="noopener"
-        style="font-size:.75rem;color:var(--blue);display:block;margin-top:6px">
-        Buka link yang tersimpan ↗</a>` : ''}
-      <div style="display:flex;gap:8px;margin-top:14px">
-        <button class="btn-md blue" style="flex:1;justify-content:center"
-          onclick="saveLinkFromModal('${contentId}','published','${platform}')">Simpan</button>
+      <input class="form-inp lem-inp" type="url" id="linkEditInp"
+        value="${esc(existingUrl)}"
+        placeholder="https://..." />
+      ${existingUrl ? `<a href="${esc(existingUrl)}" target="_blank" rel="noopener" class="lem-open-link">
+        Buka link tersimpan ${extIconSvg}</a>` : ''}
+      <div class="lem-actions">
+        <button class="btn-md lem-save-btn" style="background:${meta.color};color:#fff;border-color:${meta.color}"
+          onclick="saveLinkFromModal('${contentId}','published','${platform}')">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+          Simpan
+        </button>
         <button class="btn-md" onclick="closeLinkModal()">Batal</button>
       </div>`;
   }
 
   modal.classList.remove('hidden');
-  setTimeout(() => $('linkEditInp')?.select(), 60);
+  setTimeout(() => { const inp = $('linkEditInp'); if (inp) { inp.focus(); inp.select(); } }, 60);
 }
 
 async function saveLinkFromModal(contentId, mode, platform) {
@@ -2337,7 +2407,8 @@ function renderNewPostForm(content) {
   if (content) {
     sv('editPostId',     content.id);
     sv('postDate',       content.publishDate || '');
-    sv('postCreator',    content.creator     || '');
+    // creator handled after onFormatChange (may be array for Podcast/Liputan)
+    sv('postCreator',    Array.isArray(content.creator) ? '' : (content.creator || ''));
     sv('postEditor',     content.editor      || '');
     sv('postAccount',    content.account     || '');
     sv('postStatus',     content.status      || 'Ide');
@@ -2351,7 +2422,14 @@ function renderNewPostForm(content) {
     $$('#platformChecks input').forEach(cb => {
       cb.checked = (content.platforms||[]).includes(cb.value);
     });
-    onFormatChange(content.format || '');  // show/hide editor row
+    onFormatChange(content.format || '');  // show/hide editor row + set multiple attr
+    // Restore multi-select creator for Podcast/Liputan
+    if (FORMATS_DUAL_ROLE.includes(content.format || '') && Array.isArray(content.creator)) {
+      const sel = $('postCreator');
+      if (sel) Array.from(sel.options).forEach(opt => { opt.selected = content.creator.includes(opt.value); });
+    } else if (!Array.isArray(content.creator) && content.creator) {
+      sv('postCreator', content.creator);
+    }
     // Lock status & creator when Published
     const isPublished = content.status === 'Published';
     ['postStatus','postCreator'].forEach(fid => {
@@ -2443,7 +2521,10 @@ async function savePost() {
   const title   = gv('postTitle');
   const theme   = gv('postTheme');
   const acctId  = gv('postAccount');
-  const creator = gv('postCreator');
+  const isDualRoleFmt = FORMATS_DUAL_ROLE.includes(gv('postFormat'));
+  const creator = isDualRoleFmt
+    ? Array.from($('postCreator')?.selectedOptions || []).map(o => o.value).filter(Boolean)
+    : gv('postCreator');
   const acctName = ACCOUNTS.find(a => a.id === acctId)?.name || acctId || '—';
   const data = {
     title, platforms,

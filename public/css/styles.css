@@ -1090,6 +1090,7 @@ ul { list-style: none; }
 .dcc-val       { color: var(--muted); text-align: right; }
 .dcc-owner-val { color: var(--text); font-weight: 500; text-align: right; }
 .dcc-creator   { color: var(--blue); font-weight: 500; }
+/* ── Output link + platform link (card) ─────────────────────── */
 .dcc-link-btn  {
   display: inline-flex; align-items: center; gap: 4px;
   color: var(--blue); font-size: .7rem; font-weight: 600;
@@ -1099,6 +1100,26 @@ ul { list-style: none; }
   transition: opacity .15s;
 }
 .dcc-link-btn:hover { opacity: .78; }
+
+/* File-open icon link (when outputLink is set) */
+.dcc-output-link-wrap { display: inline-flex; align-items: center; gap: 4px; }
+.dcc-file-link {
+  display: inline-flex; align-items: center; gap: 4px;
+  color: var(--blue); font-size: .7rem; font-weight: 600;
+  background: var(--blue-lt); border: 1px solid #bfdbfe;
+  border-radius: 5px; padding: 3px 8px;
+  text-decoration: none; transition: opacity .15s;
+}
+.dcc-file-link:hover { opacity: .78; }
+.dcc-link-edit-btn {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 22px; height: 22px; border-radius: 5px;
+  border: 1px solid var(--bd); background: var(--bg);
+  color: var(--muted); cursor: pointer; padding: 0;
+  transition: background .15s, color .15s;
+}
+.dcc-link-edit-btn:hover { background: var(--bd); color: var(--text); }
+
 .dash-empty    { font-size: .82rem; color: var(--muted-lt); padding: 6px 0; }
 
 /* Platform icon — normal and clickable (published card) */
@@ -1109,7 +1130,7 @@ ul { list-style: none; }
   border-radius: 7px; border: 1.5px solid transparent;
   background: transparent;
   cursor: pointer; transition: background .15s, border-color .15s, transform .1s;
-  position: relative;
+  position: relative; text-decoration: none;
 }
 .dcc-plat-btn:hover { background: var(--bg); transform: scale(1.1); }
 .dcc-plat-btn.has-link { border-color: currentColor; background: color-mix(in srgb, currentColor 8%, transparent); }
@@ -1120,8 +1141,20 @@ ul { list-style: none; }
   background: #16a34a; border: 1px solid #fff;
 }
 
+/* Platform link wrap — icon + edit button */
+.dcc-plat-link-wrap { display: inline-flex; align-items: center; position: relative; }
+.dcc-plat-edit-btn  {
+  display: none; /* shown on hover of wrap */
+  align-items: center; justify-content: center;
+  position: absolute; top: -5px; right: -5px;
+  width: 14px; height: 14px; border-radius: 50%;
+  border: 1px solid var(--bd); background: var(--surface);
+  cursor: pointer; padding: 0; z-index: 2;
+}
+.dcc-plat-link-wrap:hover .dcc-plat-edit-btn { display: inline-flex; }
+
 /* ── Link Edit Modal ────────────────────────────────────────── */
-.link-edit-modal { max-width: 400px; }
+.link-edit-modal { max-width: 420px; }
 .link-edit-head  {
   display: flex; align-items: center; justify-content: space-between;
   padding: 14px 18px 12px; border-bottom: 1px solid var(--bd);
@@ -1129,7 +1162,7 @@ ul { list-style: none; }
 .link-edit-label {
   font-weight: 700; font-size: .88rem;
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-  max-width: 280px;
+  max-width: 300px;
 }
 .modal-close-btn {
   width: 26px; height: 26px; border: none; background: transparent;
@@ -1137,7 +1170,56 @@ ul { list-style: none; }
   justify-content: center; border-radius: 5px; flex-shrink: 0;
 }
 .modal-close-btn:hover { background: var(--bg); color: var(--text); }
-.link-edit-body  { padding: 16px 18px 18px; }
+.link-edit-body  { padding: 16px 18px 20px; }
+
+/* Hero row inside modal */
+.lem-hero {
+  display: flex; align-items: center; gap: 12px;
+  padding: 12px 14px; border-radius: 10px;
+  background: var(--bg); border: 1px solid var(--bd);
+  margin-bottom: 14px;
+}
+.lem-hero--output .lem-hero-icon { color: var(--blue); background: var(--blue-lt); border-color: #bfdbfe; }
+.lem-hero-icon {
+  display: flex; align-items: center; justify-content: center;
+  width: 38px; height: 38px; flex-shrink: 0;
+  border-radius: 10px; border: 1.5px solid var(--bd);
+  background: var(--bg);
+}
+.lem-plat-icon-wrap {
+  width: 38px; height: 38px; flex-shrink: 0;
+  border-radius: 10px; border: 1.5px solid var(--bd);
+  display: flex; align-items: center; justify-content: center;
+}
+.lem-hero-label { font-weight: 700; font-size: .88rem; line-height: 1.2; }
+.lem-hero-hint  { font-size: .75rem; color: var(--muted); margin-top: 1px; }
+
+.lem-inp { margin-top: 0; font-size: .88rem; }
+.lem-open-link {
+  display: inline-flex; align-items: center; gap: 4px;
+  font-size: .75rem; color: var(--blue); text-decoration: none;
+  margin-top: 8px; opacity: .85;
+}
+.lem-open-link:hover { opacity: 1; text-decoration: underline; }
+.lem-actions {
+  display: flex; gap: 8px; margin-top: 14px;
+}
+.lem-save-btn {
+  flex: 1; justify-content: center;
+  display: flex; align-items: center; gap: 5px;
+}
+
+/* ── Multi-select Creator (Podcast/Liputan) ─────────────────── */
+.form-inp-multi {
+  height: auto; min-height: 80px;
+  padding: 4px;
+}
+.form-inp-multi option {
+  padding: 5px 8px; border-radius: 4px; cursor: pointer;
+}
+.form-inp-multi option:checked {
+  background: var(--blue); color: #fff;
+}
 
 
 /* ── Dashboard Period Filter Bar ─────────────────────────────── */
