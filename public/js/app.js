@@ -2295,30 +2295,68 @@ function openLinkModal(contentId, mode, platform) {
   const modal = $('linkEditModal');
   if (!modal) return;
 
+  /* ── Shared SVGs ── */
   const extIconSvg = `<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>`;
+  const saveSvg     = `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>`;
 
+  /* ── Content info (read-only) ── */
+  const acct         = ACCOUNTS.find(a => a.id === c.account);
+  const creatorTxt   = Array.isArray(c.creator) ? c.creator.join(', ') : (c.creator || '');
+  const editorTxt    = (c.editor && FORMATS_DUAL_ROLE.includes(c.format)) ? c.editor : '';
+
+  // Status + account tags
+  const topTags = [
+    c.status ? `<span class="badge ${STATUS_CLASS[c.status]||'badge-ide'}">${esc(c.status)}</span>` : '',
+    acct     ? `<span class="lem-acct-tag" style="background:${acct.color}18;color:${acct.color};border-color:${acct.color}30">${esc(acct.name)}</span>` : ''
+  ].filter(Boolean).join('');
+
+  // Meta chips (date, format, creator, editor)
+  const chips = [
+    c.publishDate ? `<span class="lem-chip">📅 ${esc(fmtDate(c.publishDate))}</span>` : '',
+    c.format      ? `<span class="lem-chip">🎬 ${esc(c.format)}</span>`                : '',
+    creatorTxt    ? `<span class="lem-chip">👤 ${esc(creatorTxt)}</span>`              : '',
+    editorTxt     ? `<span class="lem-chip">✂️ ${esc(editorTxt)}</span>`               : ''
+  ].filter(Boolean).join('');
+
+  // Platform icons (all platforms of the content, read-only)
+  const platChips = (c.platforms||[]).map(p => {
+    const pm = PLATFORM_META[p]; if (!pm) return '';
+    const hasLink = !!((c.platformLinks||{})[p]);
+    return `<span class="lem-plat-chip${hasLink?' has-link':''}" style="color:${pm.color}" title="${esc(pm.name)}${hasLink?' ✓':''}">${PLAT_ICON_SVG[p]||p}</span>`;
+  }).join('');
+
+  // Extra info rows
+  const infoRows = [
+    c.theme     ? `<div class="lem-info-row"><span class="lem-info-lbl">Tema</span><span class="lem-info-val">${esc(c.theme)}</span></div>`     : '',
+    c.createdBy ? `<div class="lem-info-row"><span class="lem-info-lbl">Owner</span><span class="lem-info-val">${esc(c.createdBy)}</span></div>` : '',
+    platChips   ? `<div class="lem-info-row"><span class="lem-info-lbl">Platform</span><span class="lem-plat-chips">${platChips}</span></div>`   : ''
+  ].filter(Boolean).join('');
+
+  const detailBlock = `
+    <div class="lem-detail">
+      ${topTags ? `<div class="lem-detail-tags">${topTags}</div>` : ''}
+      <div class="lem-detail-title">${esc(c.title||'—')}</div>
+      ${chips    ? `<div class="lem-chips">${chips}</div>`   : ''}
+      ${infoRows ? `<div class="lem-info-block">${infoRows}</div>` : ''}
+    </div>`;
+
+  /* ── Link section ── */
   if (mode === 'upcoming') {
-    $('linkEditTitle').textContent = c.title || 'Output Link';
-    $('linkEditContent').innerHTML = `
-      <div class="lem-hero lem-hero--output">
-        <span class="lem-hero-icon">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14,2 14,8 20,8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10,9 9,9 8,9"/></svg>
+    $('linkEditTitle').textContent = 'Detail Konten';
+    $('linkEditContent').innerHTML = detailBlock + `
+      <div class="lem-divider"><span>Output Link</span></div>
+      <div class="lem-link-row">
+        <span class="lem-link-icon lem-link-icon--output">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14,2 14,8 20,8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10,9 9,9 8,9"/></svg>
         </span>
-        <div>
-          <div class="lem-hero-label">Output Link</div>
-          <div class="lem-hero-hint">URL konten yang sudah dipublish</div>
-        </div>
+        <input class="form-inp lem-inp" type="url" id="linkEditInp"
+          value="${esc(c.outputLink || '')}"
+          placeholder="https://youtube.com/watch?v=..." />
       </div>
-      <input class="form-inp lem-inp" type="url" id="linkEditInp"
-        value="${esc(c.outputLink || '')}"
-        placeholder="https://youtube.com/watch?v=..." />
-      ${c.outputLink ? `<a href="${esc(c.outputLink)}" target="_blank" rel="noopener" class="lem-open-link">
-        Buka link tersimpan ${extIconSvg}</a>` : ''}
+      ${c.outputLink ? `<a href="${esc(c.outputLink)}" target="_blank" rel="noopener" class="lem-open-link">Buka link tersimpan ${extIconSvg}</a>` : ''}
       <div class="lem-actions">
-        <button class="btn-md blue lem-save-btn"
-          onclick="saveLinkFromModal('${contentId}','upcoming')">
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
-          Simpan
+        <button class="btn-md blue lem-save-btn" onclick="saveLinkFromModal('${contentId}','upcoming')">
+          ${saveSvg} Simpan
         </button>
         <button class="btn-md" onclick="closeLinkModal()">Batal</button>
       </div>`;
@@ -2326,26 +2364,22 @@ function openLinkModal(contentId, mode, platform) {
   } else if (mode === 'published') {
     const meta = PLATFORM_META[platform] || { name: platform, color: '#64748b' };
     const existingUrl = (c.platformLinks || {})[platform] || '';
-    const platIcon = PLAT_ICON_SVG[platform] || '';
-    $('linkEditTitle').textContent = c.title || meta.name;
-    $('linkEditContent').innerHTML = `
-      <div class="lem-hero" style="--plat:${meta.color}">
-        <span class="lem-hero-icon lem-plat-icon-wrap" style="color:${meta.color};background:${meta.color}18;border-color:${meta.color}33">${platIcon}</span>
-        <div>
-          <div class="lem-hero-label" style="color:${meta.color}">${esc(meta.name)}</div>
-          <div class="lem-hero-hint">Link postingan di ${esc(meta.name)}</div>
-        </div>
+    $('linkEditTitle').textContent = 'Detail Konten';
+    $('linkEditContent').innerHTML = detailBlock + `
+      <div class="lem-divider"><span style="color:${meta.color}">${esc(meta.name)} Link</span></div>
+      <div class="lem-link-row">
+        <span class="lem-link-icon" style="color:${meta.color};background:${meta.color}18;border-color:${meta.color}33">
+          ${PLAT_ICON_SVG[platform] || ''}
+        </span>
+        <input class="form-inp lem-inp" type="url" id="linkEditInp"
+          value="${esc(existingUrl)}"
+          placeholder="https://..." />
       </div>
-      <input class="form-inp lem-inp" type="url" id="linkEditInp"
-        value="${esc(existingUrl)}"
-        placeholder="https://..." />
-      ${existingUrl ? `<a href="${esc(existingUrl)}" target="_blank" rel="noopener" class="lem-open-link">
-        Buka link tersimpan ${extIconSvg}</a>` : ''}
+      ${existingUrl ? `<a href="${esc(existingUrl)}" target="_blank" rel="noopener" class="lem-open-link">Buka link tersimpan ${extIconSvg}</a>` : ''}
       <div class="lem-actions">
         <button class="btn-md lem-save-btn" style="background:${meta.color};color:#fff;border-color:${meta.color}"
           onclick="saveLinkFromModal('${contentId}','published','${platform}')">
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
-          Simpan
+          ${saveSvg} Simpan
         </button>
         <button class="btn-md" onclick="closeLinkModal()">Batal</button>
       </div>`;
@@ -2359,7 +2393,7 @@ async function saveLinkFromModal(contentId, mode, platform) {
   const url = gv('linkEditInp').trim();
   const c = state.contents.find(x => x.id === contentId);
   if (!c) { closeLinkModal(); return; }
-  const btn = $('linkEditModal')?.querySelector('.btn-md.blue');
+  const btn = $('linkEditModal')?.querySelector('.lem-save-btn');
   if (btn) { btn.textContent = 'Menyimpan…'; btn.disabled = true; }
 
   try {
