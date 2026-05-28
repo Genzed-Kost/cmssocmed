@@ -1,5 +1,21 @@
 [
   {
+    "id": "mpppwxb8qs8lb",
+    "user": "Admin",
+    "role": "Admin",
+    "action": "Hapus Bank Konten",
+    "target": "\"tanpa judul\"",
+    "timestamp": "2026-05-28T16:39:09.476Z"
+  },
+  {
+    "id": "mpppw52aiihot",
+    "user": "Admin",
+    "role": "Admin",
+    "action": "Kirim WA Bank Konten",
+    "target": "ke Umar — \"tanpa judul\"",
+    "timestamp": "2026-05-28T16:38:32.866Z"
+  },
+  {
     "id": "mpppw3xcgfh6o",
     "user": "Admin",
     "role": "Admin",
