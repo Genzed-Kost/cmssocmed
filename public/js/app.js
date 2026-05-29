@@ -4132,12 +4132,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (!document.hidden && state.bankKonten?.length) checkBankKontenReminders();
   });
 
-  // Interval setiap 1 menit — agar reminder terkirim tepat jam 8 meski CMS
-  // sudah terbuka dari sebelumnya (tanpa perlu refresh manual)
-  setInterval(() => {
-    if (state.bankKonten?.length) checkBankKontenReminders();
-  }, 60_000);
-
   /* ── GitHub sync ────────────────────────────────────────────── */
   $('btnGitSync')?.addEventListener('click', () => { clearDataCache(); loadAllData(true); });
 
