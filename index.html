@@ -1,0 +1,1292 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CMS Penjaga Harapan</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/styles.css" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+</head>
+<body>
+
+<!-- ─── SIDEBAR ─────────────────────────────────────────────────────────── -->
+<aside id="sidebar" class="sidebar">
+  <div class="sidebar-logo">
+    <div class="logo-mark" id="sidebarLogoMark">
+      <img src="logo.png" alt="PH" class="logo-img"
+        onload="this.closest('.logo-mark').classList.add('has-logo')"
+        onerror="this.remove()" />
+      <span class="logo-ph-text">PH</span>
+    </div>
+    <div class="logo-text">
+      <span class="logo-main">Penjaga</span>
+      <span class="logo-sub">Harapan CMS</span>
+    </div>
+    <button id="sidebarToggle" class="sidebar-toggle" title="Toggle sidebar">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 6L6 18M6 6l12 12"/></svg>
+    </button>
+  </div>
+
+  <nav class="sidebar-nav">
+    <a href="#dashboard"    class="nav-item active" data-page="dashboard">
+      <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/></svg>
+      <span>Dashboard</span>
+    </a>
+    <a href="#planner"      class="nav-item" data-page="planner">
+      <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+      <span>Planner</span>
+    </a>
+    <a href="#bankkonten"   class="nav-item" data-page="bankkonten">
+      <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg>
+      <span>Bank of Contents</span>
+    </a>
+    <a href="#activity"     class="nav-item" data-page="activity">
+      <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+      <span>Activity Log</span>
+    </a>
+    <a href="#newpost"      class="nav-item" data-page="newpost">
+      <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+      <span>New Post</span>
+    </a>
+    <a href="#statistics"   class="nav-item" data-page="statistics">
+      <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="18" y="3" width="4" height="18" rx="1"/><rect x="10" y="8" width="4" height="13" rx="1"/><rect x="2" y="13" width="4" height="8" rx="1"/></svg>
+      <span>Statistik</span>
+    </a>
+    <a href="#apisetup"     class="nav-item" data-page="apisetup">
+      <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93l-1.41 1.41M4.93 4.93l1.41 1.41M4.93 19.07l1.41-1.41M19.07 19.07l-1.41-1.41M2 12h2M20 12h2M12 2v2M12 20v2"/></svg>
+      <span>API Setup</span>
+    </a>
+  </nav>
+
+  <div class="sidebar-footer">
+    <div class="sidebar-user-wrap" id="sidebarUserWrap">
+      <div class="user-av-sm" id="sidebarAv">—</div>
+      <div class="sidebar-user-info">
+        <span class="sidebar-uname" id="sidebarUname">—</span>
+        <span class="role-badge hidden" id="sidebarRole"></span>
+      </div>
+    </div>
+    <div class="sync-status" id="syncStatus">
+      <span class="sync-dot"></span>
+      <span id="syncLabel">Belum terhubung</span>
+    </div>
+    <button class="logout-btn" id="btnLogout">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+      Keluar
+    </button>
+  </div>
+</aside>
+
+<!-- ─── MAIN AREA ─────────────────────────────────────────────────────────── -->
+<div class="main-wrap" id="mainWrap">
+
+  <!-- TOP BAR -->
+  <header class="topbar">
+    <div class="topbar-left">
+      <button id="menuBtn" class="icon-btn" title="Menu">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+      </button>
+      <h1 class="topbar-title" id="topbarTitle">Dashboard</h1>
+    </div>
+    <!-- JAM DIGITAL -->
+    <div class="topbar-clock">
+      <div class="clock-time">
+        <span id="clockHM">00:00</span><span class="clock-colon">:</span><span id="clockSec" class="clock-sec">00</span>
+      </div>
+      <div class="clock-date" id="clockDate">Sen, 01 Jan 2024</div>
+    </div>
+
+    <div class="topbar-right">
+      <button class="badge-btn" id="badgeInfoPresiden" title="Info Presiden AI">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+        Info Presiden
+      </button>
+      <button class="icon-btn" id="btnGitSync" title="Sinkronkan GitHub">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"/></svg>
+      </button>
+      <div class="topbar-user" id="topbarUser">
+        <div class="user-avatar" id="userAvatar">—</div>
+        <span id="userLabel">Setup GitHub</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- PAGE CONTENT -->
+  <main class="page-content" id="pageContent">
+
+    <!-- ═══ DASHBOARD ═══════════════════════════════════════════════════ -->
+    <section id="page-dashboard" class="page active">
+      <div class="page-inner">
+
+        <!-- Running Ticker Reminder -->
+        <div id="dashTicker" class="dash-ticker hidden">
+          <span class="dash-ticker-label">📢</span>
+          <div class="dash-ticker-track"><div class="dash-ticker-inner" id="dashTickerInner"></div></div>
+        </div>
+
+        <!-- Period Filter Bar -->
+        <div class="dash-month-bar">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+          <span style="font-size:.8rem;font-weight:600;color:var(--muted)">Periode:</span>
+          <select id="dashPeriodSel" class="inp-sm period-sel">
+            <option value="month">📅 Bulan Ini</option>
+            <option value="week">Minggu Ini</option>
+            <option value="last7">7 Hari Terakhir</option>
+            <option value="last30">30 Hari Terakhir</option>
+            <option value="lastmonth">Bulan Lalu</option>
+            <option value="year">Tahun Ini</option>
+            <option value="all">Semua Waktu</option>
+            <option value="custom">⚙ Kustom…</option>
+          </select>
+          <div id="dashCustomRange" class="period-custom-range hidden">
+            <input type="date" id="dashDateFrom" class="inp-sm" style="width:130px" title="Dari tanggal" />
+            <span style="color:var(--muted);font-size:.8rem">—</span>
+            <input type="date" id="dashDateTo" class="inp-sm" style="width:130px" title="Sampai tanggal" />
+          </div>
+          <div style="flex:1"></div>
+          <button class="btn-sm blue" id="btnDashNewPost" onclick="navigate('newpost');renderNewPostForm()">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+            New Post
+          </button>
+        </div>
+
+        <!-- Stats row -->
+        <div class="stat-row" id="dashStatRow">
+          <div class="stat-card">
+            <div class="stat-label">Konten Bulan Ini</div>
+            <div class="stat-value" id="dStatKonten">—</div>
+            <div class="stat-sub">dari target <span id="dStatTarget">—</span></div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Selesai</div>
+            <div class="stat-value green" id="dStatSelesai">—</div>
+            <div class="stat-sub">konten published</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">On Progress</div>
+            <div class="stat-value yellow" id="dStatProgress">—</div>
+            <div class="stat-sub">sedang dikerjakan</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Anggota Tim</div>
+            <div class="stat-value blue" id="dStatTeam">—</div>
+            <div class="stat-sub">creator aktif</div>
+          </div>
+        </div>
+
+        <div class="dash-grid">
+          <!-- KPI Harian -->
+          <div class="card">
+            <div class="card-head">
+              <span class="card-title">KPI Harian</span>
+              <select id="kpiPeriodSel" class="inp-sm kpi-period-sel kpi-period-red"></select>
+            </div>
+            <div class="kpi-list" id="kpiList">
+              <div class="kpi-skeleton">Muat data…</div>
+            </div>
+          </div>
+
+          <!-- My To-Do -->
+          <div class="card">
+            <div class="card-head">
+              <span class="card-title">My To-Do</span>
+              <span class="card-sub" id="todoUserLabel" style="font-size:.72rem;color:var(--muted)"></span>
+              <a href="#planner" class="link-sm">Lihat Planner</a>
+            </div>
+            <ul class="todo-list" id="todoList">
+              <li class="todo-empty">Memuat…</li>
+            </ul>
+          </div>
+
+          <!-- Jadwal Konten Terdekat -->
+          <div class="card card-wide">
+            <div class="card-head">
+              <span class="card-title">📅 Jadwal Konten Terdekat</span>
+              <a href="#planner" class="link-sm">Lihat semua →</a>
+            </div>
+            <div id="dashNearList">
+              <div class="act-empty">Belum ada konten mendatang</div>
+            </div>
+          </div>
+
+          <!-- Analytics Panel -->
+          <div class="card card-wide anlp-wrap">
+            <div class="anlp-header">
+              <div class="anlp-title-wrap">
+                <span class="anlp-dot-green"></span>
+                <span class="anlp-title">PLATFORM ANALYTICS</span>
+              </div>
+              <div class="anlp-controls">
+                <select id="anlpAcctSel" class="inp-sm" style="min-width:110px"></select>
+              </div>
+            </div>
+            <div class="anlp-grid" id="anlpGrid"></div>
+          </div>
+        </div>
+
+
+      </div>
+    </section>
+
+    <!-- ═══ PLANNER ══════════════════════════════════════════════════════ -->
+    <section id="page-planner" class="page">
+      <div class="page-inner">
+        <div class="toolbar">
+          <div class="toolbar-left">
+            <input id="planSearch" class="inp-sm" style="width:200px" placeholder="Cari judul…" />
+            <select id="planFilterCreator" class="inp-sm"><option value="">Semua Creator</option></select>
+            <select id="planFilterStatus" class="inp-sm">
+              <option value="">Semua Status</option>
+              <option>Plan</option><option>Review</option><option>Revisi</option>
+              <option>Preview</option><option>ACC</option><option>Done</option>
+              <option>Published</option><option>Drop</option><option>Hold</option>
+            </select>
+            <select id="planFilterTime" class="inp-sm period-sel">
+              <option value="">Semua Waktu</option>
+              <option value="week">Minggu Ini</option>
+              <option value="month">Bulan Ini</option>
+              <option value="last30">30 Hari Terakhir</option>
+              <option value="lastmonth">Bulan Lalu</option>
+              <option value="year">Tahun Ini</option>
+              <option value="custom">⚙ Kustom…</option>
+            </select>
+            <div id="planCustomRange" class="period-custom-range hidden">
+              <input type="date" id="planDateFrom" class="inp-sm" style="width:120px" title="Dari tanggal" />
+              <span style="color:var(--muted);font-size:.8rem">—</span>
+              <input type="date" id="planDateTo" class="inp-sm" style="width:120px" title="Sampai tanggal" />
+            </div>
+            <button class="btn-xs" id="btnClearDateRange" title="Reset semua filter">✕ Reset</button>
+          </div>
+          <div class="toolbar-right">
+            <button class="btn-sm" id="btnPlanPdf">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+              Unduh PDF
+            </button>
+            <button class="btn-sm blue" id="btnPlanNew">+ Konten Baru</button>
+          </div>
+        </div>
+
+        <div class="table-wrap">
+          <table class="data-table" id="planTable">
+            <thead>
+              <tr>
+                <th style="width:110px">STATUS</th>
+                <th style="width:100px">TANGGAL</th>
+                <th>JUDUL KONTEN</th>
+                <th style="width:110px">TEMA</th>
+                <th style="width:110px">PLATFORM</th>
+                <th style="width:80px">CREATOR</th>
+                <th style="width:80px">AKSI</th>
+              </tr>
+            </thead>
+            <tbody id="planBody">
+              <tr><td colspan="7" class="empty-cell">Belum ada konten</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="table-footer">
+          <span id="planCount">0 konten</span>
+          <div class="pagination" id="planPagination"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══ BANK KONTEN ═══════════════════════════════════════════════════ -->
+    <section id="page-bankkonten" class="page">
+      <div class="page-inner">
+
+        <!-- Reminder banner (shown when today's content is detected) -->
+        <div id="bkReminderBanner" class="bk-reminder-banner hidden"></div>
+
+        <div class="toolbar">
+          <div class="toolbar-left">
+            <span style="font-size:.8rem;color:var(--muted)">Total: <strong id="bkCount">0</strong> konten</span>
+          </div>
+          <div class="toolbar-right">
+            <button class="btn-sm blue" id="btnAddBkRow">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+              Tambah Konten
+            </button>
+          </div>
+        </div>
+
+        <div class="table-wrap">
+          <table class="data-table" id="bkTable">
+            <thead>
+              <tr>
+                <th style="width:38px;text-align:center">NO</th>
+                <th style="width:145px">AKUN</th>
+                <th>NAMA KONTEN / JUDUL</th>
+                <th style="width:170px">REFERENSI / LINK</th>
+                <th style="width:170px">LINK DRIVE</th>
+                <th style="width:160px">CREATOR</th>
+                <th style="width:135px">TANGGAL TAYANG</th>
+                <th style="width:48px;text-align:center">AKSI</th>
+              </tr>
+            </thead>
+            <tbody id="bkBody">
+              <tr><td colspan="8" class="empty-cell">Belum ada data. Klik "+ Tambah Konten" untuk memulai.</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="table-footer">
+          <span id="bkCountFoot" style="font-size:.78rem;color:var(--muted)"></span>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ═══ ACTIVITY LOG ══════════════════════════════════════════════════ -->
+    <section id="page-activity" class="page">
+      <div class="page-inner">
+        <div class="toolbar">
+          <div class="toolbar-left" style="flex-wrap:wrap;gap:6px">
+            <input id="actSearch" class="inp-sm" style="width:180px" placeholder="Cari aktivitas…" />
+            <select id="actPeriodSel" class="inp-sm period-sel">
+              <option value="">Semua Waktu</option>
+              <option value="today">Hari Ini</option>
+              <option value="week">7 Hari Terakhir</option>
+              <option value="month">Bulan Ini</option>
+              <option value="lastmonth">Bulan Lalu</option>
+              <option value="custom">⚙ Kustom…</option>
+            </select>
+            <div id="actCustomRange" class="period-custom-range hidden">
+              <input type="date" id="actDateFrom" class="inp-sm" title="Dari tanggal" />
+              <span style="color:var(--muted);font-size:.8rem">—</span>
+              <input type="date" id="actDateTo" class="inp-sm" title="Sampai tanggal" />
+            </div>
+            <button class="btn-xs" id="btnClearActFilter" title="Reset filter">✕ Reset</button>
+            <button class="btn-xs" id="btnRefreshActivity" title="Muat ulang dari GitHub" style="gap:4px">
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+              Refresh
+            </button>
+          </div>
+        </div>
+        <ul class="activity-list" id="activityList">
+          <li class="act-empty">Belum ada aktivitas</li>
+        </ul>
+        <div class="table-footer" style="margin-top:12px">
+          <span id="actCount" style="font-size:.78rem;color:var(--muted)"></span>
+          <div class="pagination" id="actPagination"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══ CONTENTS ══════════════════════════════════════════════════════ -->
+    <section id="page-contents" class="page">
+      <div class="page-inner">
+        <div class="toolbar">
+          <div class="toolbar-left">
+            <input id="cntSearch" class="inp-sm" style="width:200px" placeholder="Cari konten…" />
+            <select id="cntFilterStatus" class="inp-sm">
+              <option value="">Semua Status</option>
+              <option>Plan</option><option>Review</option><option>Revisi</option>
+              <option>Preview</option><option>ACC</option><option>Done</option>
+              <option>Published</option><option>Drop</option><option>Hold</option>
+            </select>
+            <select id="cntFilterAcct" class="inp-sm">
+              <option value="">Semua Akun</option>
+              <option value="penjaga-harapan">Penjaga Harapan</option>
+              <option value="33-official">33 Official</option>
+              <option value="jaga-asa">Jaga Asa</option>
+            </select>
+          </div>
+          <div class="toolbar-right">
+            <a href="#newpost" class="btn-sm blue">+ New Post</a>
+          </div>
+        </div>
+        <div class="content-grid" id="contentGrid">
+          <div class="cnt-empty">Belum ada konten. Klik "+ New Post" untuk membuat.</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══ NEW POST ══════════════════════════════════════════════════════ -->
+    <section id="page-newpost" class="page">
+      <div class="page-inner page-inner-narrow">
+        <div class="form-card" id="newPostForm">
+          <input type="hidden" id="editPostId" value="" />
+
+          <!-- Published lock banner -->
+          <div id="publishedLockBanner" class="published-lock-banner hidden">
+            🔒 Konten sudah dipublish — status &amp; creator tidak dapat diubah
+          </div>
+
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+            <span style="font-size:.7rem;color:var(--muted)"><span class="req-star">*</span> wajib diisi</span>
+            <span id="draftSaveInd" style="font-size:.7rem;color:var(--muted)"></span>
+          </div>
+
+          <div class="form-row-2">
+            <div class="form-group">
+              <label class="form-label">Tanggal Tayang <span class="req-star">*</span></label>
+              <input type="date" id="postDate" class="form-inp" />
+            </div>
+            <div class="form-group">
+              <label id="postCreatorLabel" class="form-label">Creator <span class="req-star">*</span></label>
+              <select id="postCreator" class="form-inp">
+                <option value="">— Pilih Creator —</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Editor field — hanya muncul saat format Podcast / Liputan -->
+          <div id="postEditorRow" class="form-group hidden">
+            <label class="form-label">Editor
+              <span class="form-hint" style="margin:0;font-size:.7rem;color:var(--muted)">(pasca produksi)</span>
+            </label>
+            <select id="postEditor" class="form-inp">
+              <option value="">— Pilih Editor —</option>
+            </select>
+          </div>
+
+          <div class="form-row-2">
+            <div class="form-group">
+              <label class="form-label">Akun Target <span class="req-star">*</span></label>
+              <select id="postAccount" class="form-inp">
+                <option value="">— Pilih Akun —</option>
+                <option value="penjaga-harapan">Penjaga Harapan</option>
+                <option value="33-official">33 Official</option>
+                <option value="jaga-asa">Jaga Asa</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Status <span class="req-star">*</span></label>
+              <select id="postStatus" class="form-inp">
+                <option>Plan</option><option>Review</option><option>Revisi</option>
+                <option>Preview</option><option>ACC</option><option>Done</option>
+                <option>Published</option><option>Drop</option><option>Hold</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Judul Konten <span class="req-star">*</span></label>
+            <input type="text" id="postTitle" class="form-inp" placeholder="Judul konten…" />
+          </div>
+
+          <div class="form-row-2">
+            <div class="form-group">
+              <label class="form-label">Tema <span class="req-star">*</span></label>
+              <input type="text" id="postTheme" class="form-inp" placeholder="Tema / topik…" />
+            </div>
+            <div class="form-group">
+              <label class="form-label">Content Type <span class="req-star">*</span></label>
+              <select id="postFormat" class="form-inp" onchange="onFormatChange(this.value)">
+                <option>Flayer</option><option>Meme</option><option>Karikatur</option>
+                <option>Komikstrip</option><option>Animasi</option><option>Video</option>
+                <option>Short</option><option>Monolog</option><option>Carousell</option>
+                <option>Podcast</option><option>Liputan</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Platform Distribusi <span class="req-star">*</span></label>
+            <div class="platform-checks" id="platformChecks">
+              <label class="check-item"><input type="checkbox" value="instagram" /> Instagram</label>
+              <label class="check-item"><input type="checkbox" value="tiktok" />    TikTok</label>
+              <label class="check-item"><input type="checkbox" value="twitter" />   X (Twitter)</label>
+              <label class="check-item"><input type="checkbox" value="facebook" />  Facebook</label>
+              <label class="check-item"><input type="checkbox" value="youtube" />   YouTube</label>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <div class="form-label-row">
+              <label class="form-label">Script / Naskah</label>
+              <button type="button" class="ai-btn" id="btnGenerateDraft" title="Generate Draft dengan AI">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 2l3 7h7l-5.5 4 2 7L12 16l-6.5 4 2-7L2 9h7z"/></svg>
+                Generate Draft AI
+              </button>
+            </div>
+            <textarea id="postScript" class="form-inp form-ta" rows="6" placeholder="Tulis naskah / script konten di sini…"></textarea>
+          </div>
+
+          <div class="form-group">
+            <div class="form-label-row">
+              <label class="form-label">Caption Medsos</label>
+              <button type="button" class="ai-btn" id="btnGenerateCaption" title="Generate Caption dengan AI">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 2l3 7h7l-5.5 4 2 7L12 16l-6.5 4 2-7L2 9h7z"/></svg>
+                Auto-Caption AI
+              </button>
+            </div>
+            <textarea id="postCaption" class="form-inp form-ta" rows="4" placeholder="Caption untuk media sosial…"></textarea>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Output Link <span class="label-opt">opsional</span></label>
+            <input type="url" id="postOutputLink" class="form-inp" placeholder="https://link hasil konten…" />
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Catatan Khusus <span class="label-opt">opsional</span></label>
+            <textarea id="postNotes" class="form-inp form-ta" rows="2" placeholder="Catatan tambahan untuk tim… (tidak wajib)"></textarea>
+          </div>
+
+          <div class="form-actions">
+            <button type="button" class="btn-md" id="btnCancelPost">Batal</button>
+            <button type="button" class="btn-md blue" id="btnSavePost">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+              Simpan Konten
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══ STATISTICS ════════════════════════════════════════════════════ -->
+    <section id="page-statistics" class="page">
+      <div class="page-inner">
+
+        <!-- Account tabs -->
+        <div class="stat-acct-bar" id="statAcctBar"></div>
+
+        <!-- Platform tabs + actions -->
+        <div class="stat-plat-wrap">
+          <div class="stat-plat-bar" id="statPlatBar"></div>
+          <div class="stat-plat-actions">
+            <div class="stat-dl-wrap">
+              <input type="month" id="statFromMonth" class="inp-sm" title="Dari bulan" style="min-width:110px" />
+              <span class="stat-range-sep">–</span>
+              <input type="month" id="statToMonth" class="inp-sm" title="Sampai bulan" style="min-width:110px" />
+              <div class="stat-dl-dropdown" id="statDlDropWrap">
+                <button class="btn-sm" id="btnDlDropdown">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                  Download ▾
+                </button>
+                <div class="stat-dl-menu hidden" id="statDlMenu">
+                  <button onclick="downloadStatJpg()">📊 Grafik (JPG)</button>
+                  <button onclick="downloadStatTableJpg()">📋 Tabel (JPG)</button>
+                </div>
+              </div>
+              <button class="btn-sm" id="btnStatAnalyze" onclick="analyzeContentWithAI()" title="Analisis performa konten dengan AI" style="background:#7c3aed;color:#fff;border-color:#7c3aed">
+                🧠 Analisis AI
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Summary cards (latest/selected month) -->
+        <div id="statSummaryWrap"></div>
+
+        <!-- Chart container -->
+        <div class="stat-chart-wrap" id="statChartWrap">
+          <canvas id="statBarChart"></canvas>
+        </div>
+
+        <!-- Monthly data table (admin only) -->
+        <div id="statDataTable"></div>
+
+        <!-- Good/Bad content section -->
+        <div id="statGoodBadWrap"></div>
+
+        <!-- Input form (collapsible, admin only) -->
+        <div class="card hidden" style="margin-top:20px" id="statInputCard">
+          <div class="card-head">
+            <span class="card-title" id="statInputTitle">📊 Input Data Statistik</span>
+            <div style="display:flex;gap:8px;align-items:center">
+              <span id="statLastSaved" class="card-sub"></span>
+              <button class="icon-btn" id="btnCloseStatInput" title="Tutup">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 6L6 18M6 6l12 12"/></svg>
+              </button>
+            </div>
+          </div>
+          <div class="form-group" style="max-width:200px;margin-bottom:16px">
+            <label class="form-label">Bulan</label>
+            <input type="month" id="statMonth" class="form-inp" />
+          </div>
+          <div class="stat-input-grid" id="statInputFields"></div>
+          <div class="form-actions-row" style="margin-top:16px">
+            <button class="btn-sm blue" id="btnSaveStats">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/></svg>
+              Simpan ke GitHub
+            </button>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ═══ API SETUP ═════════════════════════════════════════════════════ -->
+    <section id="page-apisetup" class="page">
+      <div class="page-inner">
+        <div class="setup-grid">
+
+          <!-- ── Kolom Kiri: GitHub + Anggota Tim ───────────────── -->
+          <div class="setup-col">
+
+          <!-- GitHub Config -->
+          <div class="card setup-card">
+            <div class="card-head">
+              <span class="card-title">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="vertical-align:-2px;margin-right:6px"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
+                Koneksi GitHub
+              </span>
+              <span id="githubConnStatus" class="badge-status">Belum tersambung</span>
+            </div>
+            <div class="setup-fields">
+              <div class="form-group">
+                <label class="form-label">GitHub Owner (username / org)</label>
+                <input type="text" id="cfgOwner" class="form-inp" placeholder="username-github" />
+              </div>
+              <div class="form-group">
+                <label class="form-label">Repository Name</label>
+                <input type="text" id="cfgRepo" class="form-inp" placeholder="nama-repo" />
+              </div>
+              <div class="form-group">
+                <label class="form-label">Branch</label>
+                <input type="text" id="cfgBranch" class="form-inp" placeholder="main" value="main" />
+              </div>
+              <div class="form-group">
+                <label class="form-label">Personal Access Token (PAT)</label>
+                <div class="inp-eye-wrap">
+                  <input type="password" id="cfgPat" class="form-inp" placeholder="ghp_…" />
+                  <button type="button" class="eye-btn" id="btnTogglePat">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                  </button>
+                </div>
+                <p class="form-hint">Token hanya disimpan di browser lokal. Butuh scope: <code>repo</code></p>
+              </div>
+              <div class="form-actions-row">
+                <button class="btn-sm" id="btnTestGithub">Test Koneksi</button>
+                <button class="btn-sm blue" id="btnSaveGithub">Simpan &amp; Inisialisasi</button>
+              </div>
+              <div class="form-actions-row" style="margin-top:10px;padding-top:10px;border-top:1px solid var(--bd)">
+                <button class="btn-sm" id="btnShareAccess" onclick="generateShareLink()" title="Buat link agar anggota tim bisa login tanpa setup ulang di device baru">
+                  🔗 Salin Link Akses Tim
+                </button>
+                <span class="form-hint" style="margin:0;font-size:.72rem">Bagikan ke anggota — klik link langsung ke halaman login.</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- User Management -->
+          <div class="card setup-card">
+            <div class="card-head">
+              <span class="card-title">Anggota Tim / Creator</span>
+              <button class="btn-xs" id="btnAddUser">+ Tambah</button>
+            </div>
+            <div id="addUserForm" class="add-user-form hidden">
+              <input id="userNameInput" class="inp-sm" placeholder="Nama anggota…" />
+              <select id="userRoleInput" class="inp-sm" style="margin-top:6px;width:100%">
+                <option value="">— Pilih Role (opsional) —</option>
+                <option value="Creator">🟢 Creator</option>
+                <option value="Writer">🔵 Writer</option>
+                <option value="Designer">🩷 Designer</option>
+                <option value="Videographer">🟣 Videographer</option>
+                <option value="Editor">🩵 Editor</option>
+                <option value="Publisher">🔷 Publisher</option>
+                <option value="Producer">🟠 Producer</option>
+                <option value="Planner">🟡 Planner</option>
+                <option value="Leader">🔹 Leader</option>
+                <option value="Ketua">🔴 Ketua</option>
+                <option value="Administrator">🟣 Administrator</option>
+              </select>
+              <input id="userPhoneInput" class="inp-sm" placeholder="No. WhatsApp (08xxx)" style="margin-top:6px;width:100%" />
+              <input id="userPasswordInput" type="password" class="inp-sm" placeholder="Password login" style="margin-top:6px;width:100%" />
+              <div style="display:flex;gap:6px;margin-top:6px">
+                <button class="btn-xs blue" id="btnSaveUser">Simpan</button>
+                <button class="btn-xs" id="btnCancelUser">Batal</button>
+              </div>
+            </div>
+            <ul class="user-list" id="userList">
+              <li class="user-empty">Belum ada anggota. Tambahkan creator tim.</li>
+            </ul>
+          </div>
+
+          </div><!-- /setup-col kiri -->
+
+          <!-- ── Kolom Kanan: URL Platform + API Keys + KPI ─────── -->
+          <div class="setup-col">
+
+          <!-- Platform URLs per account -->
+          <div class="card setup-card">
+            <div class="card-head">
+              <span class="card-title">URL Platform per Akun</span>
+            </div>
+            <div class="url-acct-bar" id="urlAcctBar"></div>
+            <div id="platformUrlList"></div>
+            <div class="form-actions-row" style="margin-top:12px">
+              <button class="btn-sm blue" id="btnSaveUrls">Simpan URL</button>
+            </div>
+          </div>
+
+          <!-- Gemini AI Key -->
+          <div class="card setup-card">
+            <div class="card-head">
+              <span class="card-title">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:-2px;margin-right:6px;color:#7c3aed"><path d="M12 2l3 7h7l-5.5 4 2 7L12 16l-6.5 4 2-7L2 9h7z"/></svg>
+                Gemini AI
+              </span>
+              <span id="geminiKeyStatus" class="badge-status">Belum diisi</span>
+            </div>
+            <div class="setup-fields">
+              <div class="form-group">
+                <label class="form-label">Gemini API Key</label>
+                <div class="inp-eye-wrap">
+                  <input type="password" id="cfgGeminiKey" class="form-inp" placeholder="AIzaSy…" />
+                  <button type="button" class="eye-btn" id="btnToggleGeminiKey">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                  </button>
+                </div>
+                <p class="form-hint">Dapatkan API key gratis di <code>aistudio.google.com</code>. Key hanya tersimpan di browser lokal, tidak dikirim ke mana pun kecuali ke Google AI.</p>
+              </div>
+              <div class="form-actions-row">
+                <button class="btn-sm blue" id="btnSaveGeminiKey">Simpan API Key</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Claude AI Key -->
+          <div class="card setup-card">
+            <div class="card-head">
+              <span class="card-title">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:-2px;margin-right:6px;color:#d97706"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>
+                Claude AI <span style="font-size:.68rem;font-weight:400;color:#64748b">(Anthropic)</span>
+              </span>
+              <span id="claudeKeyStatus" class="badge-status">Belum diisi</span>
+            </div>
+            <div class="setup-fields">
+              <div class="form-group">
+                <label class="form-label">Claude API Key</label>
+                <div class="inp-eye-wrap">
+                  <input type="password" id="cfgClaudeKey" class="form-inp" placeholder="sk-ant-…" />
+                  <button type="button" class="eye-btn" id="btnToggleClaudeKey">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                  </button>
+                </div>
+                <p class="form-hint">Dapatkan API key di <code>console.anthropic.com</code>. Digunakan untuk fitur <strong>🧠 Analisis AI</strong> di halaman Statistik. Jika tidak diisi, fitur analisis akan menggunakan Gemini sebagai fallback. Key hanya tersimpan di browser lokal.</p>
+              </div>
+              <div class="form-actions-row">
+                <button class="btn-sm blue" id="btnSaveClaudeKey">Simpan API Key</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- WhatsApp Notification -->
+          <div class="card setup-card">
+            <div class="card-head">
+              <span class="card-title">💬 WhatsApp Notifikasi</span>
+              <span id="waTokenStatus" class="badge-status">Belum diisi</span>
+            </div>
+            <div class="setup-fields">
+              <div class="form-group">
+                <label class="form-label">Fonnte API Token</label>
+                <div class="inp-eye-wrap">
+                  <input type="password" id="cfgWaToken" class="form-inp" placeholder="Token dari fonnte.com…" />
+                  <button type="button" class="eye-btn" id="btnToggleWaToken">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                  </button>
+                </div>
+                <p class="form-hint">Token dari <code>fonnte.com</code>. Pengirim: <code>085134336529</code>. Notifikasi dikirim saat creator ditugaskan. Pastikan nomor sudah terdaftar di Fonnte.</p>
+              </div>
+              <div class="form-actions-row">
+                <button class="btn-sm blue" id="btnSaveWaToken" onclick="saveWaTokenFromForm()">Simpan Token</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Token Akses Tim -->
+          <div class="card setup-card">
+            <div class="card-head">
+              <span class="card-title">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:-2px;margin-right:6px;color:#0284c7"><circle cx="12" cy="8" r="5"/><path d="M12 13v8M9 18h6"/></svg>
+                Token Akses Tim
+              </span>
+              <span id="teamTokenStatus" class="badge-status">Belum diisi</span>
+            </div>
+            <div class="setup-fields">
+              <div class="form-group">
+                <label class="form-label">GitHub Fine-Grained PAT (akses terbatas)</label>
+                <div class="inp-eye-wrap">
+                  <input type="password" id="cfgTeamToken" class="form-inp" placeholder="github_pat_…" />
+                  <button type="button" class="eye-btn" id="btnToggleTeamToken">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                  </button>
+                </div>
+                <p class="form-hint">
+                  Token ini disimpan di <code>settings.json</code> GitHub sehingga <strong>perangkat baru otomatis terhubung</strong> tanpa input apapun — cukup buka link <code>/loginuser</code> dan login dengan nama + password.<br>
+                  Gunakan <strong>Fine-Grained PAT</strong> yang hanya punya izin <em>Contents: Read &amp; Write</em> pada repo ini saja.
+                </p>
+              </div>
+              <div class="form-actions-row">
+                <button class="btn-sm blue" id="btnSaveTeamToken">💾 Simpan ke GitHub</button>
+                <button class="btn-sm" id="btnDeleteTeamToken" style="color:var(--red);border-color:var(--red)">Hapus Token</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- KPI Targets -->
+          <div class="card setup-card">
+            <div class="card-head">
+              <span class="card-title">Target KPI Bulanan</span>
+            </div>
+            <div class="kpi-target-list" id="kpiTargetList">
+              <div class="form-group">
+                <label class="form-label">Penjaga Harapan</label>
+                <input type="number" id="kpiPH" class="form-inp" min="0" placeholder="5" />
+              </div>
+              <div class="form-group">
+                <label class="form-label">33 Official</label>
+                <input type="number" id="kpi33" class="form-inp" min="0" placeholder="2" />
+              </div>
+              <div class="form-group">
+                <label class="form-label">Jaga Asa</label>
+                <input type="number" id="kpiJA" class="form-inp" min="0" placeholder="1" />
+              </div>
+            </div>
+            <div class="form-actions-row" style="margin-top:12px">
+              <button class="btn-sm blue" id="btnSaveKpi">Simpan KPI</button>
+            </div>
+          </div>
+
+          </div><!-- /setup-col kanan -->
+
+        </div><!-- /setup-grid -->
+      </div>
+    </section>
+
+  </main>
+</div><!-- /.main-wrap -->
+
+<!-- ─── (invite system dihapus — diganti teamToken di settings.json) ──────── -->
+
+<!-- ─── PLACEHOLDER (dibiarkan agar refs tidak error) ───────────────────── -->
+<div id="invitePinModal" class="modal-overlay hidden" data-invite-id="">
+  <div class="modal" style="max-width:380px">
+    <div class="modal-head" style="border-top:3px solid #0284c7">
+      <span class="modal-title">🔑 Hubungkan Perangkat</span>
+    </div>
+    <div class="modal-body" style="display:flex;flex-direction:column;gap:14px">
+      <p style="font-size:.82rem;color:#475569;margin:0">
+        Admin telah membuat link akses untuk perangkat ini. Masukkan <strong>PIN 6-digit</strong> yang dikirim admin terpisah untuk menyelesaikan koneksi.
+      </p>
+      <div class="form-group">
+        <label class="form-label">PIN dari Admin</label>
+        <input type="text" id="invitePinEntry" class="form-inp"
+          maxlength="12" placeholder="123456"
+          style="font-size:1.4rem;font-weight:700;letter-spacing:6px;text-align:center"
+          onkeydown="if(event.key==='Enter') doConsumeInvite()" />
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn-sm blue" id="inviteBtnConsume" onclick="doConsumeInvite()" style="width:100%">
+        ✅ Verifikasi &amp; Hubungkan
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ─── FIRST-RUN WIZARD ─────────────────────────────────────────────────── -->
+<div id="wizardModal" class="modal-overlay hidden">
+  <div class="modal wizard-modal">
+    <div class="wizard-steps-wrap" id="wizardStepsWrap">
+      <div class="step-dot active" id="sd1">1</div>
+      <div class="step-line" id="sl1"></div>
+      <div class="step-dot" id="sd2">2</div>
+      <div class="step-line" id="sl2"></div>
+      <div class="step-dot" id="sd3">3</div>
+    </div>
+
+    <!-- Step 1: Admin account -->
+    <div class="wizard-step" id="ws1">
+      <div class="modal-body">
+        <div class="wizard-title">Buat Akun Admin</div>
+        <div class="wizard-desc">Selamat datang! Anda membuka CMS ini untuk pertama kali. Buat akun admin untuk melindungi halaman pengaturan sistem.</div>
+        <div class="setup-fields">
+          <div class="form-group">
+            <label class="form-label">Nama Admin</label>
+            <input type="text" id="setupAdminName" class="form-inp" value="Admin" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Password</label>
+            <input type="password" id="setupAdminPw" class="form-inp" placeholder="Buat password…" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Konfirmasi Password</label>
+            <input type="password" id="setupAdminPw2" class="form-inp" placeholder="Ulangi password…" />
+          </div>
+        </div>
+      </div>
+      <div class="modal-foot">
+        <button class="btn-md blue" style="width:100%" id="btnWs1Next">Lanjut →</button>
+      </div>
+      <div style="text-align:center;padding:10px 0 4px;border-top:1px solid var(--bd);margin-top:4px">
+        <button type="button" class="link-btn" id="btnShowConnectDevice" style="font-size:.76rem;color:var(--muted)">
+          Sudah punya instalasi? Hubungkan perangkat ini →
+        </button>
+      </div>
+    </div>
+
+    <!-- Connect existing device -->
+    <div class="wizard-step hidden" id="wsConnect">
+      <div class="modal-body">
+        <div class="wizard-title">Hubungkan Perangkat</div>
+        <div class="wizard-desc">Masukkan konfigurasi GitHub dari instalasi yang sudah ada. Admin hash akan diambil otomatis dan kamu bisa langsung login.</div>
+        <div class="setup-fields">
+          <div class="form-group">
+            <label class="form-label">GitHub Owner (username / org)</label>
+            <input type="text" id="connectOwner" class="form-inp" placeholder="username-github" />
+          </div>
+          <div class="form-row-2">
+            <div class="form-group">
+              <label class="form-label">Repository Name</label>
+              <input type="text" id="connectRepo" class="form-inp" placeholder="nama-repo" />
+            </div>
+            <div class="form-group">
+              <label class="form-label">Branch</label>
+              <input type="text" id="connectBranch" class="form-inp" value="main" />
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Personal Access Token (PAT)</label>
+            <div class="inp-eye-wrap">
+              <input type="password" id="connectPat" class="form-inp" placeholder="ghp_…" />
+              <button type="button" class="eye-btn" id="btnToggleConnectPat">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+              </button>
+            </div>
+            <p class="form-hint">PAT hanya tersimpan di browser lokal perangkat ini.</p>
+          </div>
+        </div>
+      </div>
+      <div class="modal-foot">
+        <button class="btn-md blue" style="width:100%" id="btnConnectDevice">Hubungkan →</button>
+      </div>
+      <div style="text-align:center;padding:10px 0 4px;border-top:1px solid var(--bd);margin-top:4px">
+        <button type="button" class="link-btn" id="btnBackToWs1" style="font-size:.76rem;color:var(--muted)">
+          Instalasi baru? Buat akun admin →
+        </button>
+      </div>
+    </div>
+
+    <!-- Step 2: GitHub -->
+    <div class="wizard-step hidden" id="ws2">
+      <div class="modal-body">
+        <div class="wizard-title">Hubungkan GitHub</div>
+        <div class="wizard-desc">GitHub digunakan sebagai database. Semua data konten tersimpan di repository GitHub Anda.</div>
+
+        <details class="pat-guide">
+          <summary>
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+            Cara membuat Personal Access Token (PAT)
+          </summary>
+          <div class="pat-guide-body">
+            <ol>
+              <li>Buka <code>github.com</code> → klik foto profil → <code>Settings</code></li>
+              <li>Scroll ke bawah → <code>Developer settings</code> → <code>Personal access tokens</code> → <code>Tokens (classic)</code></li>
+              <li>Klik <code>Generate new token (classic)</code></li>
+              <li>Beri nama token, pilih expiration, centang scope: <code>repo</code> (full control)</li>
+              <li>Klik <code>Generate token</code> → salin token yang muncul (hanya tampil sekali!)</li>
+            </ol>
+          </div>
+        </details>
+
+        <div class="setup-fields">
+          <div class="form-group">
+            <label class="form-label">GitHub Username / Organization</label>
+            <input type="text" id="setupOwner" class="form-inp" placeholder="username-github" />
+          </div>
+          <div class="form-row-2">
+            <div class="form-group">
+              <label class="form-label">Nama Repository</label>
+              <input type="text" id="setupRepo" class="form-inp" placeholder="cms-data" />
+            </div>
+            <div class="form-group">
+              <label class="form-label">Branch</label>
+              <input type="text" id="setupBranch" class="form-inp" value="main" />
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Personal Access Token (PAT)</label>
+            <div class="inp-eye-wrap">
+              <input type="password" id="setupPat" class="form-inp" placeholder="ghp_…" />
+              <button type="button" class="eye-btn" id="btnToggleSetupPat">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+              </button>
+            </div>
+          </div>
+          <div class="repo-create-row">
+            <button class="btn-sm" id="btnCreateRepo">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
+              Buat Repo Otomatis
+            </button>
+            <span style="font-size:.72rem;color:var(--muted)">atau gunakan repo yang sudah ada</span>
+          </div>
+        </div>
+      </div>
+      <div class="modal-foot">
+        <button class="btn-md" id="btnWs2Back">← Kembali</button>
+        <button class="btn-md blue" style="flex:1" id="btnWizardFinish">Simpan &amp; Selesai</button>
+      </div>
+    </div>
+
+    <!-- Step 3: Done -->
+    <div class="wizard-step hidden" id="ws3">
+      <div class="modal-body">
+        <div class="wizard-done">
+          <div class="wizard-done-icon">🎉</div>
+          <h3>CMS Siap Digunakan!</h3>
+          <p>GitHub berhasil terhubung dan data telah diinisialisasi. Anda sudah masuk sebagai <strong>Admin</strong>.</p>
+          <p style="margin-top:10px;font-size:.74rem;color:#64748b;background:#f8fafc;border-radius:8px;padding:10px 12px;text-align:left">
+            💡 <strong>Langkah berikutnya:</strong> Buka <strong>API Setup → Gemini AI</strong> untuk mengisi API Key dan mengaktifkan fitur Generate Draft AI &amp; Info Presiden.
+          </p>
+        </div>
+      </div>
+      <div class="modal-foot">
+        <button class="btn-md blue" style="width:100%" id="btnWizardDone">Mulai CMS →</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ─── LOGIN PAGE (full-screen) ─────────────────────────────────────────── -->
+<div id="loginPage" class="login-page hidden">
+  <div class="login-bg-orb login-bg-orb--a"></div>
+  <div class="login-bg-orb login-bg-orb--b"></div>
+  <div class="login-card">
+    <div class="login-hero">
+      <div class="login-hero-mark">PH</div>
+      <div class="login-hero-title">Penjaga Harapan CMS</div>
+      <div class="login-hero-sub">Platform manajemen konten tim</div>
+    </div>
+    <div class="login-form">
+      <div class="form-group" style="margin:0">
+        <label class="form-label">Masuk sebagai</label>
+        <select id="loginUserSel" class="form-inp"></select>
+      </div>
+      <div id="loginPwWrap" class="form-group" style="margin:0">
+        <label class="form-label">Password</label>
+        <div class="inp-eye-wrap">
+          <input type="password" id="loginPw" class="form-inp" placeholder="Masukkan password…" />
+          <button type="button" class="eye-btn" id="btnToggleLoginPw">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+          </button>
+        </div>
+      </div>
+      <button class="btn-md blue" style="width:100%;justify-content:center;margin-top:4px" id="btnDoLogin">Masuk →</button>
+    </div>
+    <div class="login-footer-note">Penjaga Harapan · CMS v2.0</div>
+  </div>
+</div>
+
+<!-- ─── PANTUN OVERLAY ────────────────────────────────────────────────────── -->
+<div id="pantunOverlay" class="pantun-overlay hidden">
+  <div class="pantun-card">
+    <div class="pantun-icon-wrap"><span id="pantunIcon">✨</span></div>
+    <div id="pantunRoleBadge" class="pantun-role-badge">Tim</div>
+    <div class="pantun-divider"></div>
+    <div id="pantunText" class="pantun-text"></div>
+    <div id="pantunUser" class="pantun-user"></div>
+    <button class="btn-xs pantun-btn" onclick="closePantun()">Lanjutkan →</button>
+  </div>
+</div>
+
+<!-- ─── NEWS PANEL (Info Presiden AI) ───────────────────────────────────── -->
+<div id="newsPanel" class="news-panel">
+  <div class="news-panel-head">
+    <div class="news-panel-title">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+      Info Presiden AI
+    </div>
+    <button id="closeNewsPanel" class="icon-btn">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 6L6 18M6 6l12 12"/></svg>
+    </button>
+  </div>
+  <div id="newsContent" class="news-content">
+    <div class="news-loading">
+      <div class="spinner"></div>
+      <span>Mengambil info terkini…</span>
+    </div>
+  </div>
+  <div class="news-foot">
+    <span id="newsTimestamp" class="news-ts"></span>
+    <button class="btn-xs" id="btnRefreshNews">Refresh</button>
+  </div>
+</div>
+<div id="newsOverlay" class="news-overlay"></div>
+
+<!-- ─── CONFIRM MODAL ────────────────────────────────────────────────────── -->
+<div id="confirmModal" class="modal-overlay hidden">
+  <div class="modal modal-sm">
+    <div class="modal-body" style="padding:28px 24px 8px;text-align:center">
+      <div id="confirmIcon" style="font-size:2.2rem;margin-bottom:12px">⚠️</div>
+      <p id="confirmMsg" style="font-size:.88rem;line-height:1.6;color:var(--text)">Yakin?</p>
+    </div>
+    <div class="modal-foot">
+      <button class="btn-md" id="confirmNo">Batal</button>
+      <button class="btn-md" id="confirmYes" style="background:var(--red);border-color:var(--red);color:#fff">Hapus</button>
+    </div>
+  </div>
+</div>
+
+<!-- ─── EDIT USER MODAL ───────────────────────────────────────────────────── -->
+<div id="editUserModal" class="modal-overlay hidden">
+  <div class="modal modal-sm">
+    <div class="modal-head">
+      <span class="modal-title">✏️ Edit Anggota Tim</span>
+      <button class="icon-btn" id="closeEditUser">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 6L6 18M6 6l12 12"/></svg>
+      </button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="editUserOldName" />
+      <div class="form-group">
+        <label class="form-label">Nama</label>
+        <input id="editUserName" class="form-inp" placeholder="Nama anggota…" />
+      </div>
+      <div class="form-group" style="margin-top:12px">
+        <label class="form-label">Role</label>
+        <select id="editUserRole" class="form-inp">
+          <option value="">— Tidak ada role —</option>
+          <option value="Creator">🟢 Creator</option>
+          <option value="Writer">🔵 Writer</option>
+          <option value="Designer">🩷 Designer</option>
+          <option value="Videographer">🟣 Videographer</option>
+          <option value="Editor">🩵 Editor</option>
+          <option value="Publisher">🔷 Publisher</option>
+          <option value="Producer">🟠 Producer</option>
+          <option value="Planner">🟡 Planner</option>
+          <option value="Leader">🔹 Leader</option>
+          <option value="Ketua">🔴 Ketua</option>
+          <option value="Administrator">🟣 Administrator</option>
+        </select>
+      </div>
+      <div class="form-group" style="margin-top:12px">
+        <label class="form-label">No. WhatsApp</label>
+        <input id="editUserPhone" class="form-inp" placeholder="08xxxx…" />
+      </div>
+      <div class="form-group" style="margin-top:12px">
+        <label class="form-label">Ganti Password <span class="label-opt">biarkan kosong jika tidak diubah</span></label>
+        <input id="editUserNewPassword" type="password" class="form-inp" placeholder="Password baru…" />
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn-md" id="cancelEditUser">Batal</button>
+      <button class="btn-md blue" id="saveEditUser">Simpan Perubahan</button>
+    </div>
+  </div>
+</div>
+
+<!-- ─── PDF PERIOD MODAL ─────────────────────────────────────────────────── -->
+<div id="pdfModal" class="modal-overlay hidden">
+  <div class="modal modal-sm">
+    <div class="modal-head">
+      <span class="modal-title">Unduh PDF</span>
+      <button class="icon-btn" id="closePdfModal">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 6L6 18M6 6l12 12"/></svg>
+      </button>
+    </div>
+    <div class="modal-body">
+      <p class="modal-desc">Pilih rentang waktu untuk laporan PDF:</p>
+      <div class="period-options">
+        <label class="period-item">
+          <input type="radio" name="pdfPeriod" value="week" checked />
+          <div class="period-info">
+            <span class="period-name">Minggu Ini</span>
+            <span class="period-desc">Konten 7 hari terakhir</span>
+          </div>
+        </label>
+        <label class="period-item">
+          <input type="radio" name="pdfPeriod" value="month" />
+          <div class="period-info">
+            <span class="period-name">Bulan Ini</span>
+            <span class="period-desc">Konten bulan berjalan</span>
+          </div>
+        </label>
+        <label class="period-item">
+          <input type="radio" name="pdfPeriod" value="custom" />
+          <div class="period-info">
+            <span class="period-name">Rentang Waktu</span>
+            <span class="period-desc">Pilih tanggal sendiri</span>
+          </div>
+          <div class="period-custom">
+            <input type="date" id="pdfDateFrom" class="inp-sm" />
+            <span style="font-size:.75rem;color:var(--muted)">s/d</span>
+            <input type="date" id="pdfDateTo" class="inp-sm" />
+          </div>
+        </label>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn-md" id="cancelPdfModal">Batal</button>
+      <button class="btn-md blue" id="confirmPdfDownload">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        Unduh PDF
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ─── AI LOADING OVERLAY ───────────────────────────────────────────────── -->
+<div id="aiLoadOverlay" class="ai-load-overlay hidden">
+  <div class="ai-load-box">
+    <div class="spinner large"></div>
+    <p id="aiLoadMsg">Generating dengan AI…</p>
+  </div>
+</div>
+
+<!-- ─── SPARKLINE TOOLTIP ────────────────────────────────────────────────── -->
+<!-- ─── LINK EDIT MODAL ─────────────────────────────────────────────────── -->
+<div id="linkEditModal" class="modal-overlay hidden" onclick="if(event.target===this)closeLinkModal()">
+  <div class="modal link-edit-modal">
+    <div class="link-edit-head">
+      <span id="linkEditTitle" class="link-edit-label">Edit Link</span>
+      <button class="modal-close-btn" onclick="closeLinkModal()">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 6L6 18M6 6l12 12"/></svg>
+      </button>
+    </div>
+    <div class="link-edit-body">
+      <div id="linkEditContent"></div>
+    </div>
+  </div>
+</div>
+
+<div id="sparkTooltip" class="spark-tooltip hidden"></div>
+
+<!-- ─── TOAST ─────────────────────────────────────────────────────────────── -->
+<div id="toast" class="toast hidden"></div>
+
+<!-- ─── PAGE LOADER ──────────────────────────────────────────────────────── -->
+<div id="pageLoader" class="page-loader hidden">
+  <div class="page-loader-inner">
+    <div class="loader-ring"></div>
+    <span>Memuat data…</span>
+  </div>
+</div>
+
+<!-- ─── BENDERA INDONESIA LOADER ─────────────────────────────────────────── -->
+<div id="flagLoader" class="flag-loader hidden" aria-hidden="true">
+  <div class="flag-red"></div>
+  <div class="flag-white"></div>
+  <div class="flag-ripple"></div>
+</div>
+
+<!-- ─── CONTENT PREVIEW MODAL ────────────────────────────────────────────── -->
+<div id="cntPreviewModal" class="modal-overlay hidden" onclick="if(event.target===this)closeCntPreview()">
+  <div class="cnt-preview-wrap">
+    <div class="cnt-preview-head">
+      <span id="cntPreviewTitle" style="font-weight:600;font-size:.9rem;color:var(--text)"></span>
+      <button class="icon-btn" onclick="closeCntPreview()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 6L6 18M6 6l12 12"/></svg>
+      </button>
+    </div>
+    <div class="cnt-preview-body">
+      <iframe id="cntPreviewFrame" src="" frameborder="0" allowfullscreen allow="autoplay; encrypted-media"></iframe>
+    </div>
+    <div class="cnt-preview-foot">
+      <a id="cntPreviewLink" href="#" target="_blank" class="btn-sm blue">🔗 Buka di Tab Baru</a>
+    </div>
+  </div>
+</div>
+
+<!-- Scripts -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+<script src="js/github-db.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>
