@@ -1396,6 +1396,13 @@ function renderBankKonten() {
           value="${esc(item.publishDate || '')}" />
       </td>
       <td class="bk-actions">
+        <button type="button" class="icon-btn bk-save-btn" data-id="${item.id}" title="Simpan baris ini ke GitHub">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"/>
+            <polyline points="17 21 17 13 7 13 7 21"/>
+            <polyline points="7 3 7 8 15 8"/>
+          </svg>
+        </button>
         <button type="button" class="icon-btn bk-del-btn" data-id="${item.id}" title="Hapus baris">
           <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
             <polyline points="3 6 5 6 21 6"/>
@@ -3684,10 +3691,18 @@ function renderStatistics() {
 function renderStatAcctBar() {
   const bar = $('statAcctBar');
   if (!bar) return;
-  bar.innerHTML = ACCOUNTS.map(a =>
-    `<button class="stat-acct-tab ${a.id === state.statActiveAcct ? 'active' : ''}"
-       onclick="switchStatAcct('${a.id}')">${a.name}</button>`
-  ).join('');
+  const active = state.statActiveAcct;
+  bar.innerHTML = ACCOUNTS.map(a => {
+    const isAct = a.id === active;
+    const style = isAct
+      ? `background:${a.color};border-color:${a.color};color:#fff;box-shadow:0 2px 10px ${a.color}44`
+      : `--acct-color:${a.color};border-color:${a.color}55;color:${a.color}`;
+    return `<button class="stat-acct-tab${isAct?' active':''}"
+      style="${style}" onclick="switchStatAcct('${a.id}')">
+      <span class="stat-acct-dot" style="background:${isAct?'rgba(255,255,255,.7)':a.color}"></span>
+      ${a.name}
+    </button>`;
+  }).join('');
 }
 
 function renderStatPlatBar() {
@@ -3696,7 +3711,7 @@ function renderStatPlatBar() {
   const ap = state.statActivePlat || 'youtube';
   bar.innerHTML = Object.entries(PLATFORM_FIELDS).map(([id, m]) =>
     `<button class="stat-plat-tab ${id===ap?'active':''}"
-       style="${id===ap?`--plat-color:${m.color};border-color:${m.color};color:${m.color};background:${m.color}18`:''}"
+       style="${id===ap?`border-color:${m.color};color:${m.color};background:${m.color}18`:''}"
        onclick="switchStatPlat('${id}')">${m.label}</button>`
   ).join('');
 }
@@ -5256,11 +5271,40 @@ document.addEventListener('DOMContentLoaded', async () => {
     debouncedSaveBkItem(inp.dataset.id, inp.dataset.field, inp.value);
   });
 
-  // Clicks: WA button + delete button
-  $('bkBody')?.addEventListener('click', e => {
+  // Clicks: WA button + save button + delete button
+  $('bkBody')?.addEventListener('click', async e => {
     // WA send
     const waBtn = e.target.closest('.bk-wa-btn:not(.bk-wa-btn--disabled)');
     if (waBtn) { sendBankKontenWa(waBtn.dataset.id); return; }
+
+    // Save row immediately (override debounce)
+    const saveBtn = e.target.closest('.bk-save-btn');
+    if (saveBtn) {
+      const id = saveBtn.dataset.id;
+      const item = state.bankKonten.find(x => x.id === id);
+      if (!item) return;
+      // Cancel pending debounce timer for this row
+      if (_bkSaveTimers[id]) { clearTimeout(_bkSaveTimers[id]); delete _bkSaveTimers[id]; }
+      saveBtn.disabled = true;
+      const origHTML = saveBtn.innerHTML;
+      saveBtn.innerHTML = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg>';
+      saveBtn.style.color = 'var(--green)';
+      try {
+        state.shas.bankKonten = await window.db.writeData('contentBank', state.bankKonten, `Bank Konten: simpan "${item.title || 'tanpa judul'}"`);
+        saveDataCache();
+        await logActivity(currentUser(), 'Simpan Bank Konten', `"${item.title || 'tanpa judul'}"`);
+        toast('Tersimpan ✓', 'success');
+      } catch (err) {
+        toast('Gagal simpan: ' + err.message, 'error');
+      } finally {
+        setTimeout(() => {
+          saveBtn.innerHTML = origHTML;
+          saveBtn.style.color = '';
+          saveBtn.disabled = false;
+        }, 1200);
+      }
+      return;
+    }
 
     // Delete row
     const delBtn = e.target.closest('.bk-del-btn');
