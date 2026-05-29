@@ -1,5 +1,13 @@
 [
   {
+    "id": "mprjqec5691f1",
+    "user": "Umar",
+    "role": "Publisher",
+    "action": "login",
+    "target": "masuk ke sistem sebagai Publisher",
+    "timestamp": "2026-05-29T23:21:39.605Z"
+  },
+  {
     "id": "mprjfpcd33gxq",
     "user": "Umar",
     "role": "Publisher",
@@ -20,7 +28,7 @@
     "user": "Admin",
     "role": "Admin",
     "action": "unduh PDF planner",
-    "target": "1 konten ÃÂ· filter: Semua Konten",
+    "target": "1 konten ÃÂÃÂ· filter: Semua Konten",
     "timestamp": "2026-05-29T23:01:27.649Z"
   },
   {
@@ -28,7 +36,7 @@
     "user": "Admin",
     "role": "Admin",
     "action": "edit user",
-    "target": "Umar ÃÂ¢ÃÂÃÂ Umar (Publisher)",
+    "target": "Umar ÃÂÃÂ¢ÃÂÃÂÃÂÃÂ Umar (Publisher)",
     "timestamp": "2026-05-29T22:57:44.108Z"
   },
   {
