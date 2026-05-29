@@ -3114,20 +3114,35 @@ function renderStatChart() {
     return;
   }
 
-  /* ── Summary cards (total kumulatif seluruh data) ───────────────── */
-  const keyFields = platM.fields.slice(0, 4);
-  // Hitung total kumulatif (SUM semua bulan)
-  const totals = {};
-  keyFields.forEach(f => {
-    totals[f.key] = rows.reduce((s, r) => s + (+r[f.key] || 0), 0);
-  });
+  /* ── Summary cards ───────────────────────────────────────────────
+     followerKey  = titik-waktu (EOM) → tampilkan nilai bulan terakhir
+     field lain   = kumulatif          → tampilkan SUM semua bulan
+  ──────────────────────────────────────────────────────────────── */
+  const keyFields  = platM.fields.slice(0, 4);
+  const latestRow  = rows[rows.length - 1];           // baris bulan terbaru (sudah terurut)
+  // Field yang bersifat "point-in-time" (EOM / Followers): followerKey + kunci yg mengandung "EOM"
+  const ptKeys = new Set([
+    platM.followerKey,
+    ...platM.fields
+      .filter(f => f.key.toLowerCase().includes('eom') || f.label.toLowerCase().includes('eom'))
+      .map(f => f.key)
+  ]);
   if (summaryWrap) summaryWrap.innerHTML = `<div class="stat-summary-row">
-    ${keyFields.map(f => `
-      <div class="stat-summary-card">
-        <div class="stat-sum-label">${f.label}</div>
-        <div class="stat-sum-val" style="color:${platM.color}">${fmtStatVal(totals[f.key], f.fmt)}</div>
-        <div class="stat-sum-period">Total ${rows.length} bulan</div>
-      </div>`).join('')}
+    ${keyFields.map(f => {
+      const isPointInTime = ptKeys.has(f.key);
+      const val    = isPointInTime
+        ? (+latestRow?.[f.key] || 0)
+        : rows.reduce((s, r) => s + (+r[f.key] || 0), 0);
+      const period = isPointInTime
+        ? `Bulan ${fmtMonth(latestRow?.month || '')}`
+        : `Total ${rows.length} bulan`;
+      return `
+        <div class="stat-summary-card">
+          <div class="stat-sum-label">${f.label}</div>
+          <div class="stat-sum-val" style="color:${platM.color}">${fmtStatVal(val, f.fmt)}</div>
+          <div class="stat-sum-period">${period}</div>
+        </div>`;
+    }).join('')}
   </div>`;
 
   /* ── Bar chart: last 12 months, followers (bars) + views (line) ─ */
@@ -3347,11 +3362,16 @@ function downloadStatTableJpg() {
   const month   = $('statDlMonth')?.value || getCurrentYM();
   const acctObj = ACCOUNTS.find(a => a.id === acctId);
 
-  // Semua kolom
-  const headers  = ['BULAN', ...platM.fields.map(f => f.label)];
+  // 4 kolom ringkas: Bulan · viewKey · followerKey · totalEngagement
+  const viewF  = platM.fields.find(f => f.key === platM.viewKey)      || platM.fields[0];
+  const follF  = platM.fields.find(f => f.key === platM.followerKey)  || platM.fields[1];
+  const engF   = platM.fields.find(f => f.key === 'totalEngagement')  || null;
+  const dlCols = [viewF, follF, engF].filter(Boolean);
+
+  const headers  = ['BULAN', ...dlCols.map(f => f.label)];
   const dataRows = rows.map(r => [
     fmtMonth(r.month),
-    ...platM.fields.map(f => fmtStatVal(r[f.key], f.fmt))
+    ...dlCols.map(f => fmtStatVal(r[f.key], f.fmt))
   ]);
 
   // Layout
@@ -3407,15 +3427,23 @@ function downloadStatTableJpg() {
 
   // Data rows
   dataRows.forEach((row, ri) => {
-    const y = tblTop + ROW_H * (ri + 1);
-    ctx.fillStyle = ri % 2 === 0 ? '#f8fafc' : '#ffffff';
+    const y          = tblTop + ROW_H * (ri + 1);
+    const isSelected = rows[ri]?.month === month;   // highlight bulan terpilih
+    ctx.fillStyle = isSelected
+      ? platM.color + '22'
+      : (ri % 2 === 0 ? '#f8fafc' : '#ffffff');
     ctx.fillRect(PAD, y, totalW - PAD * 2, ROW_H);
+    // Left accent bar for selected row
+    if (isSelected) {
+      ctx.fillStyle = platM.color;
+      ctx.fillRect(PAD, y, 3, ROW_H);
+    }
     ctx.fillStyle = '#0f172a';
-    ctx.font = ri === 0 ? 'bold 10px Arial, sans-serif' : '10px Arial, sans-serif';
+    ctx.font = isSelected ? 'bold 10px Arial, sans-serif' : '10px Arial, sans-serif';
     row.forEach((cell, ci) => {
       if (ci === 0) {
         ctx.textAlign = 'left';
-        ctx.fillText(String(cell), colX(ci) + 5, y + ROW_H / 2 + 3);
+        ctx.fillText(String(cell), colX(ci) + 8, y + ROW_H / 2 + 3);
       } else {
         ctx.textAlign = 'right';
         ctx.fillText(String(cell), colX(ci) + colW(ci) - 5, y + ROW_H / 2 + 3);
