@@ -95,7 +95,7 @@ const PUB_KEY  = 'cmsph_pub_v1';    // { users[] }              — cached publi
 
 /* ── User helpers (supports both legacy string[] and new {name,role}[]) ──── */
 function getUserName(u) { return typeof u === 'object' && u !== null ? (u.name || '') : (u || ''); }
-function getUserRole(u) { return typeof u === 'object' && u !== null ? (u.role || 'Creator') : 'Creator'; }
+function getUserRole(u) { return typeof u === 'object' && u !== null ? (u.role || '') : ''; }
 
 /* ── Platform / account metadata ────────────────────────────────────────── */
 const PLATFORM_META = {
@@ -144,13 +144,25 @@ const ACCOUNTS = [
 
 /* ── Role colour map (used in sidebar badge + user list) ─────────────────── */
 const ROLE_COLORS = {
-  Administrator: '#7c3aed',
-  Ketua:         '#dc2626',
-  Leader:        '#0284c7',
-  Planner:       '#d97706',
-  Creator:       '#16a34a'
+  // Manajemen
+  Administrator: '#7c3aed',   // violet
+  Ketua:         '#dc2626',   // red
+  Leader:        '#0284c7',   // sky blue
+  // Produksi
+  Planner:       '#d97706',   // amber
+  Producer:      '#c2410c',   // deep orange
+  Creator:       '#16a34a',   // green
+  Publisher:     '#0891b2',   // cyan
+  // Konten
+  Writer:        '#1e40af',   // navy blue
+  Editor:        '#0f766e',   // teal
+  Designer:      '#be185d',   // pink
+  Videographer:  '#a21caf',   // fuchsia
 };
-const ROLES_LIST = ['Creator','Leader','Planner','Administrator','Ketua'];
+const ROLES_LIST = [
+  'Creator','Writer','Designer','Videographer','Editor',
+  'Publisher','Producer','Planner','Leader','Ketua','Administrator'
+];
 
 const PAGE_TITLES = {
   dashboard:   'Dashboard',
@@ -459,13 +471,19 @@ function applyAuthState() {
       roleEl.className   = 'role-badge admin';
       roleEl.removeAttribute('style');
     } else {
-      // Show team role with correct colour from ROLE_COLORS
-      const userObj   = (state.settings?.users || []).find(u => getUserName(u) === name);
-      const teamRole  = getUserRole(userObj || null);
-      const roleColor = ROLE_COLORS[teamRole] || '#16a34a';
-      roleEl.textContent = teamRole;
-      roleEl.className   = 'role-badge';
-      roleEl.style.cssText = `background:${roleColor}18;color:${roleColor};border-color:${roleColor}30`;
+      // Show team role with correct colour from ROLE_COLORS (hidden if no role set)
+      const userObj  = (state.settings?.users || []).find(u => getUserName(u) === name);
+      const teamRole = getUserRole(userObj || null);
+      if (teamRole) {
+        const roleColor = ROLE_COLORS[teamRole] || '#64748b';
+        roleEl.textContent   = teamRole;
+        roleEl.className     = 'role-badge';
+        roleEl.style.cssText = `background:${roleColor}18;color:${roleColor};border-color:${roleColor}30`;
+        roleEl.classList.remove('hidden');
+      } else {
+        roleEl.classList.add('hidden');
+        return;   // skip the outer remove-hidden below
+      }
     }
     roleEl.classList.remove('hidden');
   }
@@ -710,7 +728,7 @@ function populateLoginSelect() {
     users.map(u => {
       const name = getUserName(u);
       const role = getUserRole(u);
-      return `<option value="${esc(name)}">${esc(name)} (${esc(role)})</option>`;
+      return `<option value="${esc(name)}">${esc(name)}${role ? ` (${esc(role)})` : ''}</option>`;
     }).join('');
 }
 
@@ -2845,8 +2863,11 @@ function renderUserList() {
     const name  = getUserName(u);
     const role  = getUserRole(u);
     const phone = u.phone || '';
-    const color = ROLE_COLORS[role] || '#16a34a';
+    const color = ROLE_COLORS[role] || '#64748b';
     const hasPw = !!u.passwordHash;
+    const roleBadge = role
+      ? `<span class="user-role-tag" style="background:${color}18;color:${color};border:1px solid ${color}30">${esc(role)}</span>`
+      : `<span class="user-role-tag" style="background:#f1f5f9;color:#94a3b8;border:1px solid #e2e8f0">—</span>`;
     return `<li class="user-item">
       <div class="user-av">${name.charAt(0).toUpperCase()}</div>
       <div class="user-info">
@@ -2854,7 +2875,7 @@ function renderUserList() {
         ${phone ? `<span class="user-phone">📱 ${esc(phone)}</span>` : '<span class="user-phone muted">— no WA —</span>'}
       </div>
       <span title="${hasPw ? 'Password diatur' : 'Belum ada password'}" style="font-size:.75rem;cursor:default">${hasPw ? '🔒' : '🔓'}</span>
-      <span class="user-role-tag" style="background:${color}18;color:${color};border:1px solid ${color}30">${esc(role)}</span>
+      ${roleBadge}
       <button class="user-edit" onclick="editUser('${esc(name)}')" title="Edit">✏</button>
       <button class="user-del"  onclick="deleteUser('${esc(name)}')" title="Hapus">×</button>
     </li>`;
@@ -2863,7 +2884,7 @@ function renderUserList() {
 
 async function addUser() {
   const name     = gv('userNameInput').trim();
-  const role     = gv('userRoleInput').trim() || 'Creator';
+  const role     = gv('userRoleInput').trim();   // opsional — boleh kosong
   const phone    = gv('userPhoneInput').trim();
   const password = gv('userPasswordInput').trim();
   if (!name) { toast('Nama tidak boleh kosong', 'error'); return; }
@@ -2875,7 +2896,7 @@ async function addUser() {
   state.settings = settings;
   setPubUsers(settings.users);
   renderUserList();
-  sv('userNameInput', ''); sv('userRoleInput', 'Creator'); sv('userPhoneInput', ''); sv('userPasswordInput', '');
+  sv('userNameInput', ''); sv('userRoleInput', ''); sv('userPhoneInput', ''); sv('userPasswordInput', '');
   $('addUserForm').classList.add('hidden');
   try {
     state.shas.settings = await window.db.writeData('settings', settings, `Tambah user: ${name} (${role})`);
@@ -2918,7 +2939,7 @@ function editUser(oldName) {
 async function saveEditUser() {
   const oldName = gv('editUserOldName');
   const newName = gv('editUserName').trim();
-  const newRole = gv('editUserRole').trim() || 'Creator';
+  const newRole = gv('editUserRole').trim();   // opsional — boleh kosong
   if (!newName) { toast('Nama tidak boleh kosong', 'error'); return; }
 
   const settings = state.settings;
