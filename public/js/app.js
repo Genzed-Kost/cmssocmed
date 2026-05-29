@@ -935,27 +935,30 @@ const WA_TOKEN_KEY = 'cmsph_wa_token';
 function getWaToken() { return localStorage.getItem(WA_TOKEN_KEY) || ''; }
 function saveWaToken(t) { if (t) localStorage.setItem(WA_TOKEN_KEY, t); else localStorage.removeItem(WA_TOKEN_KEY); }
 
-/* Roles that receive script/naskah in the WA message */
-const WA_SCRIPT_ROLES = ['Creator', 'Publisher'];
-
-const WA_MSG_TEMPLATES = {
-  Creator: (name, title, theme, date, acct, script, url) =>
-    `Halo ${name}! 👋 Kamu ditugaskan sebagai *Creator* untuk konten:\n\n📌 *Judul:* ${title}\n🏷️ *Tema:* ${theme}\n📅 *Jadwal:* ${date}\n📱 *Akun:* ${acct}${script ? `\n\n📝 *Script/Naskah:*\n${script}` : ''}\n\nSilakan mulai membuat konten. Semangat! 🎉\n\n🔗 CMS: ${url}\n_- Penjaga Harapan CMS_`,
-  Publisher: (name, title, theme, date, acct, script, url) =>
-    `Halo ${name}! 👋 Kamu ditugaskan sebagai *Publisher* untuk konten:\n\n📌 *Judul:* ${title}\n🏷️ *Tema:* ${theme}\n📅 *Jadwal:* ${date}\n📱 *Akun:* ${acct}${script ? `\n\n📝 *Script/Naskah:*\n${script}` : ''}\n\nSilakan publish konten sesuai jadwal. 🚀\n\n🔗 CMS: ${url}\n_- Penjaga Harapan CMS_`,
-  Leader: (name, title, theme, date, acct, script, url) =>
-    `Halo ${name}! 👋 Kamu ditugaskan sebagai *Leader* untuk konten:\n\n📌 *Judul:* ${title}\n🏷️ *Tema:* ${theme}\n📅 *Jadwal:* ${date}\n\nMohon supervisi dan pastikan konten berjalan sesuai rencana.\n\n🔗 CMS: ${url}\n_- Penjaga Harapan CMS_`,
-  Planner: (name, title, theme, date, acct, script, url) =>
-    `Halo ${name}! 👋 Kamu ditugaskan sebagai *Planner* untuk konten:\n\n📌 *Judul:* ${title}\n🏷️ *Tema:* ${theme}\n📅 *Jadwal:* ${date}\n\nMohon pastikan brief, jadwal, dan resources sudah disiapkan.\n\n🔗 CMS: ${url}\n_- Penjaga Harapan CMS_`,
-  Ketua: (name, title, theme, date, acct, script, url) =>
-    `Halo ${name}! 👋 Terdapat konten baru yang perlu perhatian Anda:\n\n📌 *Judul:* ${title}\n🏷️ *Tema:* ${theme}\n📅 *Jadwal:* ${date}\n\nSilakan berikan arahan atau persetujuan jika diperlukan.\n\n🔗 CMS: ${url}\n_- Penjaga Harapan CMS_`,
-  Administrator: (name, title, theme, date, acct, script, url) =>
-    `Halo ${name}! 👋 Anda mendapat tugas baru untuk melakukan budgeting pada agenda:\n\n📌 *Judul:* ${title}\n🏷️ *Tema:* ${theme}\n📅 *Tanggal:* ${date}\n\nMohon segera lakukan pengelolaan budget dan administrasi untuk konten ini.\n\n🔗 CMS: ${url}\n_- Penjaga Harapan CMS_`,
+/* Pesan WA dinamis berdasarkan STATUS konten saat creator dipilih */
+const WA_STATUS_CTA = {
+  'Plan':      { emoji: '📋', cta: 'Konten sudah masuk perencanaan. Yuk mulai siapkan materinya!' },
+  'Review':    { emoji: '🔍', cta: 'Konten menunggu di-review. Mohon segera periksa dan berikan masukan.' },
+  'Revisi':    { emoji: '✏️', cta: 'Konten perlu direvisi. Cek catatan revisi dan lakukan perbaikan segera.' },
+  'Preview':   { emoji: '🖼️', cta: 'Konten sudah di tahap preview. Mohon periksa dan berikan persetujuan.' },
+  'ACC':       { emoji: '✅', cta: 'Konten sudah di-ACC dan siap tayang sesuai jadwal!' },
+  'Done':      { emoji: '🎉', cta: 'Konten sudah selesai. Pastikan semua tahapan sudah terpenuhi.' },
+  'Published': { emoji: '🚀', cta: 'Konten telah dipublikasikan. Pantau performa di CMS.' },
+  'Hold':      { emoji: '⏸️', cta: 'Konten sedang ditahan sementara. Cek CMS untuk info lebih lanjut.' },
+  'Drop':      { emoji: '❌', cta: 'Konten ini dibatalkan. Cek CMS untuk informasi selengkapnya.' },
 };
 
-/* Generic fallback for roles not in the template list */
-function waGenericMsg(role, name, title, theme, date, acct, url) {
-  return `Halo ${name}! 👋 Kamu ditugaskan sebagai *${role}* untuk konten:\n\n📌 *Judul:* ${title}\n🏷️ *Tema:* ${theme}\n📅 *Jadwal:* ${date}\n📱 *Akun:* ${acct}\n\nSilakan tindak lanjuti sesuai peranmu sebagai ${role}.\n\n🔗 CMS: ${url}\n_- Penjaga Harapan CMS_`;
+function waStatusMsg(name, title, theme, status, date, acct, url) {
+  const s = WA_STATUS_CTA[status] || { emoji: '📌', cta: 'Mohon cek CMS untuk detail selengkapnya.' };
+  return (
+    `Halo ${name}! ${s.emoji}\n\n` +
+    `Saat ini konten *${title}* ber-tema *${theme}* sudah disiapkan dengan status *${status}*.\n\n` +
+    `${s.cta}\n\n` +
+    `📅 Jadwal: ${date}\n` +
+    `📱 Akun: ${acct}\n` +
+    `🔗 CMS: ${url}\n\n` +
+    `_- Penjaga Harapan CMS_`
+  );
 }
 
 async function sendWaNotif(phone, message) {
@@ -979,25 +982,19 @@ async function sendWaNotif(phone, message) {
 async function notifyCreatorAssigned(content, oldCreator) {
   if (!content.creator) return;
   if (!getWaToken()) return;
-  const users   = state.settings?.users || [];
-  // Normalize to arrays for comparison
+  const users  = state.settings?.users || [];
   const newArr = Array.isArray(content.creator) ? content.creator : [content.creator];
   const oldArr = Array.isArray(oldCreator) ? oldCreator : (oldCreator ? [oldCreator] : []);
-  // Only notify newly assigned creators
   for (const creatorName of newArr) {
-    if (oldArr.includes(creatorName)) continue;  // was already assigned
+    if (oldArr.includes(creatorName)) continue;   // sudah terdaftar sebelumnya
     const userObj = users.find(u => getUserName(u) === creatorName);
     if (!userObj?.phone) continue;
-    const role     = getUserRole(userObj) || 'Creator';
+    const status   = content.status || 'Plan';
     const acctObj  = ACCOUNTS.find(a => a.id === content.account);
     const acctName = acctObj?.name || content.account || '—';
     const dateStr  = fmtDate(content.publishDate) || '—';
-    const script   = (content.script || '').trim();
     const cmsUrl   = window.location.origin;
-    const addScript = WA_SCRIPT_ROLES.includes(role) ? script : '';
-    const msg = WA_MSG_TEMPLATES[role]
-      ? WA_MSG_TEMPLATES[role](creatorName, content.title||'—', content.theme||'—', dateStr, acctName, addScript, cmsUrl)
-      : waGenericMsg(role, creatorName, content.title||'—', content.theme||'—', dateStr, acctName, cmsUrl);
+    const msg = waStatusMsg(creatorName, content.title||'—', content.theme||'—', status, dateStr, acctName, cmsUrl);
     await sendWaNotif(userObj.phone, msg);
   }
 }
