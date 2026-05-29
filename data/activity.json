@@ -1,5 +1,13 @@
 [
   {
+    "id": "mpqhppp9pne58",
+    "user": "Admin",
+    "role": "Admin",
+    "action": "hapus konten",
+    "target": "Bedah Sistem Beasiswa SMA Taruna",
+    "timestamp": "2026-05-29T05:37:22.269Z"
+  },
+  {
     "id": "mpqhplr74tqnz",
     "user": "Admin",
     "role": "Admin",
