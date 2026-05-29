@@ -61,6 +61,12 @@
       "role": "Creator",
       "phone": "087885529570",
       "passwordHash": ""
+    },
+    {
+      "name": "Wildansyah",
+      "role": "Leader",
+      "phone": "081310672076",
+      "passwordHash": ""
     }
   ],
   "analyticsUrls": {
