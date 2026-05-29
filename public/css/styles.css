@@ -1611,6 +1611,10 @@ ul { list-style: none; }
   display: flex; align-items: center; gap: 5px;
 }
 .period-custom-range.hidden { display: none; }
+/* Period select wrapper - transparent on PC, icon-only on HP */
+.period-sel-wrap { display: contents; }
+.period-sel-icon { display: none; }
+
 
 /* ── Near Content (Liputan/Podcast) ─────────────────────────── */
 .near-item {
@@ -2037,12 +2041,22 @@ ul { list-style: none; }
   .stat-chart-wrap { padding: 12px; }
   .stat-chart-wrap canvas { max-height: 160px; }
 
-  /* ── Dashboard period bar: ticker wraps ke baris bawah ── */
-  .dash-month-bar { flex-wrap: wrap; }
-  .dash-ticker {
-    order: 10;           /* selalu di bawah filter + new post */
-    flex: 1 0 100%;      /* ambil full width baris baru */
-    min-width: 0;
+  /* Dashboard period bar HP: ikon saja, ticker isi sisa lebar */
+  /* New Post: icon only */
+  #btnDashNewPost { font-size: 0; padding: 7px 8px; gap: 0; min-width: auto; }
+  #btnDashNewPost svg { display: block; }
+  /* Period select: icon-only via wrapper */
+  .period-sel-wrap {
+    display: flex; align-items: center; justify-content: center;
+    position: relative; flex-shrink: 0;
+    width: 36px; height: 34px; overflow: hidden;
+    border: 1.5px solid var(--blue-bd); border-radius: var(--radius-sm);
+    background: var(--blue-lt);
+  }
+  .period-sel-icon { display: block; color: var(--blue); pointer-events: none; }
+  .period-sel-wrap .period-sel {
+    position: absolute; inset: 0; width: 100%; height: 100%;
+    opacity: 0; cursor: pointer; margin: 0; padding: 0;
   }
 
   /* ── Dashboard stat cards: 2-col tetap, lebih compact ── */
