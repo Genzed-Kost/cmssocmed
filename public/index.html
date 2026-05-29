@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="id">
 <head>
   <meta charset="UTF-8" />
@@ -63,6 +63,11 @@
 
   <div class="sidebar-footer">
     <!-- Jam Digital — hanya muncul di HP (di PC ada di topbar) -->
+    <!-- Kurs USD/IDR di sidebar (PC dan HP) -->
+    <div class="sb-rate">
+      <span class="sb-rate-label">USD / IDR</span>
+      <span class="sb-rate-value" id="rateValue">...</span>
+    </div>
     <div id="sbClock" class="sb-clock">
       <div class="sb-clock-time">
         <span id="sbClockHM">00:00</span><span class="sb-clock-colon">:</span><span id="sbClockSec" class="sb-clock-sec">00</span>
@@ -106,11 +111,6 @@
       <div class="clock-date" id="clockDate">Sen, 01 Jan 2024</div>
     </div>
 
-    <!-- KURS USD/IDR (selalu visible, nilai diisi JS) -->
-    <div class="topbar-rate" id="topbarRate" title="Kurs USD ke IDR (diperbarui tiap 5 mnt)">
-      <div class="rate-label">USD / IDR</div>
-      <div class="rate-value" id="rateValue">—</div>
-    </div>
 
     <div class="topbar-right">
       <button class="badge-btn" id="badgeInfoPresiden" title="Info Presiden AI">

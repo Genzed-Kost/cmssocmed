@@ -1,4 +1,4 @@
-/* ================================================================
+﻿/* ================================================================
    CMS Penjaga Harapan — styles.css
    ================================================================ */
 
@@ -199,6 +199,33 @@ ul { list-style: none; }
 }
 /* Tampilkan sidebar clock pada layar HP (saat topbar clock disembunyikan) */
 @media (max-width: 480px) { .sb-clock { display: block; } }
+
+/* Sidebar Rate (USD/IDR) - tampil di sidebar PC & HP */
+.sb-rate {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 2px 10px;
+  border-bottom: 1px solid var(--sb-bd);
+  margin-bottom: 10px;
+  user-select: none;
+  cursor: default;
+}
+.sb-rate-label {
+  font-size: .58rem;
+  font-weight: 700;
+  color: #64748b;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+}
+.sb-rate-value {
+  font-family: 'Courier New', Courier, monospace;
+  font-size: 1rem;
+  font-weight: 700;
+  color: #4ade80;
+  letter-spacing: .02em;
+}
+
 .sync-status { display: flex; align-items: center; gap: 7px; color: var(--sb-txt); }
 .sync-dot {
   width: 7px; height: 7px; border-radius: 50%;
@@ -278,42 +305,8 @@ ul { list-style: none; }
   text-transform: uppercase;
   margin-top: 1px;
 }
-/* Sembunyikan jam di HP (kurs yang tampil) */
-@media (max-width: 480px) { .topbar-clock { display: none; } }
 
-/* ── Exchange Rate Widget (USD/IDR) ──────────────────────────── */
-.topbar-rate {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  line-height: 1.25;
-  user-select: none;
-  flex-shrink: 0;
-  padding: 0 14px;
-  border-left: 1px solid var(--bd);  /* pemisah dari jam di PC */
-  gap: 1px;
-  cursor: default;
-}
-.rate-label {
-  font-size: .58rem;
-  font-weight: 700;
-  color: var(--muted);
-  letter-spacing: .06em;
-  text-transform: uppercase;
-}
-.rate-value {
-  font-family: 'Courier New', Courier, monospace;
-  font-size: .9rem;
-  font-weight: 700;
-  color: #16a34a;
-  letter-spacing: .02em;
-}
-/* Di HP: tampilkan rate (jam sudah hidden), hapus border kiri */
-@media (max-width: 480px) {
-  .topbar-rate { border-left: none; padding: 0 8px; }
-}
-/* Sembunyikan rate hanya di HP sangat kecil (<360px) */
-@media (max-width: 360px) { .topbar-rate { display: none; } }
+
 
 .topbar-user {
   display: flex; align-items: center; gap: 7px;
@@ -1996,7 +1989,12 @@ ul { list-style: none; }
   .dash-content-grid { grid-template-columns: 1fr; }
 
   /* KPI bar */
-  .kpi-acct { width: 90px; font-size: .74rem; }
+  .kpi-acct { width: 80px; font-size: .72rem; }
+  /* Platform analytics + content cards: compact on mobile */
+  .anlp-val-num { font-size: .95rem; }
+  .anlp-card { padding: 12px 14px; }
+  .anlp-card-vals { gap: 10px; }
+  .dcc-title { font-size: .82rem; }
 
   /* Stat summary: 2-col (already set above, keep) */
   .stat-sum-val { font-size: 1.2rem; }
