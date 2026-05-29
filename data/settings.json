@@ -55,6 +55,12 @@
       "role": "Leader",
       "phone": "089604295449",
       "passwordHash": ""
+    },
+    {
+      "name": "Bethap",
+      "role": "Creator",
+      "phone": "087885529570",
+      "passwordHash": ""
     }
   ],
   "analyticsUrls": {
