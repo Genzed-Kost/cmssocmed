@@ -1126,7 +1126,7 @@ function renderDashTicker() {
 
 const BK_ACCOUNTS = [
   { id: 'penjaga-harapan', name: 'Penjaga Harapan' },
-  { id: '33officialid',    name: '33 Official'      },
+  { id: '33-official',     name: '33 Official'      },   // harus sama dengan ACCOUNTS
   { id: 'jaga-asa',        name: 'Jaga Asa'         }
 ];
 
@@ -2929,11 +2929,10 @@ async function consumeInvite(id, pin) {
   catch { throw new Error('PIN salah — periksa kembali PIN dari admin'); }
 
   // Hapus invite setelah digunakan (one-time use)
+  // CATATAN: penghapusan ke GitHub dilakukan di doConsumeInvite() setelah PAT baru disimpan,
+  // agar device baru (yang belum punya PAT) tetap bisa menghapus invite-nya sendiri.
   delete invites[id];
-  window.db.getConfig()?.pat &&
-    window.db.writeData('_invites', invites, `Invite: hapus ${id} (sudah digunakan)`).catch(() => {});
-
-  return payload;
+  return { payload, invitesAfterDelete: invites };
 }
 
 /* ── UI: Buat invite (admin) ─────────────────────────────────────────────── */
@@ -3026,11 +3025,14 @@ async function doConsumeInvite() {
 
   btn.disabled = true; btn.textContent = 'Memverifikasi…';
   try {
-    const payload = await consumeInvite(inviteId, pin);
+    const { payload, invitesAfterDelete } = await consumeInvite(inviteId, pin);
+    // Simpan config dengan PAT baru DULU, baru hapus invite (butuh PAT untuk write)
     window.db.saveConfig({
       owner: payload.owner, repo: payload.repo,
       branch: payload.branch || 'main', pat: payload.pat
     });
+    // Hapus invite dari GitHub (sekarang PAT sudah tersimpan)
+    window.db.writeData('_invites', invitesAfterDelete, `Invite: hapus ${inviteId} (sudah digunakan)`).catch(() => {});
     if (payload.gemini) localStorage.setItem(GEMINI_LS_KEY, payload.gemini);
     if (payload.claude) localStorage.setItem(CLAUDE_LS_KEY, payload.claude);
     if (payload.wa)     localStorage.setItem(WA_TOKEN_KEY,  payload.wa);
@@ -3240,10 +3242,22 @@ async function saveEditUser() {
   const passwordHash = newPw ? await hashPw(newPw) : (u?.passwordHash || '');
   settings.users[idx] = { name: newName, role: newRole, phone: newPhone, passwordHash };
 
-  // Propagate name change to todos & contents
+  // Propagate name change to todos, contents (creator bisa string atau array), dan bankKonten
   if (newName !== oldName) {
-    state.todos    = state.todos.map(t => t.assignedTo === oldName ? {...t, assignedTo: newName} : t);
-    state.contents = state.contents.map(c => c.creator  === oldName ? {...c, creator: newName}   : c);
+    state.todos = state.todos.map(t =>
+      t.assignedTo === oldName ? { ...t, assignedTo: newName } : t
+    );
+    state.contents = state.contents.map(c => {
+      // creator bisa string (format biasa) atau string[] (Podcast/Liputan multi-select)
+      if (Array.isArray(c.creator)) {
+        const updated = c.creator.map(n => n === oldName ? newName : n);
+        return updated.join(',') !== c.creator.join(',') ? { ...c, creator: updated } : c;
+      }
+      return c.creator === oldName ? { ...c, creator: newName } : c;
+    });
+    state.bankKonten = state.bankKonten.map(b =>
+      b.creator === oldName ? { ...b, creator: newName } : b
+    );
   }
 
   state.settings = settings;
@@ -3254,8 +3268,9 @@ async function saveEditUser() {
   try {
     state.shas.settings = await window.db.writeData('settings', settings, `Edit user: ${oldName} → ${newName} (${newRole})`);
     if (newName !== oldName) {
-      state.shas.todos    = await window.db.writeData('todos',    state.todos,    `Update assignee: ${oldName}→${newName}`);
-      state.shas.contents = await window.db.writeData('contents', state.contents, `Update creator: ${oldName}→${newName}`);
+      state.shas.todos      = await window.db.writeData('todos',       state.todos,       `Update assignee: ${oldName}→${newName}`);
+      state.shas.contents   = await window.db.writeData('contents',    state.contents,    `Update creator: ${oldName}→${newName}`);
+      state.shas.bankKonten = await window.db.writeData('contentBank', state.bankKonten,  `Update creator BK: ${oldName}→${newName}`);
     }
     toast(`${newName} (${newRole}) diperbarui ✓`, 'success');
     await logActivity(currentUser(), 'edit user', `${oldName} → ${newName} (${newRole})`);
