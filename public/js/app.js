@@ -3547,7 +3547,7 @@ function renderUserList() {
         <span class="user-name">${esc(name)}</span>
         ${phone ? `<span class="user-phone">📱 ${esc(phone)}</span>` : '<span class="user-phone muted">— no WA —</span>'}
       </div>
-      <span title="${hasPw ? 'Password diatur' : 'Belum ada password'}" style="font-size:.75rem;cursor:default">${hasPw ? '🔒' : '🔓'}</span>
+      <button class="user-pw-btn ${hasPw ? 'has-pw' : 'no-pw'}" onclick="editUser('${esc(name)}')" title="${hasPw ? 'Password diatur, klik ubah' : 'Belum ada password, klik untuk set'}">${hasPw ? '🔒' : '🔓'}</button>
       ${roleBadge}
       <button class="user-edit" onclick="editUser('${esc(name)}')" title="Edit">✏</button>
       <button class="user-del"  onclick="deleteUser('${esc(name)}')" title="Hapus">×</button>
@@ -3555,9 +3555,17 @@ function renderUserList() {
   }).join('');
 }
 
+function toggleCustomRole(sel, inputId) {
+  const inp = document.getElementById(inputId);
+  if (!inp) return;
+  inp.style.display = sel.value === '__other__' ? 'block' : 'none';
+  if (sel.value === '__other__') { inp.value = ''; inp.focus(); }
+}
+
 async function addUser() {
   const name     = gv('userNameInput').trim();
-  const role     = gv('userRoleInput').trim();   // opsional — boleh kosong
+  let role   = gv('userRoleInput').trim();
+  if (role === '__other__') role = (gv('userRoleCustomInput') || '').trim();
   const phone    = gv('userPhoneInput').trim();
   const password = gv('userPasswordInput').trim();
   if (!name) { toast('Nama tidak boleh kosong', 'error'); return; }
@@ -3602,7 +3610,16 @@ function editUser(oldName) {
   if (!u) return;
   sv('editUserOldName',      oldName);
   sv('editUserName',         getUserName(u));
-  sv('editUserRole',         getUserRole(u));
+  const _roles = ['','Creator','Writer','Designer','Videographer','Editor','Publisher','Producer','Planner','Leader','Ketua','Administrator'];
+  const _cr = getUserRole(u);
+  if (_roles.includes(_cr)) {
+    sv('editUserRole', _cr);
+    const _ci = document.getElementById('editUserRoleCustom'); if (_ci) _ci.style.display = 'none';
+  } else {
+    sv('editUserRole', '__other__');
+    const _ci2 = document.getElementById('editUserRoleCustom');
+    if (_ci2) { _ci2.value = _cr; _ci2.style.display = 'block'; }
+  }
   sv('editUserPhone',        u.phone || '');
   sv('editUserNewPassword',  '');
   $('editUserModal')?.classList.remove('hidden');
@@ -3612,7 +3629,8 @@ function editUser(oldName) {
 async function saveEditUser() {
   const oldName = gv('editUserOldName');
   const newName = gv('editUserName').trim();
-  const newRole = gv('editUserRole').trim();   // opsional — boleh kosong
+  let newRole = gv('editUserRole').trim();
+  if (newRole === '__other__') newRole = (gv('editUserRoleCustom') || '').trim();
   if (!newName) { toast('Nama tidak boleh kosong', 'error'); return; }
 
   const settings = state.settings;

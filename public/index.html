@@ -710,7 +710,7 @@
             </div>
             <div id="addUserForm" class="add-user-form hidden">
               <input id="userNameInput" class="inp-sm" placeholder="Nama anggota…" />
-              <select id="userRoleInput" class="inp-sm" style="margin-top:6px;width:100%">
+              <select id="userRoleInput" class="inp-sm" style="margin-top:6px;width:100%" onchange="toggleCustomRole(this,'userRoleCustomInput')">
                 <option value="">— Pilih Role (opsional) —</option>
                 <option value="Creator">🟢 Creator</option>
                 <option value="Writer">🔵 Writer</option>
@@ -723,7 +723,9 @@
                 <option value="Leader">🔹 Leader</option>
                 <option value="Ketua">🔴 Ketua</option>
                 <option value="Administrator">🟣 Administrator</option>
+                <option value="__other__">Lainnya...</option>
               </select>
+              <input id="userRoleCustomInput" class="inp-sm" placeholder="Tulis role lainnya..." style="margin-top:4px;width:100%;display:none" />
               <input id="userPhoneInput" class="inp-sm" placeholder="No. WhatsApp (08xxx)" style="margin-top:6px;width:100%" />
               <input id="userPasswordInput" type="password" class="inp-sm" placeholder="Password login" style="margin-top:6px;width:100%" />
               <div style="display:flex;gap:6px;margin-top:6px">
@@ -1213,7 +1215,7 @@
       </div>
       <div class="form-group" style="margin-top:12px">
         <label class="form-label">Role</label>
-        <select id="editUserRole" class="form-inp">
+        <select id="editUserRole" class="form-inp" onchange="toggleCustomRole(this,'editUserRoleCustom')">
           <option value="">— Tidak ada role —</option>
           <option value="Creator">🟢 Creator</option>
           <option value="Writer">🔵 Writer</option>
@@ -1226,7 +1228,9 @@
           <option value="Leader">🔹 Leader</option>
           <option value="Ketua">🔴 Ketua</option>
           <option value="Administrator">🟣 Administrator</option>
+          <option value="__other__">Lainnya...</option>
         </select>
+        <input id="editUserRoleCustom" class="form-inp" placeholder="Tulis role lainnya..." style="margin-top:6px;display:none" />
       </div>
       <div class="form-group" style="margin-top:12px">
         <label class="form-label">No. WhatsApp</label>

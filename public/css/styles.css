@@ -165,7 +165,7 @@ ul { list-style: none; }
 
 /* ── Sidebar Clock (hanya tampil di HP) ──────────────────────── */
 .sb-clock {
-  display: none;         /* hidden by default — muncul hanya di mobile */
+  display: block;         /* hidden by default — muncul hanya di mobile */
   padding: 6px 2px 10px;
   border-bottom: 1px solid var(--sb-bd);
   margin-bottom: 10px;
@@ -198,7 +198,6 @@ ul { list-style: none; }
   margin-top: 3px;
 }
 /* Tampilkan sidebar clock pada layar HP (saat topbar clock disembunyikan) */
-@media (max-width: 480px) { .sb-clock { display: block; } }
 
 /* Sidebar Rate (USD/IDR) - tampil di sidebar PC & HP */
 .sb-rate {
@@ -269,7 +268,7 @@ ul { list-style: none; }
 
 /* ── Digital Clock ───────────────────────────────────────────── */
 .topbar-clock {
-  display: flex;
+  display: none;
   flex-direction: column;
   align-items: center;
   line-height: 1.25;
@@ -308,8 +307,6 @@ ul { list-style: none; }
 
 
 
-/* Sembunyikan jam topbar di HP, tampil di sidebar saja */
-@media (max-width: 480px) { .topbar-clock { display: none; } }
 
 .topbar-user {
   display: flex; align-items: center; gap: 7px;
@@ -1958,6 +1955,10 @@ ul { list-style: none; }
 
   /* ── User list items ── */
   .user-item { font-size: .82rem; }
+.user-pw-btn { background:none; border:none; cursor:pointer; font-size:.82rem; padding:2px 4px; border-radius:4px; transition:background .12s; }
+.user-pw-btn:hover { background:var(--bg); }
+.user-pw-btn.no-pw { opacity:.5; }
+
 
   /* ── Card head: allow wrap ── */
   .card-head { flex-wrap: wrap; gap: 6px; }
