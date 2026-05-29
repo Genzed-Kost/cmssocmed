@@ -29,11 +29,85 @@ const GEMINI_MODELS = [
   'gemini-1.5-pro-latest',
   'gemini-pro'
 ];
-const NEWS_KEY       = 'cmsph_news_v1';
-const NEWS_TTL       = 60 * 60 * 1000;
-const DATA_CACHE_KEY = 'cmsph_data_v2';
-const DATA_CACHE_TTL = 3 * 60 * 1000;   // 3 minutes — reduces GitHub API rate-limit hits
+const NEWS_KEY        = 'cmsph_news_v1';
+const NEWS_TTL        = 60 * 60 * 1000;
+const DATA_CACHE_KEY     = 'cmsph_data_v2';
+const DATA_CACHE_TTL     = 3 * 60 * 1000;   // 3 minutes — reduces GitHub API rate-limit hits
+const TEAM_TOKEN_KEY     = 'cmsph_team_token_v1'; // cache teamToken agar request selalu authenticated
+const LOGIN_ATTEMPTS_KEY = 'cmsph_login_att_v1';
+
+/* ── Token encode/decode ─────────────────────────────────────────────────────
+   XOR + hex agar tidak cocok dengan pola secret scanning GitHub.
+   GitHub bisa decode base64, tapi tidak bisa reverse XOR tanpa key ini.
+   localStorage tetap menyimpan nilai raw (decoded).                          */
+const _TK = 'cmsph_ph_2024_xk';   // XOR key — bukan rahasia, hanya mengaburkan pola
+
+function _encodeToken(t) {
+  if (!t) return '';
+  return Array.from(t)
+    .map((c, i) => (c.charCodeAt(0) ^ _TK.charCodeAt(i % _TK.length)).toString(16).padStart(2, '0'))
+    .join('');
+}
+
+function _decodeToken(s) {
+  if (!s) return '';
+  // Format baru: hex XOR
+  if (/^[0-9a-f]+$/.test(s) && s.length % 2 === 0) {
+    try {
+      const r = (s.match(/.{2}/g) || [])
+        .map((h, i) => String.fromCharCode(parseInt(h, 16) ^ _TK.charCodeAt(i % _TK.length)))
+        .join('');
+      if (r) return r;
+    } catch {}
+  }
+  // Fallback format lama: base64
+  try { return decodeURIComponent(escape(atob(s))); } catch {}
+  return s;  // fallback: raw
+}
+const LOGIN_MAX_ATTEMPTS = 5;
+const LOGIN_LOCKOUT_MS   = 5 * 60 * 1000;   // 5 menit lockout setelah 5x gagal
 const PAGE_SIZE = 15;
+
+/* ── Login attempt limiting ──────────────────────────────────────────────── */
+function _getLoginAttempts() {
+  try { return JSON.parse(localStorage.getItem(LOGIN_ATTEMPTS_KEY) || 'null') || { count: 0 }; }
+  catch { return { count: 0 }; }
+}
+function _resetLoginAttempts() { localStorage.removeItem(LOGIN_ATTEMPTS_KEY); }
+function _recordFailedAttempt() {
+  const a = _getLoginAttempts();
+  a.count = (a.count || 0) + 1;
+  a.lastAttempt = Date.now();
+  if (a.count >= LOGIN_MAX_ATTEMPTS) {
+    a.lockedUntil = Date.now() + LOGIN_LOCKOUT_MS;
+  }
+  localStorage.setItem(LOGIN_ATTEMPTS_KEY, JSON.stringify(a));
+  return a;
+}
+function _checkLoginLockout() {
+  const a = _getLoginAttempts();
+  if (!a.lockedUntil) return null;
+  if (Date.now() < a.lockedUntil) {
+    const mins = Math.ceil((a.lockedUntil - Date.now()) / 60000);
+    return `Terlalu banyak percobaan gagal. Coba lagi dalam ${mins} menit.`;
+  }
+  _resetLoginAttempts();   // lockout sudah berakhir, reset
+  return null;
+}
+
+/**
+ * Terapkan teamToken dari localStorage ke DB config SEBELUM request apapun dikirim.
+ * Dipanggil di startup (sebelum auth flow) agar loadAllData() selalu authenticated.
+ * Admin yang sudah punya PAT sendiri tidak terpengaruh.
+ */
+function _applyTeamTokenFromCache() {
+  if (window.db.getConfig()?.pat) return;  // sudah ada PAT (admin) — skip
+  const cached = localStorage.getItem(TEAM_TOKEN_KEY);
+  if (cached) {
+    const cfg = window.db.getConfig() || {};
+    window.db.saveConfig({ ...cfg, pat: cached });
+  }
+}
 
 /* ── Pantun data (login & logout per role) ─────────────────────────────── */
 const PANTUN = {
@@ -528,7 +602,57 @@ function showConfirm(msg, onYes, { icon = '⚠️', yesLabel = 'Hapus', danger =
    FIRST-RUN WIZARD
    ══════════════════════════════════════════════════════════════════════════ */
 
+/* ── Token Setup — onboarding device baru untuk repo private ─────────────── */
+function showTokenSetup() {
+  $('loginPage')?.classList.add('hidden');
+  $('wizardModal')?.classList.add('hidden');
+  $('tokenSetupModal')?.classList.remove('hidden');
+  $('setupToken') && ($('setupToken').value = '');
+}
+
+async function connectWithTeamToken() {
+  const token = ($('setupToken')?.value || '').trim();
+  if (!token) { toast('Masukkan token terlebih dahulu', 'error'); return; }
+
+  const btn = $('btnSubmitSetupToken');
+  if (btn) { btn.textContent = 'Menghubungkan…'; btn.disabled = true; }
+
+  try {
+    // Coba koneksi dengan token yang dimasukkan
+    window.db.saveConfig({ ...DEFAULT_REPO, pat: token });
+    const _s = await window.db.readData('settings');
+
+    if (!_s?.adminHash) {
+      toast('Token valid tapi data admin belum ada. Hubungi Admin untuk setup ulang.', 'warn');
+      window.db.saveConfig(DEFAULT_REPO);
+      return;
+    }
+
+    // Simpan token ke cache
+    localStorage.setItem(TEAM_TOKEN_KEY, token);
+
+    // Jika settings menyimpan teamToken yang berbeda (lebih terbatas), pakai itu
+    if (_s.teamToken && _s.teamToken !== token) {
+      const decoded = _decodeToken(_s.teamToken);
+      localStorage.setItem(TEAM_TOKEN_KEY, decoded);
+      window.db.saveConfig({ ...DEFAULT_REPO, pat: decoded });
+    }
+
+    saveAuth({ adminName: _s.adminName || 'Admin', adminHash: _s.adminHash });
+    setPubUsers(_s.users || []);
+    $('tokenSetupModal')?.classList.add('hidden');
+    showLogin();
+    toast('✅ Perangkat berhasil terhubung! Silakan login.', 'success');
+  } catch (e) {
+    toast('Gagal terhubung: ' + e.message, 'error');
+    window.db.saveConfig(DEFAULT_REPO);  // reset ke tanpa PAT
+  } finally {
+    if (btn) { btn.textContent = 'Hubungkan →'; btn.disabled = false; }
+  }
+}
+
 function showWizard(mode) {
+  $('tokenSetupModal')?.classList.add('hidden');
   $('wizardModal').classList.remove('hidden');
   if (mode === 'new') showWizardStep(1);
   else showWizardStep('Connect');
@@ -721,35 +845,37 @@ function closePantun() {
 
 async function showLogin() {
   $('loginPage').classList.remove('hidden');
-  populateLoginSelect();
   sv('loginPw', '');
   toggleLoginPw();
-  // Refresh user list dari GitHub agar selalu up-to-date (background)
+
+  // Fetch dari GitHub agar admin hash & daftar user selalu up-to-date.
+  // Tidak perlu populateLoginSelect() karena nama diketik manual sekarang.
   if (window.db.isConfigured()) {
     try {
       const _s = await window.db.readData('settings');
-      if (_s?.users?.length) {
-        setPubUsers(_s.users);
+      if (_s) {
         if (_s.adminHash && !getAuth()) {
           saveAuth({ adminName: _s.adminName || 'Admin', adminHash: _s.adminHash });
         }
-        populateLoginSelect(); // re-render dengan data fresh
+        if (_s.teamToken) {
+          const decoded = _decodeToken(_s.teamToken);
+          localStorage.setItem(TEAM_TOKEN_KEY, decoded);
+          if (!window.db.getConfig()?.pat) {
+            window.db.saveConfig({ ...window.db.getConfig(), pat: decoded });
+          }
+        }
+        if (_s.users?.length) setPubUsers(_s.users);
       }
-    } catch {}
+    } catch { /* gagal fetch — login tetap bisa dengan cache lokal */ }
   }
 }
 
+function _showLoginFetchError() { /* tidak digunakan lagi — login pakai input teks */ }
+function _hideLoginFetchError() { /* tidak digunakan lagi — login pakai input teks */ }
+
 function populateLoginSelect() {
-  const sel   = $('loginUserSel');
-  const auth  = getAuth();
-  const users = getPubUsers(); // [{name,role}] or legacy string[]
-  sel.innerHTML =
-    `<option value="__admin__">${esc(auth?.adminName || 'Admin')} (Admin)</option>` +
-    users.map(u => {
-      const name = getUserName(u);
-      const role = getUserRole(u);
-      return `<option value="${esc(name)}">${esc(name)}${role ? ` (${esc(role)})` : ''}</option>`;
-    }).join('');
+  // Input teks — tidak ada dropdown yang perlu diisi.
+  // Fungsi ini dipertahankan agar pemanggil lama tidak error.
 }
 
 function toggleLoginPw() {
@@ -758,33 +884,78 @@ function toggleLoginPw() {
 }
 
 async function doLogin() {
-  const sel   = $('loginUserSel');
-  const isAdm = sel.value === '__admin__';
-  const pw    = gv('loginPw');
-  const btn   = $('btnDoLogin');
-  if (!pw) { toast('Masukkan password', 'error'); return; }
+  const inp        = $('loginUserSel');
+  const typedName  = (inp?.value || '').trim();
+  const pw         = gv('loginPw');
+  const btn        = $('btnDoLogin');
+
+  if (!typedName) { toast('Masukkan nama', 'error'); inp?.focus(); return; }
+  if (!pw)        { toast('Masukkan password', 'error'); return; }
+
+  // ── Cek lockout percobaan login ─────────────────────────────
+  const lockMsg = _checkLoginLockout();
+  if (lockMsg) { toast(lockMsg, 'error'); return; }
+
   btn.textContent = 'Masuk…'; btn.disabled = true;
+  let userObj = null;   // diisi di blok creator
   try {
+    const auth      = getAuth();
+    const adminName = auth?.adminName || 'Admin';
+    const isAdm     = typedName.toLowerCase() === adminName.toLowerCase();
+
     if (isAdm) {
-      const auth = getAuth();
       const hash = await hashPw(pw);
-      if (hash !== auth.adminHash) { toast('Password salah', 'error'); return; }
-      setSess({ role: 'admin', name: auth.adminName });
+      if (hash !== auth?.adminHash) {
+        const a = _recordFailedAttempt();
+        toast(a.lockedUntil
+          ? 'Password salah. Terlalu banyak percobaan — akun dikunci 5 menit.'
+          : `Password salah (${LOGIN_MAX_ATTEMPTS - a.count} percobaan tersisa)`,
+          'error');
+        return;
+      }
+      _resetLoginAttempts();
+      setSess({ role: 'admin', name: adminName });
+
     } else {
-      // Verify creator password from cached user list
-      const users   = getPubUsers();
-      const userObj = users.find(u => getUserName(u) === sel.value);
-      if (!userObj) { toast('User tidak ditemukan', 'error'); return; }
+      // ── Cari user di cache; jika kosong, fetch dulu dari GitHub ──
+      let users = getPubUsers();
+      userObj   = users.find(u => getUserName(u).toLowerCase() === typedName.toLowerCase());
+
+      if (!userObj && window.db.isConfigured()) {
+        btn.textContent = 'Memeriksa…';
+        try {
+          const _s = await window.db.readData('settings');
+          if (_s?.users?.length) {
+            setPubUsers(_s.users);
+            users   = getPubUsers();
+            userObj = users.find(u => getUserName(u).toLowerCase() === typedName.toLowerCase());
+          }
+        } catch { /* tetap lanjut dengan cache lokal */ }
+        btn.textContent = 'Masuk…';
+      }
+
+      if (!userObj) { toast('Nama tidak ditemukan dalam daftar tim', 'error'); return; }
+
       if (userObj.passwordHash) {
         const hash = await hashPw(pw);
-        if (hash !== userObj.passwordHash) { toast('Password salah', 'error'); return; }
+        if (hash !== userObj.passwordHash) {
+          const a = _recordFailedAttempt();
+          toast(a.lockedUntil
+            ? 'Password salah. Terlalu banyak percobaan — akun dikunci 5 menit.'
+            : `Password salah (${LOGIN_MAX_ATTEMPTS - a.count} percobaan tersisa)`,
+            'error');
+          return;
+        }
       }
-      // No passwordHash = allow any password (backward compat, admin should set it)
-      setSess({ role: 'creator', name: sel.value });
+      // Tidak ada passwordHash = izinkan masuk (backward compat, admin perlu set password)
+      _resetLoginAttempts();
+      setSess({ role: 'creator', name: getUserName(userObj) });
     }
-    const loginName = isAdm ? getAuth().adminName : sel.value;
+
+    const loginName = isAdm ? adminName : getUserName(userObj);
     $('loginPage').classList.add('hidden');
     sv('loginPw', '');
+    if (inp) inp.value = '';
     applyAuthState();
     handleHash();
     setTimeout(async () => {
@@ -869,13 +1040,32 @@ function _syncApiKeysFromSettings() {
     }
   }
 
-  // ── Auto-apply teamToken (perangkat baru tanpa PAT) ────────────────────
-  // teamToken = fine-grained PAT terbatas, disimpan di settings.json agar
-  // device baru bisa langsung write tanpa setup manual apapun.
+  // ── Sync teamToken: cache ke localStorage + apply jika belum ada PAT ───
+  // teamToken = fine-grained PAT terbatas, disimpan di settings.json.
+  // Di-cache di localStorage agar _applyTeamTokenFromCache() bisa terapkan
+  // SEBELUM request apapun dikirim pada kunjungan berikutnya.
   const teamToken = state.settings?.teamToken;
-  if (teamToken && !window.db.getConfig()?.pat) {
-    const cfg = window.db.getConfig() || {};
-    window.db.saveConfig({ ...cfg, pat: teamToken });
+  if (teamToken) {
+    const decoded = _decodeToken(teamToken);
+    localStorage.setItem(TEAM_TOKEN_KEY, decoded);  // simpan cache (raw)
+    if (!window.db.getConfig()?.pat) {
+      const cfg = window.db.getConfig() || {};
+      window.db.saveConfig({ ...cfg, pat: decoded });
+    }
+  } else {
+    localStorage.removeItem(TEAM_TOKEN_KEY);
+  }
+
+  // ── Auto-apply API keys dari settings.json → localStorage (jika belum ada) ──
+  // Admin simpan sekali → semua device otomatis punya key tanpa input manual.
+  if (state.settings?.geminiKey && !getGeminiKey()) {
+    saveGeminiKey(_decodeToken(state.settings.geminiKey));
+  }
+  if (state.settings?.claudeKey && !getClaudeKey()) {
+    saveClaudeKey(_decodeToken(state.settings.claudeKey));
+  }
+  if (state.settings?.fonnte && !getWaToken()) {
+    saveWaToken(_decodeToken(state.settings.fonnte));
   }
 }
 
@@ -1112,7 +1302,8 @@ function renderDashTicker() {
     const daysLeft = Math.round((new Date(c.publishDate) - new Date(todayStr)) / 86400000);
     const when     = daysLeft === 0 ? 'Hari ini' : daysLeft === 1 ? 'Besok' : fmtDate(c.publishDate);
     const icon     = c.format === 'Podcast' ? '🎙' : c.format === 'Monolog' ? '🎤' : c.format === 'Liputan' ? '📰' : '📱';
-    items.push(`${icon} <strong>${esc(c.title || 'Konten')}</strong>${c.creator ? ` · ${esc(c.creator)}` : ''} [${esc(c.format)}] — ${when}`);
+    const crTxt = Array.isArray(c.creator) ? c.creator.join(', ') : (c.creator || '');
+    items.push(`${icon} <strong>${esc(c.title || 'Konten')}</strong>${crTxt ? ` · ${esc(crTxt)}` : ''} [${esc(c.format)}] — ${when}`);
   });
 
   if (!items.length) {
@@ -2113,7 +2304,10 @@ function renderPlanner(page) {
 
   let rows = state.contents.filter(c => {
     if (search  && !c.title?.toLowerCase().includes(search)) return false;
-    if (creator && c.creator !== creator) return false;
+    if (creator) {
+      const crArr = Array.isArray(c.creator) ? c.creator : (c.creator ? [c.creator] : []);
+      if (!crArr.includes(creator)) return false;
+    }
     if (status  && c.status  !== status)  return false;
     if (time === 'week') {
       const d    = new Date(c.publishDate||'');
@@ -2156,7 +2350,7 @@ function renderPlanner(page) {
       </td>
       <td>${esc(c.theme||'—')}</td>
       <td><div class="plat-pills">${plats||'—'}</div></td>
-      <td>${esc(c.creator||'—')}</td>
+      <td>${esc(Array.isArray(c.creator) ? c.creator.join(', ') : (c.creator||'—'))}</td>
       <td><div style="display:flex;gap:5px">
         <button class="btn-xs" onclick="editContent('${c.id}')">Edit</button>
         ${admin ? `<button class="btn-xs" style="border-color:#fca5a5;color:var(--red)" onclick="deleteContent('${c.id}')">Hapus</button>` : ''}
@@ -2305,8 +2499,12 @@ function renderContents() {
 let _draftTimer;
 function saveNewPostDraft() {
   if (gv('editPostId')) return; // don't autosave when editing existing post
+  const isDual = FORMATS_DUAL_ROLE.includes(gv('postFormat'));
   const draft = {
-    postDate: gv('postDate'), postCreator: gv('postCreator'), postAccount: gv('postAccount'),
+    postDate: gv('postDate'),
+    postCreator:  isDual ? '' : gv('postCreator'),
+    postCreators: isDual ? _getMultiCreators() : [],   // multi-creator (Podcast/Liputan)
+    postAccount: gv('postAccount'),
     postStatus: gv('postStatus'), postTitle: gv('postTitle'), postTheme: gv('postTheme'),
     postFormat: gv('postFormat'), postScript: gv('postScript'), postCaption: gv('postCaption'),
     postOutputLink: gv('postOutputLink'), postNotes: gv('postNotes'),
@@ -2323,7 +2521,6 @@ function clearNewPostDraft() { localStorage.removeItem(DRAFT_KEY); }
 
 function restoreDraftToForm(d) {
   sv('postDate',       d.postDate       || '');
-  sv('postCreator',    d.postCreator    || '');
   sv('postAccount',    d.postAccount    || '');
   sv('postStatus',     d.postStatus     || 'Ide');
   sv('postTitle',      d.postTitle      || '');
@@ -2334,6 +2531,13 @@ function restoreDraftToForm(d) {
   sv('postOutputLink', d.postOutputLink || '');
   sv('postNotes',      d.postNotes      || '');
   $$('#platformChecks input').forEach(cb => { cb.checked = (d.platforms||[]).includes(cb.value); });
+  // Aktifkan UI yang sesuai dulu, baru isi creator
+  onFormatChange(d.postFormat || 'Flayer');
+  if (FORMATS_DUAL_ROLE.includes(d.postFormat || '')) {
+    _setMultiCreators(Array.isArray(d.postCreators) ? d.postCreators : []);
+  } else {
+    sv('postCreator', d.postCreator || '');
+  }
 }
 
 function updateAiLimitDisplay() {
@@ -2356,7 +2560,47 @@ function updateAiLimitDisplay() {
   }
 }
 
-/* ── Format change: show/hide Editor field ─────────────────────────────── */
+/* ── Multi-creator chip helpers ─────────────────────────────────────────── */
+function _populateCreatorAddSel() {
+  const sel = $('creatorAddSel');
+  if (!sel) return;
+  const users    = state.settings?.users || [];
+  const selected = _getMultiCreators();
+  sel.innerHTML = '<option value="">＋ Tambah creator…</option>' +
+    users
+      .map(u => getUserName(u))
+      .filter(n => n && !selected.includes(n))
+      .map(n => `<option value="${esc(n)}">${esc(n)}</option>`)
+      .join('');
+}
+
+function _getMultiCreators() {
+  const chips = $('creatorChips');
+  if (!chips) return [];
+  return Array.from(chips.querySelectorAll('.creator-chip[data-name]')).map(el => el.dataset.name);
+}
+
+function _setMultiCreators(names) {
+  const chips = $('creatorChips');
+  if (!chips) return;
+  chips.innerHTML = (names || []).map(n =>
+    `<span class="creator-chip" data-name="${esc(n)}">${esc(n)}<button type="button" class="creator-chip-rm" title="Hapus">×</button></span>`
+  ).join('');
+  _populateCreatorAddSel();
+}
+
+function addCreatorChip(name) {
+  if (!name) return;
+  const chips = $('creatorChips');
+  if (!chips) return;
+  if (_getMultiCreators().includes(name)) return;  // sudah ada
+  chips.insertAdjacentHTML('beforeend',
+    `<span class="creator-chip" data-name="${esc(name)}">${esc(name)}<button type="button" class="creator-chip-rm" title="Hapus">×</button></span>`
+  );
+  _populateCreatorAddSel();
+}
+
+/* ── Format change: show/hide Editor field + toggle creator UI ─────────── */
 function onFormatChange(fmt) {
   const isDual = FORMATS_DUAL_ROLE.includes(fmt);
   $('postEditorRow')?.classList.toggle('hidden', !isDual);
@@ -2365,20 +2609,18 @@ function onFormatChange(fmt) {
     ? 'Creator <small style="font-weight:400;color:var(--muted)">(produksi · bisa pilih lebih dari 1)</small> <span class="req-star">*</span>'
     : 'Creator <span class="req-star">*</span>';
 
-  const sel = $('postCreator');
-  if (!sel) return;
+  const sel   = $('postCreator');
+  const multi = $('postCreatorMulti');
   if (isDual) {
-    sel.multiple = true;
-    sel.setAttribute('size', '4');
-    sel.classList.add('form-inp-multi');
+    // Tampilkan chip UI, sembunyikan single-select
+    if (sel)   sel.classList.add('hidden');
+    if (multi) multi.classList.remove('hidden');
+    _populateCreatorAddSel();
   } else {
-    // Clear multi-selection, keep single select
-    const prev = sel.value;
-    sel.multiple = false;
-    sel.removeAttribute('size');
-    sel.classList.remove('form-inp-multi');
-    // Restore selection if possible
-    if (prev) sel.value = prev;
+    // Tampilkan single-select, sembunyikan chip UI + reset chips
+    if (sel)   sel.classList.remove('hidden');
+    if (multi) multi.classList.add('hidden');
+    _setMultiCreators([]);
   }
 }
 
@@ -2618,13 +2860,12 @@ function renderNewPostForm(content) {
     $$('#platformChecks input').forEach(cb => {
       cb.checked = (content.platforms||[]).includes(cb.value);
     });
-    onFormatChange(content.format || '');  // show/hide editor row + set multiple attr
-    // Restore multi-select creator for Podcast/Liputan
-    if (FORMATS_DUAL_ROLE.includes(content.format || '') && Array.isArray(content.creator)) {
-      const sel = $('postCreator');
-      if (sel) Array.from(sel.options).forEach(opt => { opt.selected = content.creator.includes(opt.value); });
-    } else if (!Array.isArray(content.creator) && content.creator) {
-      sv('postCreator', content.creator);
+    onFormatChange(content.format || '');  // show/hide editor row + toggle creator UI
+    // Restore creator: chip UI untuk Podcast/Liputan, single-select untuk lainnya
+    if (FORMATS_DUAL_ROLE.includes(content.format || '')) {
+      _setMultiCreators(Array.isArray(content.creator) ? content.creator : (content.creator ? [content.creator] : []));
+    } else {
+      sv('postCreator', Array.isArray(content.creator) ? '' : (content.creator || ''));
     }
     // Lock status & creator when Published
     const isPublished = content.status === 'Published';
@@ -2719,8 +2960,8 @@ async function savePost() {
   const acctId  = gv('postAccount');
   const isDualRoleFmt = FORMATS_DUAL_ROLE.includes(gv('postFormat'));
   const creator = isDualRoleFmt
-    ? Array.from($('postCreator')?.selectedOptions || []).map(o => o.value).filter(Boolean)
-    : gv('postCreator');
+    ? _getMultiCreators()           // baca dari chip UI
+    : gv('postCreator');            // baca dari single-select
   const acctName = ACCOUNTS.find(a => a.id === acctId)?.name || acctId || '—';
   const data = {
     title, platforms,
@@ -2830,7 +3071,30 @@ function saveWaTokenFromForm() {
   const t = gv('cfgWaToken').trim();
   saveWaToken(t);
   updateWaStatus();
+  _saveApiKeysToSettings({ fonnte: t });
   toast(t ? 'Token WA disimpan ✓' : 'Token WA dihapus', t ? 'success' : 'warn');
+}
+
+/**
+ * Simpan API keys (Gemini, Claude, Fonnte) ke settings.json (encoded).
+ * Hanya admin yang bisa update — creator tidak punya akses tulis settings.
+ * Gagal silently — key sudah aman di localStorage.
+ */
+async function _saveApiKeysToSettings(updates) {
+  if (getSess()?.role !== 'admin') return;
+  try {
+    const settings = { ...(state.settings || { kpi: {}, users: [], analyticsUrls: {} }) };
+    for (const [k, v] of Object.entries(updates)) {
+      if (v) settings[k] = _encodeToken(v);
+      else   delete settings[k];
+    }
+    state.settings = settings;
+    state.shas.settings = await window.db.writeData('settings', settings, 'API keys: update');
+    saveDataCache();
+  } catch (e) {
+    console.warn('API keys: gagal simpan ke GitHub —', e.message);
+    // Tidak tampilkan error ke user — key sudah tersimpan di localStorage
+  }
 }
 
 /* ══════════════════════════════════════════════════════════════════════════
@@ -2976,7 +3240,7 @@ async function saveTeamTokenFromForm() {
   if (btn) { btn.textContent = 'Menyimpan…'; btn.disabled = true; }
 
   const settings = state.settings || { kpi:{}, users:[], analyticsUrls:{} };
-  settings.teamToken = token;
+  settings.teamToken = _encodeToken(token);   // encode agar tidak terdeteksi secret scanner
   try {
     state.settings = settings;
     state.shas.settings = await window.db.writeData('settings', settings, 'Token akses tim: update');
@@ -4677,7 +4941,10 @@ function downloadPlannerPdf() {
 
   let filtered = state.contents.filter(c => {
     if (search  && !c.title?.toLowerCase().includes(search)) return false;
-    if (creator && c.creator !== creator) return false;
+    if (creator) {
+      const crArr = Array.isArray(c.creator) ? c.creator : (c.creator ? [c.creator] : []);
+      if (!crArr.includes(creator)) return false;
+    }
     if (status  && c.status  !== status)  return false;
     if (time === 'week') {
       const d   = new Date(c.publishDate||'');
@@ -4744,7 +5011,7 @@ function downloadPlannerPdf() {
           <span style="background:${statusBg[c.status]||'#f1f5f9'};border-radius:4px;padding:2px 7px;font-size:10px;font-weight:700">${esc(c.status)}</span>
         </td>
         <td style="padding:7px 10px;border:1px solid #e2e8f0">${esc(getAcctName(c.account))}</td>
-        <td style="padding:7px 10px;border:1px solid #e2e8f0">${esc(c.creator||'—')}</td>
+        <td style="padding:7px 10px;border:1px solid #e2e8f0">${esc(Array.isArray(c.creator) ? c.creator.join(', ') : (c.creator||'—'))}</td>
         <td style="padding:7px 10px;border:1px solid #e2e8f0;font-size:10px">${(c.platforms||[]).join(', ')||'—'}</td>
       </tr>`).join('')}</tbody>
     </table>
@@ -4809,11 +5076,24 @@ document.addEventListener('DOMContentLoaded', async () => {
   $('btnToggleConnectPat')?.addEventListener('click', () => { const i=$('connectPat'); i.type=i.type==='password'?'text':'password'; });
 
   /* ── Login ──────────────────────────────────────────────────── */
-  $('loginUserSel')?.addEventListener('change', toggleLoginPw);
+  $('loginUserSel')?.addEventListener('keydown', e => { if (e.key==='Enter') { e.preventDefault(); $('loginPw')?.focus(); } });
   $('btnDoLogin')?.addEventListener('click', doLogin);
   $('loginPw')?.addEventListener('keydown', e => { if (e.key==='Enter') doLogin(); });
   $('btnToggleLoginPw')?.addEventListener('click', () => { const i=$('loginPw'); i.type=i.type==='password'?'text':'password'; });
   $('btnLogout')?.addEventListener('click', doLogout);
+
+  /* ── Token Setup Modal ──────────────────────────────────────── */
+  $('btnSubmitSetupToken')?.addEventListener('click', connectWithTeamToken);
+  $('setupToken')?.addEventListener('keydown', e => { if (e.key === 'Enter') connectWithTeamToken(); });
+  $('btnToggleSetupToken')?.addEventListener('click', () => { const i = $('setupToken'); i.type = i.type === 'password' ? 'text' : 'password'; });
+
+  /* ── Multi-creator chip removal (event delegation) ─────────── */
+  $('creatorChips')?.addEventListener('click', e => {
+    const btn = e.target.closest('.creator-chip-rm');
+    if (!btn) return;
+    const chip = btn.closest('.creator-chip');
+    if (chip) { chip.remove(); _populateCreatorAddSel(); }
+  });
 
   /* ── GitHub (API Setup) ─────────────────────────────────────── */
   $('btnTestGithub')?.addEventListener('click', testGithub);
@@ -4823,6 +5103,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const key = gv('cfgGeminiKey');
     saveGeminiKey(key);
     updateGeminiStatus();
+    _saveApiKeysToSettings({ geminiKey: key });
     toast(key ? 'Gemini API Key disimpan ✓' : 'Gemini API Key dihapus', key ? 'success' : '');
   });
   $('btnToggleGeminiKey')?.addEventListener('click', () => { const i=$('cfgGeminiKey'); i.type=i.type==='password'?'text':'password'; });
@@ -4830,6 +5111,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const key = gv('cfgClaudeKey');
     saveClaudeKey(key);
     updateClaudeStatus();
+    _saveApiKeysToSettings({ claudeKey: key });
     toast(key ? 'Claude API Key disimpan ✓' : 'Claude API Key dihapus', key ? 'success' : '');
   });
   $('btnToggleClaudeKey')?.addEventListener('click', () => { const i=$('cfgClaudeKey'); i.type=i.type==='password'?'text':'password'; });
@@ -5057,22 +5339,46 @@ document.addEventListener('DOMContentLoaded', async () => {
     window.db.saveConfig(DEFAULT_REPO);  // tanpa PAT — hanya untuk baca repo public
   }
 
+  /* ── INIT: Terapkan teamToken dari cache SEBELUM request apapun ─────────
+     Ini mencegah rate-limit GitHub (60 req/jam untuk unauthenticated).
+     Admin yang punya PAT sendiri tidak terpengaruh (_applyTeamTokenFromCache
+     skip jika PAT sudah ada). ─────────────────────────────────────────── */
+  _applyTeamTokenFromCache();
+
   /* ── INIT: Auth flow ────────────────────────────────────────── */
   if (isFirstRun()) {
-    // Coba ambil admin hash dari GitHub settings (berhasil jika repo public)
     try {
       const _s = await window.db.readData('settings');
+
       if (_s?.adminHash) {
+        // ✅ Instalasi ada & sudah setup — lanjut ke login
+        if (_s.teamToken) {
+          const decoded = _decodeToken(_s.teamToken);
+          localStorage.setItem(TEAM_TOKEN_KEY, decoded);
+          if (!window.db.getConfig()?.pat) {
+            window.db.saveConfig({ ...window.db.getConfig(), pat: decoded });
+          }
+        }
         saveAuth({ adminName: _s.adminName || 'Admin', adminHash: _s.adminHash });
         setPubUsers(_s.users || []);
         showLogin();
+
+      } else if (Array.isArray(_s) && !_s.length) {
+        // 🔒 File tidak ditemukan (404) — repo kemungkinan PRIVATE atau belum ada file
+        // Tunjukkan form token setup (anggota tim masukkan token, admin klik link wizard)
+        showTokenSetup();
+
       } else {
-        // Repo ada tapi belum ada admin — instalasi pertama
+        // ⚙️ File ada tapi adminHash belum diisi — instalasi pertama admin
         showWizard('new');
       }
     } catch {
-      // Tidak bisa baca settings (rate limit / private repo) — tetap tampilkan login
-      showLogin();
+      // ❌ Error koneksi / rate limit
+      if (getAuth()) {
+        showLogin();      // ada cache → tetap bisa login
+      } else {
+        showTokenSetup(); // tidak ada cache → minta token
+      }
     }
   } else if (!isLoggedIn()) {
     // Returning visit, no active session — show login

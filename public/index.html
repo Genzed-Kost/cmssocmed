@@ -427,9 +427,18 @@
             </div>
             <div class="form-group">
               <label id="postCreatorLabel" class="form-label">Creator <span class="req-star">*</span></label>
+              <!-- Single select — format biasa (Post, Reels, Story, dll.) -->
               <select id="postCreator" class="form-inp">
                 <option value="">— Pilih Creator —</option>
               </select>
+              <!-- Chip UI — multi-creator untuk Podcast / Liputan -->
+              <div id="postCreatorMulti" class="creator-multi-wrap hidden">
+                <div id="creatorChips" class="creator-chips"></div>
+                <select id="creatorAddSel" class="form-inp" style="margin-top:4px"
+                  onchange="addCreatorChip(this.value); this.value=''">
+                  <option value="">＋ Tambah creator…</option>
+                </select>
+              </div>
             </div>
           </div>
 
@@ -881,6 +890,38 @@
   </div>
 </div>
 
+<!-- ─── TOKEN SETUP (device baru, repo private) ───────────────────────────── -->
+<div id="tokenSetupModal" class="modal-overlay hidden">
+  <div class="modal" style="max-width:400px">
+    <div class="modal-body" style="text-align:center;padding-bottom:0">
+      <div style="font-size:2.2rem;margin-bottom:8px">🔑</div>
+      <h3 style="margin:0 0 6px;font-size:1.1rem;font-weight:700">Hubungkan Perangkat</h3>
+      <p style="margin:0 0 20px;font-size:.85rem;color:var(--muted);line-height:1.5">
+        Masukkan Token Akses Tim yang diberikan Admin untuk menghubungkan perangkat ini ke CMS.
+      </p>
+      <div class="form-group" style="text-align:left">
+        <label class="form-label">Token Akses Tim</label>
+        <div class="inp-eye-wrap">
+          <input type="password" id="setupToken" class="form-inp" placeholder="github_pat_…" autocomplete="off" />
+          <button type="button" class="eye-btn" id="btnToggleSetupToken">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+          </button>
+        </div>
+        <p class="form-hint">Token tersimpan hanya di perangkat ini — tidak dikirim ke mana pun selain GitHub.</p>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn-md blue" style="width:100%" id="btnSubmitSetupToken">Hubungkan →</button>
+    </div>
+    <div style="text-align:center;padding:10px 0 6px;border-top:1px solid var(--bd);margin-top:4px">
+      <button type="button" class="link-btn" onclick="$('tokenSetupModal').classList.add('hidden');showWizard('new')"
+        style="font-size:.76rem;color:var(--muted)">
+        Admin / instalasi pertama kali? Setup di sini →
+      </button>
+    </div>
+  </div>
+</div>
+
 <!-- ─── FIRST-RUN WIZARD ─────────────────────────────────────────────────── -->
 <div id="wizardModal" class="modal-overlay hidden">
   <div class="modal wizard-modal">
@@ -1056,8 +1097,10 @@
     </div>
     <div class="login-form">
       <div class="form-group" style="margin:0">
-        <label class="form-label">Masuk sebagai</label>
-        <select id="loginUserSel" class="form-inp"></select>
+        <label class="form-label">Nama</label>
+        <input type="text" id="loginUserSel" class="form-inp"
+          placeholder="Ketik namamu…"
+          autocomplete="off" autocorrect="off" spellcheck="false" />
       </div>
       <div id="loginPwWrap" class="form-group" style="margin:0">
         <label class="form-label">Password</label>

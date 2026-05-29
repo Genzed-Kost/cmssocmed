@@ -56,20 +56,38 @@ class GitHubDB {
 
   /**
    * Read a file from GitHub. Returns { data: any, sha: string } or null.
+   * Jika PAT tersimpan invalid (Bad credentials), otomatis retry tanpa auth
+   * agar repo public tetap bisa dibaca meski cache PAT kadaluarsa.
    */
   async getFile(path) {
     const c = this.loadConfig();
-    const branch = c.branch || 'main';
+    const branch = (c?.branch) || 'main';
     const url = this._url(path) + `?ref=${branch}&t=${Date.now()}`;
 
-    // Gunakan auth jika ada PAT, tanpa auth untuk repo public
-    const headers = {
+    const baseHeaders = {
       'Accept': 'application/vnd.github.v3+json',
       'X-GitHub-Api-Version': '2022-11-28'
     };
-    if (c.pat) headers['Authorization'] = `Bearer ${c.pat}`;
 
-    const res = await fetch(url, { headers });
+    // PENTING: simpan pat sebagai string primitif (bukan referensi objek).
+    // Jika banyak getFile() berjalan paralel (Promise.all) dan salah satu
+    // menghapus cfg.pat, objek c yang di-share bisa kehilangan .pat SEBELUM
+    // handler 401 di call lain sempat memeriksa c.pat.
+    const patAtStart = c?.pat || '';
+    const authHeaders = patAtStart
+      ? { ...baseHeaders, 'Authorization': `Bearer ${patAtStart}` }
+      : baseHeaders;
+
+    let res = await fetch(url, { headers: authHeaders });
+
+    // PAT invalid → hapus dari config & retry tanpa auth (repo public)
+    if (res.status === 401 && patAtStart) {
+      const cfg = this.loadConfig();
+      if (cfg) { delete cfg.pat; this._cfg = cfg; localStorage.setItem(this._ls, JSON.stringify(cfg)); }
+      localStorage.removeItem('cmsph_team_token_v1');
+      res = await fetch(url, { headers: baseHeaders });
+    }
+
     if (res.status === 404) return null;
     if (!res.ok) {
       const err = await res.json().catch(() => ({}));
