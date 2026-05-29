@@ -251,6 +251,21 @@
         "totalShares": 1768,
         "totalEngagement": 61627,
         "erPct": 2.48
+      },
+      {
+        "month": "2025-08",
+        "totalVideoViews": 2041908,
+        "profileViews": 6711,
+        "followersEOM": 21420,
+        "followersGained": 11291,
+        "totalViewers": 1720980,
+        "newViewers": 968895,
+        "returningViewers": 752085,
+        "totalLikes": 63238,
+        "totalComments": 12969,
+        "totalShares": 5126,
+        "totalEngagement": 81333,
+        "erPct": 3.98
       }
     ]
   },
