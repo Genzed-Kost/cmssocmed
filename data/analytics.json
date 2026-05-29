@@ -70,6 +70,23 @@
         "peakViews": 7091
       },
       {
+        "month": "2025-09",
+        "jmlVideo": 13,
+        "totalViews": 68829,
+        "uniqueViewers": 0,
+        "subsEOM": 1252,
+        "subsGained": 355,
+        "totalLikes": 984,
+        "totalComments": 642,
+        "totalEngagement": 1626,
+        "erPct": 2.36,
+        "watchHours": 5164,
+        "impressions": 426399,
+        "adImpressions": 20929,
+        "avgViewsPerVideo": 5295,
+        "peakViews": 35412
+      },
+      {
         "month": "2026-01",
         "jmlVideo": 68,
         "totalViews": 493283,
