@@ -4094,18 +4094,24 @@ function showAiAnalysisModal(text, acctId, platId) {
   modal.id = 'aiAnalysisModal';
   modal.className = 'modal-overlay';
   modal.innerHTML = `
-    <div class="modal-box" style="max-width:680px;max-height:85vh;display:flex;flex-direction:column">
-      <div class="modal-head" style="border-top:3px solid ${color}">
-        <div>
-          <div class="modal-title" style="font-size:.95rem">🧠 Analisis AI — ${platM?.label||platId} · ${acctObj?.name||acctId}</div>
-          <div style="font-size:.73rem;color:#64748b;margin-top:2px">Powered by ${getClaudeKey() ? 'Claude AI' : 'Gemini AI'} · ${new Date().toLocaleDateString('id-ID',{day:'2-digit',month:'long',year:'numeric'})}</div>
+    <div class="modal modal-analysis">
+      <div class="modal-head" style="border-top:3px solid ${color};padding:14px 18px 12px">
+        <div style="flex:1;min-width:0">
+          <div class="modal-title" style="font-size:.9rem;display:flex;align-items:center;gap:6px">
+            🧠 Analisis AI
+            <span style="font-size:.75rem;font-weight:400;color:#64748b;padding:2px 7px;background:#f1f5f9;border-radius:20px">${platM?.label||platId} · ${acctObj?.name||acctId}</span>
+          </div>
+          <div style="font-size:.7rem;color:#94a3b8;margin-top:3px">Powered by ${getClaudeKey() ? 'Claude AI (Anthropic)' : 'Gemini AI (Google)'} · ${new Date().toLocaleDateString('id-ID',{day:'2-digit',month:'long',year:'numeric'})}</div>
         </div>
-        <button class="modal-close" onclick="document.getElementById('aiAnalysisModal').remove()">✕</button>
+        <button onclick="document.getElementById('aiAnalysisModal').remove()"
+          style="flex-shrink:0;width:28px;height:28px;border:none;background:transparent;cursor:pointer;font-size:1rem;color:#94a3b8;border-radius:6px;display:flex;align-items:center;justify-content:center"
+          onmouseover="this.style.background='#f1f5f9';this.style.color='#334155'"
+          onmouseout="this.style.background='transparent';this.style.color='#94a3b8'">✕</button>
       </div>
-      <div style="overflow-y:auto;padding:16px 20px;font-size:.82rem;line-height:1.65;color:#334155;flex:1">
+      <div class="modal-analysis-body">
         ${html}
       </div>
-      <div style="padding:12px 20px;border-top:1px solid #e2e8f0;display:flex;gap:8px;justify-content:flex-end">
+      <div style="padding:11px 18px;border-top:1px solid var(--bd);display:flex;gap:8px;justify-content:flex-end;flex-shrink:0">
         <button class="btn-sm" id="btnCopyAnalysis">📋 Salin</button>
         <button class="btn-sm blue" onclick="document.getElementById('aiAnalysisModal').remove()">Tutup</button>
       </div>

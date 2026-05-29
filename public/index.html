@@ -608,6 +608,9 @@
       <div class="page-inner">
         <div class="setup-grid">
 
+          <!-- ── Kolom Kiri: GitHub + Anggota Tim ───────────────── -->
+          <div class="setup-col">
+
           <!-- GitHub Config -->
           <div class="card setup-card">
             <div class="card-head">
@@ -653,18 +656,6 @@
             </div>
           </div>
 
-          <!-- Platform URLs per account -->
-          <div class="card setup-card">
-            <div class="card-head">
-              <span class="card-title">URL Platform per Akun</span>
-            </div>
-            <div class="url-acct-bar" id="urlAcctBar"></div>
-            <div id="platformUrlList"></div>
-            <div class="form-actions-row" style="margin-top:12px">
-              <button class="btn-sm blue" id="btnSaveUrls">Simpan URL</button>
-            </div>
-          </div>
-
           <!-- User Management -->
           <div class="card setup-card">
             <div class="card-head">
@@ -697,6 +688,23 @@
             <ul class="user-list" id="userList">
               <li class="user-empty">Belum ada anggota. Tambahkan creator tim.</li>
             </ul>
+          </div>
+
+          </div><!-- /setup-col kiri -->
+
+          <!-- ── Kolom Kanan: URL Platform + API Keys + KPI ─────── -->
+          <div class="setup-col">
+
+          <!-- Platform URLs per account -->
+          <div class="card setup-card">
+            <div class="card-head">
+              <span class="card-title">URL Platform per Akun</span>
+            </div>
+            <div class="url-acct-bar" id="urlAcctBar"></div>
+            <div id="platformUrlList"></div>
+            <div class="form-actions-row" style="margin-top:12px">
+              <button class="btn-sm blue" id="btnSaveUrls">Simpan URL</button>
+            </div>
           </div>
 
           <!-- Gemini AI Key -->
@@ -798,7 +806,9 @@
             </div>
           </div>
 
-        </div>
+          </div><!-- /setup-col kanan -->
+
+        </div><!-- /setup-grid -->
       </div>
     </section>
 
