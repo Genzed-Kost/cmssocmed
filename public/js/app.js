@@ -150,6 +150,7 @@ const ROLE_COLORS = {
   Planner:       '#d97706',
   Creator:       '#16a34a'
 };
+const ROLES_LIST = ['Creator','Leader','Planner','Administrator','Ketua'];
 
 const PAGE_TITLES = {
   dashboard:   'Dashboard',
@@ -1934,16 +1935,17 @@ function renderTodoList() {
   const list = $('todoList');
   if (!list) return;
 
-  const me       = currentUser();
-  const admin    = isAdmin();
-  const todayStr = new Date().toISOString().slice(0, 10);
-  const DONE     = ['Published', 'Done', 'Drop'];
+  const me          = currentUser();
+  const admin       = isAdmin();
+  const todayStr    = new Date().toISOString().slice(0, 10);
+  const tomorrowStr = new Date(Date.now() + 86400000).toISOString().slice(0, 10);
+  const DONE        = ['Published', 'Done', 'Drop'];
 
   // Label subjudul
   const label = $('todoUserLabel');
   if (label) label.textContent = admin ? '(semua tim)' : `(${me})`;
 
-  // Filter konten dari planner
+  // Filter & sort konten dari planner
   const myContents = (state.contents || [])
     .filter(c => {
       if (DONE.includes(c.status)) return false;
@@ -1955,30 +1957,45 @@ function renderTodoList() {
       const da = a.publishDate ? new Date(a.publishDate) : new Date('9999');
       const db = b.publishDate ? new Date(b.publishDate) : new Date('9999');
       return da - db;
-    })
-    .slice(0, 6);  // maksimal 6 item
+    });
 
   if (!myContents.length) {
     list.innerHTML = `<li class="todo-empty">${admin ? 'Tidak ada konten aktif' : 'Tidak ada tugas untuk Anda saat ini'}</li>`;
     return;
   }
 
-  list.innerHTML = myContents.map(c => {
-    const mode     = c.status === 'Published' ? 'published' : 'upcoming';
-    const overdue  = c.publishDate && c.publishDate < todayStr;
-    const dateStr  = c.publishDate
+  // Kelompokkan: hari ini, besok, sisanya (max 6 total)
+  const todayItems    = myContents.filter(c => c.publishDate === todayStr);
+  const tomorrowItems = myContents.filter(c => c.publishDate === tomorrowStr);
+  const otherItems    = myContents.filter(c => c.publishDate !== todayStr && c.publishDate !== tomorrowStr);
+
+  // Ambil max 6 total, prioritas: hari ini → besok → lainnya
+  const combined = [...todayItems, ...tomorrowItems, ...otherItems].slice(0, 6);
+
+  function buildItem(c, tag) {
+    const mode    = c.status === 'Published' ? 'published' : 'upcoming';
+    const overdue = c.publishDate && c.publishDate < todayStr;
+    const dateStr = c.publishDate
       ? (overdue ? `⚠ ${fmtDate(c.publishDate)}` : fmtDate(c.publishDate))
       : '—';
-    return `
-      <li class="todo-item todo-planner-item${overdue ? ' todo-overdue' : ''}"
-          onclick="openLinkModal('${c.id}','${mode}')" title="Klik untuk lihat detail konten">
-        <span class="badge ${STATUS_CLASS[c.status] || 'badge-ide'} todo-status-badge">${esc(c.status || 'Plan')}</span>
-        <span class="todo-planner-body">
-          <span class="todo-planner-title">${esc(c.title || '(Tanpa Judul)')}</span>
-          <span class="todo-planner-meta">${esc(c.format || '—')} · ${dateStr}</span>
-        </span>
-        <span class="todo-planner-arrow">›</span>
-      </li>`;
+    const tagHtml = tag
+      ? `<span class="todo-day-tag todo-day-tag--${tag}">${tag === 'today' ? 'Hari Ini' : 'Besok'}</span>`
+      : '';
+    return `<li class="todo-item todo-planner-item${overdue ? ' todo-overdue' : ''}${tag ? ` todo-highlight-${tag}` : ''}"
+        onclick="openLinkModal('${c.id}','${mode}')" title="Klik untuk lihat detail konten">
+      <span class="badge ${STATUS_CLASS[c.status] || 'badge-ide'} todo-status-badge">${esc(c.status || 'Plan')}</span>
+      <span class="todo-planner-body">
+        <span class="todo-planner-title">${esc(c.title || '(Tanpa Judul)')}${tagHtml}</span>
+        <span class="todo-planner-meta">${esc(c.format || '—')} · ${dateStr}</span>
+      </span>
+      <span class="todo-planner-arrow">›</span>
+    </li>`;
+  }
+
+  list.innerHTML = combined.map(c => {
+    const isToday    = c.publishDate === todayStr;
+    const isTomorrow = c.publishDate === tomorrowStr;
+    return buildItem(c, isToday ? 'today' : isTomorrow ? 'tomorrow' : null);
   }).join('');
 }
 

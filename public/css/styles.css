@@ -372,6 +372,17 @@ ul { list-style: none; }
 }
 .todo-overdue .todo-planner-meta { color: var(--red); font-weight: 600; }
 
+/* Today / tomorrow highlight tags */
+.todo-day-tag {
+  display: inline-block; font-size: .58rem; font-weight: 700;
+  padding: 1px 5px; border-radius: 4px; margin-left: 5px;
+  vertical-align: middle; letter-spacing: .02em;
+}
+.todo-day-tag--today    { background: #fee2e2; color: #dc2626; border: 1px solid #fca5a5; }
+.todo-day-tag--tomorrow { background: #fef9c3; color: #ca8a04; border: 1px solid #fde047; }
+.todo-highlight-today    { border-left: 3px solid #dc2626 !important; padding-left: 5px !important; }
+.todo-highlight-tomorrow { border-left: 3px solid #f59e0b !important; padding-left: 5px !important; }
+
 /* Activity list (mini) */
 .act-list { display: flex; flex-direction: column; gap: 0; max-height: 220px; overflow-y: auto; }
 .act-item {

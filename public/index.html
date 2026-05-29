@@ -670,15 +670,13 @@
             </div>
             <div id="addUserForm" class="add-user-form hidden">
               <input id="userNameInput" class="inp-sm" placeholder="Nama anggota…" />
-              <input id="userRoleInput" class="inp-sm" list="roleOptionsList"
-                placeholder="Peran (Creator, Leader…)" style="margin-top:6px;width:100%" value="Creator" />
-              <datalist id="roleOptionsList">
-                <option value="Creator"></option>
-                <option value="Administrator"></option>
-                <option value="Leader"></option>
-                <option value="Planner"></option>
-                <option value="Ketua"></option>
-              </datalist>
+              <select id="userRoleInput" class="inp-sm" style="margin-top:6px;width:100%">
+                <option value="Creator">Creator</option>
+                <option value="Leader">Leader</option>
+                <option value="Planner">Planner</option>
+                <option value="Ketua">Ketua</option>
+                <option value="Administrator">Administrator</option>
+              </select>
               <input id="userPhoneInput" class="inp-sm" placeholder="No. WhatsApp (08xxx)" style="margin-top:6px;width:100%" />
               <input id="userPasswordInput" type="password" class="inp-sm" placeholder="Password login" style="margin-top:6px;width:100%" />
               <div style="display:flex;gap:6px;margin-top:6px">
@@ -1031,14 +1029,13 @@
       </div>
       <div class="form-group" style="margin-top:12px">
         <label class="form-label">Role</label>
-        <input id="editUserRole" class="form-inp" list="editRoleList" placeholder="Creator, Leader…" />
-        <datalist id="editRoleList">
-          <option value="Creator"></option>
-          <option value="Administrator"></option>
-          <option value="Leader"></option>
-          <option value="Planner"></option>
-          <option value="Ketua"></option>
-        </datalist>
+        <select id="editUserRole" class="form-inp">
+          <option value="Creator">Creator</option>
+          <option value="Leader">Leader</option>
+          <option value="Planner">Planner</option>
+          <option value="Ketua">Ketua</option>
+          <option value="Administrator">Administrator</option>
+        </select>
       </div>
       <div class="form-group" style="margin-top:12px">
         <label class="form-label">No. WhatsApp</label>
