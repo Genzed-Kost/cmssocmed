@@ -845,21 +845,18 @@ function closePantun() {
 
 async function showLogin() {
   $('loginPage').classList.remove('hidden');
-  populateLoginSelect();   // tampilkan cache dulu (cepat untuk returning device)
   sv('loginPw', '');
   toggleLoginPw();
-  _hideLoginFetchError();
 
-  // Selalu fetch dari GitHub agar daftar anggota selalu up-to-date
+  // Fetch dari GitHub agar admin hash & daftar user selalu up-to-date.
+  // Tidak perlu populateLoginSelect() karena nama diketik manual sekarang.
   if (window.db.isConfigured()) {
     try {
       const _s = await window.db.readData('settings');
       if (_s) {
-        // Simpan auth admin jika belum ada (perangkat baru)
         if (_s.adminHash && !getAuth()) {
           saveAuth({ adminName: _s.adminName || 'Admin', adminHash: _s.adminHash });
         }
-        // Apply teamToken untuk perangkat baru yang belum punya token
         if (_s.teamToken) {
           const decoded = _decodeToken(_s.teamToken);
           localStorage.setItem(TEAM_TOKEN_KEY, decoded);
@@ -867,40 +864,18 @@ async function showLogin() {
             window.db.saveConfig({ ...window.db.getConfig(), pat: decoded });
           }
         }
-        // Update cache: pakai data GitHub jika ada users; jangan hapus cache jika settings kosong
-        if (_s.users?.length) {
-          setPubUsers(_s.users);
-        }
-        populateLoginSelect();  // selalu re-render setelah fetch
+        if (_s.users?.length) setPubUsers(_s.users);
       }
-    } catch {
-      // Jika fetch gagal tapi ada cache → tetap tampil (sudah dilakukan di atas)
-      // Jika tidak ada cache → tampilkan petunjuk
-      if (!getPubUsers().length) _showLoginFetchError();
-    }
+    } catch { /* gagal fetch — login tetap bisa dengan cache lokal */ }
   }
 }
 
-function _showLoginFetchError() {
-  const el = $('loginFetchError');
-  if (el) el.classList.remove('hidden');
-}
-function _hideLoginFetchError() {
-  const el = $('loginFetchError');
-  if (el) el.classList.add('hidden');
-}
+function _showLoginFetchError() { /* tidak digunakan lagi — login pakai input teks */ }
+function _hideLoginFetchError() { /* tidak digunakan lagi — login pakai input teks */ }
 
 function populateLoginSelect() {
-  const sel   = $('loginUserSel');
-  const auth  = getAuth();
-  const users = getPubUsers(); // [{name,role}] or legacy string[]
-  sel.innerHTML =
-    `<option value="__admin__">${esc(auth?.adminName || 'Admin')} (Admin)</option>` +
-    users.map(u => {
-      const name = getUserName(u);
-      const role = getUserRole(u);
-      return `<option value="${esc(name)}">${esc(name)}${role ? ` (${esc(role)})` : ''}</option>`;
-    }).join('');
+  // Input teks — tidak ada dropdown yang perlu diisi.
+  // Fungsi ini dipertahankan agar pemanggil lama tidak error.
 }
 
 function toggleLoginPw() {
@@ -909,22 +884,28 @@ function toggleLoginPw() {
 }
 
 async function doLogin() {
-  const sel   = $('loginUserSel');
-  const isAdm = sel.value === '__admin__';
-  const pw    = gv('loginPw');
-  const btn   = $('btnDoLogin');
-  if (!pw) { toast('Masukkan password', 'error'); return; }
+  const inp        = $('loginUserSel');
+  const typedName  = (inp?.value || '').trim();
+  const pw         = gv('loginPw');
+  const btn        = $('btnDoLogin');
+
+  if (!typedName) { toast('Masukkan nama', 'error'); inp?.focus(); return; }
+  if (!pw)        { toast('Masukkan password', 'error'); return; }
 
   // ── Cek lockout percobaan login ─────────────────────────────
   const lockMsg = _checkLoginLockout();
   if (lockMsg) { toast(lockMsg, 'error'); return; }
 
   btn.textContent = 'Masuk…'; btn.disabled = true;
+  let userObj = null;   // diisi di blok creator
   try {
+    const auth      = getAuth();
+    const adminName = auth?.adminName || 'Admin';
+    const isAdm     = typedName.toLowerCase() === adminName.toLowerCase();
+
     if (isAdm) {
-      const auth = getAuth();
       const hash = await hashPw(pw);
-      if (hash !== auth.adminHash) {
+      if (hash !== auth?.adminHash) {
         const a = _recordFailedAttempt();
         toast(a.lockedUntil
           ? 'Password salah. Terlalu banyak percobaan — akun dikunci 5 menit.'
@@ -933,12 +914,28 @@ async function doLogin() {
         return;
       }
       _resetLoginAttempts();
-      setSess({ role: 'admin', name: auth.adminName });
+      setSess({ role: 'admin', name: adminName });
+
     } else {
-      // Verify creator password from cached user list
-      const users   = getPubUsers();
-      const userObj = users.find(u => getUserName(u) === sel.value);
-      if (!userObj) { toast('User tidak ditemukan', 'error'); return; }
+      // ── Cari user di cache; jika kosong, fetch dulu dari GitHub ──
+      let users = getPubUsers();
+      userObj   = users.find(u => getUserName(u).toLowerCase() === typedName.toLowerCase());
+
+      if (!userObj && window.db.isConfigured()) {
+        btn.textContent = 'Memeriksa…';
+        try {
+          const _s = await window.db.readData('settings');
+          if (_s?.users?.length) {
+            setPubUsers(_s.users);
+            users   = getPubUsers();
+            userObj = users.find(u => getUserName(u).toLowerCase() === typedName.toLowerCase());
+          }
+        } catch { /* tetap lanjut dengan cache lokal */ }
+        btn.textContent = 'Masuk…';
+      }
+
+      if (!userObj) { toast('Nama tidak ditemukan dalam daftar tim', 'error'); return; }
+
       if (userObj.passwordHash) {
         const hash = await hashPw(pw);
         if (hash !== userObj.passwordHash) {
@@ -950,13 +947,15 @@ async function doLogin() {
           return;
         }
       }
-      // No passwordHash = allow any password (backward compat, admin should set it)
+      // Tidak ada passwordHash = izinkan masuk (backward compat, admin perlu set password)
       _resetLoginAttempts();
-      setSess({ role: 'creator', name: sel.value });
+      setSess({ role: 'creator', name: getUserName(userObj) });
     }
-    const loginName = isAdm ? getAuth().adminName : sel.value;
+
+    const loginName = isAdm ? adminName : getUserName(userObj);
     $('loginPage').classList.add('hidden');
     sv('loginPw', '');
+    if (inp) inp.value = '';
     applyAuthState();
     handleHash();
     setTimeout(async () => {
@@ -1397,6 +1396,13 @@ function renderBankKonten() {
           value="${esc(item.publishDate || '')}" />
       </td>
       <td class="bk-actions">
+        <button type="button" class="icon-btn bk-save-btn" data-id="${item.id}" title="Simpan baris ini ke GitHub">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"/>
+            <polyline points="17 21 17 13 7 13 7 21"/>
+            <polyline points="7 3 7 8 15 8"/>
+          </svg>
+        </button>
         <button type="button" class="icon-btn bk-del-btn" data-id="${item.id}" title="Hapus baris">
           <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
             <polyline points="3 6 5 6 21 6"/>
@@ -3301,6 +3307,22 @@ function startClock() {
   setInterval(tick, 1000);
 }
 
+/* ═══════════════════════════════════════════════════════════════════════════
+   KURS USD/IDR — fetchExchangeRate (frankfurter.app, refresh tiap 5 mnt)
+   ══════════════════════════════════════════════════════════════════════════ */
+async function fetchExchangeRate() {
+  try {
+    const res = await fetch('https://api.frankfurter.app/latest?from=USD&to=IDR');
+    if (!res.ok) return;
+    const data = await res.json();
+    const rate = data.rates?.IDR;
+    if (!rate) return;
+    const el = document.getElementById('rateValue');
+    if (el) el.textContent = 'Rp ' + Math.round(rate).toLocaleString('id-ID');
+    document.getElementById('topbarRate')?.classList.remove('hidden');
+  } catch { /* fail silently — widget tetap tersembunyi jika offline */ }
+}
+
 function showInviteCreatorModal() {
   const cfg = window.db.getConfig();
   if (!cfg?.owner || !cfg?.repo || !cfg?.pat) {
@@ -3685,10 +3707,18 @@ function renderStatistics() {
 function renderStatAcctBar() {
   const bar = $('statAcctBar');
   if (!bar) return;
-  bar.innerHTML = ACCOUNTS.map(a =>
-    `<button class="stat-acct-tab ${a.id === state.statActiveAcct ? 'active' : ''}"
-       onclick="switchStatAcct('${a.id}')">${a.name}</button>`
-  ).join('');
+  const active = state.statActiveAcct;
+  bar.innerHTML = ACCOUNTS.map(a => {
+    const isAct = a.id === active;
+    const style = isAct
+      ? `background:${a.color};border-color:${a.color};color:#fff;box-shadow:0 2px 10px ${a.color}44`
+      : `--acct-color:${a.color};border-color:${a.color}55;color:${a.color}`;
+    return `<button class="stat-acct-tab${isAct?' active':''}"
+      style="${style}" onclick="switchStatAcct('${a.id}')">
+      <span class="stat-acct-dot" style="background:${isAct?'rgba(255,255,255,.7)':a.color}"></span>
+      ${a.name}
+    </button>`;
+  }).join('');
 }
 
 function renderStatPlatBar() {
@@ -3697,7 +3727,7 @@ function renderStatPlatBar() {
   const ap = state.statActivePlat || 'youtube';
   bar.innerHTML = Object.entries(PLATFORM_FIELDS).map(([id, m]) =>
     `<button class="stat-plat-tab ${id===ap?'active':''}"
-       style="${id===ap?`--plat-color:${m.color};border-color:${m.color};color:${m.color};background:${m.color}18`:''}"
+       style="${id===ap?`border-color:${m.color};color:${m.color};background:${m.color}18`:''}"
        onclick="switchStatPlat('${id}')">${m.label}</button>`
   ).join('');
 }
@@ -5077,7 +5107,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   $('btnToggleConnectPat')?.addEventListener('click', () => { const i=$('connectPat'); i.type=i.type==='password'?'text':'password'; });
 
   /* ── Login ──────────────────────────────────────────────────── */
-  $('loginUserSel')?.addEventListener('change', toggleLoginPw);
+  $('loginUserSel')?.addEventListener('keydown', e => { if (e.key==='Enter') { e.preventDefault(); $('loginPw')?.focus(); } });
   $('btnDoLogin')?.addEventListener('click', doLogin);
   $('loginPw')?.addEventListener('keydown', e => { if (e.key==='Enter') doLogin(); });
   $('btnToggleLoginPw')?.addEventListener('click', () => { const i=$('loginPw'); i.type=i.type==='password'?'text':'password'; });
@@ -5257,11 +5287,40 @@ document.addEventListener('DOMContentLoaded', async () => {
     debouncedSaveBkItem(inp.dataset.id, inp.dataset.field, inp.value);
   });
 
-  // Clicks: WA button + delete button
-  $('bkBody')?.addEventListener('click', e => {
+  // Clicks: WA button + save button + delete button
+  $('bkBody')?.addEventListener('click', async e => {
     // WA send
     const waBtn = e.target.closest('.bk-wa-btn:not(.bk-wa-btn--disabled)');
     if (waBtn) { sendBankKontenWa(waBtn.dataset.id); return; }
+
+    // Save row immediately (override debounce)
+    const saveBtn = e.target.closest('.bk-save-btn');
+    if (saveBtn) {
+      const id = saveBtn.dataset.id;
+      const item = state.bankKonten.find(x => x.id === id);
+      if (!item) return;
+      // Cancel pending debounce timer for this row
+      if (_bkSaveTimers[id]) { clearTimeout(_bkSaveTimers[id]); delete _bkSaveTimers[id]; }
+      saveBtn.disabled = true;
+      const origHTML = saveBtn.innerHTML;
+      saveBtn.innerHTML = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg>';
+      saveBtn.style.color = 'var(--green)';
+      try {
+        state.shas.bankKonten = await window.db.writeData('contentBank', state.bankKonten, `Bank Konten: simpan "${item.title || 'tanpa judul'}"`);
+        saveDataCache();
+        await logActivity(currentUser(), 'Simpan Bank Konten', `"${item.title || 'tanpa judul'}"`);
+        toast('Tersimpan ✓', 'success');
+      } catch (err) {
+        toast('Gagal simpan: ' + err.message, 'error');
+      } finally {
+        setTimeout(() => {
+          saveBtn.innerHTML = origHTML;
+          saveBtn.style.color = '';
+          saveBtn.disabled = false;
+        }, 1200);
+      }
+      return;
+    }
 
     // Delete row
     const delBtn = e.target.closest('.bk-del-btn');
@@ -5334,6 +5393,10 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   /* ── Jam digital topbar ─────────────────────────────────────────── */
   startClock();
+
+  /* ── Kurs USD/IDR ───────────────────────────────────────────────── */
+  fetchExchangeRate();
+  setInterval(fetchExchangeRate, 5 * 60 * 1000);  // refresh tiap 5 menit
 
   /* ── INIT: Pre-configure dengan default repo jika belum ada config ── */
   if (!window.db.isConfigured()) {
