@@ -1,10 +1,18 @@
 [
   {
+    "id": "mpqjy1dgcra0m",
+    "user": "Umar",
+    "role": "Leader",
+    "action": "Hapus Bank Konten",
+    "target": "\"POV Saya dapat bansos malah dikira buzzer\"",
+    "timestamp": "2026-05-29T06:39:49.876Z"
+  },
+  {
     "id": "mpqjxeyk6ywuc",
     "user": "Umar",
     "role": "Leader",
     "action": "Edit Bank Konten",
-    "target": "\"POV Saya dapat bansos malah dikira buzzer\" — publishDate",
+    "target": "\"POV Saya dapat bansos malah dikira buzzer\" â publishDate",
     "timestamp": "2026-05-29T06:39:20.828Z"
   },
   {
@@ -12,7 +20,7 @@
     "user": "Umar",
     "role": "Leader",
     "action": "Edit Bank Konten",
-    "target": "\"POV Saya dapat bansos malah dikira buzzer\" â publishDate",
+    "target": "\"POV Saya dapat bansos malah dikira buzzer\" Ã¢ÂÂ publishDate",
     "timestamp": "2026-05-29T06:39:00.088Z"
   },
   {
@@ -116,7 +124,7 @@
     "user": "Admin",
     "role": "Admin",
     "action": "edit user",
-    "target": "Umar ÃÂ¢ÃÂÃÂ Umar (Leader)",
+    "target": "Umar ÃÂÃÂ¢ÃÂÃÂÃÂÃÂ Umar (Leader)",
     "timestamp": "2026-05-29T06:14:35.117Z"
   },
   {
@@ -156,7 +164,7 @@
     "user": "Admin",
     "role": "Admin",
     "action": "edit user",
-    "target": "Umar ÃÂÃÂ¢ÃÂÃÂÃÂÃÂ Umar (Leader)",
+    "target": "Umar ÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ Umar (Leader)",
     "timestamp": "2026-05-29T06:06:47.856Z"
   },
   {
