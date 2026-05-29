@@ -815,6 +815,82 @@
   </main>
 </div><!-- /.main-wrap -->
 
+<!-- ─── INVITE CREATOR MODAL (admin: buat link akses perangkat baru) ─────── -->
+<div id="inviteCreatorModal" class="modal-overlay hidden">
+  <div class="modal" style="max-width:460px">
+    <div class="modal-head" style="border-top:3px solid #7c3aed">
+      <span class="modal-title">🔐 Buat Link Akses Perangkat Baru</span>
+      <button class="modal-close-btn" onclick="closeInviteCreatorModal()">✕</button>
+    </div>
+    <div class="modal-body" style="display:flex;flex-direction:column;gap:14px">
+      <div class="form-hint" style="background:#fef9c3;border:1px solid #fde047;border-radius:8px;padding:10px 12px;color:#78350f;font-size:.78rem">
+        ⚠️ Kirim <strong>URL</strong> dan <strong>PIN</strong> via <strong>pesan terpisah</strong> ke anggota tim — jangan kirim keduanya bersamaan.
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">PIN (6 digit, auto-generated — bisa diubah)</label>
+        <div style="display:flex;gap:8px;align-items:center">
+          <input type="text" id="invitePinInput" class="form-inp" maxlength="12"
+            style="font-size:1.2rem;font-weight:700;letter-spacing:4px;text-align:center;max-width:140px" />
+          <button class="btn-sm" onclick="document.getElementById('invitePinInput').value=_randomPin6()">🔄 Acak</button>
+          <button class="btn-sm" id="inviteBtnCopyPin" onclick="
+            navigator.clipboard.writeText(document.getElementById('invitePinInput').value)
+              .then(()=>toast('PIN disalin ✓','success'))">📋 Salin PIN</button>
+        </div>
+        <p class="form-hint">Bagikan PIN ini via chat/DM <em>terpisah</em> dari URL invite.</p>
+      </div>
+
+      <div class="form-group">
+        <button class="btn-sm blue" id="inviteBtnCreate" onclick="doCreateInvite()" style="width:100%">
+          🔗 Buat Link Invite
+        </button>
+      </div>
+
+      <div class="form-group" id="inviteUrlGroup">
+        <label class="form-label">URL Invite (berlaku 24 jam, sekali pakai)</label>
+        <div style="display:flex;gap:8px;align-items:center">
+          <input type="text" id="inviteUrlDisplay" class="form-inp"
+            style="font-size:.78rem;color:#334155;flex:1" readonly value="— klik Buat Link —" />
+          <button class="btn-sm blue" id="inviteBtnCopyUrl" disabled
+            onclick="navigator.clipboard.writeText(this.dataset.url).then(()=>toast('URL disalin ✓','success'))">
+            📋 Salin URL
+          </button>
+        </div>
+        <p class="form-hint">URL ini <strong>tidak mengandung kredensial</strong> — aman dikirim via grup. PIN yang mengunci aksesnya.</p>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn-sm" onclick="closeInviteCreatorModal()">Tutup</button>
+    </div>
+  </div>
+</div>
+
+<!-- ─── INVITE PIN MODAL (device baru: masukkan PIN dari admin) ───────────── -->
+<div id="invitePinModal" class="modal-overlay hidden" data-invite-id="">
+  <div class="modal" style="max-width:380px">
+    <div class="modal-head" style="border-top:3px solid #0284c7">
+      <span class="modal-title">🔑 Hubungkan Perangkat</span>
+    </div>
+    <div class="modal-body" style="display:flex;flex-direction:column;gap:14px">
+      <p style="font-size:.82rem;color:#475569;margin:0">
+        Admin telah membuat link akses untuk perangkat ini. Masukkan <strong>PIN 6-digit</strong> yang dikirim admin terpisah untuk menyelesaikan koneksi.
+      </p>
+      <div class="form-group">
+        <label class="form-label">PIN dari Admin</label>
+        <input type="text" id="invitePinEntry" class="form-inp"
+          maxlength="12" placeholder="123456"
+          style="font-size:1.4rem;font-weight:700;letter-spacing:6px;text-align:center"
+          onkeydown="if(event.key==='Enter') doConsumeInvite()" />
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn-sm blue" id="inviteBtnConsume" onclick="doConsumeInvite()" style="width:100%">
+        ✅ Verifikasi &amp; Hubungkan
+      </button>
+    </div>
+  </div>
+</div>
+
 <!-- ─── FIRST-RUN WIZARD ─────────────────────────────────────────────────── -->
 <div id="wizardModal" class="modal-overlay hidden">
   <div class="modal wizard-modal">

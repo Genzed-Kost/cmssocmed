@@ -635,61 +635,20 @@ function wizardDone() {
   setTimeout(loadAllData, 150);
 }
 
-/* ── Auto-apply ?access= param dari "Salin Link Akses Tim" ───────────────── */
+/* ── Cek ?invite= param di URL (dipanggil saat app startup) ─────────────── */
 /**
- * Jika URL mengandung ?access=<base64>, decode dan setup device otomatis.
- * PAT disimpan ke localStorage via db.saveConfig(), lalu settings diambil dari
- * GitHub (auth hash + user list). Setelah selesai URL dibersihkan dari ?access=.
- * @returns {boolean} true jika param ditemukan dan berhasil diproses
+ * Jika URL mengandung ?invite=<id>, tampilkan PIN dialog.
+ * Credential TIDAK ada di URL — hanya invite ID.
+ * @returns {boolean} true jika param ditemukan
  */
-async function applyAccessParam() {
-  const params = new URLSearchParams(window.location.search);
-  const encoded = params.get('access');
-  if (!encoded) return false;
-
-  // Bersihkan URL segera agar PAT tidak tersimpan di browser history
-  const cleanUrl = window.location.pathname + window.location.hash;
-  history.replaceState(null, '', cleanUrl);
-
-  let cfg;
-  try {
-    cfg = JSON.parse(decodeURIComponent(escape(atob(encoded))));
-  } catch {
-    toast('Link akses tidak valid', 'error');
-    return false;
-  }
-
-  if (!cfg?.owner || !cfg?.repo || !cfg?.pat) {
-    toast('Link akses tidak lengkap', 'error');
-    return false;
-  }
-
-  // Tampilkan overlay loading
-  setSyncStatus(null, 'Menghubungkan perangkat…');
-  toast('Menghubungkan perangkat via link akses…');
-
-  window.db.saveConfig(cfg);
-  try {
-    await window.db.testConnection();
-    const settings = await window.db.readData('settings');
-    if (!settings?.adminHash) {
-      toast('Data admin belum tersedia. Minta Admin buka CMS & sync terlebih dahulu.', 'warn');
-      return false;
-    }
-    // Restore admin credentials & user list
-    saveAuth({ adminName: settings.adminName || 'Admin', adminHash: settings.adminHash });
-    if (settings.users?.length) setPubUsers(settings.users);
-    // Simpan API keys dari URL payload ke localStorage (tidak pernah ke GitHub)
-    if (cfg.gemini) localStorage.setItem(GEMINI_LS_KEY, cfg.gemini);
-    if (cfg.claude) localStorage.setItem(CLAUDE_LS_KEY, cfg.claude);
-    if (cfg.wa)     localStorage.setItem(WA_TOKEN_KEY,  cfg.wa);
-    toast('✅ Perangkat berhasil dihubungkan! Silakan login.', 'success');
-    return true;
-  } catch (e) {
-    toast('Gagal menghubungkan: ' + e.message, 'error');
-    window.db.saveConfig({ owner: '', repo: '', branch: 'main', pat: '' }); // reset agar tidak corrupt
-    return false;
-  }
+function checkInviteParam() {
+  const params   = new URLSearchParams(window.location.search);
+  const inviteId = params.get('invite');
+  if (!inviteId) return false;
+  // Jangan bersihkan URL dulu — dibutuhkan oleh doConsumeInvite()
+  // URL dibersihkan setelah invite berhasil dikonsumsi
+  showInvitePinModal(inviteId);
+  return true;
 }
 
 /* ── Connect existing device (no re-setup needed on second/third device) ── */
@@ -1112,7 +1071,7 @@ async function notifyCreatorAssigned(content, oldCreator) {
     const acctObj  = ACCOUNTS.find(a => a.id === content.account);
     const acctName = acctObj?.name || content.account || '—';
     const dateStr  = fmtDate(content.publishDate) || '—';
-    const cmsUrl   = window.location.origin;
+    const cmsUrl   = `${window.location.origin}/loginuser`;
     const msg = waStatusMsg(creatorName, content.title||'—', content.theme||'—', status, dateStr, acctName, cmsUrl);
     await sendWaNotif(userObj.phone, msg);
   }
@@ -2863,39 +2822,209 @@ function saveWaTokenFromForm() {
   toast(t ? 'Token WA disimpan ✓' : 'Token WA dihapus', t ? 'success' : 'warn');
 }
 
-/* ── Generate shareable access link for team members ─────────────────── */
+/* ══════════════════════════════════════════════════════════════════════════
+   INVITE SYSTEM — Enkripsi AES-256-GCM + PIN terpisah
+   URL pendek: https://domain/loginuser?invite=<8chars>
+   Data tersimpan di GitHub (terenkripsi) — tidak readable tanpa PIN
+   ══════════════════════════════════════════════════════════════════════════ */
+
+/** Turunkan AES-256-GCM key dari PIN via PBKDF2 */
+async function _deriveKey(pin) {
+  const enc  = new TextEncoder();
+  const raw  = await crypto.subtle.importKey('raw', enc.encode(pin), 'PBKDF2', false, ['deriveKey']);
+  return crypto.subtle.deriveKey(
+    { name: 'PBKDF2', salt: enc.encode('cmssocmed-ph-v1'), iterations: 150000, hash: 'SHA-256' },
+    raw,
+    { name: 'AES-GCM', length: 256 },
+    false,
+    ['encrypt', 'decrypt']
+  );
+}
+
+/** Enkripsi object → URL-safe base64 */
+async function _encryptPayload(data, pin) {
+  const key = await _deriveKey(pin);
+  const iv  = crypto.getRandomValues(new Uint8Array(12));
+  const ct  = await crypto.subtle.encrypt(
+    { name: 'AES-GCM', iv },
+    key,
+    new TextEncoder().encode(JSON.stringify(data))
+  );
+  const buf = new Uint8Array(12 + ct.byteLength);
+  buf.set(iv);
+  buf.set(new Uint8Array(ct), 12);
+  return btoa(String.fromCharCode(...buf))
+    .replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+}
+
+/** Dekripsi URL-safe base64 → object */
+async function _decryptPayload(b64, pin) {
+  const pad = b64.replace(/-/g, '+').replace(/_/g, '/');
+  const buf = Uint8Array.from(atob(pad + '=='.slice(0, (4 - pad.length % 4) % 4)), c => c.charCodeAt(0));
+  const key = await _deriveKey(pin);
+  const dec = await crypto.subtle.decrypt({ name: 'AES-GCM', iv: buf.slice(0, 12) }, key, buf.slice(12));
+  return JSON.parse(new TextDecoder().decode(dec));
+}
+
+/** Buat PIN numerik 6-digit secara kriptografis acak */
+function _randomPin6() {
+  return String(crypto.getRandomValues(new Uint32Array(1))[0] % 900000 + 100000);
+}
+
+/** Buat invite ID 8 huruf hex (acak) */
+function _randomInviteId() {
+  return Array.from(crypto.getRandomValues(new Uint8Array(4)))
+    .map(b => b.toString(16).padStart(2, '0')).join('');
+}
+
 /**
- * Buat link yang mengandung GitHub config + API keys (base64).
- * Link ini TIDAK disimpan ke server mana pun — hanya dikirim via clipboard.
- * PAT dan API keys ikut dienkode agar device baru tidak perlu setup ulang.
- * ⚠️  Bagikan hanya via chat/DM privat, bukan public channel.
+ * Buat invite terenkripsi dan simpan ke GitHub _invites.json.
+ * @param {string} pin  — PIN 6 digit yang dibuat admin
+ * @returns {string}    — URL invite pendek
  */
-function generateShareLink() {
+async function createDeviceInvite(pin) {
   const cfg = window.db.getConfig();
-  if (!cfg?.owner || !cfg?.repo || !cfg?.pat) {
-    toast('Konfigurasi GitHub belum lengkap', 'error'); return;
-  }
+  if (!cfg?.owner || !cfg?.repo || !cfg?.pat)
+    throw new Error('Konfigurasi GitHub belum lengkap');
+
   const payload = {
-    owner:  cfg.owner,
-    repo:   cfg.repo,
-    branch: cfg.branch || 'main',
-    pat:    cfg.pat,
-    // API keys ikut dioper agar device baru langsung bisa pakai AI & WA
+    owner: cfg.owner, repo: cfg.repo, branch: cfg.branch || 'main', pat: cfg.pat,
     gemini: getGeminiKey() || undefined,
     claude: getClaudeKey() || undefined,
     wa:     getWaToken()   || undefined,
   };
-  // Bersihkan undefined agar JSON lebih ringkas
   Object.keys(payload).forEach(k => payload[k] === undefined && delete payload[k]);
 
-  const encoded = btoa(unescape(encodeURIComponent(JSON.stringify(payload))));
-  const url = `${window.location.origin}${window.location.pathname}?access=${encoded}`;
-  if (navigator.clipboard?.writeText) {
-    navigator.clipboard.writeText(url)
-      .then(() => toast('✅ Link akses tim disalin! Bagikan via chat privat.', 'success'))
-      .catch(() => prompt('Salin link ini dan bagikan ke anggota tim (chat privat):', url));
-  } else {
-    prompt('Salin link ini dan bagikan ke anggota tim (chat privat):', url);
+  const id        = _randomInviteId();
+  const encrypted = await _encryptPayload(payload, pin);
+  const expires   = Date.now() + 24 * 60 * 60 * 1000;  // 24 jam
+
+  // Load & prune expired invites
+  let invites = {};
+  try { invites = (await window.db.readData('_invites')) || {}; } catch {}
+  Object.keys(invites).forEach(k => { if (invites[k].expires < Date.now()) delete invites[k]; });
+  invites[id] = { encrypted, expires };
+  await window.db.writeData('_invites', invites, `Invite: buat akses perangkat baru`);
+
+  return `${window.location.origin}/loginuser?invite=${id}`;
+}
+
+/**
+ * Konsumsi invite: dekripsi payload lalu hapus invite dari GitHub.
+ * @param {string} id  — invite ID dari URL
+ * @param {string} pin — PIN dari admin
+ * @returns {object}   — payload { owner, repo, branch, pat, gemini?, claude?, wa? }
+ */
+async function consumeInvite(id, pin) {
+  let invites;
+  try { invites = await window.db.readData('_invites'); } catch {
+    throw new Error('Tidak dapat membaca data invite dari server');
+  }
+  const inv = invites?.[id];
+  if (!inv) throw new Error('Kode invite tidak ditemukan atau sudah digunakan');
+  if (inv.expires < Date.now()) throw new Error('Invite kedaluwarsa — minta admin buat link baru');
+
+  let payload;
+  try { payload = await _decryptPayload(inv.encrypted, pin); }
+  catch { throw new Error('PIN salah — periksa kembali PIN dari admin'); }
+
+  // Hapus invite setelah digunakan (one-time use)
+  delete invites[id];
+  window.db.getConfig()?.pat &&
+    window.db.writeData('_invites', invites, `Invite: hapus ${id} (sudah digunakan)`).catch(() => {});
+
+  return payload;
+}
+
+/* ── UI: Buat invite (admin) ─────────────────────────────────────────────── */
+function generateShareLink() {
+  showInviteCreatorModal();
+}
+
+function showInviteCreatorModal() {
+  const cfg = window.db.getConfig();
+  if (!cfg?.owner || !cfg?.repo || !cfg?.pat) {
+    toast('Konfigurasi GitHub belum lengkap', 'error'); return;
+  }
+  const pin = _randomPin6();
+  const modal = document.getElementById('inviteCreatorModal');
+  if (!modal) { toast('Modal invite tidak ditemukan', 'error'); return; }
+
+  document.getElementById('invitePinDisplay').textContent = pin;
+  document.getElementById('invitePinInput').value = pin;
+  document.getElementById('inviteUrlDisplay').textContent = '— klik Buat Link —';
+  document.getElementById('inviteBtnCopyUrl').disabled = true;
+  document.getElementById('inviteBtnCopyUrl').dataset.url = '';
+  modal.classList.remove('hidden');
+}
+
+async function doCreateInvite() {
+  const pin    = document.getElementById('invitePinInput')?.value?.trim();
+  const btn    = document.getElementById('inviteBtnCreate');
+  if (!pin || pin.length < 4) { toast('PIN minimal 4 karakter', 'error'); return; }
+
+  btn.disabled = true; btn.textContent = 'Membuat…';
+  try {
+    const url = await createDeviceInvite(pin);
+    document.getElementById('inviteUrlDisplay').textContent = url;
+    const copyBtn = document.getElementById('inviteBtnCopyUrl');
+    copyBtn.disabled = false;
+    copyBtn.dataset.url = url;
+    toast('✅ Link invite berhasil dibuat!', 'success');
+  } catch (e) {
+    toast('Gagal buat invite: ' + e.message, 'error');
+  } finally {
+    btn.disabled = false; btn.textContent = 'Buat Link';
+  }
+}
+
+function closeInviteCreatorModal() {
+  document.getElementById('inviteCreatorModal')?.classList.add('hidden');
+}
+
+/* ── UI: Masukkan PIN (device baru) ──────────────────────────────────────── */
+function showInvitePinModal(inviteId) {
+  const modal = document.getElementById('invitePinModal');
+  if (!modal) return;
+  document.getElementById('invitePinEntry').value = '';
+  document.getElementById('invitePinModal').dataset.inviteId = inviteId;
+  modal.classList.remove('hidden');
+  setTimeout(() => document.getElementById('invitePinEntry')?.focus(), 100);
+}
+
+async function doConsumeInvite() {
+  const modal    = document.getElementById('invitePinModal');
+  const inviteId = modal?.dataset?.inviteId;
+  const pin      = document.getElementById('invitePinEntry')?.value?.trim();
+  const btn      = document.getElementById('inviteBtnConsume');
+  if (!pin) { toast('Masukkan PIN terlebih dahulu', 'error'); return; }
+
+  btn.disabled = true; btn.textContent = 'Memverifikasi…';
+  try {
+    const payload = await consumeInvite(inviteId, pin);
+    window.db.saveConfig({
+      owner: payload.owner, repo: payload.repo,
+      branch: payload.branch || 'main', pat: payload.pat
+    });
+    if (payload.gemini) localStorage.setItem(GEMINI_LS_KEY, payload.gemini);
+    if (payload.claude) localStorage.setItem(CLAUDE_LS_KEY, payload.claude);
+    if (payload.wa)     localStorage.setItem(WA_TOKEN_KEY,  payload.wa);
+
+    // Load settings untuk restore auth
+    const settings = await window.db.readData('settings');
+    if (!settings?.adminHash) throw new Error('Data admin belum tersedia di GitHub');
+    saveAuth({ adminName: settings.adminName || 'Admin', adminHash: settings.adminHash });
+    if (settings.users?.length) setPubUsers(settings.users);
+
+    modal.classList.add('hidden');
+    // Bersihkan URL
+    history.replaceState(null, '', window.location.pathname);
+    toast('✅ Perangkat berhasil dihubungkan! Silakan login.', 'success');
+    showLogin();
+  } catch (e) {
+    toast(e.message, 'error');
+  } finally {
+    btn.disabled = false; btn.textContent = 'Verifikasi & Hubungkan';
   }
 }
 
@@ -4803,24 +4932,21 @@ document.addEventListener('DOMContentLoaded', async () => {
   window.saveTopContent       = saveTopContent;
   window.switchTop3Month      = switchTop3Month;
   window.generateShareLink    = generateShareLink;
+  window._randomPin6          = _randomPin6;
+  window.doCreateInvite       = doCreateInvite;
+  window.closeInviteCreatorModal = closeInviteCreatorModal;
+  window.doConsumeInvite      = doConsumeInvite;
 
   /* ── INIT: Pre-configure dengan default repo jika belum ada config ── */
   if (!window.db.isConfigured()) {
     window.db.saveConfig(DEFAULT_REPO);  // tanpa PAT — hanya untuk baca repo public
   }
 
-  /* ── INIT: Check for ?access= shared link — handle first so config is ready ── */
-  const _hasAccessParam = new URLSearchParams(window.location.search).has('access');
-  if (_hasAccessParam) {
-    // applyAccessParam() saves config, restores auth + API keys, cleans URL
-    const _ok = await applyAccessParam();
-    // Regardless of result: fall through to auth flow below
-    // (auth state is now set if _ok === true)
-    if (!_ok) {
-      // If failed, ensure we show a usable state
-      showLogin();
-      return;
-    }
+  /* ── INIT: Check for ?invite= (device setup via encrypted invite) ───────── */
+  if (checkInviteParam()) {
+    // PIN modal sudah ditampilkan — doConsumeInvite() akan handle sisanya
+    // Hentikan init flow normal agar tidak tampilkan login/wizard di belakang modal
+    return;
   }
 
   /* ── INIT: Auth flow ────────────────────────────────────────── */
