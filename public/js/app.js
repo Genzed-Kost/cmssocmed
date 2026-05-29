@@ -828,6 +828,49 @@ function clearDataCache() {
   try { localStorage.removeItem(DATA_CACHE_KEY); } catch {}
 }
 
+/**
+ * Setelah settings dimuat dari GitHub, sync API keys ke localStorage
+ * sehingga device baru otomatis punya key tanpa isi ulang.
+ * GitHub settings = sumber kebenaran; localStorage = cache lokal.
+ */
+function _syncApiKeysFromSettings() {
+  const keys = state.settings?.apiKeys || {};
+  // Gemini
+  if (keys.gemini !== undefined) {
+    keys.gemini ? localStorage.setItem(GEMINI_LS_KEY, keys.gemini)
+                : localStorage.removeItem(GEMINI_LS_KEY);
+  }
+  // Claude
+  if (keys.claude !== undefined) {
+    keys.claude ? localStorage.setItem(CLAUDE_LS_KEY, keys.claude)
+                : localStorage.removeItem(CLAUDE_LS_KEY);
+  }
+  // WhatsApp token
+  if (keys.wa !== undefined) {
+    keys.wa ? localStorage.setItem(WA_TOKEN_KEY, keys.wa)
+            : localStorage.removeItem(WA_TOKEN_KEY);
+  }
+}
+
+/**
+ * Simpan API key ke settings.json di GitHub agar tersedia di semua device.
+ * @param {'gemini'|'claude'|'wa'} keyName
+ * @param {string} value
+ */
+async function _persistApiKey(keyName, value) {
+  if (!window.db?.getConfig()?.pat) return;   // tidak ada PAT → skip (non-admin device)
+  if (!state.settings) return;
+  if (!state.settings.apiKeys) state.settings.apiKeys = {};
+  state.settings.apiKeys[keyName] = value;
+  try {
+    state.shas.settings = await window.db.writeData('settings', state.settings, `API key: ${keyName}`);
+    saveDataCache();
+  } catch (e) {
+    // Gagal sync GitHub? Tidak masalah — key sudah tersimpan di localStorage
+    console.warn('Gagal sync API key ke GitHub:', e.message);
+  }
+}
+
 function _applyTopContentDefaults() {
   if (!state.settings.topContent) state.settings.topContent = {};
   ACCOUNTS.forEach(a => {
@@ -857,6 +900,7 @@ async function loadAllData(force = false) {
         // SHAs sengaja tidak di-cache — db.writeData() akan auto-fetch SHA saat write
         state.shas = {};
         _applyTopContentDefaults();
+        _syncApiKeysFromSettings();   // sync API keys dari GitHub settings → localStorage
         checkBankKontenReminders();
         setPubUsers(state.settings.users || []);
         setSyncStatus(true, `Cache (${Math.round((Date.now() - cached.ts) / 1000)}s)`);
@@ -885,6 +929,7 @@ async function loadAllData(force = false) {
     state.bankKonten = Array.isArray(bkR?.data) ? bkR.data : [];
     state.settings   = sR?.data   || { kpi: {}, users: [], analyticsUrls: {} };
     _applyTopContentDefaults();
+    _syncApiKeysFromSettings();   // sync API keys dari GitHub settings → localStorage
     state.analytics = anlR?.data || {};
     state.shas = {
       contents:    cR?.sha,
@@ -2761,11 +2806,12 @@ function updateWaStatus() {
   const has = !!getWaToken();
   if (el) { el.textContent = has ? 'Aktif' : 'Belum diisi'; el.className = 'badge-status' + (has ? ' ok' : ''); }
 }
-function saveWaTokenFromForm() {
+async function saveWaTokenFromForm() {
   const t = gv('cfgWaToken').trim();
   saveWaToken(t);
   updateWaStatus();
   toast(t ? 'Token WA disimpan ✓' : 'Token WA dihapus', t ? 'success' : 'warn');
+  await _persistApiKey('wa', t);   // sync ke GitHub settings
 }
 
 /* ── Generate shareable access link for team members ─────────────────── */
@@ -4466,18 +4512,20 @@ document.addEventListener('DOMContentLoaded', async () => {
   $('btnTestGithub')?.addEventListener('click', testGithub);
   $('btnSaveGithub')?.addEventListener('click', saveAndInitGithub);
   $('btnTogglePat')?.addEventListener('click', () => { const i=$('cfgPat'); i.type=i.type==='password'?'text':'password'; });
-  $('btnSaveGeminiKey')?.addEventListener('click', () => {
+  $('btnSaveGeminiKey')?.addEventListener('click', async () => {
     const key = gv('cfgGeminiKey');
     saveGeminiKey(key);
     updateGeminiStatus();
     toast(key ? 'Gemini API Key disimpan ✓' : 'Gemini API Key dihapus', key ? 'success' : '');
+    await _persistApiKey('gemini', key);   // sync ke GitHub settings
   });
   $('btnToggleGeminiKey')?.addEventListener('click', () => { const i=$('cfgGeminiKey'); i.type=i.type==='password'?'text':'password'; });
-  $('btnSaveClaudeKey')?.addEventListener('click', () => {
+  $('btnSaveClaudeKey')?.addEventListener('click', async () => {
     const key = gv('cfgClaudeKey');
     saveClaudeKey(key);
     updateClaudeStatus();
     toast(key ? 'Claude API Key disimpan ✓' : 'Claude API Key dihapus', key ? 'success' : '');
+    await _persistApiKey('claude', key);   // sync ke GitHub settings
   });
   $('btnToggleClaudeKey')?.addEventListener('click', () => { const i=$('cfgClaudeKey'); i.type=i.type==='password'?'text':'password'; });
   $('btnSaveWaToken')?.addEventListener('click', saveWaTokenFromForm);
