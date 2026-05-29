@@ -2024,7 +2024,7 @@ function dashContentCard(c, mode = 'upcoming') {
   const statuses = STATUSES;
 
   // ── Owner row (createdBy) ──────────────────────────────────────
-  const ownerRow = `<div class="dcc-meta-row">
+  const ownerRow = `<div class="dcc-meta-row${!c.createdBy ? ' dcc-empty' : ''}">
     <span class="dcc-label">OWNER</span>
     <span class="dcc-val dcc-owner-val">${esc(c.createdBy || '—')}</span>
   </div>`;
@@ -2068,7 +2068,7 @@ function dashContentCard(c, mode = 'upcoming') {
     ${acct ? `<div class="dcc-owner-tag" style="background:${acct.color}18;color:${acct.color};border-color:${acct.color}30">${acct.name}</div>` : ''}
     <div class="dcc-title">${esc(c.title||'—')}</div>
     ${outputIcon}
-    <div class="dcc-meta-row">
+    <div class="dcc-meta-row${!c.theme ? ' dcc-empty' : ''}">
       <span class="dcc-label">TEMA</span>
       <span class="dcc-val">${esc(c.theme||'—')}</span>
     </div>
@@ -2084,7 +2084,7 @@ function dashContentCard(c, mode = 'upcoming') {
         </select>`;
       })()}
     </div>
-    <div class="dcc-meta-row">
+    <div class="dcc-meta-row${!plats ? ' dcc-empty' : ''}">
       <span class="dcc-label">PLATFORM</span>
       <div style="display:flex;gap:6px;align-items:center">${plats||'<span class="dcc-val">—</span>'}</div>
     </div>
