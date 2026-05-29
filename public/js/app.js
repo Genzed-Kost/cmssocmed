@@ -825,9 +825,9 @@ async function loadAllData(force = false) {
     try {
       const cached = JSON.parse(localStorage.getItem(DATA_CACHE_KEY) || 'null');
       if (cached && (Date.now() - cached.ts) < DATA_CACHE_TTL) {
-        state.contents   = cached.contents   || [];
-        state.activity   = cached.activity   || [];
-        state.todos      = cached.todos      || [];
+        state.contents   = Array.isArray(cached.contents)  ? cached.contents  : [];
+        state.activity   = Array.isArray(cached.activity)  ? cached.activity  : [];
+        state.todos      = Array.isArray(cached.todos)     ? cached.todos     : [];
         state.settings   = cached.settings   || { kpi:{}, users:[], analyticsUrls:{} };
         state.analytics  = cached.analytics  || {};
         state.bankKonten = cached.bankKonten || [];
@@ -856,10 +856,10 @@ async function loadAllData(force = false) {
       window.db.read('analytics'),
       window.db.read('contentBank')
     ]);
-    state.contents   = cR?.data   || [];
-    state.activity   = aR?.data   || [];
-    state.todos      = tR?.data   || [];
-    state.bankKonten = bkR?.data  || [];
+    state.contents   = Array.isArray(cR?.data)  ? cR.data  : [];
+    state.activity   = Array.isArray(aR?.data)  ? aR.data  : [];
+    state.todos      = Array.isArray(tR?.data)  ? tR.data  : [];
+    state.bankKonten = Array.isArray(bkR?.data) ? bkR.data : [];
     state.settings   = sR?.data   || { kpi: {}, users: [], analyticsUrls: {} };
     _applyTopContentDefaults();
     state.analytics = anlR?.data || {};
@@ -901,6 +901,7 @@ async function logActivity(user, action, target) {
   const userObj = isAdminUser ? null : (state.settings?.users || []).find(u => getUserName(u) === user);
   const role = isAdminUser ? 'Admin' : (getUserRole(userObj || null) || 'Creator');
   const item = { id: uid(), user, role, action, target, timestamp: new Date().toISOString() };
+  if (!Array.isArray(state.activity)) state.activity = [];  // guard: jika terhapus/rusak
   state.activity.unshift(item);
   if (state.activity.length > 500) state.activity = state.activity.slice(0, 500);
   try {
