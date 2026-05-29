@@ -1054,8 +1054,19 @@ function _syncApiKeysFromSettings() {
       window.db.saveConfig({ ...cfg, pat: decoded });
     }
   } else {
-    // Token dihapus dari GitHub → hapus cache lokal juga
     localStorage.removeItem(TEAM_TOKEN_KEY);
+  }
+
+  // ── Auto-apply API keys dari settings.json → localStorage (jika belum ada) ──
+  // Admin simpan sekali → semua device otomatis punya key tanpa input manual.
+  if (state.settings?.geminiKey && !getGeminiKey()) {
+    saveGeminiKey(_decodeToken(state.settings.geminiKey));
+  }
+  if (state.settings?.claudeKey && !getClaudeKey()) {
+    saveClaudeKey(_decodeToken(state.settings.claudeKey));
+  }
+  if (state.settings?.fonnte && !getWaToken()) {
+    saveWaToken(_decodeToken(state.settings.fonnte));
   }
 }
 
@@ -3061,7 +3072,30 @@ function saveWaTokenFromForm() {
   const t = gv('cfgWaToken').trim();
   saveWaToken(t);
   updateWaStatus();
+  _saveApiKeysToSettings({ fonnte: t });
   toast(t ? 'Token WA disimpan ✓' : 'Token WA dihapus', t ? 'success' : 'warn');
+}
+
+/**
+ * Simpan API keys (Gemini, Claude, Fonnte) ke settings.json (encoded).
+ * Hanya admin yang bisa update — creator tidak punya akses tulis settings.
+ * Gagal silently — key sudah aman di localStorage.
+ */
+async function _saveApiKeysToSettings(updates) {
+  if (getSess()?.role !== 'admin') return;
+  try {
+    const settings = { ...(state.settings || { kpi: {}, users: [], analyticsUrls: {} }) };
+    for (const [k, v] of Object.entries(updates)) {
+      if (v) settings[k] = _encodeToken(v);
+      else   delete settings[k];
+    }
+    state.settings = settings;
+    state.shas.settings = await window.db.writeData('settings', settings, 'API keys: update');
+    saveDataCache();
+  } catch (e) {
+    console.warn('API keys: gagal simpan ke GitHub —', e.message);
+    // Tidak tampilkan error ke user — key sudah tersimpan di localStorage
+  }
 }
 
 /* ══════════════════════════════════════════════════════════════════════════
@@ -5070,6 +5104,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const key = gv('cfgGeminiKey');
     saveGeminiKey(key);
     updateGeminiStatus();
+    _saveApiKeysToSettings({ geminiKey: key });
     toast(key ? 'Gemini API Key disimpan ✓' : 'Gemini API Key dihapus', key ? 'success' : '');
   });
   $('btnToggleGeminiKey')?.addEventListener('click', () => { const i=$('cfgGeminiKey'); i.type=i.type==='password'?'text':'password'; });
@@ -5077,6 +5112,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const key = gv('cfgClaudeKey');
     saveClaudeKey(key);
     updateClaudeStatus();
+    _saveApiKeysToSettings({ claudeKey: key });
     toast(key ? 'Claude API Key disimpan ✓' : 'Claude API Key dihapus', key ? 'success' : '');
   });
   $('btnToggleClaudeKey')?.addEventListener('click', () => { const i=$('cfgClaudeKey'); i.type=i.type==='password'?'text':'password'; });
