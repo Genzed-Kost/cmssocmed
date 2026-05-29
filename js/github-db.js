@@ -86,8 +86,7 @@ class GitHubDB {
   }
 
   /**
-   * Write (create or update) a file via server-side proxy.
-   * PAT ditambahkan oleh Cloudflare Pages Function — tidak pernah ke browser.
+   * Write (create or update) a file.
    * @param {string} path  - repo-relative path, e.g. "data/contents.json"
    * @param {any}    data  - JSON-serialisable value
    * @param {string} sha   - current file SHA (required for updates, omit for create)
@@ -95,7 +94,7 @@ class GitHubDB {
    */
   async putFile(path, data, sha, msg) {
     const c = this.loadConfig();
-    const branch = (c?.branch) || 'main';
+    const branch = c.branch || 'main';
     const content = btoa(unescape(encodeURIComponent(JSON.stringify(data, null, 2))));
 
     const body = {
@@ -105,11 +104,10 @@ class GitHubDB {
     };
     if (sha) body.sha = sha;
 
-    // Tulis via /api/proxy — Cloudflare Function menambah Authorization header
-    const res = await fetch(`/api/proxy?path=${encodeURIComponent(path)}`, {
-      method : 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body   : JSON.stringify(body)
+    const res = await fetch(this._url(path), {
+      method: 'PUT',
+      headers: this._headers(),
+      body: JSON.stringify(body)
     });
 
     if (!res.ok) {
@@ -226,11 +224,13 @@ class GitHubDB {
   /* ── Test connection ─────────────────────────────────────────── */
 
   async testConnection() {
-    // Cek koneksi via proxy — verifikasi GITHUB_TOKEN di Cloudflare aktif
-    const res = await fetch('/api/proxy', { method: 'GET' });
+    const c = this.loadConfig();
+    if (!c) throw new Error('Konfigurasi kosong');
+    const url = `https://api.github.com/repos/${c.owner}/${c.repo}`;
+    const res = await fetch(url, { headers: this._headers() });
     if (!res.ok) {
       const err = await res.json().catch(() => ({}));
-      throw new Error(err.error || err.message || `HTTP ${res.status}`);
+      throw new Error(err.message || `HTTP ${res.status}`);
     }
     return await res.json();
   }

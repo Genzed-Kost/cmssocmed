@@ -799,20 +799,33 @@
             </div>
           </div>
 
-          <!-- Token Akses Tim (digantikan proxy Cloudflare) -->
+          <!-- Token Akses Tim -->
           <div class="card setup-card">
             <div class="card-head">
               <span class="card-title">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:-2px;margin-right:6px;color:#0284c7"><circle cx="12" cy="8" r="5"/><path d="M12 13v8M9 18h6"/></svg>
                 Token Akses Tim
               </span>
-              <span class="badge-status ok">Dikelola Cloudflare</span>
+              <span id="teamTokenStatus" class="badge-status">Belum diisi</span>
             </div>
             <div class="setup-fields">
-              <p class="form-hint" style="margin:0">
-                PAT disimpan sebagai <strong>environment variable</strong> di Cloudflare Pages — tidak pernah masuk ke repo atau browser.<br>
-                Untuk mengubah: buka <strong>Cloudflare Pages → project → Settings → Environment variables → <code>GITHUB_TOKEN</code></strong>.
-              </p>
+              <div class="form-group">
+                <label class="form-label">GitHub Fine-Grained PAT (akses terbatas)</label>
+                <div class="inp-eye-wrap">
+                  <input type="password" id="cfgTeamToken" class="form-inp" placeholder="github_pat_…" />
+                  <button type="button" class="eye-btn" id="btnToggleTeamToken">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                  </button>
+                </div>
+                <p class="form-hint">
+                  Token ini disimpan di <code>settings.json</code> GitHub sehingga <strong>perangkat baru otomatis terhubung</strong> tanpa input apapun — cukup buka link <code>/loginuser</code> dan login dengan nama + password.<br>
+                  Gunakan <strong>Fine-Grained PAT</strong> yang hanya punya izin <em>Contents: Read &amp; Write</em> pada repo ini saja.
+                </p>
+              </div>
+              <div class="form-actions-row">
+                <button class="btn-sm blue" id="btnSaveTeamToken">💾 Simpan ke GitHub</button>
+                <button class="btn-sm" id="btnDeleteTeamToken" style="color:var(--red);border-color:var(--red)">Hapus Token</button>
+              </div>
             </div>
           </div>
 
@@ -872,6 +885,38 @@
     <div class="modal-foot">
       <button class="btn-sm blue" id="inviteBtnConsume" onclick="doConsumeInvite()" style="width:100%">
         ✅ Verifikasi &amp; Hubungkan
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ─── TOKEN SETUP (device baru, repo private) ───────────────────────────── -->
+<div id="tokenSetupModal" class="modal-overlay hidden">
+  <div class="modal" style="max-width:400px">
+    <div class="modal-body" style="text-align:center;padding-bottom:0">
+      <div style="font-size:2.2rem;margin-bottom:8px">🔑</div>
+      <h3 style="margin:0 0 6px;font-size:1.1rem;font-weight:700">Hubungkan Perangkat</h3>
+      <p style="margin:0 0 20px;font-size:.85rem;color:var(--muted);line-height:1.5">
+        Masukkan Token Akses Tim yang diberikan Admin untuk menghubungkan perangkat ini ke CMS.
+      </p>
+      <div class="form-group" style="text-align:left">
+        <label class="form-label">Token Akses Tim</label>
+        <div class="inp-eye-wrap">
+          <input type="password" id="setupToken" class="form-inp" placeholder="github_pat_…" autocomplete="off" />
+          <button type="button" class="eye-btn" id="btnToggleSetupToken">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+          </button>
+        </div>
+        <p class="form-hint">Token tersimpan hanya di perangkat ini — tidak dikirim ke mana pun selain GitHub.</p>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn-md blue" style="width:100%" id="btnSubmitSetupToken">Hubungkan →</button>
+    </div>
+    <div style="text-align:center;padding:10px 0 6px;border-top:1px solid var(--bd);margin-top:4px">
+      <button type="button" class="link-btn" onclick="$('tokenSetupModal').classList.add('hidden');showWizard('new')"
+        style="font-size:.76rem;color:var(--muted)">
+        Admin / instalasi pertama kali? Setup di sini →
       </button>
     </div>
   </div>
