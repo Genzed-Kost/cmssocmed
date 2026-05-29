@@ -635,6 +635,66 @@ function wizardDone() {
   setTimeout(loadAllData, 150);
 }
 
+/* ── Auto-apply ?access= param dari "Salin Link Akses Tim" ───────────────── */
+/**
+ * Jika URL mengandung ?access=<base64>, decode dan setup device otomatis.
+ * PAT disimpan ke localStorage via db.saveConfig(), lalu settings diambil dari
+ * GitHub (auth hash + user list). Setelah selesai URL dibersihkan dari ?access=.
+ * @returns {boolean} true jika param ditemukan dan berhasil diproses
+ */
+async function applyAccessParam() {
+  const params = new URLSearchParams(window.location.search);
+  const encoded = params.get('access');
+  if (!encoded) return false;
+
+  // Bersihkan URL segera agar PAT tidak tersimpan di browser history
+  const cleanUrl = window.location.pathname + window.location.hash;
+  history.replaceState(null, '', cleanUrl);
+
+  let cfg;
+  try {
+    cfg = JSON.parse(atob(encoded));
+  } catch {
+    toast('Link akses tidak valid', 'error');
+    return false;
+  }
+
+  if (!cfg?.owner || !cfg?.repo || !cfg?.pat) {
+    toast('Link akses tidak lengkap', 'error');
+    return false;
+  }
+
+  // Tampilkan overlay loading
+  setSyncStatus(null, 'Menghubungkan perangkat…');
+  toast('Menghubungkan perangkat via link akses…');
+
+  window.db.saveConfig(cfg);
+  try {
+    await window.db.testConnection();
+    const settings = await window.db.readData('settings');
+    if (!settings?.adminHash) {
+      toast('Data admin belum tersedia. Minta Admin buka CMS & sync terlebih dahulu.', 'warn');
+      return false;
+    }
+    // Restore admin credentials & user list
+    saveAuth({ adminName: settings.adminName || 'Admin', adminHash: settings.adminHash });
+    if (settings.users?.length) setPubUsers(settings.users);
+    // Sync API keys ke localStorage jika ada di settings
+    if (settings.apiKeys) {
+      const k = settings.apiKeys;
+      if (k.gemini !== undefined) { k.gemini ? localStorage.setItem(GEMINI_LS_KEY, k.gemini) : localStorage.removeItem(GEMINI_LS_KEY); }
+      if (k.claude !== undefined) { k.claude ? localStorage.setItem(CLAUDE_LS_KEY, k.claude) : localStorage.removeItem(CLAUDE_LS_KEY); }
+      if (k.wa     !== undefined) { k.wa     ? localStorage.setItem(WA_TOKEN_KEY,  k.wa)     : localStorage.removeItem(WA_TOKEN_KEY); }
+    }
+    toast('✅ Perangkat berhasil dihubungkan! Silakan login.', 'success');
+    return true;
+  } catch (e) {
+    toast('Gagal menghubungkan: ' + e.message, 'error');
+    window.db.saveConfig({ owner: '', repo: '', branch: 'main', pat: '' }); // reset agar tidak corrupt
+    return false;
+  }
+}
+
 /* ── Connect existing device (no re-setup needed on second/third device) ── */
 async function connectExistingDevice() {
   const cfg = {
@@ -4738,23 +4798,23 @@ document.addEventListener('DOMContentLoaded', async () => {
   window.switchTop3Month      = switchTop3Month;
   window.generateShareLink    = generateShareLink;
 
-  /* ── INIT: Check for ?access= shared link from admin ───────── */
-  const _urlParams = new URLSearchParams(window.location.search);
-  const _accessB64 = _urlParams.get('access');
-  if (_accessB64) {
-    try {
-      const _cfg = JSON.parse(atob(_accessB64));
-      if (_cfg.owner && _cfg.repo && _cfg.pat) {
-        window.db.saveConfig(_cfg);
-        // Remove ?access= from URL bar (no reload)
-        history.replaceState(null, '', window.location.pathname + window.location.hash);
-      }
-    } catch {}
-  }
-
   /* ── INIT: Pre-configure dengan default repo jika belum ada config ── */
   if (!window.db.isConfigured()) {
     window.db.saveConfig(DEFAULT_REPO);  // tanpa PAT — hanya untuk baca repo public
+  }
+
+  /* ── INIT: Check for ?access= shared link — handle first so config is ready ── */
+  const _hasAccessParam = new URLSearchParams(window.location.search).has('access');
+  if (_hasAccessParam) {
+    // applyAccessParam() saves config, restores auth + API keys, cleans URL
+    const _ok = await applyAccessParam();
+    // Regardless of result: fall through to auth flow below
+    // (auth state is now set if _ok === true)
+    if (!_ok) {
+      // If failed, ensure we show a usable state
+      showLogin();
+      return;
+    }
   }
 
   /* ── INIT: Auth flow ────────────────────────────────────────── */
