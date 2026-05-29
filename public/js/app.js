@@ -653,7 +653,7 @@ async function applyAccessParam() {
 
   let cfg;
   try {
-    cfg = JSON.parse(atob(encoded));
+    cfg = JSON.parse(decodeURIComponent(escape(atob(encoded))));
   } catch {
     toast('Link akses tidak valid', 'error');
     return false;
@@ -679,13 +679,10 @@ async function applyAccessParam() {
     // Restore admin credentials & user list
     saveAuth({ adminName: settings.adminName || 'Admin', adminHash: settings.adminHash });
     if (settings.users?.length) setPubUsers(settings.users);
-    // Sync API keys ke localStorage jika ada di settings
-    if (settings.apiKeys) {
-      const k = settings.apiKeys;
-      if (k.gemini !== undefined) { k.gemini ? localStorage.setItem(GEMINI_LS_KEY, k.gemini) : localStorage.removeItem(GEMINI_LS_KEY); }
-      if (k.claude !== undefined) { k.claude ? localStorage.setItem(CLAUDE_LS_KEY, k.claude) : localStorage.removeItem(CLAUDE_LS_KEY); }
-      if (k.wa     !== undefined) { k.wa     ? localStorage.setItem(WA_TOKEN_KEY,  k.wa)     : localStorage.removeItem(WA_TOKEN_KEY); }
-    }
+    // Simpan API keys dari URL payload ke localStorage (tidak pernah ke GitHub)
+    if (cfg.gemini) localStorage.setItem(GEMINI_LS_KEY, cfg.gemini);
+    if (cfg.claude) localStorage.setItem(CLAUDE_LS_KEY, cfg.claude);
+    if (cfg.wa)     localStorage.setItem(WA_TOKEN_KEY,  cfg.wa);
     toast('✅ Perangkat berhasil dihubungkan! Silakan login.', 'success');
     return true;
   } catch (e) {
@@ -889,46 +886,39 @@ function clearDataCache() {
 }
 
 /**
- * Setelah settings dimuat dari GitHub, sync API keys ke localStorage
- * sehingga device baru otomatis punya key tanpa isi ulang.
- * GitHub settings = sumber kebenaran; localStorage = cache lokal.
+ * Setelah settings dimuat dari GitHub: HAPUS apiKeys dari settings jika ada
+ * (migrasi dari versi lama yang menyimpan keys di GitHub — tidak aman untuk
+ * public repo). Keys sekarang hanya di localStorage dan di share link.
  */
 function _syncApiKeysFromSettings() {
-  const keys = state.settings?.apiKeys || {};
-  // Gemini
-  if (keys.gemini !== undefined) {
-    keys.gemini ? localStorage.setItem(GEMINI_LS_KEY, keys.gemini)
-                : localStorage.removeItem(GEMINI_LS_KEY);
-  }
-  // Claude
-  if (keys.claude !== undefined) {
-    keys.claude ? localStorage.setItem(CLAUDE_LS_KEY, keys.claude)
-                : localStorage.removeItem(CLAUDE_LS_KEY);
-  }
-  // WhatsApp token
-  if (keys.wa !== undefined) {
-    keys.wa ? localStorage.setItem(WA_TOKEN_KEY, keys.wa)
-            : localStorage.removeItem(WA_TOKEN_KEY);
+  const keys = state.settings?.apiKeys;
+  if (!keys) return;
+
+  // Migrasi: jika ada keys tersimpan di settings lama, pindah ke localStorage
+  // lalu hapus dari settings agar tidak tersimpan di GitHub
+  let needCleanup = false;
+  if (keys.gemini) { localStorage.setItem(GEMINI_LS_KEY, keys.gemini); needCleanup = true; }
+  if (keys.claude) { localStorage.setItem(CLAUDE_LS_KEY, keys.claude); needCleanup = true; }
+  if (keys.wa)     { localStorage.setItem(WA_TOKEN_KEY,  keys.wa);     needCleanup = true; }
+
+  if (needCleanup && window.db?.getConfig()?.pat) {
+    // Hapus apiKeys dari settings.json di GitHub agar tidak tersimpan di sana
+    delete state.settings.apiKeys;
+    window.db.writeData('settings', state.settings, 'Keamanan: hapus API keys dari GitHub settings')
+      .then(sha => { state.shas.settings = sha; saveDataCache(); })
+      .catch(() => {});
+  } else if (keys) {
+    // Tidak ada PAT (non-admin device) — setidaknya hapus dari memory
+    delete state.settings.apiKeys;
   }
 }
 
 /**
- * Simpan API key ke settings.json di GitHub agar tersedia di semua device.
- * @param {'gemini'|'claude'|'wa'} keyName
- * @param {string} value
+ * @deprecated API keys tidak lagi disimpan ke GitHub (tidak aman untuk public repo).
+ * Keys hanya di localStorage dan dioper via "Salin Link Akses Tim".
  */
-async function _persistApiKey(keyName, value) {
-  if (!window.db?.getConfig()?.pat) return;   // tidak ada PAT → skip (non-admin device)
-  if (!state.settings) return;
-  if (!state.settings.apiKeys) state.settings.apiKeys = {};
-  state.settings.apiKeys[keyName] = value;
-  try {
-    state.shas.settings = await window.db.writeData('settings', state.settings, `API key: ${keyName}`);
-    saveDataCache();
-  } catch (e) {
-    // Gagal sync GitHub? Tidak masalah — key sudah tersimpan di localStorage
-    console.warn('Gagal sync API key ke GitHub:', e.message);
-  }
+async function _persistApiKey(_keyName, _value) {
+  // Sengaja dikosongkan — lihat generateShareLink() untuk distribusi keys ke device baru
 }
 
 function _applyTopContentDefaults() {
@@ -2866,28 +2856,46 @@ function updateWaStatus() {
   const has = !!getWaToken();
   if (el) { el.textContent = has ? 'Aktif' : 'Belum diisi'; el.className = 'badge-status' + (has ? ' ok' : ''); }
 }
-async function saveWaTokenFromForm() {
+function saveWaTokenFromForm() {
   const t = gv('cfgWaToken').trim();
   saveWaToken(t);
   updateWaStatus();
   toast(t ? 'Token WA disimpan ✓' : 'Token WA dihapus', t ? 'success' : 'warn');
-  await _persistApiKey('wa', t);   // sync ke GitHub settings
 }
 
 /* ── Generate shareable access link for team members ─────────────────── */
+/**
+ * Buat link yang mengandung GitHub config + API keys (base64).
+ * Link ini TIDAK disimpan ke server mana pun — hanya dikirim via clipboard.
+ * PAT dan API keys ikut dienkode agar device baru tidak perlu setup ulang.
+ * ⚠️  Bagikan hanya via chat/DM privat, bukan public channel.
+ */
 function generateShareLink() {
   const cfg = window.db.getConfig();
   if (!cfg?.owner || !cfg?.repo || !cfg?.pat) {
     toast('Konfigurasi GitHub belum lengkap', 'error'); return;
   }
-  const encoded = btoa(JSON.stringify({ owner: cfg.owner, repo: cfg.repo, branch: cfg.branch || 'main', pat: cfg.pat }));
+  const payload = {
+    owner:  cfg.owner,
+    repo:   cfg.repo,
+    branch: cfg.branch || 'main',
+    pat:    cfg.pat,
+    // API keys ikut dioper agar device baru langsung bisa pakai AI & WA
+    gemini: getGeminiKey() || undefined,
+    claude: getClaudeKey() || undefined,
+    wa:     getWaToken()   || undefined,
+  };
+  // Bersihkan undefined agar JSON lebih ringkas
+  Object.keys(payload).forEach(k => payload[k] === undefined && delete payload[k]);
+
+  const encoded = btoa(unescape(encodeURIComponent(JSON.stringify(payload))));
   const url = `${window.location.origin}${window.location.pathname}?access=${encoded}`;
   if (navigator.clipboard?.writeText) {
     navigator.clipboard.writeText(url)
-      .then(() => toast('✅ Link akses tim disalin! Bagikan ke anggota.', 'success'))
-      .catch(() => prompt('Salin link ini dan bagikan ke anggota tim:', url));
+      .then(() => toast('✅ Link akses tim disalin! Bagikan via chat privat.', 'success'))
+      .catch(() => prompt('Salin link ini dan bagikan ke anggota tim (chat privat):', url));
   } else {
-    prompt('Salin link ini dan bagikan ke anggota tim:', url);
+    prompt('Salin link ini dan bagikan ke anggota tim (chat privat):', url);
   }
 }
 
@@ -4572,20 +4580,18 @@ document.addEventListener('DOMContentLoaded', async () => {
   $('btnTestGithub')?.addEventListener('click', testGithub);
   $('btnSaveGithub')?.addEventListener('click', saveAndInitGithub);
   $('btnTogglePat')?.addEventListener('click', () => { const i=$('cfgPat'); i.type=i.type==='password'?'text':'password'; });
-  $('btnSaveGeminiKey')?.addEventListener('click', async () => {
+  $('btnSaveGeminiKey')?.addEventListener('click', () => {
     const key = gv('cfgGeminiKey');
     saveGeminiKey(key);
     updateGeminiStatus();
     toast(key ? 'Gemini API Key disimpan ✓' : 'Gemini API Key dihapus', key ? 'success' : '');
-    await _persistApiKey('gemini', key);   // sync ke GitHub settings
   });
   $('btnToggleGeminiKey')?.addEventListener('click', () => { const i=$('cfgGeminiKey'); i.type=i.type==='password'?'text':'password'; });
-  $('btnSaveClaudeKey')?.addEventListener('click', async () => {
+  $('btnSaveClaudeKey')?.addEventListener('click', () => {
     const key = gv('cfgClaudeKey');
     saveClaudeKey(key);
     updateClaudeStatus();
     toast(key ? 'Claude API Key disimpan ✓' : 'Claude API Key dihapus', key ? 'success' : '');
-    await _persistApiKey('claude', key);   // sync ke GitHub settings
   });
   $('btnToggleClaudeKey')?.addEventListener('click', () => { const i=$('cfgClaudeKey'); i.type=i.type==='password'?'text':'password'; });
   $('btnSaveWaToken')?.addEventListener('click', saveWaTokenFromForm);
