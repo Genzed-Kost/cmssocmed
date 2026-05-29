@@ -3399,24 +3399,17 @@ function renderStatGoodBad(acctId) {
 
   function sectionHtml(type, items, label, icon, headCls) {
     const acctColor = acct?.color || '#6366f1';
+    const adminBadge = isAdmin()
+      ? `<span class="badge-status ok" style="font-size:.68rem">Admin Only</span>`
+      : '';
     const head = `<div class="sgb-section-head ${headCls}">
       <span class="sgb-icon">${icon}</span>
       <span>${label}</span>
       <span class="sgb-acct" style="color:${acctColor}">${acct?.name||''} · ${fmtMonth(selMonth)}</span>
+      ${adminBadge}
     </div>`;
 
-    // Semua user bisa edit
-    const inputRows = items.map((item, i) => `
-      <div class="sgb-input-row">
-        <input type="text" class="inp-sm" placeholder="Judul konten…"
-          value="${esc(item.title||'')}" style="flex:1;min-width:0"
-          oninput="updateTopSlot('${esc(acctId)}','${type}',${i},'title',this.value,'${selMonth}')" />
-        <input type="url" class="inp-sm" placeholder="https://link-konten…"
-          value="${esc(item.link||'')}" style="flex:2;min-width:0"
-          oninput="updateTopSlot('${esc(acctId)}','${type}',${i},'link',this.value,'${selMonth}')" />
-      </div>`).join('');
-
-    // Preview cards (untuk semua user — tampilkan hasil simpan)
+    // Preview cards (semua user bisa lihat)
     const valid = items.filter(it => it.link);
     const cards = valid.length
       ? valid.map(it => `<a href="${esc(it.link)}" target="_blank" class="sgb-card sgb-${type}">
@@ -3428,13 +3421,34 @@ function renderStatGoodBad(acctId) {
         </a>`).join('')
       : '';
 
+    // Form edit hanya untuk admin
+    if (isAdmin()) {
+      const inputRows = items.map((item, i) => `
+        <div class="sgb-input-row">
+          <input type="text" class="inp-sm" placeholder="Judul konten…"
+            value="${esc(item.title||'')}" style="flex:1;min-width:0"
+            oninput="updateTopSlot('${esc(acctId)}','${type}',${i},'title',this.value,'${selMonth}')" />
+          <input type="url" class="inp-sm" placeholder="https://link-konten…"
+            value="${esc(item.link||'')}" style="flex:2;min-width:0"
+            oninput="updateTopSlot('${esc(acctId)}','${type}',${i},'link',this.value,'${selMonth}')" />
+        </div>`).join('');
+
+      return `<div class="sgb-col">
+        ${head}
+        <div class="sgb-admin-form">${inputRows}
+          <button class="btn-xs blue" style="margin-top:6px"
+            onclick="saveTopContent('${esc(acctId)}','${selMonth}')">💾 Simpan Top Content</button>
+        </div>
+        ${cards ? `<div class="sgb-list" style="margin-top:8px">${cards}</div>` : ''}
+      </div>`;
+    }
+
+    // Tampilan user biasa: hanya preview cards
     return `<div class="sgb-col">
       ${head}
-      <div class="sgb-admin-form">${inputRows}
-        <button class="btn-xs blue" style="margin-top:6px"
-          onclick="saveTopContent('${esc(acctId)}','${selMonth}')">💾 Simpan Top Content</button>
-      </div>
-      ${cards ? `<div class="sgb-list" style="margin-top:8px">${cards}</div>` : ''}
+      ${cards
+        ? `<div class="sgb-list">${cards}</div>`
+        : `<div class="sgb-empty-user">Belum ada data untuk bulan ini</div>`}
     </div>`;
   }
 

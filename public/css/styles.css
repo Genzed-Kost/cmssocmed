@@ -1761,6 +1761,7 @@ ul { list-style: none; }
 .sgb-card-creator { font-size: .72rem; color: var(--muted); }
 .sgb-card-actions { display: flex; gap: 6px; margin-top: 2px; }
 .sgb-empty { font-size: .78rem; color: var(--muted-lt); padding: 12px 14px; text-align: center; font-style: italic; }
+.sgb-empty-user { font-size: .78rem; color: var(--muted-lt); padding: 20px 14px; text-align: center; font-style: italic; border: 1.5px dashed var(--bd); border-radius: var(--radius); margin-top: 6px; }
 .sgb-admin-form { display: flex; flex-direction: column; gap: 4px; }
 .sgb-input-row  { display: flex; gap: 6px; align-items: center; }
 
