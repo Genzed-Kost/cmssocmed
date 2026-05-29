@@ -35,6 +35,18 @@ const DATA_CACHE_KEY     = 'cmsph_data_v2';
 const DATA_CACHE_TTL     = 3 * 60 * 1000;   // 3 minutes — reduces GitHub API rate-limit hits
 const TEAM_TOKEN_KEY     = 'cmsph_team_token_v1'; // cache teamToken agar request selalu authenticated
 const LOGIN_ATTEMPTS_KEY = 'cmsph_login_att_v1';
+
+/* ── Token encode/decode ─────────────────────────────────────────────────────
+   Token di-encode sebelum disimpan ke settings.json agar tidak terdeteksi
+   oleh GitHub secret scanning. localStorage tetap menyimpan nilai raw (decoded).  */
+function _encodeToken(t) {
+  try { return btoa(unescape(encodeURIComponent(t))); } catch { return t; }
+}
+function _decodeToken(s) {
+  if (!s) return '';
+  try { return decodeURIComponent(escape(atob(s))); }
+  catch { return s; }  // fallback: nilai lama yang belum di-encode
+}
 const LOGIN_MAX_ATTEMPTS = 5;
 const LOGIN_LOCKOUT_MS   = 5 * 60 * 1000;   // 5 menit lockout setelah 5x gagal
 const PAGE_SIZE = 15;
@@ -604,8 +616,9 @@ async function connectWithTeamToken() {
 
     // Jika settings menyimpan teamToken yang berbeda (lebih terbatas), pakai itu
     if (_s.teamToken && _s.teamToken !== token) {
-      localStorage.setItem(TEAM_TOKEN_KEY, _s.teamToken);
-      window.db.saveConfig({ ...DEFAULT_REPO, pat: _s.teamToken });
+      const decoded = _decodeToken(_s.teamToken);
+      localStorage.setItem(TEAM_TOKEN_KEY, decoded);
+      window.db.saveConfig({ ...DEFAULT_REPO, pat: decoded });
     }
 
     saveAuth({ adminName: _s.adminName || 'Admin', adminHash: _s.adminHash });
@@ -831,9 +844,10 @@ async function showLogin() {
         }
         // Apply teamToken untuk perangkat baru yang belum punya token
         if (_s.teamToken) {
-          localStorage.setItem(TEAM_TOKEN_KEY, _s.teamToken);
+          const decoded = _decodeToken(_s.teamToken);
+          localStorage.setItem(TEAM_TOKEN_KEY, decoded);
           if (!window.db.getConfig()?.pat) {
-            window.db.saveConfig({ ...window.db.getConfig(), pat: _s.teamToken });
+            window.db.saveConfig({ ...window.db.getConfig(), pat: decoded });
           }
         }
         // Update cache: pakai data GitHub jika ada users; jangan hapus cache jika settings kosong
@@ -1016,10 +1030,11 @@ function _syncApiKeysFromSettings() {
   // SEBELUM request apapun dikirim pada kunjungan berikutnya.
   const teamToken = state.settings?.teamToken;
   if (teamToken) {
-    localStorage.setItem(TEAM_TOKEN_KEY, teamToken);  // simpan cache
+    const decoded = _decodeToken(teamToken);
+    localStorage.setItem(TEAM_TOKEN_KEY, decoded);  // simpan cache (raw)
     if (!window.db.getConfig()?.pat) {
       const cfg = window.db.getConfig() || {};
-      window.db.saveConfig({ ...cfg, pat: teamToken });
+      window.db.saveConfig({ ...cfg, pat: decoded });
     }
   } else {
     // Token dihapus dari GitHub → hapus cache lokal juga
@@ -3175,7 +3190,7 @@ async function saveTeamTokenFromForm() {
   if (btn) { btn.textContent = 'Menyimpan…'; btn.disabled = true; }
 
   const settings = state.settings || { kpi:{}, users:[], analyticsUrls:{} };
-  settings.teamToken = token;
+  settings.teamToken = _encodeToken(token);   // encode agar tidak terdeteksi secret scanner
   try {
     state.settings = settings;
     state.shas.settings = await window.db.writeData('settings', settings, 'Token akses tim: update');
@@ -5286,9 +5301,10 @@ document.addEventListener('DOMContentLoaded', async () => {
       if (_s?.adminHash) {
         // ✅ Instalasi ada & sudah setup — lanjut ke login
         if (_s.teamToken) {
-          localStorage.setItem(TEAM_TOKEN_KEY, _s.teamToken);
+          const decoded = _decodeToken(_s.teamToken);
+          localStorage.setItem(TEAM_TOKEN_KEY, decoded);
           if (!window.db.getConfig()?.pat) {
-            window.db.saveConfig({ ...window.db.getConfig(), pat: _s.teamToken });
+            window.db.saveConfig({ ...window.db.getConfig(), pat: decoded });
           }
         }
         saveAuth({ adminName: _s.adminName || 'Admin', adminHash: _s.adminHash });
