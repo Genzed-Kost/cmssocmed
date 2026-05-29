@@ -1450,17 +1450,32 @@ ul { list-style: none; }
 .lem-plat-item-url:hover { text-decoration: underline; }
 .lem-plat-item-empty { font-size: .7rem; color: var(--muted-lt); }
 
-/* ── Multi-select Creator (Podcast/Liputan) ─────────────────── */
-.form-inp-multi {
-  height: auto; min-height: 80px;
-  padding: 4px;
+/* ── Multi-creator Chip UI (Podcast/Liputan) ─────────────────── */
+.creator-multi-wrap { display: flex; flex-direction: column; }
+.creator-chips {
+  display: flex; flex-wrap: wrap; gap: 6px;
+  min-height: 36px; padding: 6px 10px;
+  border: 1px solid var(--border); border-radius: 8px;
+  background: var(--bg);
 }
-.form-inp-multi option {
-  padding: 5px 8px; border-radius: 4px; cursor: pointer;
+.creator-chips:empty::before {
+  content: 'Belum ada creator dipilih';
+  font-size: .75rem; color: var(--muted); align-self: center;
 }
-.form-inp-multi option:checked {
-  background: var(--blue); color: #fff;
+.creator-chip {
+  display: inline-flex; align-items: center; gap: 5px;
+  background: #eff6ff; color: #2563eb;
+  border: 1px solid #bfdbfe; border-radius: 20px;
+  padding: 3px 8px 3px 11px; font-size: .8rem; font-weight: 500;
 }
+.creator-chip-rm {
+  display: flex; align-items: center; justify-content: center;
+  width: 16px; height: 16px; border-radius: 50%;
+  background: none; border: none; cursor: pointer;
+  color: #93c5fd; font-size: 1rem; font-weight: 700;
+  line-height: 1; padding: 0; transition: background .15s, color .15s;
+}
+.creator-chip-rm:hover { background: #fee2e2; color: #ef4444; }
 
 
 /* ── Dashboard Period Filter Bar ─────────────────────────────── */

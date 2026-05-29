@@ -427,9 +427,18 @@
             </div>
             <div class="form-group">
               <label id="postCreatorLabel" class="form-label">Creator <span class="req-star">*</span></label>
+              <!-- Single select — format biasa (Post, Reels, Story, dll.) -->
               <select id="postCreator" class="form-inp">
                 <option value="">— Pilih Creator —</option>
               </select>
+              <!-- Chip UI — multi-creator untuk Podcast / Liputan -->
+              <div id="postCreatorMulti" class="creator-multi-wrap hidden">
+                <div id="creatorChips" class="creator-chips"></div>
+                <select id="creatorAddSel" class="form-inp" style="margin-top:4px"
+                  onchange="addCreatorChip(this.value); this.value=''">
+                  <option value="">＋ Tambah creator…</option>
+                </select>
+              </div>
             </div>
           </div>
 

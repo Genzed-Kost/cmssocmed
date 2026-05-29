@@ -2357,8 +2357,12 @@ function renderContents() {
 let _draftTimer;
 function saveNewPostDraft() {
   if (gv('editPostId')) return; // don't autosave when editing existing post
+  const isDual = FORMATS_DUAL_ROLE.includes(gv('postFormat'));
   const draft = {
-    postDate: gv('postDate'), postCreator: gv('postCreator'), postAccount: gv('postAccount'),
+    postDate: gv('postDate'),
+    postCreator:  isDual ? '' : gv('postCreator'),
+    postCreators: isDual ? _getMultiCreators() : [],   // multi-creator (Podcast/Liputan)
+    postAccount: gv('postAccount'),
     postStatus: gv('postStatus'), postTitle: gv('postTitle'), postTheme: gv('postTheme'),
     postFormat: gv('postFormat'), postScript: gv('postScript'), postCaption: gv('postCaption'),
     postOutputLink: gv('postOutputLink'), postNotes: gv('postNotes'),
@@ -2375,7 +2379,6 @@ function clearNewPostDraft() { localStorage.removeItem(DRAFT_KEY); }
 
 function restoreDraftToForm(d) {
   sv('postDate',       d.postDate       || '');
-  sv('postCreator',    d.postCreator    || '');
   sv('postAccount',    d.postAccount    || '');
   sv('postStatus',     d.postStatus     || 'Ide');
   sv('postTitle',      d.postTitle      || '');
@@ -2386,6 +2389,13 @@ function restoreDraftToForm(d) {
   sv('postOutputLink', d.postOutputLink || '');
   sv('postNotes',      d.postNotes      || '');
   $$('#platformChecks input').forEach(cb => { cb.checked = (d.platforms||[]).includes(cb.value); });
+  // Aktifkan UI yang sesuai dulu, baru isi creator
+  onFormatChange(d.postFormat || 'Flayer');
+  if (FORMATS_DUAL_ROLE.includes(d.postFormat || '')) {
+    _setMultiCreators(Array.isArray(d.postCreators) ? d.postCreators : []);
+  } else {
+    sv('postCreator', d.postCreator || '');
+  }
 }
 
 function updateAiLimitDisplay() {
@@ -2408,7 +2418,47 @@ function updateAiLimitDisplay() {
   }
 }
 
-/* ── Format change: show/hide Editor field ─────────────────────────────── */
+/* ── Multi-creator chip helpers ─────────────────────────────────────────── */
+function _populateCreatorAddSel() {
+  const sel = $('creatorAddSel');
+  if (!sel) return;
+  const users    = state.settings?.users || [];
+  const selected = _getMultiCreators();
+  sel.innerHTML = '<option value="">＋ Tambah creator…</option>' +
+    users
+      .map(u => getUserName(u))
+      .filter(n => n && !selected.includes(n))
+      .map(n => `<option value="${esc(n)}">${esc(n)}</option>`)
+      .join('');
+}
+
+function _getMultiCreators() {
+  const chips = $('creatorChips');
+  if (!chips) return [];
+  return Array.from(chips.querySelectorAll('.creator-chip[data-name]')).map(el => el.dataset.name);
+}
+
+function _setMultiCreators(names) {
+  const chips = $('creatorChips');
+  if (!chips) return;
+  chips.innerHTML = (names || []).map(n =>
+    `<span class="creator-chip" data-name="${esc(n)}">${esc(n)}<button type="button" class="creator-chip-rm" title="Hapus">×</button></span>`
+  ).join('');
+  _populateCreatorAddSel();
+}
+
+function addCreatorChip(name) {
+  if (!name) return;
+  const chips = $('creatorChips');
+  if (!chips) return;
+  if (_getMultiCreators().includes(name)) return;  // sudah ada
+  chips.insertAdjacentHTML('beforeend',
+    `<span class="creator-chip" data-name="${esc(name)}">${esc(name)}<button type="button" class="creator-chip-rm" title="Hapus">×</button></span>`
+  );
+  _populateCreatorAddSel();
+}
+
+/* ── Format change: show/hide Editor field + toggle creator UI ─────────── */
 function onFormatChange(fmt) {
   const isDual = FORMATS_DUAL_ROLE.includes(fmt);
   $('postEditorRow')?.classList.toggle('hidden', !isDual);
@@ -2417,20 +2467,18 @@ function onFormatChange(fmt) {
     ? 'Creator <small style="font-weight:400;color:var(--muted)">(produksi · bisa pilih lebih dari 1)</small> <span class="req-star">*</span>'
     : 'Creator <span class="req-star">*</span>';
 
-  const sel = $('postCreator');
-  if (!sel) return;
+  const sel   = $('postCreator');
+  const multi = $('postCreatorMulti');
   if (isDual) {
-    sel.multiple = true;
-    sel.setAttribute('size', '4');
-    sel.classList.add('form-inp-multi');
+    // Tampilkan chip UI, sembunyikan single-select
+    if (sel)   sel.classList.add('hidden');
+    if (multi) multi.classList.remove('hidden');
+    _populateCreatorAddSel();
   } else {
-    // Clear multi-selection, keep single select
-    const prev = sel.value;
-    sel.multiple = false;
-    sel.removeAttribute('size');
-    sel.classList.remove('form-inp-multi');
-    // Restore selection if possible
-    if (prev) sel.value = prev;
+    // Tampilkan single-select, sembunyikan chip UI + reset chips
+    if (sel)   sel.classList.remove('hidden');
+    if (multi) multi.classList.add('hidden');
+    _setMultiCreators([]);
   }
 }
 
@@ -2670,13 +2718,12 @@ function renderNewPostForm(content) {
     $$('#platformChecks input').forEach(cb => {
       cb.checked = (content.platforms||[]).includes(cb.value);
     });
-    onFormatChange(content.format || '');  // show/hide editor row + set multiple attr
-    // Restore multi-select creator for Podcast/Liputan
-    if (FORMATS_DUAL_ROLE.includes(content.format || '') && Array.isArray(content.creator)) {
-      const sel = $('postCreator');
-      if (sel) Array.from(sel.options).forEach(opt => { opt.selected = content.creator.includes(opt.value); });
-    } else if (!Array.isArray(content.creator) && content.creator) {
-      sv('postCreator', content.creator);
+    onFormatChange(content.format || '');  // show/hide editor row + toggle creator UI
+    // Restore creator: chip UI untuk Podcast/Liputan, single-select untuk lainnya
+    if (FORMATS_DUAL_ROLE.includes(content.format || '')) {
+      _setMultiCreators(Array.isArray(content.creator) ? content.creator : (content.creator ? [content.creator] : []));
+    } else {
+      sv('postCreator', Array.isArray(content.creator) ? '' : (content.creator || ''));
     }
     // Lock status & creator when Published
     const isPublished = content.status === 'Published';
@@ -2771,8 +2818,8 @@ async function savePost() {
   const acctId  = gv('postAccount');
   const isDualRoleFmt = FORMATS_DUAL_ROLE.includes(gv('postFormat'));
   const creator = isDualRoleFmt
-    ? Array.from($('postCreator')?.selectedOptions || []).map(o => o.value).filter(Boolean)
-    : gv('postCreator');
+    ? _getMultiCreators()           // baca dari chip UI
+    : gv('postCreator');            // baca dari single-select
   const acctName = ACCOUNTS.find(a => a.id === acctId)?.name || acctId || '—';
   const data = {
     title, platforms,
@@ -4869,6 +4916,14 @@ document.addEventListener('DOMContentLoaded', async () => {
   $('loginPw')?.addEventListener('keydown', e => { if (e.key==='Enter') doLogin(); });
   $('btnToggleLoginPw')?.addEventListener('click', () => { const i=$('loginPw'); i.type=i.type==='password'?'text':'password'; });
   $('btnLogout')?.addEventListener('click', doLogout);
+
+  /* ── Multi-creator chip removal (event delegation) ─────────── */
+  $('creatorChips')?.addEventListener('click', e => {
+    const btn = e.target.closest('.creator-chip-rm');
+    if (!btn) return;
+    const chip = btn.closest('.creator-chip');
+    if (chip) { chip.remove(); _populateCreatorAddSel(); }
+  });
 
   /* ── GitHub (API Setup) ─────────────────────────────────────── */
   $('btnTestGithub')?.addEventListener('click', testGithub);
