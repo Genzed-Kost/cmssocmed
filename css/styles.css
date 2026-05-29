@@ -203,47 +203,10 @@ ul { list-style: none; }
 .topbar-title { font-size: 1rem; font-weight: 700; white-space: nowrap; letter-spacing: -.01em; }
 .topbar-right { display: flex; align-items: center; gap: 8px; flex: 1; justify-content: flex-end; }
 
-/* ── Digital Clock ───────────────────────────────────────────── */
-.topbar-clock {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  line-height: 1.25;
-  user-select: none;
-  pointer-events: none;
-  flex-shrink: 0;
-}
-.clock-time {
-  font-family: 'Courier New', Courier, monospace;
-  font-size: .97rem;
-  font-weight: 700;
-  letter-spacing: .05em;
-  color: var(--text);
-}
-.clock-colon {
-  color: var(--muted-lt);
-  animation: clockBlink 1s step-start infinite;
-}
-@keyframes clockBlink {
-  0%, 100% { opacity: 1; }
-  50%       { opacity: .25; }
-}
-.clock-sec {
-  color: var(--blue);
-  min-width: 1.6ch;
-  display: inline-block;
-}
-.clock-date {
-  font-size: .59rem;
-  font-weight: 600;
-  color: var(--muted);
-  letter-spacing: .04em;
-  text-transform: uppercase;
-  margin-top: 1px;
-}
-@media (max-width: 580px) { .topbar-clock { display: none; } }
+/* ── Digital Clock (disembunyikan — diganti widget kurs) ─────── */
+.topbar-clock { display: none !important; }
 
-/* ── Exchange Rate Widget (USD/IDR) ──────────────────────── */
+/* ── Exchange Rate Widget (USD/IDR) ──────────────────────────── */
 .topbar-rate {
   display: flex;
   flex-direction: column;
@@ -251,9 +214,7 @@ ul { list-style: none; }
   line-height: 1.25;
   user-select: none;
   flex-shrink: 0;
-  padding: 0 10px;
-  border-left: 1px solid var(--bd);
-  border-right: 1px solid var(--bd);
+  padding: 0 14px;
   gap: 1px;
   cursor: default;
 }
@@ -271,7 +232,7 @@ ul { list-style: none; }
   color: #16a34a;
   letter-spacing: .02em;
 }
-@media (max-width: 580px) { .topbar-rate { display: none; } }
+@media (max-width: 480px) { .topbar-rate { display: none; } }
 
 .topbar-user {
   display: flex; align-items: center; gap: 7px;
@@ -1993,6 +1954,20 @@ ul { list-style: none; }
   /* Plat stat chart: more compact */
   .stat-chart-wrap { padding: 12px; }
   .stat-chart-wrap canvas { max-height: 160px; }
+
+  /* ── Dashboard period bar: ticker wraps ke baris bawah ── */
+  .dash-month-bar { flex-wrap: wrap; }
+  .dash-ticker {
+    order: 10;           /* selalu di bawah filter + new post */
+    flex: 1 0 100%;      /* ambil full width baris baru */
+    min-width: 0;
+  }
+
+  /* ── Dashboard stat cards: 2-col tetap, lebih compact ── */
+  .stat-row { grid-template-columns: 1fr 1fr; gap: 8px; }
+  .stat-card { padding: 10px 12px; }
+  .stat-value { font-size: 1.45rem; }
+  .stat-label { font-size: .68rem; }
 }
 
 /* ── Breakpoint: 400px (very small phones) ────────────────────── */

@@ -1,4 +1,4 @@
-/* ================================================================
+﻿/* ================================================================
    CMS Penjaga Harapan — app.js v2
    GitHub-backed CMS · Role-based auth · Gemini AI
    ================================================================ */
@@ -3311,16 +3311,32 @@ function startClock() {
    KURS USD/IDR — fetchExchangeRate (frankfurter.app, refresh tiap 5 mnt)
    ══════════════════════════════════════════════════════════════════════════ */
 async function fetchExchangeRate() {
-  try {
-    const res = await fetch('https://api.frankfurter.app/latest?from=USD&to=IDR');
-    if (!res.ok) return;
-    const data = await res.json();
-    const rate = data.rates?.IDR;
-    if (!rate) return;
+  const _show = (rate) => {
     const el = document.getElementById('rateValue');
-    if (el) el.textContent = 'Rp ' + Math.round(rate).toLocaleString('id-ID');
+    if (el) el.textContent = 'Rp ' + Math.round(rate).toLocaleString('id-ID');
     document.getElementById('topbarRate')?.classList.remove('hidden');
-  } catch { /* fail silently — widget tetap tersembunyi jika offline */ }
+  };
+
+  // Primary: jsDelivr CDN (fawazahmed0) -- gratis, tanpa API key, tanpa rate limit
+  try {
+    const r = await fetch(
+      'https://cdn.jsdelivr.net/npm/@fawazahmed0/currency-api@latest/v1/currencies/usd.json',
+      { cache: 'no-cache' }
+    );
+    if (r.ok) {
+      const d = await r.json();
+      if (d?.usd?.idr) { _show(d.usd.idr); return; }
+    }
+  } catch { /* lanjut ke fallback */ }
+
+  // Fallback: frankfurter.app
+  try {
+    const r = await fetch('https://api.frankfurter.app/latest?from=USD&to=IDR');
+    if (r.ok) {
+      const d = await r.json();
+      if (d?.rates?.IDR) { _show(d.rates.IDR); return; }
+    }
+  } catch { /* fail silently */ }
 }
 
 function showInviteCreatorModal() {
