@@ -1,5 +1,13 @@
 [
   {
+    "id": "mpqj4if7f9c5b",
+    "user": "Admin",
+    "role": "Admin",
+    "action": "logout",
+    "target": "keluar dari sistem",
+    "timestamp": "2026-05-29T06:16:52.291Z"
+  },
+  {
     "id": "mpqj2pa2nn5v6",
     "user": "Admin",
     "role": "Admin",
@@ -84,7 +92,7 @@
     "user": "Admin",
     "role": "Admin",
     "action": "edit user",
-    "target": "Umar → Umar (Leader)",
+    "target": "Umar â Umar (Leader)",
     "timestamp": "2026-05-29T06:14:35.117Z"
   },
   {
@@ -124,7 +132,7 @@
     "user": "Admin",
     "role": "Admin",
     "action": "edit user",
-    "target": "Umar â Umar (Leader)",
+    "target": "Umar Ã¢ÂÂ Umar (Leader)",
     "timestamp": "2026-05-29T06:06:47.856Z"
   },
   {
