@@ -495,9 +495,6 @@ function applyAuthState() {
   // GitHub sync button: only visible to admin
   if ($('btnGitSync')) $('btnGitSync').style.display = admin ? '' : 'none';
 
-  // Statistics Input Data button: only visible to admin
-  if ($('btnToggleStatInput')) $('btnToggleStatInput').style.display = admin ? '' : 'none';
-
   // Logout button
   if ($('btnLogout')) $('btnLogout').style.display = sess ? '' : 'none';
 }
@@ -3110,7 +3107,7 @@ function renderStatChart() {
     if (chartWrap)   chartWrap.innerHTML = `<div class="stat-no-data">
       <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="color:var(--muted-lt)"><rect x="18" y="3" width="4" height="18" rx="1"/><rect x="10" y="8" width="4" height="13" rx="1"/><rect x="2" y="13" width="4" height="8" rx="1"/></svg>
       <p>Belum ada data <strong>${platM.label}</strong> untuk <strong>${getAcctName(acctId)}</strong></p>
-      <button class="btn-sm blue" onclick="document.getElementById('btnToggleStatInput').click()">+ Input Data Pertama</button>
+      <button class="btn-sm blue" onclick="addStatRowFromTable()">+ Input Data Pertama</button>
     </div>`;
     if (window._statChart) { window._statChart.destroy(); window._statChart = null; }
     const dt = $('statDataTable'); if (dt) dt.innerHTML = '';
@@ -3235,7 +3232,15 @@ function renderStatDataTable(acctId, platId, rows) {
     const cells = platM.fields.map(f =>
       `<td style="text-align:right">${fmtStatVal(r[f.key], f.fmt)}</td>`
     ).join('');
-    return `<tr><td style="white-space:nowrap;font-weight:500">${fmtMonth(r.month)}</td>${cells}</tr>`;
+    const m = esc(r.month);
+    return `<tr>
+      <td style="white-space:nowrap;font-weight:500">${fmtMonth(r.month)}</td>
+      ${cells}
+      <td style="white-space:nowrap;text-align:center">
+        <button class="btn-xs" title="Edit baris ini" onclick="openStatEdit('${m}')">✏️</button>
+        <button class="btn-xs" title="Hapus baris ini" style="color:var(--red)" onclick="deleteStatRow('${m}')">🗑</button>
+      </td>
+    </tr>`;
   }).join('');
 
   wrap.innerHTML = `
@@ -3250,12 +3255,54 @@ function renderStatDataTable(acctId, platId, rows) {
             <tr>
               <th style="white-space:nowrap">BULAN</th>
               ${headerCells}
+              <th style="white-space:nowrap;text-align:center">Aksi</th>
             </tr>
           </thead>
           <tbody>${bodyRows}</tbody>
         </table>
       </div>
+      <div style="padding:10px 0 0">
+        <button class="btn-sm blue" onclick="addStatRowFromTable()">
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          Tambah Bulan
+        </button>
+      </div>
     </div>`;
+}
+
+/* Tambah baris baru lewat tabel */
+function addStatRowFromTable() {
+  const d    = new Date();
+  const platM = PLATFORM_FIELDS[state.statActivePlat || 'youtube'];
+  sv('statMonth', `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`);
+  renderStatInputFields(state.statActiveAcct);
+  const title = $('statInputTitle');
+  if (title) title.textContent = `📊 Input ${platM?.label||''} — ${getAcctName(state.statActiveAcct)}`;
+  $('statInputCard')?.classList.remove('hidden');
+  $('statInputCard')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+/* Hapus satu baris data */
+async function deleteStatRow(month) {
+  const acctId = state.statActiveAcct;
+  const platId = state.statActivePlat || 'youtube';
+  showConfirm(`Hapus data ${fmtMonth(month)}? Tindakan tidak dapat dibatalkan.`, async () => {
+    const analytics = state.analytics || {};
+    if (analytics[acctId]?.[platId]) {
+      analytics[acctId][platId] = analytics[acctId][platId].filter(r => r.month !== month);
+    }
+    state.analytics = analytics;
+    showFlagLoader(600);
+    try {
+      state.shas.analytics = await window.db.writeData(
+        'analytics', analytics,
+        `Hapus statistik: ${getAcctName(acctId)} ${platId} — ${month}`
+      );
+      await logActivity(currentUser(), 'hapus statistik', `${getAcctName(acctId)} ${platId} — ${fmtMonth(month)}`);
+      toast(`Data ${fmtMonth(month)} dihapus ✓`);
+      renderStatChart();
+    } catch (e) { toast('Gagal hapus: ' + e.message, 'error'); }
+  });
 }
 
 /* ── Download helpers ───────────────────────────────────────────────────── */
@@ -3287,7 +3334,7 @@ function downloadStatJpg() {
   toast('Grafik berhasil didownload ✓', 'success');
 }
 
-function downloadStatTable() {
+function downloadStatTableJpg() {
   const acctId = state.statActiveAcct;
   const platId = state.statActivePlat || 'youtube';
   const platM  = PLATFORM_FIELDS[platId];
@@ -3297,44 +3344,115 @@ function downloadStatTable() {
     .slice().sort((a,b) => a.month.localeCompare(b.month));
   if (!rows.length) { toast('Belum ada data untuk didownload', 'error'); return; }
 
-  const month = $('statDlMonth')?.value || getCurrentYM();
-
-  // 4 key columns: follower, views, total engagement, ER
-  const follF = platM.fields.find(f => f.key === platM.followerKey) || platM.fields[0];
-  const viewF = platM.fields.find(f => f.key === platM.viewKey)     || platM.fields[1];
-  const engF  = platM.fields.find(f => f.key.toLowerCase().includes('totalengagement') || f.label.toLowerCase().includes('engagement'));
-  const erF   = platM.fields.find(f => f.fmt === 'pct' || f.label.toLowerCase().includes('er %'));
-  const cols  = [follF, viewF, engF, erF].filter(Boolean);
-
+  const month   = $('statDlMonth')?.value || getCurrentYM();
   const acctObj = ACCOUNTS.find(a => a.id === acctId);
-  const headerRow = `<tr style="background:${platM.color};color:#fff"><th>Bulan</th>${cols.map(f=>`<th>${f.label}</th>`).join('')}</tr>`;
-  const dataRows  = rows.map(r => {
-    const isSelected = r.month === month;
-    const style = isSelected ? `style="background:${platM.color}18;font-weight:600"` : '';
-    return `<tr ${style}><td>${fmtMonth(r.month)}</td>${cols.map(f=>`<td>${fmtStatVal(r[f.key],f.fmt)}</td>`).join('')}</tr>`;
-  }).join('');
 
-  const html = `<html><head><meta charset="UTF-8">
-    <style>
-      body { font-family: Arial, sans-serif; padding: 24px; color: #0f172a; }
-      h2   { margin-bottom: 4px; font-size: 16px; }
-      p    { color: #64748b; font-size: 12px; margin-bottom: 16px; }
-      table { border-collapse: collapse; width: 100%; font-size: 12px; }
-      th, td { padding: 8px 12px; border: 1px solid #e2e8f0; text-align: right; }
-      th:first-child, td:first-child { text-align: left; }
-      th { font-size: 11px; letter-spacing: .04em; }
-    </style></head><body>
-    <h2>${platM.label} — ${acctObj?.name || acctId}</h2>
-    <p>Diekspor: ${new Date().toLocaleDateString('id-ID',{day:'2-digit',month:'long',year:'numeric'})} · ${rows.length} bulan data</p>
-    <table><thead>${headerRow}</thead><tbody>${dataRows}</tbody></table>
-  </body></html>`;
+  // Semua kolom
+  const headers  = ['BULAN', ...platM.fields.map(f => f.label)];
+  const dataRows = rows.map(r => [
+    fmtMonth(r.month),
+    ...platM.fields.map(f => fmtStatVal(r[f.key], f.fmt))
+  ]);
 
-  html2pdf().set({
-    margin: 10,
-    filename: `tabel-${acctId}-${platId}-${month}.pdf`,
-    jsPDF: { unit:'mm', format:'a4', orientation:'landscape' }
-  }).from(html).save();
-  toast('Tabel sedang didownload ✓', 'success');
+  // Layout
+  const PAD     = 24;
+  const HEAD_H  = 52;   // title + subtitle area
+  const ROW_H   = 26;
+  const COL0_W  = 88;   // BULAN column
+  const COL_W   = 90;   // other columns
+  const totalW  = PAD * 2 + COL0_W + COL_W * (headers.length - 1);
+  const totalH  = PAD + HEAD_H + ROW_H * (dataRows.length + 1) + PAD;
+
+  const cv = document.createElement('canvas');
+  cv.width  = totalW;
+  cv.height = totalH;
+  const ctx = cv.getContext('2d');
+
+  // White background
+  ctx.fillStyle = '#ffffff';
+  ctx.fillRect(0, 0, totalW, totalH);
+
+  // Title
+  ctx.fillStyle = '#0f172a';
+  ctx.font = 'bold 13px Arial, sans-serif';
+  ctx.fillText(`${platM.label} — ${acctObj?.name || acctId}`, PAD, PAD + 15);
+  ctx.fillStyle = '#64748b';
+  ctx.font = '10px Arial, sans-serif';
+  ctx.fillText(
+    `Diekspor: ${new Date().toLocaleDateString('id-ID',{day:'2-digit',month:'long',year:'numeric'})} · ${rows.length} bulan`,
+    PAD, PAD + 32
+  );
+
+  // Column x positions
+  function colX(i) { return PAD + (i === 0 ? 0 : COL0_W + COL_W * (i - 1)); }
+  function colW(i) { return i === 0 ? COL0_W : COL_W; }
+
+  const tblTop = PAD + HEAD_H;
+
+  // Header row
+  ctx.fillStyle = platM.color;
+  ctx.fillRect(PAD, tblTop, totalW - PAD * 2, ROW_H);
+  ctx.fillStyle = '#ffffff';
+  ctx.font = 'bold 9px Arial, sans-serif';
+  headers.forEach((h, i) => {
+    if (i === 0) {
+      ctx.textAlign = 'left';
+      ctx.fillText(h, colX(i) + 5, tblTop + ROW_H / 2 + 3);
+    } else {
+      ctx.textAlign = 'right';
+      ctx.fillText(h.toUpperCase(), colX(i) + colW(i) - 5, tblTop + ROW_H / 2 + 3);
+    }
+  });
+  ctx.textAlign = 'left';
+
+  // Data rows
+  dataRows.forEach((row, ri) => {
+    const y = tblTop + ROW_H * (ri + 1);
+    ctx.fillStyle = ri % 2 === 0 ? '#f8fafc' : '#ffffff';
+    ctx.fillRect(PAD, y, totalW - PAD * 2, ROW_H);
+    ctx.fillStyle = '#0f172a';
+    ctx.font = ri === 0 ? 'bold 10px Arial, sans-serif' : '10px Arial, sans-serif';
+    row.forEach((cell, ci) => {
+      if (ci === 0) {
+        ctx.textAlign = 'left';
+        ctx.fillText(String(cell), colX(ci) + 5, y + ROW_H / 2 + 3);
+      } else {
+        ctx.textAlign = 'right';
+        ctx.fillText(String(cell), colX(ci) + colW(ci) - 5, y + ROW_H / 2 + 3);
+      }
+    });
+    ctx.textAlign = 'left';
+    // Row separator
+    ctx.strokeStyle = '#e2e8f0';
+    ctx.lineWidth = 0.5;
+    ctx.beginPath();
+    ctx.moveTo(PAD, y + ROW_H);
+    ctx.lineTo(totalW - PAD, y + ROW_H);
+    ctx.stroke();
+  });
+
+  // Vertical column separators
+  ctx.strokeStyle = '#e2e8f0';
+  ctx.lineWidth = 0.5;
+  for (let i = 1; i < headers.length; i++) {
+    const x = colX(i);
+    ctx.beginPath();
+    ctx.moveTo(x, tblTop);
+    ctx.lineTo(x, tblTop + ROW_H * (dataRows.length + 1));
+    ctx.stroke();
+  }
+
+  // Table outer border
+  ctx.strokeStyle = '#cbd5e1';
+  ctx.lineWidth = 1;
+  ctx.strokeRect(PAD, tblTop, totalW - PAD * 2, ROW_H * (dataRows.length + 1));
+
+  // Download
+  const link = document.createElement('a');
+  link.download = `tabel-${acctId}-${platId}-${month}.jpg`;
+  link.href = cv.toDataURL('image/jpeg', 0.92);
+  link.click();
+  toast('Tabel berhasil didownload ✓', 'success');
 }
 
 /* ── Top 3 per-bulan — semua user bisa edit ─────────────────────────────── */
@@ -4103,28 +4221,14 @@ document.addEventListener('DOMContentLoaded', async () => {
   $('newsOverlay')?.addEventListener('click', closeNewsPanel);
   $('btnRefreshNews')?.addEventListener('click', () => { localStorage.removeItem(NEWS_KEY); fetchNews(); });
 
-  /* ── Statistics download ──────────────────────────────────── */
-  $('btnDlJpg')?.addEventListener('click', downloadStatJpg);
-  $('btnDlTable')?.addEventListener('click', downloadStatTable);
+  /* ── Statistics download dropdown ───────────────────────────── */
+  $('btnDlDropdown')?.addEventListener('click', e => {
+    e.stopPropagation();
+    $('statDlMenu')?.classList.toggle('hidden');
+  });
+  document.addEventListener('click', () => $('statDlMenu')?.classList.add('hidden'));
 
   /* ── Statistics ─────────────────────────────────────────────── */
-  $('btnToggleStatInput')?.addEventListener('click', () => {
-    const card = $('statInputCard');
-    if (!card) return;
-    const wasHidden = card.classList.contains('hidden');
-    card.classList.toggle('hidden');
-    if (wasHidden) {
-      const d = new Date();
-      if (!$('statMonth')?.value) sv('statMonth', `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`);
-      renderStatInputFields(state.statActiveAcct);
-      const title = $('statInputTitle');
-      if (title) {
-        const platM = PLATFORM_FIELDS[state.statActivePlat || 'youtube'];
-        title.textContent = `📊 Input ${platM?.label||''} — ${getAcctName(state.statActiveAcct)}`;
-      }
-      $('statMonth')?.focus();
-    }
-  });
   $('btnCloseStatInput')?.addEventListener('click', () => $('statInputCard')?.classList.add('hidden'));
   $('btnSaveStats')?.addEventListener('click', saveAnalyticsEntry);
   // statMetric removed — platform tabs handle switching now

@@ -1833,6 +1833,21 @@ ul { list-style: none; }
 .stat-dl-wrap {
   display: flex; align-items: center; gap: 6px; flex-wrap: wrap;
 }
+.stat-dl-dropdown { position: relative; }
+.stat-dl-menu {
+  position: absolute; top: calc(100% + 4px); right: 0; z-index: 200;
+  background: #fff; border: 1px solid var(--bd);
+  border-radius: 10px; box-shadow: var(--shadow-lg);
+  min-width: 160px; overflow: hidden;
+}
+.stat-dl-menu.hidden { display: none; }
+.stat-dl-menu button {
+  display: block; width: 100%; padding: 9px 14px;
+  text-align: left; font-size: .8rem; font-weight: 500;
+  background: none; border: none; cursor: pointer; color: var(--text);
+  transition: background .12s;
+}
+.stat-dl-menu button:hover { background: var(--bg); }
 .stat-chart-wrap {
   background: var(--surface); border: 1.5px solid var(--bd);
   border-radius: 12px; padding: 20px; margin-bottom: 20px;

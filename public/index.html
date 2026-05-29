@@ -541,20 +541,18 @@
         <div class="stat-plat-wrap">
           <div class="stat-plat-bar" id="statPlatBar"></div>
           <div class="stat-plat-actions">
-            <button class="btn-sm blue" id="btnToggleStatInput">
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-              Input Data
-            </button>
             <div class="stat-dl-wrap">
-              <input type="month" id="statDlMonth" class="inp-sm" title="Pilih bulan untuk download" style="min-width:140px" />
-              <button class="btn-sm" id="btnDlJpg" title="Download grafik sebagai JPG">
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-                JPG
-              </button>
-              <button class="btn-sm" id="btnDlTable" title="Download tabel data">
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-                Tabel
-              </button>
+              <input type="month" id="statDlMonth" class="inp-sm" title="Bulan untuk nama file download" style="min-width:130px" />
+              <div class="stat-dl-dropdown" id="statDlDropWrap">
+                <button class="btn-sm" id="btnDlDropdown">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                  Download ▾
+                </button>
+                <div class="stat-dl-menu hidden" id="statDlMenu">
+                  <button onclick="downloadStatJpg()">📊 Grafik (JPG)</button>
+                  <button onclick="downloadStatTableJpg()">📋 Tabel (JPG)</button>
+                </div>
+              </div>
             </div>
           </div>
         </div>
