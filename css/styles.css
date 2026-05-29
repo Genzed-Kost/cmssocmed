@@ -203,8 +203,46 @@ ul { list-style: none; }
 .topbar-title { font-size: 1rem; font-weight: 700; white-space: nowrap; letter-spacing: -.01em; }
 .topbar-right { display: flex; align-items: center; gap: 8px; flex: 1; justify-content: flex-end; }
 
-/* ── Digital Clock (disembunyikan — diganti widget kurs) ─────── */
-.topbar-clock { display: none !important; }
+/* ── Digital Clock ───────────────────────────────────────────── */
+.topbar-clock {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  line-height: 1.25;
+  user-select: none;
+  pointer-events: none;
+  flex-shrink: 0;
+}
+.clock-time {
+  font-family: 'Courier New', Courier, monospace;
+  font-size: .97rem;
+  font-weight: 700;
+  letter-spacing: .05em;
+  color: var(--text);
+}
+.clock-colon {
+  color: var(--muted-lt);
+  animation: clockBlink 1s step-start infinite;
+}
+@keyframes clockBlink {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: .25; }
+}
+.clock-sec {
+  color: var(--blue);
+  min-width: 1.6ch;
+  display: inline-block;
+}
+.clock-date {
+  font-size: .59rem;
+  font-weight: 600;
+  color: var(--muted);
+  letter-spacing: .04em;
+  text-transform: uppercase;
+  margin-top: 1px;
+}
+/* Sembunyikan jam di HP (kurs yang tampil) */
+@media (max-width: 480px) { .topbar-clock { display: none; } }
 
 /* ── Exchange Rate Widget (USD/IDR) ──────────────────────────── */
 .topbar-rate {
@@ -215,6 +253,7 @@ ul { list-style: none; }
   user-select: none;
   flex-shrink: 0;
   padding: 0 14px;
+  border-left: 1px solid var(--bd);  /* pemisah dari jam di PC */
   gap: 1px;
   cursor: default;
 }
@@ -232,7 +271,12 @@ ul { list-style: none; }
   color: #16a34a;
   letter-spacing: .02em;
 }
-@media (max-width: 480px) { .topbar-rate { display: none; } }
+/* Di HP: tampilkan rate (jam sudah hidden), hapus border kiri */
+@media (max-width: 480px) {
+  .topbar-rate { border-left: none; padding: 0 8px; }
+}
+/* Sembunyikan rate hanya di HP sangat kecil (<360px) */
+@media (max-width: 360px) { .topbar-rate { display: none; } }
 
 .topbar-user {
   display: flex; align-items: center; gap: 7px;
@@ -1972,7 +2016,7 @@ ul { list-style: none; }
 
 /* ── Breakpoint: 400px (very small phones) ────────────────────── */
 @media (max-width: 400px) {
-  .stat-row   { grid-template-columns: 1fr; }
+  .stat-row   { grid-template-columns: 1fr 1fr; gap: 8px; }  /* tetap 2-col */
   .todo-list  { grid-template-columns: 1fr; }
   .page-inner { padding: 10px 8px 16px; }
   .card       { padding: 10px; }
