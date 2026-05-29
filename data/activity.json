@@ -1,11 +1,11 @@
 [
   {
-    "id": "mpr4jntbyjfd6",
-    "user": "Umar",
-    "role": "Leader",
-    "action": "login",
-    "target": "masuk ke sistem sebagai Leader",
-    "timestamp": "2026-05-29T16:16:31.055Z"
+    "id": "mpr4l70b8fx35",
+    "user": "Admin",
+    "role": "Admin",
+    "action": "logout",
+    "target": "keluar dari sistem",
+    "timestamp": "2026-05-29T16:17:42.587Z"
   },
   {
     "id": "mpr49cm3n1e6k",
