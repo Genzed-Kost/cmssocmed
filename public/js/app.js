@@ -851,24 +851,31 @@ function clearDataCache() {
  */
 function _syncApiKeysFromSettings() {
   const keys = state.settings?.apiKeys;
-  if (!keys) return;
+  if (keys) {
+    // Migrasi: jika ada keys tersimpan di settings lama, pindah ke localStorage
+    // lalu hapus dari settings agar tidak tersimpan di GitHub
+    let needCleanup = false;
+    if (keys.gemini) { localStorage.setItem(GEMINI_LS_KEY, keys.gemini); needCleanup = true; }
+    if (keys.claude) { localStorage.setItem(CLAUDE_LS_KEY, keys.claude); needCleanup = true; }
+    if (keys.wa)     { localStorage.setItem(WA_TOKEN_KEY,  keys.wa);     needCleanup = true; }
 
-  // Migrasi: jika ada keys tersimpan di settings lama, pindah ke localStorage
-  // lalu hapus dari settings agar tidak tersimpan di GitHub
-  let needCleanup = false;
-  if (keys.gemini) { localStorage.setItem(GEMINI_LS_KEY, keys.gemini); needCleanup = true; }
-  if (keys.claude) { localStorage.setItem(CLAUDE_LS_KEY, keys.claude); needCleanup = true; }
-  if (keys.wa)     { localStorage.setItem(WA_TOKEN_KEY,  keys.wa);     needCleanup = true; }
+    if (needCleanup && window.db?.getConfig()?.pat) {
+      delete state.settings.apiKeys;
+      window.db.writeData('settings', state.settings, 'Keamanan: hapus API keys dari GitHub settings')
+        .then(sha => { state.shas.settings = sha; saveDataCache(); })
+        .catch(() => {});
+    } else if (keys) {
+      delete state.settings.apiKeys;
+    }
+  }
 
-  if (needCleanup && window.db?.getConfig()?.pat) {
-    // Hapus apiKeys dari settings.json di GitHub agar tidak tersimpan di sana
-    delete state.settings.apiKeys;
-    window.db.writeData('settings', state.settings, 'Keamanan: hapus API keys dari GitHub settings')
-      .then(sha => { state.shas.settings = sha; saveDataCache(); })
-      .catch(() => {});
-  } else if (keys) {
-    // Tidak ada PAT (non-admin device) — setidaknya hapus dari memory
-    delete state.settings.apiKeys;
+  // ── Auto-apply teamToken (perangkat baru tanpa PAT) ────────────────────
+  // teamToken = fine-grained PAT terbatas, disimpan di settings.json agar
+  // device baru bisa langsung write tanpa setup manual apapun.
+  const teamToken = state.settings?.teamToken;
+  if (teamToken && !window.db.getConfig()?.pat) {
+    const cfg = window.db.getConfig() || {};
+    window.db.saveConfig({ ...cfg, pat: teamToken });
   }
 }
 
@@ -2790,6 +2797,10 @@ function renderApiSetup() {
   sv('cfgWaToken', getWaToken());
   updateWaStatus();
 
+  // Team token — tampilkan nilai saat ini (ter-mask karena type=password)
+  sv('cfgTeamToken', state.settings?.teamToken || '');
+  updateTeamTokenStatus();
+
   renderUserList();
   renderUrlAcctBar();
   renderPlatformUrls(state.urlActiveAcct);
@@ -2935,9 +2946,68 @@ async function consumeInvite(id, pin) {
   return { payload, invitesAfterDelete: invites };
 }
 
-/* ── UI: Buat invite (admin) ─────────────────────────────────────────────── */
+/* ── Salin Link Akses Tim — cukup salin URL loginuser ────────────────────── */
 function generateShareLink() {
-  showInviteCreatorModal();
+  const url = `${window.location.origin}/loginuser`;
+  if (navigator.clipboard?.writeText) {
+    navigator.clipboard.writeText(url)
+      .then(() => toast(`🔗 Link disalin! Bagikan ke anggota tim.`, 'success'))
+      .catch(() => prompt('Salin link ini:', url));
+  } else {
+    prompt('Salin link ini:', url);
+  }
+}
+
+/* ── Token Akses Tim ─────────────────────────────────────────────────────── */
+function updateTeamTokenStatus() {
+  const el  = $('teamTokenStatus');
+  const has = !!(state.settings?.teamToken);
+  if (el) {
+    el.textContent = has ? 'Aktif' : 'Belum diisi';
+    el.className   = 'badge-status' + (has ? ' ok' : '');
+  }
+}
+
+async function saveTeamTokenFromForm() {
+  const token = gv('cfgTeamToken').trim();
+  if (!token) { toast('Masukkan fine-grained PAT terlebih dahulu', 'error'); return; }
+
+  const btn = $('btnSaveTeamToken');
+  if (btn) { btn.textContent = 'Menyimpan…'; btn.disabled = true; }
+
+  const settings = state.settings || { kpi:{}, users:[], analyticsUrls:{} };
+  settings.teamToken = token;
+  try {
+    state.settings = settings;
+    state.shas.settings = await window.db.writeData('settings', settings, 'Token akses tim: update');
+    saveDataCache();
+    sv('cfgTeamToken', '');          // kosongkan field setelah simpan
+    updateTeamTokenStatus();
+    toast('✅ Token disimpan di GitHub — anggota bisa langsung login!', 'success');
+  } catch (e) {
+    toast('Gagal simpan: ' + e.message, 'error');
+  } finally {
+    if (btn) { btn.textContent = '💾 Simpan ke GitHub'; btn.disabled = false; }
+  }
+}
+
+function deleteTeamToken() {
+  showConfirm(
+    'Hapus Token Akses Tim? Perangkat baru harus setup manual.',
+    async () => {
+      const settings = state.settings || {};
+      delete settings.teamToken;
+      try {
+        state.settings = settings;
+        state.shas.settings = await window.db.writeData('settings', settings, 'Token akses tim: hapus');
+        saveDataCache();
+        sv('cfgTeamToken', '');
+        updateTeamTokenStatus();
+        toast('Token akses tim dihapus', '');
+      } catch (e) { toast('Gagal: ' + e.message, 'error'); }
+    },
+    { icon: '🔑', yesLabel: 'Hapus Token', danger: true }
+  );
 }
 
 /* ══════════════════════════════════════════════════════════════════════════
@@ -4765,6 +4835,9 @@ document.addEventListener('DOMContentLoaded', async () => {
   $('btnToggleClaudeKey')?.addEventListener('click', () => { const i=$('cfgClaudeKey'); i.type=i.type==='password'?'text':'password'; });
   $('btnSaveWaToken')?.addEventListener('click', saveWaTokenFromForm);
   $('btnToggleWaToken')?.addEventListener('click', () => { const i=$('cfgWaToken'); i.type=i.type==='password'?'text':'password'; });
+  $('btnSaveTeamToken')?.addEventListener('click', saveTeamTokenFromForm);
+  $('btnDeleteTeamToken')?.addEventListener('click', deleteTeamToken);
+  $('btnToggleTeamToken')?.addEventListener('click', () => { const i=$('cfgTeamToken'); i.type=i.type==='password'?'text':'password'; });
   $('btnSaveUrls')?.addEventListener('click', saveUrls);
   $('btnSaveKpi')?.addEventListener('click', saveKpi);
 
@@ -4971,11 +5044,10 @@ document.addEventListener('DOMContentLoaded', async () => {
   window.updateTopSlot        = updateTopSlot;
   window.saveTopContent       = saveTopContent;
   window.switchTop3Month      = switchTop3Month;
-  window.generateShareLink    = generateShareLink;
-  window._randomPin6          = _randomPin6;
-  window.doCreateInvite       = doCreateInvite;
-  window.closeInviteCreatorModal = closeInviteCreatorModal;
-  window.doConsumeInvite      = doConsumeInvite;
+  window.generateShareLink       = generateShareLink;
+  window.saveTeamTokenFromForm   = saveTeamTokenFromForm;
+  window.deleteTeamToken         = deleteTeamToken;
+  window.updateTeamTokenStatus   = updateTeamTokenStatus;
 
   /* ── Jam digital topbar ─────────────────────────────────────────── */
   startClock();
@@ -4984,11 +5056,6 @@ document.addEventListener('DOMContentLoaded', async () => {
   if (!window.db.isConfigured()) {
     window.db.saveConfig(DEFAULT_REPO);  // tanpa PAT — hanya untuk baca repo public
   }
-
-  /* ── INIT: Check for ?invite= (device setup via encrypted invite) ───────── */
-  // checkInviteParam() hanya tampilkan PIN modal — auth flow tetap lanjut di bawah
-  // sehingga event listener login/wizard sudah siap saat doConsumeInvite() sukses
-  const _hasInvite = checkInviteParam();
 
   /* ── INIT: Auth flow ────────────────────────────────────────── */
   if (isFirstRun()) {
