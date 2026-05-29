@@ -170,6 +170,23 @@
         "adImpressions": 193804,
         "avgViewsPerVideo": 16101,
         "peakViews": 147914
+      },
+      {
+        "month": "2026-03",
+        "jmlVideo": 49,
+        "totalViews": 690825,
+        "uniqueViewers": 0,
+        "subsEOM": 56743,
+        "subsGained": 411,
+        "totalLikes": 6856,
+        "totalComments": 5854,
+        "totalEngagement": 12710,
+        "erPct": 1.84,
+        "watchHours": 6106,
+        "impressions": 222647,
+        "adImpressions": 49118,
+        "avgViewsPerVideo": 14098,
+        "peakViews": 69575
       }
     ],
     "tiktok": [
