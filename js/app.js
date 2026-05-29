@@ -736,22 +736,48 @@ function closePantun() {
 
 async function showLogin() {
   $('loginPage').classList.remove('hidden');
-  populateLoginSelect();
+  populateLoginSelect();   // tampilkan cache dulu (cepat untuk returning device)
   sv('loginPw', '');
   toggleLoginPw();
-  // Refresh user list dari GitHub agar selalu up-to-date (background)
+  _hideLoginFetchError();
+
+  // Selalu fetch dari GitHub agar daftar anggota selalu up-to-date
   if (window.db.isConfigured()) {
     try {
       const _s = await window.db.readData('settings');
-      if (_s?.users?.length) {
-        setPubUsers(_s.users);
+      if (_s) {
+        // Simpan auth admin jika belum ada (perangkat baru)
         if (_s.adminHash && !getAuth()) {
           saveAuth({ adminName: _s.adminName || 'Admin', adminHash: _s.adminHash });
         }
-        populateLoginSelect(); // re-render dengan data fresh
+        // Apply teamToken untuk perangkat baru yang belum punya token
+        if (_s.teamToken) {
+          localStorage.setItem(TEAM_TOKEN_KEY, _s.teamToken);
+          if (!window.db.getConfig()?.pat) {
+            window.db.saveConfig({ ...window.db.getConfig(), pat: _s.teamToken });
+          }
+        }
+        // Update cache: pakai data GitHub jika ada users; jangan hapus cache jika settings kosong
+        if (_s.users?.length) {
+          setPubUsers(_s.users);
+        }
+        populateLoginSelect();  // selalu re-render setelah fetch
       }
-    } catch {}
+    } catch {
+      // Jika fetch gagal tapi ada cache → tetap tampil (sudah dilakukan di atas)
+      // Jika tidak ada cache → tampilkan petunjuk
+      if (!getPubUsers().length) _showLoginFetchError();
+    }
   }
+}
+
+function _showLoginFetchError() {
+  const el = $('loginFetchError');
+  if (el) el.classList.remove('hidden');
+}
+function _hideLoginFetchError() {
+  const el = $('loginFetchError');
+  if (el) el.classList.add('hidden');
 }
 
 function populateLoginSelect() {

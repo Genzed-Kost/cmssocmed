@@ -1058,6 +1058,11 @@
       <div class="form-group" style="margin:0">
         <label class="form-label">Masuk sebagai</label>
         <select id="loginUserSel" class="form-inp"></select>
+        <div id="loginFetchError" class="hidden" style="margin-top:8px;font-size:12px;color:var(--red,#ef4444);display:flex;align-items:center;gap:6px">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+          Gagal memuat anggota tim.
+          <button type="button" onclick="showLogin()" style="background:none;border:none;color:var(--blue,#3b82f6);cursor:pointer;font-size:12px;padding:0;text-decoration:underline">Coba lagi</button>
+        </div>
       </div>
       <div id="loginPwWrap" class="form-group" style="margin:0">
         <label class="form-label">Password</label>
