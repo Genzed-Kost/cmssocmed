@@ -308,6 +308,9 @@ ul { list-style: none; }
 
 
 
+/* Sembunyikan jam topbar di HP, tampil di sidebar saja */
+@media (max-width: 480px) { .topbar-clock { display: none; } }
+
 .topbar-user {
   display: flex; align-items: center; gap: 7px;
   font-size: .78rem; font-weight: 600; color: var(--muted);
@@ -1962,8 +1965,7 @@ ul { list-style: none; }
   .page-inner { padding: 12px 10px 20px; }
   .page-inner-narrow { padding: 12px 10px; }
 
-  /* Topbar: fully icon-only, hide badge-btn */
-  .badge-btn { display: none; }
+  /* Topbar: icon-only pada HP */
   .topbar-title {
     font-size: .82rem;
     max-width: 150px;
@@ -2062,7 +2064,6 @@ ul { list-style: none; }
   .modal-overlay { padding: 4px; }
   .modal { border-radius: 12px; }
   .btn-md { padding: 8px 12px; font-size: .8rem; }
-  .badge-btn { display: none; }
 }
 
 /* ══════════════════════════════════════════════════════════════════
