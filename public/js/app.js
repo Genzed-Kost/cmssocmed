@@ -3357,24 +3357,76 @@ function initStatDownloadMonth() {
 function downloadStatJpg() {
   const canvas = $('statBarChart');
   if (!canvas) { toast('Tidak ada grafik untuk didownload', 'error'); return; }
-  const acctId = state.statActiveAcct;
-  const platId = state.statActivePlat || 'youtube';
+
+  const acctId  = state.statActiveAcct;
+  const platId  = state.statActivePlat || 'youtube';
+  const platM   = PLATFORM_FIELDS[platId];
+  const acctObj = ACCOUNTS.find(a => a.id === acctId);
   const fromM   = $('statFromMonth')?.value || '';
   const toM     = $('statToMonth')?.value   || getCurrentYM();
   const fileTag = fromM ? `${fromM}_${toM}` : toM;
+  const rangeLabel = fromM
+    ? `${fmtMonth(fromM)} – ${fmtMonth(toM)}`
+    : fmtMonth(toM);
 
-  // Create a white-background version
+  // ── Layout ─────────────────────────────────────────────────────
+  const PAD      = 20;
+  const HEADER_H = 64;   // area judul + subtitle
+  const FOOTER_H = 28;   // area watermark bawah
+  // Target lebar minimum 900px, scale up jika chart lebih kecil
+  const TARGET_W = Math.max(canvas.width, 900);
+  const scale    = TARGET_W / canvas.width;
+  const chartH   = Math.round(canvas.height * scale);
+  const totalW   = TARGET_W;
+  const totalH   = HEADER_H + chartH + FOOTER_H;
+
   const offCanvas = document.createElement('canvas');
-  offCanvas.width  = canvas.width;
-  offCanvas.height = canvas.height;
-  const offCtx = offCanvas.getContext('2d');
-  offCtx.fillStyle = '#ffffff';
-  offCtx.fillRect(0, 0, offCanvas.width, offCanvas.height);
-  offCtx.drawImage(canvas, 0, 0);
+  offCanvas.width  = totalW;
+  offCanvas.height = totalH;
+  const ctx = offCanvas.getContext('2d');
+
+  // White background
+  ctx.fillStyle = '#ffffff';
+  ctx.fillRect(0, 0, totalW, totalH);
+
+  // Color accent bar at top
+  ctx.fillStyle = platM?.color || '#6366f1';
+  ctx.fillRect(0, 0, totalW, 4);
+
+  // Title
+  ctx.fillStyle = '#0f172a';
+  ctx.font = 'bold 15px Arial, sans-serif';
+  ctx.fillText(`${platM?.label || platId} — ${acctObj?.name || acctId}`, PAD, 26);
+
+  // Subtitle: range + tanggal ekspor
+  ctx.fillStyle = '#64748b';
+  ctx.font = '11px Arial, sans-serif';
+  ctx.fillText(
+    `Rentang: ${rangeLabel}   ·   Diekspor: ${new Date().toLocaleDateString('id-ID', { day:'2-digit', month:'long', year:'numeric' })}`,
+    PAD, 46
+  );
+
+  // Divider
+  ctx.strokeStyle = '#e2e8f0';
+  ctx.lineWidth = 1;
+  ctx.beginPath();
+  ctx.moveTo(PAD, HEADER_H - 6);
+  ctx.lineTo(totalW - PAD, HEADER_H - 6);
+  ctx.stroke();
+
+  // Chart (scaled up, white bg sudah ada di offCanvas)
+  ctx.drawImage(canvas, 0, HEADER_H, totalW, chartH);
+
+  // Footer watermark
+  ctx.fillStyle = '#94a3b8';
+  ctx.font = '10px Arial, sans-serif';
+  ctx.textAlign = 'right';
+  ctx.fillText('Penjaga Harapan CMS', totalW - PAD, HEADER_H + chartH + 18);
+  ctx.textAlign = 'left';
 
   const link = document.createElement('a');
   link.download = `grafik-${acctId}-${platId}-${fileTag}.jpg`;
-  link.href = offCanvas.toDataURL('image/jpeg', 0.92);
+  link.href = offCanvas.toDataURL('image/jpeg', 0.95);
   link.click();
   toast('Grafik berhasil didownload ✓', 'success');
 }
@@ -3428,15 +3480,20 @@ function downloadStatTableJpg() {
   ctx.fillStyle = '#ffffff';
   ctx.fillRect(0, 0, totalW, totalH);
 
+  // Color bar at top
+  ctx.fillStyle = platM.color;
+  ctx.fillRect(0, 0, totalW, 4);
+
   // Title
   ctx.fillStyle = '#0f172a';
   ctx.font = 'bold 13px Arial, sans-serif';
-  ctx.fillText(`${platM.label} — ${acctObj?.name || acctId}`, PAD, PAD + 15);
+  ctx.fillText(`${platM.label} — ${acctObj?.name || acctId}`, PAD, PAD + 16);
   ctx.fillStyle = '#64748b';
   ctx.font = '10px Arial, sans-serif';
+  const rangeStr = fromM ? `${fmtMonth(fromM)} – ${fmtMonth(toM)}` : `${dlRows.length} bulan`;
   ctx.fillText(
-    `Diekspor: ${new Date().toLocaleDateString('id-ID',{day:'2-digit',month:'long',year:'numeric'})} · ${dlRows.length} bulan`,
-    PAD, PAD + 32
+    `Rentang: ${rangeStr}   ·   Diekspor: ${new Date().toLocaleDateString('id-ID',{day:'2-digit',month:'long',year:'numeric'})}`,
+    PAD, PAD + 34
   );
 
   // Column x positions
@@ -3463,19 +3520,11 @@ function downloadStatTableJpg() {
 
   // Data rows
   dataRows.forEach((row, ri) => {
-    const y          = tblTop + ROW_H * (ri + 1);
-    const isSelected = rows[ri]?.month === month;   // highlight bulan terpilih
-    ctx.fillStyle = isSelected
-      ? platM.color + '22'
-      : (ri % 2 === 0 ? '#f8fafc' : '#ffffff');
+    const y = tblTop + ROW_H * (ri + 1);
+    ctx.fillStyle = ri % 2 === 0 ? '#f8fafc' : '#ffffff';
     ctx.fillRect(PAD, y, totalW - PAD * 2, ROW_H);
-    // Left accent bar for selected row
-    if (isSelected) {
-      ctx.fillStyle = platM.color;
-      ctx.fillRect(PAD, y, 3, ROW_H);
-    }
     ctx.fillStyle = '#0f172a';
-    ctx.font = isSelected ? 'bold 10px Arial, sans-serif' : '10px Arial, sans-serif';
+    ctx.font = '10px Arial, sans-serif';
     row.forEach((cell, ci) => {
       if (ci === 0) {
         ctx.textAlign = 'left';
