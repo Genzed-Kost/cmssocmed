@@ -1833,6 +1833,7 @@ ul { list-style: none; }
 .stat-dl-wrap {
   display: flex; align-items: center; gap: 6px; flex-wrap: wrap;
 }
+.stat-range-sep { color: var(--muted); font-size: .85rem; flex-shrink: 0; user-select: none; }
 .stat-dl-dropdown { position: relative; }
 .stat-dl-menu {
   position: absolute; top: calc(100% + 4px); right: 0; z-index: 200;

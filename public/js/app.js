@@ -3114,28 +3114,42 @@ function renderStatChart() {
     return;
   }
 
+  /* ── Range filter (dari statFromMonth – statToMonth) ────────────── */
+  const fromM = $('statFromMonth')?.value || '';
+  const toM   = $('statToMonth')?.value   || '';
+  let displayRows = rows;
+  if (fromM || toM) {
+    displayRows = rows.filter(r =>
+      (!fromM || r.month >= fromM) && (!toM || r.month <= toM)
+    );
+  }
+  // Fallback jika filter terlalu sempit (tidak ada data)
+  if (!displayRows.length) displayRows = rows;
+
   /* ── Summary cards ───────────────────────────────────────────────
-     followerKey  = titik-waktu (EOM) → tampilkan nilai bulan terakhir
-     field lain   = kumulatif          → tampilkan SUM semua bulan
+     followerKey  = titik-waktu (EOM) → tampilkan nilai bulan terakhir dalam rentang
+     field lain   = kumulatif          → tampilkan SUM dalam rentang
   ──────────────────────────────────────────────────────────────── */
-  const keyFields  = platM.fields.slice(0, 4);
-  const latestRow  = rows[rows.length - 1];           // baris bulan terbaru (sudah terurut)
-  // Field yang bersifat "point-in-time" (EOM / Followers): followerKey + kunci yg mengandung "EOM"
-  const ptKeys = new Set([
+  const keyFields = platM.fields.slice(0, 4);
+  const latestRow = displayRows[displayRows.length - 1];
+  const ptKeys    = new Set([
     platM.followerKey,
     ...platM.fields
       .filter(f => f.key.toLowerCase().includes('eom') || f.label.toLowerCase().includes('eom'))
       .map(f => f.key)
   ]);
+  const rangeLabel = (fromM && toM)
+    ? `${fmtMonth(fromM)} – ${fmtMonth(toM)}`
+    : `${displayRows.length} bulan`;
   if (summaryWrap) summaryWrap.innerHTML = `<div class="stat-summary-row">
     ${keyFields.map(f => {
-      const isPointInTime = ptKeys.has(f.key);
-      const val    = isPointInTime
+      const isPt  = ptKeys.has(f.key);
+      const val   = isPt
         ? (+latestRow?.[f.key] || 0)
-        : rows.reduce((s, r) => s + (+r[f.key] || 0), 0);
-      const period = isPointInTime
+        : displayRows.reduce((s, r) => s + (+r[f.key] || 0), 0);
+      const period = isPt
         ? `Bulan ${fmtMonth(latestRow?.month || '')}`
-        : `Total ${rows.length} bulan`;
+        : `Total ${rangeLabel}`;
       return `
         <div class="stat-summary-card">
           <div class="stat-sum-label">${f.label}</div>
@@ -3145,12 +3159,10 @@ function renderStatChart() {
     }).join('')}
   </div>`;
 
-  /* ── Bar chart: last 12 months, followers (bars) + views (line) ─ */
+  /* ── Bar chart ──────────────────────────────────────────────────── */
   if (chartWrap && !chartWrap.querySelector('canvas')) {
     chartWrap.innerHTML = '<canvas id="statBarChart"></canvas>';
   } else if (!chartWrap) return;
-
-  const displayRows = rows.slice(-12);
   const labels     = displayRows.map(r => fmtMonth(r.month));
   const follData   = displayRows.map(r => +(r[platM.followerKey] || 0));
   const viewData   = displayRows.map(r => +(r[platM.viewKey]     || 0));
@@ -3322,8 +3334,24 @@ async function deleteStatRow(month) {
 
 /* ── Download helpers ───────────────────────────────────────────────────── */
 function initStatDownloadMonth() {
-  const inp = $('statDlMonth');
-  if (inp && !inp.value) inp.value = getCurrentYM();
+  const fromInp = $('statFromMonth');
+  const toInp   = $('statToMonth');
+  if (!fromInp || !toInp) return;
+  // Default: 12 bulan terakhir (hanya set jika belum ada nilai)
+  if (!toInp.value) {
+    toInp.value = getCurrentYM();
+  }
+  if (!fromInp.value) {
+    const d = new Date();
+    d.setMonth(d.getMonth() - 11);
+    fromInp.value = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;
+  }
+  // Re-render chart saat range berubah
+  if (!fromInp._rangeInit) {
+    fromInp._rangeInit = true;
+    fromInp.addEventListener('change', () => renderStatChart());
+    toInp.addEventListener('change',   () => renderStatChart());
+  }
 }
 
 function downloadStatJpg() {
@@ -3331,7 +3359,9 @@ function downloadStatJpg() {
   if (!canvas) { toast('Tidak ada grafik untuk didownload', 'error'); return; }
   const acctId = state.statActiveAcct;
   const platId = state.statActivePlat || 'youtube';
-  const month  = $('statDlMonth')?.value || getCurrentYM();
+  const fromM   = $('statFromMonth')?.value || '';
+  const toM     = $('statToMonth')?.value   || getCurrentYM();
+  const fileTag = fromM ? `${fromM}_${toM}` : toM;
 
   // Create a white-background version
   const offCanvas = document.createElement('canvas');
@@ -3343,7 +3373,7 @@ function downloadStatJpg() {
   offCtx.drawImage(canvas, 0, 0);
 
   const link = document.createElement('a');
-  link.download = `grafik-${acctId}-${platId}-${month}.jpg`;
+  link.download = `grafik-${acctId}-${platId}-${fileTag}.jpg`;
   link.href = offCanvas.toDataURL('image/jpeg', 0.92);
   link.click();
   toast('Grafik berhasil didownload ✓', 'success');
@@ -3355,21 +3385,27 @@ function downloadStatTableJpg() {
   const platM  = PLATFORM_FIELDS[platId];
   if (!platM) return;
 
-  const rows = ((state.analytics?.[acctId]?.[platId]) || [])
+  const allRows = ((state.analytics?.[acctId]?.[platId]) || [])
     .slice().sort((a,b) => a.month.localeCompare(b.month));
-  if (!rows.length) { toast('Belum ada data untuk didownload', 'error'); return; }
+  if (!allRows.length) { toast('Belum ada data untuk didownload', 'error'); return; }
 
-  const month   = $('statDlMonth')?.value || getCurrentYM();
+  const fromM = $('statFromMonth')?.value || '';
+  const toM   = $('statToMonth')?.value   || getCurrentYM();
+  const rows  = (fromM || toM)
+    ? allRows.filter(r => (!fromM || r.month >= fromM) && (!toM || r.month <= toM))
+    : allRows;
+  const dlRows  = rows.length ? rows : allRows;   // fallback jika filter kosong
+  const fileTag = fromM ? `${fromM}_${toM}` : toM;
   const acctObj = ACCOUNTS.find(a => a.id === acctId);
 
-  // 4 kolom ringkas: Bulan · viewKey · followerKey · totalEngagement
+  // 4 kolom ringkas: Bulan · Total Views · Subscribers/Followers EOM · Total Engagement
   const viewF  = platM.fields.find(f => f.key === platM.viewKey)      || platM.fields[0];
   const follF  = platM.fields.find(f => f.key === platM.followerKey)  || platM.fields[1];
   const engF   = platM.fields.find(f => f.key === 'totalEngagement')  || null;
   const dlCols = [viewF, follF, engF].filter(Boolean);
 
   const headers  = ['BULAN', ...dlCols.map(f => f.label)];
-  const dataRows = rows.map(r => [
+  const dataRows = dlRows.map(r => [
     fmtMonth(r.month),
     ...dlCols.map(f => fmtStatVal(r[f.key], f.fmt))
   ]);
@@ -3399,7 +3435,7 @@ function downloadStatTableJpg() {
   ctx.fillStyle = '#64748b';
   ctx.font = '10px Arial, sans-serif';
   ctx.fillText(
-    `Diekspor: ${new Date().toLocaleDateString('id-ID',{day:'2-digit',month:'long',year:'numeric'})} · ${rows.length} bulan`,
+    `Diekspor: ${new Date().toLocaleDateString('id-ID',{day:'2-digit',month:'long',year:'numeric'})} · ${dlRows.length} bulan`,
     PAD, PAD + 32
   );
 
@@ -3477,7 +3513,7 @@ function downloadStatTableJpg() {
 
   // Download
   const link = document.createElement('a');
-  link.download = `tabel-${acctId}-${platId}-${month}.jpg`;
+  link.download = `tabel-${acctId}-${platId}-${fileTag}.jpg`;
   link.href = cv.toDataURL('image/jpeg', 0.92);
   link.click();
   toast('Tabel berhasil didownload ✓', 'success');
