@@ -291,13 +291,18 @@ ul { list-style: none; }
 .kpi-fraction { font-size: .75rem; color: var(--muted); width: 44px; text-align: right; flex-shrink: 0; }
 .kpi-skeleton { color: var(--muted); font-size: .8rem; }
 
-/* My To-Do — compact planner items */
-.todo-list { display: flex; flex-direction: column; gap: 0; max-height: 300px; overflow-y: auto; }
+/* My To-Do — compact planner items, 2-column grid */
+.todo-list {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+}
 .todo-item {
   display: flex; align-items: center; gap: 8px;
-  padding: 8px 4px; border-bottom: 1px solid var(--bd);
+  padding: 7px 8px;
+  border: 1px solid var(--bd); border-radius: 8px;
 }
-.todo-item:last-child { border-bottom: none; }
+.todo-empty { grid-column: 1 / -1; }
 .todo-empty, .act-empty, .user-empty { font-size: .82rem; color: var(--muted); padding: 8px 0; }
 
 /* Planner-item style */

@@ -1933,7 +1933,8 @@ function renderTodoList() {
       const da = a.publishDate ? new Date(a.publishDate) : new Date('9999');
       const db = b.publishDate ? new Date(b.publishDate) : new Date('9999');
       return da - db;
-    });
+    })
+    .slice(0, 6);  // maksimal 6 item
 
   if (!myContents.length) {
     list.innerHTML = `<li class="todo-empty">${admin ? 'Tidak ada konten aktif' : 'Tidak ada tugas untuk Anda saat ini'}</li>`;
