@@ -1,5 +1,13 @@
 [
   {
+    "id": "mpqj12vjyn5db",
+    "user": "Umar",
+    "role": "Leader",
+    "action": "logout",
+    "target": "keluar dari sistem",
+    "timestamp": "2026-05-29T06:14:12.175Z"
+  },
+  {
     "id": "mpqirrvkxrtza",
     "user": "Umar",
     "role": "Leader",
@@ -20,7 +28,7 @@
     "user": "Admin",
     "role": "Admin",
     "action": "edit user",
-    "target": "Umar → Umar (Leader)",
+    "target": "Umar â Umar (Leader)",
     "timestamp": "2026-05-29T06:06:47.856Z"
   },
   {
