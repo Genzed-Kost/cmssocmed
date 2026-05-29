@@ -1,11 +1,11 @@
 [
   {
-    "id": "mprirse85mjx1",
-    "user": "Umar",
-    "role": "Leader",
-    "action": "login",
-    "target": "masuk ke sistem sebagai Leader",
-    "timestamp": "2026-05-29T22:54:44.864Z"
+    "id": "mprivmp8my3qg",
+    "user": "Admin",
+    "role": "Admin",
+    "action": "edit user",
+    "target": "Umar → Umar (Publisher)",
+    "timestamp": "2026-05-29T22:57:44.108Z"
   },
   {
     "id": "mpri98h89gv4c",
