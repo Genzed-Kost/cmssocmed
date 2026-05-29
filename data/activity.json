@@ -1,10 +1,18 @@
 [
   {
-    "id": "mpqjwyygi83pu",
+    "id": "mpqjxeyk6ywuc",
     "user": "Umar",
     "role": "Leader",
     "action": "Edit Bank Konten",
     "target": "\"POV Saya dapat bansos malah dikira buzzer\" — publishDate",
+    "timestamp": "2026-05-29T06:39:20.828Z"
+  },
+  {
+    "id": "mpqjwyygi83pu",
+    "user": "Umar",
+    "role": "Leader",
+    "action": "Edit Bank Konten",
+    "target": "\"POV Saya dapat bansos malah dikira buzzer\" â publishDate",
     "timestamp": "2026-05-29T06:39:00.088Z"
   },
   {
@@ -108,7 +116,7 @@
     "user": "Admin",
     "role": "Admin",
     "action": "edit user",
-    "target": "Umar Ã¢ÂÂ Umar (Leader)",
+    "target": "Umar ÃÂ¢ÃÂÃÂ Umar (Leader)",
     "timestamp": "2026-05-29T06:14:35.117Z"
   },
   {
@@ -148,7 +156,7 @@
     "user": "Admin",
     "role": "Admin",
     "action": "edit user",
-    "target": "Umar ÃÂ¢ÃÂÃÂ Umar (Leader)",
+    "target": "Umar ÃÂÃÂ¢ÃÂÃÂÃÂÃÂ Umar (Leader)",
     "timestamp": "2026-05-29T06:06:47.856Z"
   },
   {
