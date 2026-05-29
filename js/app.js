@@ -33,7 +33,6 @@ const NEWS_KEY        = 'cmsph_news_v1';
 const NEWS_TTL        = 60 * 60 * 1000;
 const DATA_CACHE_KEY     = 'cmsph_data_v2';
 const DATA_CACHE_TTL     = 3 * 60 * 1000;   // 3 minutes — reduces GitHub API rate-limit hits
-const TEAM_TOKEN_KEY     = 'cmsph_team_token_v1'; // cache teamToken agar request selalu authenticated
 const LOGIN_ATTEMPTS_KEY = 'cmsph_login_att_v1';
 const LOGIN_MAX_ATTEMPTS = 5;
 const LOGIN_LOCKOUT_MS   = 5 * 60 * 1000;   // 5 menit lockout setelah 5x gagal
@@ -64,20 +63,6 @@ function _checkLoginLockout() {
   }
   _resetLoginAttempts();   // lockout sudah berakhir, reset
   return null;
-}
-
-/**
- * Terapkan teamToken dari localStorage ke DB config SEBELUM request apapun dikirim.
- * Dipanggil di startup (sebelum auth flow) agar loadAllData() selalu authenticated.
- * Admin yang sudah punya PAT sendiri tidak terpengaruh.
- */
-function _applyTeamTokenFromCache() {
-  if (window.db.getConfig()?.pat) return;  // sudah ada PAT (admin) — skip
-  const cached = localStorage.getItem(TEAM_TOKEN_KEY);
-  if (cached) {
-    const cfg = window.db.getConfig() || {};
-    window.db.saveConfig({ ...cfg, pat: cached });
-  }
 }
 
 /* ── Pantun data (login & logout per role) ─────────────────────────────── */
@@ -573,56 +558,7 @@ function showConfirm(msg, onYes, { icon = '⚠️', yesLabel = 'Hapus', danger =
    FIRST-RUN WIZARD
    ══════════════════════════════════════════════════════════════════════════ */
 
-/* ── Token Setup — onboarding device baru untuk repo private ─────────────── */
-function showTokenSetup() {
-  $('loginPage')?.classList.add('hidden');
-  $('wizardModal')?.classList.add('hidden');
-  $('tokenSetupModal')?.classList.remove('hidden');
-  $('setupToken') && ($('setupToken').value = '');
-}
-
-async function connectWithTeamToken() {
-  const token = ($('setupToken')?.value || '').trim();
-  if (!token) { toast('Masukkan token terlebih dahulu', 'error'); return; }
-
-  const btn = $('btnSubmitSetupToken');
-  if (btn) { btn.textContent = 'Menghubungkan…'; btn.disabled = true; }
-
-  try {
-    // Coba koneksi dengan token yang dimasukkan
-    window.db.saveConfig({ ...DEFAULT_REPO, pat: token });
-    const _s = await window.db.readData('settings');
-
-    if (!_s?.adminHash) {
-      toast('Token valid tapi data admin belum ada. Hubungi Admin untuk setup ulang.', 'warn');
-      window.db.saveConfig(DEFAULT_REPO);
-      return;
-    }
-
-    // Simpan token ke cache
-    localStorage.setItem(TEAM_TOKEN_KEY, token);
-
-    // Jika settings menyimpan teamToken yang berbeda (lebih terbatas), pakai itu
-    if (_s.teamToken && _s.teamToken !== token) {
-      localStorage.setItem(TEAM_TOKEN_KEY, _s.teamToken);
-      window.db.saveConfig({ ...DEFAULT_REPO, pat: _s.teamToken });
-    }
-
-    saveAuth({ adminName: _s.adminName || 'Admin', adminHash: _s.adminHash });
-    setPubUsers(_s.users || []);
-    $('tokenSetupModal')?.classList.add('hidden');
-    showLogin();
-    toast('✅ Perangkat berhasil terhubung! Silakan login.', 'success');
-  } catch (e) {
-    toast('Gagal terhubung: ' + e.message, 'error');
-    window.db.saveConfig(DEFAULT_REPO);  // reset ke tanpa PAT
-  } finally {
-    if (btn) { btn.textContent = 'Hubungkan →'; btn.disabled = false; }
-  }
-}
-
 function showWizard(mode) {
-  $('tokenSetupModal')?.classList.add('hidden');
   $('wizardModal').classList.remove('hidden');
   if (mode === 'new') showWizardStep(1);
   else showWizardStep('Connect');
@@ -829,14 +765,6 @@ async function showLogin() {
         if (_s.adminHash && !getAuth()) {
           saveAuth({ adminName: _s.adminName || 'Admin', adminHash: _s.adminHash });
         }
-        // Apply teamToken untuk perangkat baru yang belum punya token
-        if (_s.teamToken) {
-          localStorage.setItem(TEAM_TOKEN_KEY, _s.teamToken);
-          if (!window.db.getConfig()?.pat) {
-            window.db.saveConfig({ ...window.db.getConfig(), pat: _s.teamToken });
-          }
-        }
-        // Update cache: pakai data GitHub jika ada users; jangan hapus cache jika settings kosong
         if (_s.users?.length) {
           setPubUsers(_s.users);
         }
@@ -1010,21 +938,6 @@ function _syncApiKeysFromSettings() {
     }
   }
 
-  // ── Sync teamToken: cache ke localStorage + apply jika belum ada PAT ───
-  // teamToken = fine-grained PAT terbatas, disimpan di settings.json.
-  // Di-cache di localStorage agar _applyTeamTokenFromCache() bisa terapkan
-  // SEBELUM request apapun dikirim pada kunjungan berikutnya.
-  const teamToken = state.settings?.teamToken;
-  if (teamToken) {
-    localStorage.setItem(TEAM_TOKEN_KEY, teamToken);  // simpan cache
-    if (!window.db.getConfig()?.pat) {
-      const cfg = window.db.getConfig() || {};
-      window.db.saveConfig({ ...cfg, pat: teamToken });
-    }
-  } else {
-    // Token dihapus dari GitHub → hapus cache lokal juga
-    localStorage.removeItem(TEAM_TOKEN_KEY);
-  }
 }
 
 /**
@@ -2996,10 +2909,6 @@ function renderApiSetup() {
   sv('cfgWaToken', getWaToken());
   updateWaStatus();
 
-  // Team token — tampilkan nilai saat ini (ter-mask karena type=password)
-  sv('cfgTeamToken', state.settings?.teamToken || '');
-  updateTeamTokenStatus();
-
   renderUserList();
   renderUrlAcctBar();
   renderPlatformUrls(state.urlActiveAcct);
@@ -3155,58 +3064,6 @@ function generateShareLink() {
   } else {
     prompt('Salin link ini:', url);
   }
-}
-
-/* ── Token Akses Tim ─────────────────────────────────────────────────────── */
-function updateTeamTokenStatus() {
-  const el  = $('teamTokenStatus');
-  const has = !!(state.settings?.teamToken);
-  if (el) {
-    el.textContent = has ? 'Aktif' : 'Belum diisi';
-    el.className   = 'badge-status' + (has ? ' ok' : '');
-  }
-}
-
-async function saveTeamTokenFromForm() {
-  const token = gv('cfgTeamToken').trim();
-  if (!token) { toast('Masukkan fine-grained PAT terlebih dahulu', 'error'); return; }
-
-  const btn = $('btnSaveTeamToken');
-  if (btn) { btn.textContent = 'Menyimpan…'; btn.disabled = true; }
-
-  const settings = state.settings || { kpi:{}, users:[], analyticsUrls:{} };
-  settings.teamToken = token;
-  try {
-    state.settings = settings;
-    state.shas.settings = await window.db.writeData('settings', settings, 'Token akses tim: update');
-    saveDataCache();
-    sv('cfgTeamToken', '');          // kosongkan field setelah simpan
-    updateTeamTokenStatus();
-    toast('✅ Token disimpan di GitHub — anggota bisa langsung login!', 'success');
-  } catch (e) {
-    toast('Gagal simpan: ' + e.message, 'error');
-  } finally {
-    if (btn) { btn.textContent = '💾 Simpan ke GitHub'; btn.disabled = false; }
-  }
-}
-
-function deleteTeamToken() {
-  showConfirm(
-    'Hapus Token Akses Tim? Perangkat baru harus setup manual.',
-    async () => {
-      const settings = state.settings || {};
-      delete settings.teamToken;
-      try {
-        state.settings = settings;
-        state.shas.settings = await window.db.writeData('settings', settings, 'Token akses tim: hapus');
-        saveDataCache();
-        sv('cfgTeamToken', '');
-        updateTeamTokenStatus();
-        toast('Token akses tim dihapus', '');
-      } catch (e) { toast('Gagal: ' + e.message, 'error'); }
-    },
-    { icon: '🔑', yesLabel: 'Hapus Token', danger: true }
-  );
 }
 
 /* ══════════════════════════════════════════════════════════════════════════
@@ -5017,11 +4874,6 @@ document.addEventListener('DOMContentLoaded', async () => {
   $('btnToggleLoginPw')?.addEventListener('click', () => { const i=$('loginPw'); i.type=i.type==='password'?'text':'password'; });
   $('btnLogout')?.addEventListener('click', doLogout);
 
-  /* ── Token Setup Modal ──────────────────────────────────────── */
-  $('btnSubmitSetupToken')?.addEventListener('click', connectWithTeamToken);
-  $('setupToken')?.addEventListener('keydown', e => { if (e.key === 'Enter') connectWithTeamToken(); });
-  $('btnToggleSetupToken')?.addEventListener('click', () => { const i = $('setupToken'); i.type = i.type === 'password' ? 'text' : 'password'; });
-
   /* ── Multi-creator chip removal (event delegation) ─────────── */
   $('creatorChips')?.addEventListener('click', e => {
     const btn = e.target.closest('.creator-chip-rm');
@@ -5050,9 +4902,6 @@ document.addEventListener('DOMContentLoaded', async () => {
   $('btnToggleClaudeKey')?.addEventListener('click', () => { const i=$('cfgClaudeKey'); i.type=i.type==='password'?'text':'password'; });
   $('btnSaveWaToken')?.addEventListener('click', saveWaTokenFromForm);
   $('btnToggleWaToken')?.addEventListener('click', () => { const i=$('cfgWaToken'); i.type=i.type==='password'?'text':'password'; });
-  $('btnSaveTeamToken')?.addEventListener('click', saveTeamTokenFromForm);
-  $('btnDeleteTeamToken')?.addEventListener('click', deleteTeamToken);
-  $('btnToggleTeamToken')?.addEventListener('click', () => { const i=$('cfgTeamToken'); i.type=i.type==='password'?'text':'password'; });
   $('btnSaveUrls')?.addEventListener('click', saveUrls);
   $('btnSaveKpi')?.addEventListener('click', saveKpi);
 
@@ -5260,9 +5109,6 @@ document.addEventListener('DOMContentLoaded', async () => {
   window.saveTopContent       = saveTopContent;
   window.switchTop3Month      = switchTop3Month;
   window.generateShareLink       = generateShareLink;
-  window.saveTeamTokenFromForm   = saveTeamTokenFromForm;
-  window.deleteTeamToken         = deleteTeamToken;
-  window.updateTeamTokenStatus   = updateTeamTokenStatus;
 
   /* ── Jam digital topbar ─────────────────────────────────────────── */
   startClock();
@@ -5272,12 +5118,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     window.db.saveConfig(DEFAULT_REPO);  // tanpa PAT — hanya untuk baca repo public
   }
 
-  /* ── INIT: Terapkan teamToken dari cache SEBELUM request apapun ─────────
-     Ini mencegah rate-limit GitHub (60 req/jam untuk unauthenticated).
-     Admin yang punya PAT sendiri tidak terpengaruh (_applyTeamTokenFromCache
-     skip jika PAT sudah ada). ─────────────────────────────────────────── */
-  _applyTeamTokenFromCache();
-
   /* ── INIT: Auth flow ────────────────────────────────────────── */
   if (isFirstRun()) {
     try {
@@ -5285,32 +5125,16 @@ document.addEventListener('DOMContentLoaded', async () => {
 
       if (_s?.adminHash) {
         // ✅ Instalasi ada & sudah setup — lanjut ke login
-        if (_s.teamToken) {
-          localStorage.setItem(TEAM_TOKEN_KEY, _s.teamToken);
-          if (!window.db.getConfig()?.pat) {
-            window.db.saveConfig({ ...window.db.getConfig(), pat: _s.teamToken });
-          }
-        }
         saveAuth({ adminName: _s.adminName || 'Admin', adminHash: _s.adminHash });
         setPubUsers(_s.users || []);
         showLogin();
-
-      } else if (Array.isArray(_s) && !_s.length) {
-        // 🔒 File tidak ditemukan (404) — repo kemungkinan PRIVATE atau belum ada file
-        // Tunjukkan form token setup (anggota tim masukkan token, admin klik link wizard)
-        showTokenSetup();
-
       } else {
         // ⚙️ File ada tapi adminHash belum diisi — instalasi pertama admin
         showWizard('new');
       }
     } catch {
-      // ❌ Error koneksi / rate limit
-      if (getAuth()) {
-        showLogin();      // ada cache → tetap bisa login
-      } else {
-        showTokenSetup(); // tidak ada cache → minta token
-      }
+      // ❌ Error koneksi / rate limit — ada cache auth → tetap bisa login
+      showLogin();
     }
   } else if (!isLoggedIn()) {
     // Returning visit, no active session — show login
