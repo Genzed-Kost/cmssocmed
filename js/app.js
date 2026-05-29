@@ -3321,7 +3321,7 @@ async function fetchExchangeRate() {
   const _show = (rate) => {
     const el = document.getElementById('rateValue');
     if (el) el.textContent = 'Rp ' + Math.round(rate).toLocaleString('id-ID');
-    document.getElementById('topbarRate')?.classList.remove('hidden');
+    // widget selalu visible (tidak perlu remove hidden lagi)
   };
 
   // Tampilkan cache dulu agar widget muncul instan
