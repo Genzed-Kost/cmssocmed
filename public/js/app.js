@@ -1324,55 +1324,76 @@ function renderCurrentPage() {
    DASHBOARD
    ══════════════════════════════════════════════════════════════════════════ */
 
-/* ── Dashboard period filter: "Bulan Ini" button + optional date range ─────── */
+/* ── Helper: konversi nilai dropdown periode → {from, to} ───────────────── */
+function getPeriodDates(value) {
+  const now   = new Date();
+  const today = now.toISOString().slice(0, 10);
+  const pad   = n => String(n).padStart(2, '0');
+
+  switch (value) {
+    case 'month': {
+      const y = now.getFullYear(), m = now.getMonth();
+      return { from: `${y}-${pad(m+1)}-01`,
+               to:   new Date(y, m+1, 0).toISOString().slice(0, 10) };
+    }
+    case 'week': {
+      const d   = now.getDay();
+      const mon = new Date(now); mon.setDate(now.getDate() - (d === 0 ? 6 : d - 1));
+      const sun = new Date(mon); sun.setDate(mon.getDate() + 6);
+      return { from: mon.toISOString().slice(0, 10),
+               to:   sun.toISOString().slice(0, 10) };
+    }
+    case 'last7':  return { from: new Date(now - 6*864e5).toISOString().slice(0,10), to: today };
+    case 'last30': return { from: new Date(now - 29*864e5).toISOString().slice(0,10), to: today };
+    case 'today':  return { from: today, to: today };
+    case 'lastmonth': {
+      const y = now.getFullYear(), m = now.getMonth();
+      const ly = m === 0 ? y-1 : y, lm = m === 0 ? 12 : m;
+      return { from: `${ly}-${pad(lm)}-01`,
+               to:   new Date(y, m, 0).toISOString().slice(0, 10) };
+    }
+    case 'year': {
+      const y = now.getFullYear();
+      return { from: `${y}-01-01`, to: `${y}-12-31` };
+    }
+    case 'all':  return { from: null, to: null };
+    default:     return null;   // 'custom' — gunakan input manual
+  }
+}
+
+/* ── Dashboard period filter ─────────────────────────────────────────────── */
 function initDashFilter() {
-  // Set default month (current month)
-  if (!state.dashMonth) {
-    const n = new Date();
-    state.dashMonth = `${n.getFullYear()}-${String(n.getMonth()+1).padStart(2,'0')}`;
-  }
+  const sel       = $('dashPeriodSel');
+  const fromInp   = $('dashDateFrom');
+  const toInp     = $('dashDateTo');
+  const customDiv = $('dashCustomRange');
 
-  const btnBulanIni = $('btnDashBulanIni');
-  const fromInp     = $('dashDateFrom');
-  const toInp       = $('dashDateTo');
-  const clearBtn    = $('btnClearDashDate');
+  if (!sel || sel._dashFilterInit) return;
+  sel._dashFilterInit = true;
 
-  if (!btnBulanIni || btnBulanIni._dashFilterInit) return;
-  btnBulanIni._dashFilterInit = true;
+  function applyPeriod() {
+    const val = sel?.value || 'month';
+    const isCustom = val === 'custom';
+    customDiv?.classList.toggle('hidden', !isCustom);
 
-  function applyRange() {
-    state.dashDateFrom = fromInp?.value || null;
-    state.dashDateTo   = toInp?.value   || null;
-    const hasRange = !!(state.dashDateFrom || state.dashDateTo);
-    if (btnBulanIni) btnBulanIni.classList.toggle('active', !hasRange);
-    if (clearBtn)    clearBtn.style.display = hasRange ? '' : 'none';
+    if (isCustom) {
+      state.dashDateFrom = fromInp?.value || null;
+      state.dashDateTo   = toInp?.value   || null;
+    } else {
+      const r = getPeriodDates(val);
+      state.dashDateFrom = r.from;
+      state.dashDateTo   = r.to;
+    }
     showFlagLoader(350);
     renderDashboard();
   }
 
-  btnBulanIni.addEventListener('click', () => {
-    if (fromInp) fromInp.value = '';
-    if (toInp)   toInp.value   = '';
-    state.dashDateFrom = null;
-    state.dashDateTo   = null;
-    if (btnBulanIni) btnBulanIni.classList.add('active');
-    if (clearBtn)    clearBtn.style.display = 'none';
-    showFlagLoader(350);
-    renderDashboard();
-  });
+  sel.addEventListener('change', applyPeriod);
+  fromInp?.addEventListener('change', applyPeriod);
+  toInp?.addEventListener('change',   applyPeriod);
 
-  fromInp?.addEventListener('change', applyRange);
-  toInp?.addEventListener('change',   applyRange);
-  clearBtn?.addEventListener('click', () => {
-    if (fromInp) fromInp.value = '';
-    if (toInp)   toInp.value   = '';
-    state.dashDateFrom = null;
-    state.dashDateTo   = null;
-    if (btnBulanIni) btnBulanIni.classList.add('active');
-    if (clearBtn)    clearBtn.style.display = 'none';
-    showFlagLoader(350);
-    renderDashboard();
-  });
+  // Terapkan default (Bulan Ini) saat init
+  applyPeriod();
 }
 
 function buildKpiPeriodSel() {
@@ -1974,8 +1995,20 @@ function renderPlanner(page) {
   const creator   = gv('planFilterCreator');
   const status    = gv('planFilterStatus');
   const time      = gv('planFilterTime');
-  const dateFrom  = gv('planDateFrom');
-  const dateTo    = gv('planDateTo');
+  // Resolve custom date inputs or period preset → dateFrom / dateTo
+  let dateFrom, dateTo;
+  if (time === 'custom') {
+    dateFrom = gv('planDateFrom');
+    dateTo   = gv('planDateTo');
+  } else if (time && time !== '') {
+    const r = getPeriodDates(time);
+    dateFrom = r?.from || '';
+    dateTo   = r?.to   || '';
+  } else {
+    dateFrom = ''; dateTo = '';
+  }
+  // Show/hide custom range inputs
+  $('planCustomRange')?.classList.toggle('hidden', time !== 'custom');
 
   let rows = state.contents.filter(c => {
     if (search  && !c.title?.toLowerCase().includes(search)) return false;
@@ -1989,10 +2022,7 @@ function renderPlanner(page) {
       const sun  = new Date(mon);  sun.setDate(mon.getDate() + 7);
       if (d < mon || d >= sun) return false;
     }
-    if (time === 'month') {
-      const d = new Date(c.publishDate||''), now = new Date();
-      if (d.getMonth() !== now.getMonth() || d.getFullYear() !== now.getFullYear()) return false;
-    }
+    // dateFrom/dateTo sudah di-resolve dari getPeriodDates() di atas
     if (dateFrom) {
       const d = new Date(c.publishDate||'');
       if (d < new Date(dateFrom)) return false;
@@ -2060,10 +2090,19 @@ const ACT_PAGE_SIZE = 20;
 
 function renderActivity(page) {
   if (page !== undefined) state.actPage = page;
-  const search   = gv('actSearch').toLowerCase();
-  const dateFrom = gv('actDateFrom');
-  const dateTo   = gv('actDateTo');
-  const list     = $('activityList');
+  const search  = gv('actSearch').toLowerCase();
+  const period  = gv('actPeriodSel');
+  let dateFrom, dateTo;
+  if (period === 'custom') {
+    dateFrom = gv('actDateFrom');
+    dateTo   = gv('actDateTo');
+  } else if (period) {
+    const r = getPeriodDates(period);
+    dateFrom = r?.from || ''; dateTo = r?.to || '';
+  } else {
+    dateFrom = ''; dateTo = '';
+  }
+  const list = $('activityList');
   if (!list) return;
 
   const filtered = state.activity.filter(a => {
@@ -3975,11 +4014,20 @@ document.addEventListener('DOMContentLoaded', async () => {
   $('saveEditUser')?.addEventListener('click',   saveEditUser);
   $('editUserName')?.addEventListener('keydown', e => { if (e.key==='Enter') saveEditUser(); });
 
-  /* ── Activity search + date filter ──────────────────────────── */
-  $('actSearch')?.addEventListener('input',  () => renderActivity(1));
+  /* ── Activity search + period filter ───────────────────────── */
+  $('actSearch')?.addEventListener('input', () => renderActivity(1));
+  $('actPeriodSel')?.addEventListener('change', () => {
+    const val = gv('actPeriodSel');
+    $('actCustomRange')?.classList.toggle('hidden', val !== 'custom');
+    if (val !== 'custom') { sv('actDateFrom',''); sv('actDateTo',''); }
+    renderActivity(1);
+  });
   ['actDateFrom','actDateTo'].forEach(id => $(id)?.addEventListener('change', () => renderActivity(1)));
   $('btnClearActFilter')?.addEventListener('click', () => {
-    sv('actSearch',''); sv('actDateFrom',''); sv('actDateTo',''); renderActivity(1);
+    sv('actSearch',''); sv('actDateFrom',''); sv('actDateTo','');
+    const sel = $('actPeriodSel'); if (sel) sel.value = '';
+    $('actCustomRange')?.classList.add('hidden');
+    renderActivity(1);
   });
   $('btnRefreshActivity')?.addEventListener('click', () => {
     const btn = $('btnRefreshActivity');

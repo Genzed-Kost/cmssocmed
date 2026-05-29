@@ -1392,18 +1392,21 @@ ul { list-style: none; }
 .dash-month-bar {
   display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
   margin-bottom: 14px; padding: 8px 14px;
-  background: var(--surface); border: 1px solid var(--bd);
+  background: var(--surface); border: 1px solid rgba(226,232,240,.7);
   border-radius: var(--radius); width: 100%;
+  box-shadow: var(--shadow);
 }
-.dash-bulan-ini {
-  background: var(--bg); border: 1px solid var(--bd-dk); color: var(--muted);
-  border-radius: 6px; padding: 3px 10px; font-size: .78rem; font-weight: 600;
-  transition: all .15s;
+/* Period dropdown — compact & styled */
+.period-sel {
+  min-width: 148px; font-weight: 600; font-size: .8rem;
+  background: var(--blue-lt); border-color: var(--blue-bd); color: var(--blue);
+  cursor: pointer;
 }
-.dash-bulan-ini.active {
-  background: var(--blue-lt); border-color: var(--blue); color: var(--blue);
+/* Custom date range — shown only when period = 'custom' */
+.period-custom-range {
+  display: flex; align-items: center; gap: 5px;
 }
-.dash-bulan-ini:hover { border-color: var(--blue); color: var(--blue); }
+.period-custom-range.hidden { display: none; }
 
 /* ── Near Content (Liputan/Podcast) ─────────────────────────── */
 .near-item {
@@ -1595,11 +1598,9 @@ ul { list-style: none; }
   letter-spacing: .03em; width: fit-content;
 }
 
-/* ── Planner date range ──────────────────────────────────────── */
+/* ── Planner date range (legacy — kept for compat) ───────────── */
 .date-range-wrap {
   display: flex; align-items: center; gap: 5px;
-  background: var(--bg); border: 1px solid var(--bd);
-  border-radius: 8px; padding: 3px 8px;
 }
 
 /* ── New Post optional label ─────────────────────────────────── */
@@ -1642,6 +1643,16 @@ ul { list-style: none; }
   .topbar-title { font-size: .9rem; }
   .btn-md { padding: 9px 16px; font-size: .82rem; }
   html { font-size: 13px; }
+  /* Toolbar: stack vertically on mobile */
+  .toolbar { flex-direction: column; align-items: stretch; gap: 8px; }
+  .toolbar-left, .toolbar-right { flex-wrap: wrap; }
+  .toolbar-right { justify-content: flex-end; }
+  /* Dash month bar: period sel full-width on mobile */
+  .dash-month-bar { gap: 6px; }
+  .period-sel { flex: 1; min-width: 0; }
+  /* Hide "Periode:" label on small screen */
+  .dash-month-bar > span { display: none; }
+  .dash-month-bar > svg  { display: none; }
 }
 
 @media (max-width: 400px) {
