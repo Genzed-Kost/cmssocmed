@@ -1529,6 +1529,8 @@ ul { list-style: none; }
   border-radius: var(--radius); width: 100%;
   box-shadow: var(--shadow);
 }
+/* New Post button always pinned to the right */
+.dash-month-bar #btnDashNewPost { margin-left: auto; flex-shrink: 0; }
 /* Period dropdown — compact & styled */
 .period-sel {
   min-width: 148px; font-weight: 600; font-size: .8rem;
@@ -2343,44 +2345,66 @@ ul { list-style: none; }
    ══════════════════════════════════════════════════════════════════ */
 
 .dash-ticker {
+  /* Inline inside dash-month-bar: fills space between filter and button */
+  flex: 1;
+  min-width: 0;
   overflow: hidden;
-  white-space: nowrap;
   background: linear-gradient(90deg, #fffbeb 0%, #fef3c7 100%);
   border: 1.5px solid #fbbf24;
-  border-radius: var(--radius);
-  padding: 7px 0;
-  margin-bottom: 10px;
+  border-radius: 99px;
+  padding: 3px 0;
   position: relative;
-  width: 100%;
-  max-width: 100%;
+  display: flex;
+  align-items: center;
+  height: 34px;
   box-sizing: border-box;
 }
+.dash-ticker.hidden { display: none !important; }
+
+/* Fade edges */
 .dash-ticker::before,
 .dash-ticker::after {
   content: '';
   position: absolute;
   top: 0; bottom: 0;
-  width: 32px;
+  width: 28px;
   z-index: 1;
   pointer-events: none;
 }
 .dash-ticker::before { left: 0;  background: linear-gradient(to right,  #fffbeb, transparent); }
-.dash-ticker::after  { right: 0; background: linear-gradient(to left,   #fffbeb, transparent); }
+.dash-ticker::after  { right: 0; background: linear-gradient(to left,   #fef3c7, transparent); }
 
-.dash-ticker-track {
-  display: inline-block;
-  animation: ticker-scroll var(--ticker-dur, 30s) linear infinite;
+/* 📢 label */
+.dash-ticker-label {
+  flex-shrink: 0;
+  padding: 0 6px 0 10px;
+  font-size: .85rem;
+  line-height: 1;
+  z-index: 2;
 }
-.dash-ticker-track:hover { animation-play-state: paused; }
 
+/* Scroll container — clips the moving text */
+.dash-ticker-track {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  position: relative;
+  height: 100%;
+  display: flex;
+  align-items: center;
+}
+
+/* Animated inner — the moving text strip */
 .dash-ticker-inner {
   display: inline-flex;
   align-items: center;
+  white-space: nowrap;
   gap: 0;
-  padding: 0 24px;
-  font-size: .8rem;
+  font-size: .78rem;
   color: #92400e;
+  animation: ticker-scroll var(--ticker-dur, 30s) linear infinite;
 }
+.dash-ticker-track:hover .dash-ticker-inner { animation-play-state: paused; }
 
 .dash-ticker-item {
   display: inline-flex;

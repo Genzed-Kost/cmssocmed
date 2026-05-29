@@ -121,13 +121,7 @@
     <section id="page-dashboard" class="page active">
       <div class="page-inner">
 
-        <!-- Running Ticker Reminder -->
-        <div id="dashTicker" class="dash-ticker hidden">
-          <span class="dash-ticker-label">📢</span>
-          <div class="dash-ticker-track"><div class="dash-ticker-inner" id="dashTickerInner"></div></div>
-        </div>
-
-        <!-- Period Filter Bar -->
+        <!-- Period Filter Bar (ticker sits in the middle) -->
         <div class="dash-month-bar">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
           <span style="font-size:.8rem;font-weight:600;color:var(--muted)">Periode:</span>
@@ -146,7 +140,11 @@
             <span style="color:var(--muted);font-size:.8rem">—</span>
             <input type="date" id="dashDateTo" class="inp-sm" style="width:130px" title="Sampai tanggal" />
           </div>
-          <div style="flex:1"></div>
+          <!-- Running Ticker — fills middle space between filter and button -->
+          <div id="dashTicker" class="dash-ticker hidden">
+            <span class="dash-ticker-label">📢</span>
+            <div class="dash-ticker-track"><div class="dash-ticker-inner" id="dashTickerInner"></div></div>
+          </div>
           <button class="btn-sm blue" id="btnDashNewPost" onclick="navigate('newpost');renderNewPostForm()">
             <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
             New Post
