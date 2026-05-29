@@ -2950,9 +2950,8 @@ function showInviteCreatorModal() {
   const modal = document.getElementById('inviteCreatorModal');
   if (!modal) { toast('Modal invite tidak ditemukan', 'error'); return; }
 
-  document.getElementById('invitePinDisplay').textContent = pin;
   document.getElementById('invitePinInput').value = pin;
-  document.getElementById('inviteUrlDisplay').textContent = '— klik Buat Link —';
+  document.getElementById('inviteUrlDisplay').value = '— klik Buat Link —';
   document.getElementById('inviteBtnCopyUrl').disabled = true;
   document.getElementById('inviteBtnCopyUrl').dataset.url = '';
   modal.classList.remove('hidden');
@@ -2966,7 +2965,7 @@ async function doCreateInvite() {
   btn.disabled = true; btn.textContent = 'Membuat…';
   try {
     const url = await createDeviceInvite(pin);
-    document.getElementById('inviteUrlDisplay').textContent = url;
+    document.getElementById('inviteUrlDisplay').value = url;
     const copyBtn = document.getElementById('inviteBtnCopyUrl');
     copyBtn.disabled = false;
     copyBtn.dataset.url = url;
@@ -4943,11 +4942,9 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
 
   /* ── INIT: Check for ?invite= (device setup via encrypted invite) ───────── */
-  if (checkInviteParam()) {
-    // PIN modal sudah ditampilkan — doConsumeInvite() akan handle sisanya
-    // Hentikan init flow normal agar tidak tampilkan login/wizard di belakang modal
-    return;
-  }
+  // checkInviteParam() hanya tampilkan PIN modal — auth flow tetap lanjut di bawah
+  // sehingga event listener login/wizard sudah siap saat doConsumeInvite() sukses
+  const _hasInvite = checkInviteParam();
 
   /* ── INIT: Auth flow ────────────────────────────────────────── */
   if (isFirstRun()) {
