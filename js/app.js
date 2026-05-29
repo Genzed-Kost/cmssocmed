@@ -31,10 +31,40 @@ const GEMINI_MODELS = [
 ];
 const NEWS_KEY        = 'cmsph_news_v1';
 const NEWS_TTL        = 60 * 60 * 1000;
-const DATA_CACHE_KEY  = 'cmsph_data_v2';
-const DATA_CACHE_TTL  = 3 * 60 * 1000;   // 3 minutes — reduces GitHub API rate-limit hits
-const TEAM_TOKEN_KEY  = 'cmsph_team_token_v1'; // cache teamToken agar request selalu authenticated
+const DATA_CACHE_KEY     = 'cmsph_data_v2';
+const DATA_CACHE_TTL     = 3 * 60 * 1000;   // 3 minutes — reduces GitHub API rate-limit hits
+const TEAM_TOKEN_KEY     = 'cmsph_team_token_v1'; // cache teamToken agar request selalu authenticated
+const LOGIN_ATTEMPTS_KEY = 'cmsph_login_att_v1';
+const LOGIN_MAX_ATTEMPTS = 5;
+const LOGIN_LOCKOUT_MS   = 5 * 60 * 1000;   // 5 menit lockout setelah 5x gagal
 const PAGE_SIZE = 15;
+
+/* ── Login attempt limiting ──────────────────────────────────────────────── */
+function _getLoginAttempts() {
+  try { return JSON.parse(localStorage.getItem(LOGIN_ATTEMPTS_KEY) || 'null') || { count: 0 }; }
+  catch { return { count: 0 }; }
+}
+function _resetLoginAttempts() { localStorage.removeItem(LOGIN_ATTEMPTS_KEY); }
+function _recordFailedAttempt() {
+  const a = _getLoginAttempts();
+  a.count = (a.count || 0) + 1;
+  a.lastAttempt = Date.now();
+  if (a.count >= LOGIN_MAX_ATTEMPTS) {
+    a.lockedUntil = Date.now() + LOGIN_LOCKOUT_MS;
+  }
+  localStorage.setItem(LOGIN_ATTEMPTS_KEY, JSON.stringify(a));
+  return a;
+}
+function _checkLoginLockout() {
+  const a = _getLoginAttempts();
+  if (!a.lockedUntil) return null;
+  if (Date.now() < a.lockedUntil) {
+    const mins = Math.ceil((a.lockedUntil - Date.now()) / 60000);
+    return `Terlalu banyak percobaan gagal. Coba lagi dalam ${mins} menit.`;
+  }
+  _resetLoginAttempts();   // lockout sudah berakhir, reset
+  return null;
+}
 
 /**
  * Terapkan teamToken dari localStorage ke DB config SEBELUM request apapun dikirim.
@@ -543,7 +573,56 @@ function showConfirm(msg, onYes, { icon = '⚠️', yesLabel = 'Hapus', danger =
    FIRST-RUN WIZARD
    ══════════════════════════════════════════════════════════════════════════ */
 
+/* ── Token Setup — onboarding device baru untuk repo private ─────────────── */
+function showTokenSetup() {
+  $('loginPage')?.classList.add('hidden');
+  $('wizardModal')?.classList.add('hidden');
+  $('tokenSetupModal')?.classList.remove('hidden');
+  $('setupToken') && ($('setupToken').value = '');
+}
+
+async function connectWithTeamToken() {
+  const token = ($('setupToken')?.value || '').trim();
+  if (!token) { toast('Masukkan token terlebih dahulu', 'error'); return; }
+
+  const btn = $('btnSubmitSetupToken');
+  if (btn) { btn.textContent = 'Menghubungkan…'; btn.disabled = true; }
+
+  try {
+    // Coba koneksi dengan token yang dimasukkan
+    window.db.saveConfig({ ...DEFAULT_REPO, pat: token });
+    const _s = await window.db.readData('settings');
+
+    if (!_s?.adminHash) {
+      toast('Token valid tapi data admin belum ada. Hubungi Admin untuk setup ulang.', 'warn');
+      window.db.saveConfig(DEFAULT_REPO);
+      return;
+    }
+
+    // Simpan token ke cache
+    localStorage.setItem(TEAM_TOKEN_KEY, token);
+
+    // Jika settings menyimpan teamToken yang berbeda (lebih terbatas), pakai itu
+    if (_s.teamToken && _s.teamToken !== token) {
+      localStorage.setItem(TEAM_TOKEN_KEY, _s.teamToken);
+      window.db.saveConfig({ ...DEFAULT_REPO, pat: _s.teamToken });
+    }
+
+    saveAuth({ adminName: _s.adminName || 'Admin', adminHash: _s.adminHash });
+    setPubUsers(_s.users || []);
+    $('tokenSetupModal')?.classList.add('hidden');
+    showLogin();
+    toast('✅ Perangkat berhasil terhubung! Silakan login.', 'success');
+  } catch (e) {
+    toast('Gagal terhubung: ' + e.message, 'error');
+    window.db.saveConfig(DEFAULT_REPO);  // reset ke tanpa PAT
+  } finally {
+    if (btn) { btn.textContent = 'Hubungkan →'; btn.disabled = false; }
+  }
+}
+
 function showWizard(mode) {
+  $('tokenSetupModal')?.classList.add('hidden');
   $('wizardModal').classList.remove('hidden');
   if (mode === 'new') showWizardStep(1);
   else showWizardStep('Connect');
@@ -804,12 +883,25 @@ async function doLogin() {
   const pw    = gv('loginPw');
   const btn   = $('btnDoLogin');
   if (!pw) { toast('Masukkan password', 'error'); return; }
+
+  // ── Cek lockout percobaan login ─────────────────────────────
+  const lockMsg = _checkLoginLockout();
+  if (lockMsg) { toast(lockMsg, 'error'); return; }
+
   btn.textContent = 'Masuk…'; btn.disabled = true;
   try {
     if (isAdm) {
       const auth = getAuth();
       const hash = await hashPw(pw);
-      if (hash !== auth.adminHash) { toast('Password salah', 'error'); return; }
+      if (hash !== auth.adminHash) {
+        const a = _recordFailedAttempt();
+        toast(a.lockedUntil
+          ? 'Password salah. Terlalu banyak percobaan — akun dikunci 5 menit.'
+          : `Password salah (${LOGIN_MAX_ATTEMPTS - a.count} percobaan tersisa)`,
+          'error');
+        return;
+      }
+      _resetLoginAttempts();
       setSess({ role: 'admin', name: auth.adminName });
     } else {
       // Verify creator password from cached user list
@@ -818,9 +910,17 @@ async function doLogin() {
       if (!userObj) { toast('User tidak ditemukan', 'error'); return; }
       if (userObj.passwordHash) {
         const hash = await hashPw(pw);
-        if (hash !== userObj.passwordHash) { toast('Password salah', 'error'); return; }
+        if (hash !== userObj.passwordHash) {
+          const a = _recordFailedAttempt();
+          toast(a.lockedUntil
+            ? 'Password salah. Terlalu banyak percobaan — akun dikunci 5 menit.'
+            : `Password salah (${LOGIN_MAX_ATTEMPTS - a.count} percobaan tersisa)`,
+            'error');
+          return;
+        }
       }
       // No passwordHash = allow any password (backward compat, admin should set it)
+      _resetLoginAttempts();
       setSess({ role: 'creator', name: sel.value });
     }
     const loginName = isAdm ? getAuth().adminName : sel.value;
@@ -4917,6 +5017,11 @@ document.addEventListener('DOMContentLoaded', async () => {
   $('btnToggleLoginPw')?.addEventListener('click', () => { const i=$('loginPw'); i.type=i.type==='password'?'text':'password'; });
   $('btnLogout')?.addEventListener('click', doLogout);
 
+  /* ── Token Setup Modal ──────────────────────────────────────── */
+  $('btnSubmitSetupToken')?.addEventListener('click', connectWithTeamToken);
+  $('setupToken')?.addEventListener('keydown', e => { if (e.key === 'Enter') connectWithTeamToken(); });
+  $('btnToggleSetupToken')?.addEventListener('click', () => { const i = $('setupToken'); i.type = i.type === 'password' ? 'text' : 'password'; });
+
   /* ── Multi-creator chip removal (event delegation) ─────────── */
   $('creatorChips')?.addEventListener('click', e => {
     const btn = e.target.closest('.creator-chip-rm');
@@ -5175,11 +5280,11 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   /* ── INIT: Auth flow ────────────────────────────────────────── */
   if (isFirstRun()) {
-    // Coba ambil admin hash dari GitHub settings (berhasil jika repo public)
     try {
       const _s = await window.db.readData('settings');
+
       if (_s?.adminHash) {
-        // Terapkan teamToken segera agar semua request setelah login authenticated
+        // ✅ Instalasi ada & sudah setup — lanjut ke login
         if (_s.teamToken) {
           localStorage.setItem(TEAM_TOKEN_KEY, _s.teamToken);
           if (!window.db.getConfig()?.pat) {
@@ -5189,13 +5294,23 @@ document.addEventListener('DOMContentLoaded', async () => {
         saveAuth({ adminName: _s.adminName || 'Admin', adminHash: _s.adminHash });
         setPubUsers(_s.users || []);
         showLogin();
+
+      } else if (Array.isArray(_s) && !_s.length) {
+        // 🔒 File tidak ditemukan (404) — repo kemungkinan PRIVATE atau belum ada file
+        // Tunjukkan form token setup (anggota tim masukkan token, admin klik link wizard)
+        showTokenSetup();
+
       } else {
-        // Repo ada tapi belum ada admin — instalasi pertama
+        // ⚙️ File ada tapi adminHash belum diisi — instalasi pertama admin
         showWizard('new');
       }
     } catch {
-      // Tidak bisa baca settings (rate limit / private repo) — tetap tampilkan login
-      showLogin();
+      // ❌ Error koneksi / rate limit
+      if (getAuth()) {
+        showLogin();      // ada cache → tetap bisa login
+      } else {
+        showTokenSetup(); // tidak ada cache → minta token
+      }
     }
   } else if (!isLoggedIn()) {
     // Returning visit, no active session — show login
