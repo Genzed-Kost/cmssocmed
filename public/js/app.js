@@ -1839,6 +1839,8 @@ async function updateContentField(id, field, value) {
     } else {
       await logActivity(currentUser(), `ubah ${field}`, `"${c.title}"`);
     }
+    // Refresh My To-Do saat creator/status berubah
+    if (field === 'creator' || field === 'status') renderTodoList();
     if (state.currentPage === 'dashboard') renderDashboard();
     toast(`${field === 'status' ? 'Status' : 'Creator'} diperbarui ✓`, 'success');
   } catch (e) { toast('Gagal: ' + e.message, 'error'); }
@@ -1905,104 +1907,60 @@ function renderDashPublished() {
   el.innerHTML = published.map(c => dashContentCard(c, 'published')).join('');
 }
 
-/* ── To-Do ───────────────────────────────────────────────────────────────── */
+/* ── My To-Do (ringkasan tugas dari Planner) ─────────────────────────────── */
 function renderTodoList() {
   const list = $('todoList');
   if (!list) return;
 
-  const me    = currentUser();
-  const admin = isAdmin();
+  const me       = currentUser();
+  const admin    = isAdmin();
+  const todayStr = new Date().toISOString().slice(0, 10);
+  const DONE     = ['Published', 'Done', 'Drop'];
 
-  // Admin sees all; each user sees only their own assigned todos
-  const myTodos = admin
-    ? state.todos
-    : state.todos.filter(t => t.assignedTo === me);
-
+  // Label subjudul
   const label = $('todoUserLabel');
-  if (label) label.textContent = admin ? '' : `(${me})`;
+  if (label) label.textContent = admin ? '(semua tim)' : `(${me})`;
 
-  // Populate the assign dropdown
-  const assignSel = $('todoAssign');
-  if (assignSel) {
-    const users = state.settings?.users || [];
-    if (admin) {
-      const auth = getAuth();
-      const adminName = auth?.adminName || 'Admin';
-      assignSel.innerHTML =
-        `<option value="${esc(adminName)}">${esc(adminName)} (saya)</option>` +
-        users.map(u => {
-          const n = getUserName(u);
-          return `<option value="${esc(n)}">${esc(n)}</option>`;
-        }).join('');
-      assignSel.style.display = '';
-    } else {
-      assignSel.innerHTML = `<option value="${esc(me)}">${esc(me)}</option>`;
-      assignSel.style.display = 'none';
-    }
-  }
+  // Filter konten dari planner
+  const myContents = (state.contents || [])
+    .filter(c => {
+      if (DONE.includes(c.status)) return false;
+      if (admin) return true;
+      const creators = Array.isArray(c.creator) ? c.creator : (c.creator ? [c.creator] : []);
+      return creators.includes(me);
+    })
+    .sort((a, b) => {
+      const da = a.publishDate ? new Date(a.publishDate) : new Date('9999');
+      const db = b.publishDate ? new Date(b.publishDate) : new Date('9999');
+      return da - db;
+    });
 
-  if (!myTodos.length) {
-    list.innerHTML = '<li class="todo-empty">Belum ada tugas' + (admin ? '' : ' untuk Anda') + '</li>';
+  if (!myContents.length) {
+    list.innerHTML = `<li class="todo-empty">${admin ? 'Tidak ada konten aktif' : 'Tidak ada tugas untuk Anda saat ini'}</li>`;
     return;
   }
-  list.innerHTML = myTodos.map(t => `
-    <li class="todo-item" id="todo-li-${t.id}">
-      <input type="checkbox" class="todo-check" ${t.done?'checked':''}
-        onchange="toggleTodo('${t.id}',this.checked)" />
-      <span class="todo-text ${t.done?'done':''}" ondblclick="startEditTodo('${t.id}')">${esc(t.text)}</span>
-      ${t.assignedTo && admin ? `<span class="todo-assign">${esc(t.assignedTo)}</span>` : ''}
-      <button class="todo-edit" onclick="startEditTodo('${t.id}')" title="Edit">✏</button>
-      <button class="todo-del"  onclick="deleteTodo('${t.id}')" title="Hapus">×</button>
-    </li>`).join('');
+
+  list.innerHTML = myContents.map(c => {
+    const mode     = c.status === 'Published' ? 'published' : 'upcoming';
+    const overdue  = c.publishDate && c.publishDate < todayStr;
+    const dateStr  = c.publishDate
+      ? (overdue ? `⚠ ${fmtDate(c.publishDate)}` : fmtDate(c.publishDate))
+      : '—';
+    return `
+      <li class="todo-item todo-planner-item${overdue ? ' todo-overdue' : ''}"
+          onclick="openLinkModal('${c.id}','${mode}')" title="Klik untuk lihat detail konten">
+        <span class="badge ${STATUS_CLASS[c.status] || 'badge-ide'} todo-status-badge">${esc(c.status || 'Plan')}</span>
+        <span class="todo-planner-body">
+          <span class="todo-planner-title">${esc(c.title || '(Tanpa Judul)')}</span>
+          <span class="todo-planner-meta">${esc(c.format || '—')} · ${dateStr}</span>
+        </span>
+        <span class="todo-planner-arrow">›</span>
+      </li>`;
+  }).join('');
 }
 
-async function toggleTodo(id, done) {
-  const t = state.todos.find(x => x.id === id);
-  if (!t) return;
-  t.done = done;
-  try { state.shas.todos = await window.db.writeData('todos', state.todos, 'Todo: toggle'); }
-  catch (e) { toast('Gagal simpan: ' + e.message, 'error'); }
-}
-
-async function deleteTodo(id) {
-  state.todos = state.todos.filter(x => x.id !== id);
-  renderTodoList();
-  try { state.shas.todos = await window.db.writeData('todos', state.todos, 'Todo: hapus'); toast('Tugas dihapus'); }
-  catch (e) { toast('Gagal: ' + e.message, 'error'); }
-}
-
-function startEditTodo(id) {
-  const t  = state.todos.find(x => x.id === id);
-  const li = document.getElementById(`todo-li-${id}`);
-  if (!t || !li) return;
-  const span = li.querySelector('.todo-text');
-  if (!span) return;
-
-  const inp = document.createElement('input');
-  inp.type      = 'text';
-  inp.className = 'inp-sm todo-edit-inp';
-  inp.value     = t.text;
-  inp.style.cssText = 'flex:1;min-width:0;font-size:.82rem';
-  span.replaceWith(inp);
-  // Hide edit/del while editing to avoid double-click
-  li.querySelectorAll('.todo-edit,.todo-del').forEach(b => b.style.display='none');
-  inp.focus(); inp.select();
-
-  const save = async () => {
-    const newText = inp.value.trim();
-    if (newText && newText !== t.text) {
-      t.text = newText;
-      try { state.shas.todos = await window.db.writeData('todos', state.todos, 'Todo: edit'); toast('Tugas diperbarui ✓', 'success'); }
-      catch(e) { toast('Gagal: ' + e.message, 'error'); }
-    }
-    renderTodoList();
-  };
-  inp.addEventListener('blur',    save);
-  inp.addEventListener('keydown', e => {
-    if (e.key === 'Enter')  { e.preventDefault(); inp.removeEventListener('blur', save); save(); }
-    if (e.key === 'Escape') { renderTodoList(); }
-  });
-}
+// toggleTodo / deleteTodo / startEditTodo dihapus —
+// My To-Do sekarang hanya menampilkan data dari Planner (read-only)
 
 /* ══════════════════════════════════════════════════════════════════════════
    PLANNER
@@ -3947,20 +3905,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   $('btnCancelUser')?.addEventListener('click', () => { $('addUserForm').classList.add('hidden'); sv('userNameInput',''); });
   $('userNameInput')?.addEventListener('keydown', e => { if (e.key==='Enter') addUser(); });
 
-  /* ── To-Do ──────────────────────────────────────────────────── */
-  $('btnAddTodo')?.addEventListener('click', () => { $('addTodoForm').classList.toggle('hidden'); $('todoInput')?.focus(); });
-  $('btnCancelTodo')?.addEventListener('click', () => { $('addTodoForm').classList.add('hidden'); sv('todoInput',''); });
-  $('btnSaveTodo')?.addEventListener('click', async () => {
-    const text = gv('todoInput'), assign = gv('todoAssign');
-    if (!text) return;
-    const item = { id: uid(), text, done: false, assignedTo: assign, createdAt: new Date().toISOString() };
-    state.todos.push(item);
-    renderTodoList();
-    sv('todoInput', ''); $('addTodoForm').classList.add('hidden');
-    try { state.shas.todos = await window.db.writeData('todos', state.todos, 'Todo: tambah'); toast('Tugas ditambahkan','success'); }
-    catch (e) { toast('Gagal: '+e.message,'error'); }
-  });
-  $('todoInput')?.addEventListener('keydown', e => { if (e.key==='Enter') $('btnSaveTodo').click(); });
+  // My To-Do: tidak ada event listener manual — data dari Planner (renderTodoList dipanggil di renderDashStats)
 
   /* ── New Post ───────────────────────────────────────────────── */
   $('btnSavePost')?.addEventListener('click', savePost);
@@ -4141,8 +4086,6 @@ document.addEventListener('DOMContentLoaded', async () => {
   window.closeLinkModal        = closeLinkModal;
   window.onFormatChange        = onFormatChange;
   window.renderDashNearContent = renderDashNearContent;
-  window.toggleTodo     = toggleTodo;
-  window.deleteTodo     = deleteTodo;
   window.editContent    = editContent;
   window.deleteContent  = deleteContent;
   window.selectUrlAcct  = selectUrlAcct;
@@ -4160,7 +4103,6 @@ document.addEventListener('DOMContentLoaded', async () => {
   window.renderActivity       = renderActivity;
   window.editUser             = editUser;
   window.saveEditUser         = saveEditUser;
-  window.startEditTodo        = startEditTodo;
   window.saveWaTokenFromForm  = saveWaTokenFromForm;
   window.updateTopSlot        = updateTopSlot;
   window.saveTopContent       = saveTopContent;

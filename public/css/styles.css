@@ -291,24 +291,37 @@ ul { list-style: none; }
 .kpi-fraction { font-size: .75rem; color: var(--muted); width: 44px; text-align: right; flex-shrink: 0; }
 .kpi-skeleton { color: var(--muted); font-size: .8rem; }
 
-/* To-Do */
-.todo-add-form { padding: 10px 0; border-bottom: 1px solid var(--bd); margin-bottom: 10px; }
-.todo-add-row  { display: flex; align-items: center; gap: 6px; margin-top: 6px; }
-.todo-list { display: flex; flex-direction: column; gap: 0; max-height: 280px; overflow-y: auto; }
+/* My To-Do — compact planner items */
+.todo-list { display: flex; flex-direction: column; gap: 0; max-height: 300px; overflow-y: auto; }
 .todo-item {
-  display: flex; align-items: center; gap: 10px;
-  padding: 8px 2px;
-  border-bottom: 1px solid var(--bd);
-  font-size: .84rem;
+  display: flex; align-items: center; gap: 8px;
+  padding: 8px 4px; border-bottom: 1px solid var(--bd);
 }
 .todo-item:last-child { border-bottom: none; }
-.todo-check { width: 16px; height: 16px; border-radius: 4px; cursor: pointer; flex-shrink: 0; }
-.todo-text  { flex: 1; }
-.todo-text.done { text-decoration: line-through; color: var(--muted); }
-.todo-assign { font-size: .68rem; color: var(--muted); background: var(--bg); padding: 2px 6px; border-radius: 5px; }
-.todo-del { background: none; border: none; color: var(--muted-lt); font-size: .85rem; line-height: 1; padding: 0 4px; }
-.todo-del:hover { color: var(--red); }
 .todo-empty, .act-empty, .user-empty { font-size: .82rem; color: var(--muted); padding: 8px 0; }
+
+/* Planner-item style */
+.todo-planner-item {
+  cursor: pointer; border-radius: 6px; padding: 7px 6px;
+  transition: background .12s;
+}
+.todo-planner-item:hover { background: var(--bg); }
+.todo-status-badge { flex-shrink: 0; font-size: .6rem; }
+.todo-planner-body {
+  display: flex; flex-direction: column; gap: 2px;
+  flex: 1; min-width: 0;
+}
+.todo-planner-title {
+  font-size: .82rem; font-weight: 600; color: var(--text);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.todo-planner-meta {
+  font-size: .7rem; color: var(--muted);
+}
+.todo-planner-arrow {
+  font-size: 1rem; color: var(--muted-lt); flex-shrink: 0;
+}
+.todo-overdue .todo-planner-meta { color: var(--red); font-weight: 600; }
 
 /* Activity list (mini) */
 .act-list { display: flex; flex-direction: column; gap: 0; max-height: 220px; overflow-y: auto; }
