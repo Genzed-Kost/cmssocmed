@@ -555,6 +555,9 @@
                   <button onclick="downloadStatTableJpg()">📋 Tabel (JPG)</button>
                 </div>
               </div>
+              <button class="btn-sm" id="btnStatAnalyze" onclick="analyzeContentWithAI()" title="Analisis performa konten dengan AI" style="background:#7c3aed;color:#fff;border-color:#7c3aed">
+                🧠 Analisis AI
+              </button>
             </div>
           </div>
         </div>
@@ -718,6 +721,32 @@
               </div>
               <div class="form-actions-row">
                 <button class="btn-sm blue" id="btnSaveGeminiKey">Simpan API Key</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Claude AI Key -->
+          <div class="card setup-card">
+            <div class="card-head">
+              <span class="card-title">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:-2px;margin-right:6px;color:#d97706"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>
+                Claude AI <span style="font-size:.68rem;font-weight:400;color:#64748b">(Anthropic)</span>
+              </span>
+              <span id="claudeKeyStatus" class="badge-status">Belum diisi</span>
+            </div>
+            <div class="setup-fields">
+              <div class="form-group">
+                <label class="form-label">Claude API Key</label>
+                <div class="inp-eye-wrap">
+                  <input type="password" id="cfgClaudeKey" class="form-inp" placeholder="sk-ant-…" />
+                  <button type="button" class="eye-btn" id="btnToggleClaudeKey">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                  </button>
+                </div>
+                <p class="form-hint">Dapatkan API key di <code>console.anthropic.com</code>. Digunakan untuk fitur <strong>🧠 Analisis AI</strong> di halaman Statistik. Jika tidak diisi, fitur analisis akan menggunakan Gemini sebagai fallback. Key hanya tersimpan di browser lokal.</p>
+              </div>
+              <div class="form-actions-row">
+                <button class="btn-sm blue" id="btnSaveClaudeKey">Simpan API Key</button>
               </div>
             </div>
           </div>

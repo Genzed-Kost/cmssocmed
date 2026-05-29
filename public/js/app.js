@@ -15,6 +15,13 @@ const GEMINI_LS_KEY = 'cmsph_gemini_v1';
 function getGeminiKey()     { return localStorage.getItem(GEMINI_LS_KEY) || ''; }
 function saveGeminiKey(key) { key ? localStorage.setItem(GEMINI_LS_KEY, key) : localStorage.removeItem(GEMINI_LS_KEY); }
 
+/* Claude AI key (Anthropic) */
+const CLAUDE_LS_KEY = 'cmsph_claude_v1';
+function getClaudeKey()     { return localStorage.getItem(CLAUDE_LS_KEY) || ''; }
+function saveClaudeKey(key) { key ? localStorage.setItem(CLAUDE_LS_KEY, key) : localStorage.removeItem(CLAUDE_LS_KEY); }
+
+const CLAUDE_MODELS = ['claude-haiku-4-5', 'claude-3-5-haiku-20241022', 'claude-3-haiku-20240307'];
+
 const GEMINI_MODELS = [
   'gemini-2.5-flash',
   'gemini-2.5-flash-preview-04-17',
@@ -2721,6 +2728,10 @@ function renderApiSetup() {
   sv('cfgGeminiKey', getGeminiKey());
   updateGeminiStatus();
 
+  // Claude key
+  sv('cfgClaudeKey', getClaudeKey());
+  updateClaudeStatus();
+
   // WhatsApp API token
   sv('cfgWaToken', getWaToken());
   updateWaStatus();
@@ -2734,6 +2745,13 @@ function renderApiSetup() {
 function updateGeminiStatus() {
   const el  = $('geminiKeyStatus');
   const has = !!getGeminiKey();
+  if (el) { el.textContent = has ? 'Terkonfigurasi' : 'Belum diisi'; el.className = 'badge-status' + (has ? ' ok' : ''); }
+}
+
+/* Claude key */
+function updateClaudeStatus() {
+  const el  = $('claudeKeyStatus');
+  const has = !!getClaudeKey();
   if (el) { el.textContent = has ? 'Terkonfigurasi' : 'Belum diisi'; el.className = 'badge-status' + (has ? ' ok' : ''); }
 }
 
@@ -3354,6 +3372,57 @@ function initStatDownloadMonth() {
   }
 }
 
+/* ── Platform badge helper (canvas-based, untuk download JPG) ─────────────── */
+const PLATFORM_SYMBOLS = {
+  youtube:   { text: '▶', bg: '#ff0000' },
+  tiktok:    { text: '♪', bg: '#010101' },
+  facebook:  { text: 'f',  bg: '#1877f2' },
+  instagram: { text: '◉', bg: '#e1306c' },
+  twitter:   { text: '𝕏', bg: '#000000' },
+  spotify:   { text: '♫', bg: '#1db954' },
+};
+
+/**
+ * Draw a rounded platform icon badge on a canvas context.
+ * @param {CanvasRenderingContext2D} ctx
+ * @param {string}  platId   — platform key (youtube, tiktok, …)
+ * @param {number}  cx       — center x
+ * @param {number}  cy       — center y
+ * @param {number}  size     — badge diameter (px)
+ */
+function drawPlatformBadge(ctx, platId, cx, cy, size) {
+  const sym = PLATFORM_SYMBOLS[platId] || { text: (platId[0]||'?').toUpperCase(), bg: '#6366f1' };
+  const r   = size / 2;
+
+  ctx.save();
+
+  // Rounded square background
+  ctx.fillStyle = sym.bg;
+  ctx.beginPath();
+  const cr = r * 0.32; // corner radius
+  const x  = cx - r, y = cy - r;
+  ctx.moveTo(x + cr, y);
+  ctx.lineTo(x + size - cr, y);
+  ctx.quadraticCurveTo(x + size, y, x + size, y + cr);
+  ctx.lineTo(x + size, y + size - cr);
+  ctx.quadraticCurveTo(x + size, y + size, x + size - cr, y + size);
+  ctx.lineTo(x + cr, y + size);
+  ctx.quadraticCurveTo(x, y + size, x, y + size - cr);
+  ctx.lineTo(x, y + cr);
+  ctx.quadraticCurveTo(x, y, x + cr, y);
+  ctx.closePath();
+  ctx.fill();
+
+  // Platform symbol text, centered
+  ctx.fillStyle = '#ffffff';
+  ctx.font      = `bold ${Math.round(size * 0.48)}px Arial, sans-serif`;
+  ctx.textAlign    = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillText(sym.text, cx, cy + 1);
+
+  ctx.restore();
+}
+
 function downloadStatJpg() {
   const canvas = $('statBarChart');
   if (!canvas) { toast('Tidak ada grafik untuk didownload', 'error'); return; }
@@ -3393,17 +3462,22 @@ function downloadStatJpg() {
   ctx.fillStyle = platM?.color || '#6366f1';
   ctx.fillRect(0, 0, totalW, 4);
 
-  // Title
+  // Platform badge icon
+  const BADGE_SIZE = 32;
+  drawPlatformBadge(ctx, platId, PAD + BADGE_SIZE / 2, 4 + BADGE_SIZE / 2 + 4, BADGE_SIZE);
+
+  // Title (offset to right of badge)
+  const titleX = PAD + BADGE_SIZE + 10;
   ctx.fillStyle = '#0f172a';
   ctx.font = 'bold 15px Arial, sans-serif';
-  ctx.fillText(`${platM?.label || platId} — ${acctObj?.name || acctId}`, PAD, 26);
+  ctx.fillText(`${platM?.label || platId} — ${acctObj?.name || acctId}`, titleX, 26);
 
   // Subtitle: range + tanggal ekspor
   ctx.fillStyle = '#64748b';
   ctx.font = '11px Arial, sans-serif';
   ctx.fillText(
     `Rentang: ${rangeLabel}   ·   Diekspor: ${new Date().toLocaleDateString('id-ID', { day:'2-digit', month:'long', year:'numeric' })}`,
-    PAD, 46
+    titleX, 46
   );
 
   // Divider
@@ -3484,16 +3558,21 @@ function downloadStatTableJpg() {
   ctx.fillStyle = platM.color;
   ctx.fillRect(0, 0, totalW, 4);
 
-  // Title
+  // Platform badge icon
+  const TBL_BADGE = 28;
+  drawPlatformBadge(ctx, platId, PAD + TBL_BADGE / 2, 4 + TBL_BADGE / 2 + 3, TBL_BADGE);
+
+  // Title (offset to right of badge)
+  const tblTitleX = PAD + TBL_BADGE + 8;
   ctx.fillStyle = '#0f172a';
   ctx.font = 'bold 13px Arial, sans-serif';
-  ctx.fillText(`${platM.label} — ${acctObj?.name || acctId}`, PAD, PAD + 16);
+  ctx.fillText(`${platM.label} — ${acctObj?.name || acctId}`, tblTitleX, PAD + 16);
   ctx.fillStyle = '#64748b';
   ctx.font = '10px Arial, sans-serif';
   const rangeStr = fromM ? `${fmtMonth(fromM)} – ${fmtMonth(toM)}` : `${dlRows.length} bulan`;
   ctx.fillText(
     `Rentang: ${rangeStr}   ·   Diekspor: ${new Date().toLocaleDateString('id-ID',{day:'2-digit',month:'long',year:'numeric'})}`,
-    PAD, PAD + 34
+    tblTitleX, PAD + 34
   );
 
   // Column x positions
@@ -3872,6 +3951,176 @@ async function callGemini(prompt) {
 function showAiLoad(msg) { $('aiLoadMsg').textContent = msg; $('aiLoadOverlay').classList.remove('hidden'); }
 function hideAiLoad()     { $('aiLoadOverlay').classList.add('hidden'); }
 
+async function callClaude(prompt) {
+  const key = getClaudeKey();
+  if (!key) throw new Error('Claude API Key belum diisi. Masuk ke API Setup → Claude AI dan isi key-nya.');
+  let lastErr = 'Semua model gagal';
+  for (const model of CLAUDE_MODELS) {
+    try {
+      const res = await fetch('https://api.anthropic.com/v1/messages', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-api-key': key,
+          'anthropic-version': '2023-06-01',
+          'anthropic-dangerous-direct-browser-access': 'true'
+        },
+        body: JSON.stringify({
+          model,
+          max_tokens: 2048,
+          messages: [{ role: 'user', content: prompt }]
+        })
+      });
+      const data = await res.json();
+      if (data.error) { lastErr = data.error.message; continue; }
+      const text = data.content?.[0]?.text;
+      if (!text) { lastErr = 'Respons kosong'; continue; }
+      return text;
+    } catch (e) { lastErr = e.message; }
+  }
+  throw new Error(lastErr);
+}
+
+/* ── AI Content Analysis (Claude/Gemini) ─────────────────────────────────── */
+
+function buildAnalysisPrompt(acctId, platId) {
+  const platM   = PLATFORM_FIELDS[platId];
+  const acctObj = ACCOUNTS.find(a => a.id === acctId);
+  const acctName = acctObj?.name || acctId;
+  const platName = platM?.label || platId;
+
+  // Last 6 months stats
+  const allRows = ((state.analytics?.[acctId]?.[platId]) || [])
+    .slice().sort((a,b) => a.month.localeCompare(b.month));
+  const last6 = allRows.slice(-6);
+  const statsText = last6.length
+    ? last6.map(r => {
+        const view = r[platM?.viewKey] || 0;
+        const foll = r[platM?.followerKey] || 0;
+        const eng  = r['totalEngagement'] || 0;
+        return `- ${fmtMonth(r.month)}: Views=${fmtNum(view)}, Followers/Subs(EOM)=${fmtNum(foll)}, Engagement=${fmtNum(eng)}`;
+      }).join('\n')
+    : '(Belum ada data statistik)';
+
+  // Recent 20 planner contents for this account
+  const plannerItems = (state.contents || [])
+    .filter(c => c.account === acctId)
+    .sort((a,b) => new Date(b.publishDate||b.createdAt||0) - new Date(a.publishDate||a.createdAt||0))
+    .slice(0, 20);
+  const plannerText = plannerItems.length
+    ? plannerItems.map(c =>
+        `- [${c.status||'?'}] "${c.title||'tanpa judul'}" | Format: ${c.format||'?'} | Platform: ${(c.platforms||[]).join(',')||'?'}`
+      ).join('\n')
+    : '(Belum ada data planner)';
+
+  // Recent 10 bank of contents for this account
+  const bankItems = (state.bankKonten || [])
+    .filter(b => !b.account || b.account === acctId)
+    .slice(0, 10);
+  const bankText = bankItems.length
+    ? bankItems.map(b => `- "${b.title||'tanpa judul'}"${b.creator ? ` (${b.creator})` : ''}`).join('\n')
+    : '(Belum ada data bank konten)';
+
+  return `Kamu adalah analis konten media sosial profesional untuk organisasi Penjaga Harapan, Indonesia.
+
+Akun: ${acctName} | Platform: ${platName}
+
+## DATA STATISTIK (6 bulan terakhir)
+${statsText}
+
+## PLANNER KONTEN (20 konten terbaru)
+${plannerText}
+
+## BANK OF CONTENTS (10 item terakhir)
+${bankText}
+
+Berdasarkan data di atas, analisis mendalam dan berikan REKOMENDASI KONKRET untuk meningkatkan performa views konten di platform ${platName}. Fokus pada:
+
+1. **Tren Performa** — Identifikasi pola naik/turun dari data statistik. Apa yang menyebabkannya?
+2. **Analisis Konten** — Dari daftar planner & bank konten, format/tema apa yang paling potensial menghasilkan views tinggi?
+3. **Rekomendasi Format** — Format konten apa yang harus diprioritaskan? (berdasarkan data tren platform ${platName} saat ini)
+4. **Strategi Judul** — Tips judul yang menarik untuk meningkatkan CTR di ${platName}
+5. **Jadwal Posting** — Kapan waktu terbaik posting? Seberapa sering?
+6. **Action Plan** — 5 langkah konkret yang bisa langsung dieksekusi minggu ini
+
+Tulis dalam Bahasa Indonesia yang ringkas dan actionable. Gunakan bullet points dan header yang jelas.`;
+}
+
+async function analyzeContentWithAI() {
+  const acctId = state.statActiveAcct;
+  const platId = state.statActivePlat || 'youtube';
+  const prompt = buildAnalysisPrompt(acctId, platId);
+
+  showAiLoad('Menganalisis konten dengan AI…');
+  try {
+    let text;
+    const claudeKey = getClaudeKey();
+    const geminiKey = getGeminiKey();
+
+    if (claudeKey) {
+      text = await callClaude(prompt);
+    } else if (geminiKey) {
+      text = await callGemini(prompt);
+    } else {
+      throw new Error('Belum ada AI API Key. Masuk ke API Setup dan isi Claude atau Gemini API Key.');
+    }
+    showAiAnalysisModal(text, acctId, platId);
+  } catch (e) {
+    toast('Analisis gagal: ' + e.message, 'error');
+  } finally {
+    hideAiLoad();
+  }
+}
+
+function showAiAnalysisModal(text, acctId, platId) {
+  const platM   = PLATFORM_FIELDS[platId];
+  const acctObj = ACCOUNTS.find(a => a.id === acctId);
+  const color   = platM?.color || '#6366f1';
+
+  // Convert simple markdown to HTML
+  const html = text
+    .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+    .replace(/^#{1,3}\s+(.+)$/gm, '<h4 style="margin:12px 0 4px;color:#0f172a;font-size:.88rem">$1</h4>')
+    .replace(/^[-•]\s+(.+)$/gm, '<li>$1</li>')
+    .replace(/(<li>.*<\/li>\n?)+/gs, m => `<ul style="margin:4px 0 8px 16px;padding:0">${m}</ul>`)
+    .replace(/\n{2,}/g, '<br><br>')
+    .replace(/\n/g, '<br>');
+
+  // Remove existing modal if any
+  const existing = document.getElementById('aiAnalysisModal');
+  if (existing) existing.remove();
+
+  const modal = document.createElement('div');
+  modal.id = 'aiAnalysisModal';
+  modal.className = 'modal-overlay';
+  modal.innerHTML = `
+    <div class="modal-box" style="max-width:680px;max-height:85vh;display:flex;flex-direction:column">
+      <div class="modal-head" style="border-top:3px solid ${color}">
+        <div>
+          <div class="modal-title" style="font-size:.95rem">🧠 Analisis AI — ${platM?.label||platId} · ${acctObj?.name||acctId}</div>
+          <div style="font-size:.73rem;color:#64748b;margin-top:2px">Powered by ${getClaudeKey() ? 'Claude AI' : 'Gemini AI'} · ${new Date().toLocaleDateString('id-ID',{day:'2-digit',month:'long',year:'numeric'})}</div>
+        </div>
+        <button class="modal-close" onclick="document.getElementById('aiAnalysisModal').remove()">✕</button>
+      </div>
+      <div style="overflow-y:auto;padding:16px 20px;font-size:.82rem;line-height:1.65;color:#334155;flex:1">
+        ${html}
+      </div>
+      <div style="padding:12px 20px;border-top:1px solid #e2e8f0;display:flex;gap:8px;justify-content:flex-end">
+        <button class="btn-sm" id="btnCopyAnalysis">📋 Salin</button>
+        <button class="btn-sm blue" onclick="document.getElementById('aiAnalysisModal').remove()">Tutup</button>
+      </div>
+    </div>`;
+  document.body.appendChild(modal);
+
+  // Copy button (uses raw `text` via closure)
+  document.getElementById('btnCopyAnalysis')?.addEventListener('click', () => {
+    navigator.clipboard.writeText(text).then(() => toast('Analisis disalin ✓', 'success'));
+  });
+
+  // Close on backdrop click
+  modal.addEventListener('click', e => { if (e.target === modal) modal.remove(); });
+}
+
 async function generateDraft() {
   const title = gv('postTitle'), theme = gv('postTheme'), format = gv('postFormat');
   const acct  = gv('postAccount') ? getAcctName(gv('postAccount')) : 'akun';
@@ -4218,6 +4467,13 @@ document.addEventListener('DOMContentLoaded', async () => {
     toast(key ? 'Gemini API Key disimpan ✓' : 'Gemini API Key dihapus', key ? 'success' : '');
   });
   $('btnToggleGeminiKey')?.addEventListener('click', () => { const i=$('cfgGeminiKey'); i.type=i.type==='password'?'text':'password'; });
+  $('btnSaveClaudeKey')?.addEventListener('click', () => {
+    const key = gv('cfgClaudeKey');
+    saveClaudeKey(key);
+    updateClaudeStatus();
+    toast(key ? 'Claude API Key disimpan ✓' : 'Claude API Key dihapus', key ? 'success' : '');
+  });
+  $('btnToggleClaudeKey')?.addEventListener('click', () => { const i=$('cfgClaudeKey'); i.type=i.type==='password'?'text':'password'; });
   $('btnSaveWaToken')?.addEventListener('click', saveWaTokenFromForm);
   $('btnToggleWaToken')?.addEventListener('click', () => { const i=$('cfgWaToken'); i.type=i.type==='password'?'text':'password'; });
   $('btnSaveUrls')?.addEventListener('click', saveUrls);
