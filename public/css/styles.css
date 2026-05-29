@@ -1450,17 +1450,32 @@ ul { list-style: none; }
 .lem-plat-item-url:hover { text-decoration: underline; }
 .lem-plat-item-empty { font-size: .7rem; color: var(--muted-lt); }
 
-/* ── Multi-select Creator (Podcast/Liputan) ─────────────────── */
-.form-inp-multi {
-  height: auto; min-height: 80px;
-  padding: 4px;
+/* ── Multi-creator Chip UI (Podcast/Liputan) ─────────────────── */
+.creator-multi-wrap { display: flex; flex-direction: column; }
+.creator-chips {
+  display: flex; flex-wrap: wrap; gap: 6px;
+  min-height: 36px; padding: 6px 10px;
+  border: 1px solid var(--border); border-radius: 8px;
+  background: var(--bg);
 }
-.form-inp-multi option {
-  padding: 5px 8px; border-radius: 4px; cursor: pointer;
+.creator-chips:empty::before {
+  content: 'Belum ada creator dipilih';
+  font-size: .75rem; color: var(--muted); align-self: center;
 }
-.form-inp-multi option:checked {
-  background: var(--blue); color: #fff;
+.creator-chip {
+  display: inline-flex; align-items: center; gap: 5px;
+  background: #eff6ff; color: #2563eb;
+  border: 1px solid #bfdbfe; border-radius: 20px;
+  padding: 3px 8px 3px 11px; font-size: .8rem; font-weight: 500;
 }
+.creator-chip-rm {
+  display: flex; align-items: center; justify-content: center;
+  width: 16px; height: 16px; border-radius: 50%;
+  background: none; border: none; cursor: pointer;
+  color: #93c5fd; font-size: 1rem; font-weight: 700;
+  line-height: 1; padding: 0; transition: background .15s, color .15s;
+}
+.creator-chip-rm:hover { background: #fee2e2; color: #ef4444; }
 
 
 /* ── Dashboard Period Filter Bar ─────────────────────────────── */
@@ -1704,36 +1719,216 @@ ul { list-style: none; }
 
 @media (max-width: 680px) {
   :root { --topbar-h: 52px; }
+  html { font-size: 13px; }
+
+  /* ── Sidebar: hidden off-canvas, toggled via .mobile-open ── */
   .sidebar { transform: translateX(-100%); box-shadow: none; }
   .sidebar.mobile-open {
     transform: translateX(0);
     box-shadow: 6px 0 32px rgba(0,0,0,.35);
   }
   .main-wrap { margin-left: 0 !important; }
-  .topbar { padding: 0 14px; }
-  .page-inner { padding: 14px 14px 24px; }
-  .page-inner-narrow { padding: 14px; }
+
+  /* ── Topbar ── */
+  .topbar { padding: 0 12px; gap: 8px; }
+  .topbar-title { font-size: .88rem; }
+  /* Badge-btn: icon only (hide text node via font-size trick) */
+  .badge-btn { font-size: 0; padding: 6px 8px; gap: 0; }
+  .badge-btn svg { width: 15px; height: 15px; display: block; }
+  /* User pill: compact */
+  .topbar-user { padding: 3px 3px; gap: 0; border: none; background: transparent; }
+  #userLabel { display: none; }
+
+  /* ── Page content ── */
+  .page-inner { padding: 14px 12px 24px; }
+  .page-inner-narrow { padding: 14px 12px; }
+
+  /* ── Dashboard stats ── */
   .stat-row { grid-template-columns: 1fr 1fr; gap: 10px; }
-  .stat-value { font-size: 1.6rem; }
-  .card { padding: 16px; }
-  .topbar-title { font-size: .9rem; }
-  .btn-md { padding: 9px 16px; font-size: .82rem; }
-  html { font-size: 13px; }
-  /* Toolbar: stack vertically on mobile */
-  .toolbar { flex-direction: column; align-items: stretch; gap: 8px; }
-  .toolbar-left, .toolbar-right { flex-wrap: wrap; }
-  .toolbar-right { justify-content: flex-end; }
-  /* Dash month bar: period sel full-width on mobile */
+  .stat-value { font-size: 1.55rem; }
+  .card { padding: 14px; }
+
+  /* ── Dash month bar ── */
   .dash-month-bar { gap: 6px; }
   .period-sel { flex: 1; min-width: 0; }
-  /* Hide "Periode:" label on small screen */
   .dash-month-bar > span { display: none; }
   .dash-month-bar > svg  { display: none; }
+
+  /* ── Buttons ── */
+  .btn-md { padding: 9px 16px; font-size: .82rem; }
+
+  /* ── Toolbar: stack on mobile ── */
+  .toolbar { flex-direction: column; align-items: stretch; gap: 8px; }
+  .toolbar-left  { flex-wrap: wrap; }
+  .toolbar-right { flex-wrap: wrap; justify-content: flex-end; }
+
+  /* ── Content grids: smaller minimum tile ── */
+  .content-grid     { grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); }
+  .dash-content-grid{ grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); }
+
+  /* ── Form card ── */
+  .form-card { padding: 14px; gap: 14px; }
+
+  /* ── Modals: cap height, body scrollable ── */
+  .modal-overlay { padding: 10px; }
+  .modal { max-height: 92vh; display: flex; flex-direction: column; }
+  .modal-body { flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; }
+  .modal-analysis { max-height: 92vh; }
+
+  /* Period custom range: wrap */
+  .period-custom-range { flex-wrap: wrap; }
+  .period-custom-range .inp-sm { flex: 1; min-width: 100px; }
+
+  /* ── Content detail modal (lem) info table: allow wrapping ── */
+  .lem-info-table { flex-wrap: wrap; }
+  .lem-info-col {
+    flex: 1 0 42%;
+    border-right: none;
+    border-bottom: 1px solid var(--bd);
+    min-width: 0;
+  }
+  .lem-info-col:nth-last-child(-n+2) { border-bottom: none; }
+
+  /* ── Statistics ── */
+  /* Stat input rows: platform label spans full row */
+  .stat-inp-row { grid-template-columns: 1fr 1fr; }
+  .stat-inp-plat { grid-column: 1 / -1; }
+  /* Stat chart: shorter on mobile */
+  .stat-chart-wrap canvas { max-height: 200px; }
+  /* Stat summary: 2-col grid */
+  .stat-summary-row { grid-template-columns: repeat(2, 1fr); }
+  /* Stat plat actions: full width */
+  .stat-plat-actions { width: 100%; justify-content: flex-start; }
+  .stat-dl-wrap { flex-wrap: wrap; }
+
+  /* ── Analytics platform panel: 2-col ── */
+  .anlp-grid { grid-template-columns: repeat(2, 1fr); }
+
+  /* ── Good/bad content: single column ── */
+  .sgb-row { grid-template-columns: 1fr; }
+
+  /* ── KPI date range inputs: flexible ── */
+  .inp-xs { width: 100px; }
+  .kpi-range-wrap { flex-wrap: wrap; }
+
+  /* ── Table: smooth horizontal scroll ── */
+  .table-wrap { -webkit-overflow-scrolling: touch; }
+  .table-footer { flex-direction: column; align-items: flex-start; gap: 6px; }
+
+  /* ── News panel: full-width overlay on mobile ── */
+  .news-panel { width: 100%; left: 0; }
+
+  /* ── Toast: allow wrapping on narrow screens ── */
+  .toast { white-space: normal; max-width: calc(100vw - 32px); text-align: center; }
+
+  /* ── Login page: tighter padding ── */
+  .login-card { border-radius: 16px; }
+  .login-hero  { padding: 24px 20px 18px; }
+  .login-form  { padding: 18px 20px 16px; gap: 12px; }
+
+  /* ── Platform URL rows: allow name to stack ── */
+  .platform-url-row { flex-wrap: wrap; gap: 5px; }
+  .platform-url-name { width: auto; min-width: 60px; }
+  .platform-url-inp  { min-width: 120px; }
+
+  /* ── Stat inp grid: ensure wraps nicely ── */
+  .stat-inp-grid { gap: 7px; }
+
+  /* ── User list items ── */
+  .user-item { font-size: .82rem; }
+
+  /* ── Card head: allow wrap ── */
+  .card-head { flex-wrap: wrap; gap: 6px; }
 }
 
+/* ── Breakpoint: 480px (small phones) ────────────────────────── */
+@media (max-width: 480px) {
+  html { font-size: 12.5px; }
+  .page-inner { padding: 12px 10px 20px; }
+  .page-inner-narrow { padding: 12px 10px; }
+
+  /* Topbar: fully icon-only, hide badge-btn */
+  .badge-btn { display: none; }
+  .topbar-title {
+    font-size: .82rem;
+    max-width: 150px;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+
+  /* Modal: near-fullscreen */
+  .modal-overlay { padding: 6px; }
+  .modal { border-radius: 14px; max-height: 96vh; }
+
+  /* Period custom: stack date inputs */
+  .period-custom { flex-direction: column; align-items: stretch; gap: 6px; }
+  .period-custom .inp-sm { width: 100%; }
+
+  /* Stats inp: full stack */
+  .stat-inp-row { grid-template-columns: 1fr; }
+
+  /* Analytics grid: single column */
+  .anlp-grid { grid-template-columns: 1fr; }
+
+  /* Content grids: single column */
+  .content-grid      { grid-template-columns: 1fr; }
+  .dash-content-grid { grid-template-columns: 1fr; }
+
+  /* KPI bar */
+  .kpi-acct { width: 90px; font-size: .74rem; }
+
+  /* Stat summary: 2-col (already set above, keep) */
+  .stat-sum-val { font-size: 1.2rem; }
+  .stat-summary-row { gap: 8px; }
+
+  /* Platform stat vals: allow wrap */
+  .plat-stat-vals { flex-wrap: wrap; gap: 8px; }
+
+  /* Platform URL rows: stack */
+  .platform-url-name { width: 100%; }
+  .platform-url-inp  { flex: 1; }
+
+  /* Form: tighter buttons */
+  .btn-sm { padding: 6px 10px; font-size: .74rem; }
+  .form-card { padding: 12px; gap: 12px; }
+  .card { padding: 12px; }
+
+  /* Top 3 bar */
+  .top3-month-bar { flex-wrap: wrap; }
+
+  /* Bank reminder banner */
+  .bk-reminder-banner { font-size: .76rem; padding: 8px 10px; gap: 6px; }
+
+  /* Topbar compact */
+  .topbar { padding: 0 10px; gap: 6px; }
+
+  /* Near split already 1-col at 720px */
+
+  /* Stat acct tabs: smaller */
+  .stat-acct-tab { padding: 5px 12px; font-size: .76rem; }
+  .stat-plat-tab { padding: 5px 10px; font-size: .76rem; }
+
+  /* lem info table: stack to single col */
+  .lem-info-col { flex: 1 0 100%; border-bottom: 1px solid var(--bd); }
+  .lem-info-col:last-child { border-bottom: none; }
+
+  /* Plat stat chart: more compact */
+  .stat-chart-wrap { padding: 12px; }
+  .stat-chart-wrap canvas { max-height: 160px; }
+}
+
+/* ── Breakpoint: 400px (very small phones) ────────────────────── */
 @media (max-width: 400px) {
-  .stat-row { grid-template-columns: 1fr; }
-  .todo-list { grid-template-columns: 1fr; }
+  .stat-row   { grid-template-columns: 1fr; }
+  .todo-list  { grid-template-columns: 1fr; }
+  .page-inner { padding: 10px 8px 16px; }
+  .card       { padding: 10px; }
+  .topbar     { padding: 0 8px; }
+  .login-hero { padding: 18px 14px 14px; }
+  .login-form { padding: 14px 14px 12px; gap: 10px; }
+  .modal-overlay { padding: 4px; }
+  .modal { border-radius: 12px; }
+  .btn-md { padding: 8px 12px; font-size: .8rem; }
+  .badge-btn { display: none; }
 }
 
 /* ══════════════════════════════════════════════════════════════════
