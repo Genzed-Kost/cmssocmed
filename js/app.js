@@ -1160,7 +1160,8 @@ function renderDashTicker() {
     const daysLeft = Math.round((new Date(c.publishDate) - new Date(todayStr)) / 86400000);
     const when     = daysLeft === 0 ? 'Hari ini' : daysLeft === 1 ? 'Besok' : fmtDate(c.publishDate);
     const icon     = c.format === 'Podcast' ? '🎙' : c.format === 'Monolog' ? '🎤' : c.format === 'Liputan' ? '📰' : '📱';
-    items.push(`${icon} <strong>${esc(c.title || 'Konten')}</strong>${c.creator ? ` · ${esc(c.creator)}` : ''} [${esc(c.format)}] — ${when}`);
+    const crTxt = Array.isArray(c.creator) ? c.creator.join(', ') : (c.creator || '');
+    items.push(`${icon} <strong>${esc(c.title || 'Konten')}</strong>${crTxt ? ` · ${esc(crTxt)}` : ''} [${esc(c.format)}] — ${when}`);
   });
 
   if (!items.length) {
@@ -2161,7 +2162,10 @@ function renderPlanner(page) {
 
   let rows = state.contents.filter(c => {
     if (search  && !c.title?.toLowerCase().includes(search)) return false;
-    if (creator && c.creator !== creator) return false;
+    if (creator) {
+      const crArr = Array.isArray(c.creator) ? c.creator : (c.creator ? [c.creator] : []);
+      if (!crArr.includes(creator)) return false;
+    }
     if (status  && c.status  !== status)  return false;
     if (time === 'week') {
       const d    = new Date(c.publishDate||'');
@@ -2204,7 +2208,7 @@ function renderPlanner(page) {
       </td>
       <td>${esc(c.theme||'—')}</td>
       <td><div class="plat-pills">${plats||'—'}</div></td>
-      <td>${esc(c.creator||'—')}</td>
+      <td>${esc(Array.isArray(c.creator) ? c.creator.join(', ') : (c.creator||'—'))}</td>
       <td><div style="display:flex;gap:5px">
         <button class="btn-xs" onclick="editContent('${c.id}')">Edit</button>
         ${admin ? `<button class="btn-xs" style="border-color:#fca5a5;color:var(--red)" onclick="deleteContent('${c.id}')">Hapus</button>` : ''}
@@ -4725,7 +4729,10 @@ function downloadPlannerPdf() {
 
   let filtered = state.contents.filter(c => {
     if (search  && !c.title?.toLowerCase().includes(search)) return false;
-    if (creator && c.creator !== creator) return false;
+    if (creator) {
+      const crArr = Array.isArray(c.creator) ? c.creator : (c.creator ? [c.creator] : []);
+      if (!crArr.includes(creator)) return false;
+    }
     if (status  && c.status  !== status)  return false;
     if (time === 'week') {
       const d   = new Date(c.publishDate||'');
@@ -4792,7 +4799,7 @@ function downloadPlannerPdf() {
           <span style="background:${statusBg[c.status]||'#f1f5f9'};border-radius:4px;padding:2px 7px;font-size:10px;font-weight:700">${esc(c.status)}</span>
         </td>
         <td style="padding:7px 10px;border:1px solid #e2e8f0">${esc(getAcctName(c.account))}</td>
-        <td style="padding:7px 10px;border:1px solid #e2e8f0">${esc(c.creator||'—')}</td>
+        <td style="padding:7px 10px;border:1px solid #e2e8f0">${esc(Array.isArray(c.creator) ? c.creator.join(', ') : (c.creator||'—'))}</td>
         <td style="padding:7px 10px;border:1px solid #e2e8f0;font-size:10px">${(c.platforms||[]).join(', ')||'—'}</td>
       </tr>`).join('')}</tbody>
     </table>
