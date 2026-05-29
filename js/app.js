@@ -3290,17 +3290,22 @@ function startClock() {
   const elHM   = document.getElementById('clockHM');
   const elSec  = document.getElementById('clockSec');
   const elDate = document.getElementById('clockDate');
-  if (!elHM || !elSec || !elDate) return;
+  const sbHM   = document.getElementById('sbClockHM');
+  const sbSec  = document.getElementById('sbClockSec');
+  const sbDate = document.getElementById('sbClockDate');
 
   function tick() {
-    const n  = new Date();
-    const H  = String(n.getHours()).padStart(2, '0');
-    const M  = String(n.getMinutes()).padStart(2, '0');
-    const S  = String(n.getSeconds()).padStart(2, '0');
-    elHM.textContent  = `${H}:${M}`;
-    elSec.textContent = S;
-    elDate.textContent =
-      `${DAYS[n.getDay()]}, ${n.getDate()} ${MONTHS[n.getMonth()]} ${n.getFullYear()}`;
+    const n = new Date();
+    const H = String(n.getHours()).padStart(2, '0');
+    const M = String(n.getMinutes()).padStart(2, '0');
+    const S = String(n.getSeconds()).padStart(2, '0');
+    const dateStr = `${DAYS[n.getDay()]}, ${n.getDate()} ${MONTHS[n.getMonth()]} ${n.getFullYear()}`;
+    if (elHM)   elHM.textContent   = `${H}:${M}`;
+    if (elSec)  elSec.textContent  = S;
+    if (elDate) elDate.textContent = dateStr;
+    if (sbHM)   sbHM.textContent   = `${H}:${M}`;
+    if (sbSec)  sbSec.textContent  = S;
+    if (sbDate) sbDate.textContent = dateStr;
   }
 
   tick();
@@ -3311,34 +3316,44 @@ function startClock() {
    KURS USD/IDR — fetchExchangeRate (frankfurter.app, refresh tiap 5 mnt)
    ══════════════════════════════════════════════════════════════════════════ */
 async function fetchExchangeRate() {
+  const CACHE_KEY = 'cms_usd_idr_v1';
+
   const _show = (rate) => {
     const el = document.getElementById('rateValue');
     if (el) el.textContent = 'Rp ' + Math.round(rate).toLocaleString('id-ID');
     document.getElementById('topbarRate')?.classList.remove('hidden');
   };
 
-  // Primary: jsDelivr CDN (fawazahmed0) -- gratis, tanpa API key, tanpa rate limit
+  // Tampilkan cache dulu agar widget muncul instan
   try {
-    const r = await fetch(
-      'https://cdn.jsdelivr.net/npm/@fawazahmed0/currency-api@latest/v1/currencies/usd.json',
-      { cache: 'no-cache' }
-    );
-    if (r.ok) {
-      const d = await r.json();
-      if (d?.usd?.idr) { _show(d.usd.idr); return; }
-    }
-  } catch { /* lanjut ke fallback */ }
+    const c = JSON.parse(localStorage.getItem(CACHE_KEY) || 'null');
+    if (c?.rate && c.rate > 1000) _show(c.rate);
+  } catch {}
 
-  // Fallback: frankfurter.app
-  try {
-    const r = await fetch('https://api.frankfurter.app/latest?from=USD&to=IDR');
-    if (r.ok) {
-      const d = await r.json();
-      if (d?.rates?.IDR) { _show(d.rates.IDR); return; }
-    }
-  } catch { /* fail silently */ }
+  // Coba 3 API secara berurutan
+  const APIS = [
+    { url: 'https://open.er-api.com/v6/latest/USD',          get: d => d?.rates?.IDR },
+    { url: 'https://api.frankfurter.app/latest?from=USD&to=IDR', get: d => d?.rates?.IDR },
+    { url: 'https://cdn.jsdelivr.net/npm/@fawazahmed0/currency-api@latest/v1/currencies/usd.json', get: d => d?.usd?.idr }
+  ];
+
+  for (const api of APIS) {
+    try {
+      const ctrl = new AbortController();
+      const tid  = setTimeout(() => ctrl.abort(), 5000);
+      const r    = await fetch(api.url, { signal: ctrl.signal });
+      clearTimeout(tid);
+      if (!r.ok) continue;
+      const d    = await r.json();
+      const rate = api.get(d);
+      if (rate && rate > 1000) {
+        _show(rate);
+        localStorage.setItem(CACHE_KEY, JSON.stringify({ rate, ts: Date.now() }));
+        return;
+      }
+    } catch { continue; }
+  }
 }
-
 function showInviteCreatorModal() {
   const cfg = window.db.getConfig();
   if (!cfg?.owner || !cfg?.repo || !cfg?.pat) {
