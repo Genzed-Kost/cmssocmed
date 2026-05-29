@@ -2941,6 +2941,32 @@ function generateShareLink() {
   showInviteCreatorModal();
 }
 
+/* ══════════════════════════════════════════════════════════════════════════
+   JAM DIGITAL — topbar clock (HH:MM:SS + tanggal)
+   ══════════════════════════════════════════════════════════════════════════ */
+function startClock() {
+  const DAYS   = ['Min','Sen','Sel','Rab','Kam','Jum','Sab'];
+  const MONTHS = ['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agu','Sep','Okt','Nov','Des'];
+  const elHM   = document.getElementById('clockHM');
+  const elSec  = document.getElementById('clockSec');
+  const elDate = document.getElementById('clockDate');
+  if (!elHM || !elSec || !elDate) return;
+
+  function tick() {
+    const n  = new Date();
+    const H  = String(n.getHours()).padStart(2, '0');
+    const M  = String(n.getMinutes()).padStart(2, '0');
+    const S  = String(n.getSeconds()).padStart(2, '0');
+    elHM.textContent  = `${H}:${M}`;
+    elSec.textContent = S;
+    elDate.textContent =
+      `${DAYS[n.getDay()]}, ${n.getDate()} ${MONTHS[n.getMonth()]} ${n.getFullYear()}`;
+  }
+
+  tick();
+  setInterval(tick, 1000);
+}
+
 function showInviteCreatorModal() {
   const cfg = window.db.getConfig();
   if (!cfg?.owner || !cfg?.repo || !cfg?.pat) {
@@ -4935,6 +4961,9 @@ document.addEventListener('DOMContentLoaded', async () => {
   window.doCreateInvite       = doCreateInvite;
   window.closeInviteCreatorModal = closeInviteCreatorModal;
   window.doConsumeInvite      = doConsumeInvite;
+
+  /* ── Jam digital topbar ─────────────────────────────────────────── */
+  startClock();
 
   /* ── INIT: Pre-configure dengan default repo jika belum ada config ── */
   if (!window.db.isConfigured()) {
