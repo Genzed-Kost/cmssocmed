@@ -3,26 +3,34 @@ name: WA Reminder Jam 8 WIB
 on:
   schedule:
     - cron: '0 1 * * *'   # 01:00 UTC = 08:00 WIB (UTC+7)
-  workflow_dispatch:        # tombol "Run workflow" manual untuk test
+  workflow_dispatch:        # tombol "Run workflow" di GitHub Actions untuk test
 
 jobs:
   send-reminders:
     runs-on: ubuntu-latest
     permissions:
-      contents: write       # perlu untuk push remindedDate
+      contents: write       # diperlukan untuk commit remindedDate ke repo
 
     steps:
       - uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Setup Node.js 20 (mendukung fetch & FormData native)
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
 
       - name: Kirim WA Reminder Bank Konten
+        # FONNTE_TOKEN sebagai fallback jika belum diisi via API Setup
         env:
           FONNTE_TOKEN: ${{ secrets.FONNTE_TOKEN }}
         run: node .github/scripts/send-reminders.js
 
       - name: Simpan remindedDate ke repo
         run: |
-          git config user.name  "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git config user.name  "cms-reminder[bot]"
+          git config user.email "cms-reminder[bot]@users.noreply.github.com"
           git add data/contentBank.json
-          git diff --cached --quiet || git commit -m "chore: catat remindedDate $(date -u +%F)"
+          git diff --cached --quiet || git commit -m "chore: catat remindedDate $(date -u +%F) [skip ci]"
           git push
