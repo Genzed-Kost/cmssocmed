@@ -420,6 +420,21 @@
         "erPct": 40.86
       },
       {
+        "month": "2025-08",
+        "pageFollowers": 2788,
+        "totalPost": 256,
+        "totalViews": 820905,
+        "totalReach": 572115,
+        "totalReactions": 29820,
+        "totalComments": 9374,
+        "totalShares": 1172,
+        "totalEngagement": 40366,
+        "avgViewsPerPost": 3207,
+        "avgEngPerPost": 158,
+        "maxViewsSingle": 719238,
+        "erPct": 4.92
+      },
+      {
         "month": "2026-01",
         "pageFollowers": 7198,
         "totalPost": 212,
