@@ -856,6 +856,26 @@
         "reelViews": 673367,
         "carouselViews": 0,
         "imageViews": 0
+      },
+      {
+        "month": "2026-03",
+        "followersEOM": 0,
+        "jmlPost": 25,
+        "totalViews": 115531,
+        "totalReach": 88138,
+        "followersGained": 441,
+        "totalLikes": 3022,
+        "totalComments": 501,
+        "totalShares": 64,
+        "totalSaves": 377,
+        "totalEngagement": 3964,
+        "erPct": 4.5,
+        "avgViews": 4621,
+        "peakViews": 30338,
+        "avgEng": 158,
+        "reelViews": 115531,
+        "carouselViews": 0,
+        "imageViews": 0
       }
     ]
   },
