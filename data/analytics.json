@@ -390,6 +390,21 @@
     ],
     "facebook": [
       {
+        "month": "2025-06",
+        "pageFollowers": 26,
+        "totalPost": 92,
+        "totalViews": 3560,
+        "totalReach": 1303,
+        "totalReactions": 617,
+        "totalComments": 354,
+        "totalShares": 50,
+        "totalEngagement": 1021,
+        "avgViewsPerPost": 39,
+        "avgEngPerPost": 11,
+        "maxViewsSingle": 281,
+        "erPct": 26.68
+      },
+      {
         "month": "2026-01",
         "pageFollowers": 7198,
         "totalPost": 212,
