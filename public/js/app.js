@@ -3817,10 +3817,10 @@ function getCurrentYM() {
 const STAT_FIELD_DESC = {
   // YouTube
   jmlVideo:         'Jumlah video yang diunggah dalam periode ini.',
-  totalViews:       'Total tayangan video pada periode ini (semua video).',
+  totalViews:       'Total tayangan semua video dalam periode ini.',
   uniqueViewers:    'Jumlah penonton unik — satu orang dihitung sekali meski menonton berkali-kali.',
-  subsEOM:          'Jumlah subscriber di akhir bulan (End of Month).',
-  subsGained:       'Pertambahan subscriber baru dalam periode ini.',
+  subsEOM:          'Total subscriber di akhir periode (End of Month) — angka kumulatif, bukan pertambahan.',
+  subsGained:       'Pertambahan (atau penurunan) subscriber selama periode ini. Positif = bertambah, negatif = berkurang.',
   watchHours:       'Total jam tonton semua video dalam periode ini.',
   impressions:      'Berapa kali thumbnail video ditampilkan kepada pengguna YouTube.',
   adImpressions:    'Jumlah tayangan iklan yang muncul di video channel ini.',
@@ -4351,38 +4351,67 @@ function renderStatChart() {
   // Fallback jika filter terlalu sempit (tidak ada data)
   if (!displayRows.length) displayRows = rows;
 
-  /* ── Summary cards ───────────────────────────────────────────────
-     followerKey  = titik-waktu (EOM) → tampilkan nilai bulan terakhir dalam rentang
-     field lain   = kumulatif          → tampilkan SUM dalam rentang
+  /* ── Summary cards: 4 kartu tetap per platform ──────────────────
+     Urutan: Followers/Subs Gained | Total Views | Total Engagement | Followers EOM
   ──────────────────────────────────────────────────────────────── */
-  const keyFields = platM.fields.slice(0, 4);
-  const latestRow = displayRows[displayRows.length - 1];
-  const ptKeys    = new Set([
-    platM.followerKey,
-    ...platM.fields
-      .filter(f => f.key.toLowerCase().includes('eom') || f.label.toLowerCase().includes('eom'))
-      .map(f => f.key)
-  ]);
-  const rangeLabel = (fromM && toM)
+  // Definisi 4 kartu per platform: { key, label, eom? }
+  // eom=true → tampilkan nilai bulan terakhir (point-in-time), bukan sum
+  const SUMMARY_CARDS = {
+    youtube:   [
+      { key:'subsGained',      label:'Subs Gained',        eom:false },
+      { key:'totalViews',      label:'Total Views',         eom:false },
+      { key:'totalEngagement', label:'Total Engagement',    eom:false },
+      { key:'subsEOM',         label:'Subscribers (EOM)',   eom:true  },
+    ],
+    tiktok:    [
+      { key:'followersGained', label:'Followers Gained',   eom:false },
+      { key:'totalVideoViews', label:'Total Views',         eom:false },
+      { key:'totalEngagement', label:'Total Engagement',    eom:false },
+      { key:'followersEOM',    label:'Followers (EOM)',     eom:true  },
+    ],
+    facebook:  [
+      { key:'pageFollowers',   label:'Page Followers',      eom:true  },
+      { key:'totalViews',      label:'Total Views',         eom:false },
+      { key:'totalEngagement', label:'Total Engagement',    eom:false },
+      { key:'erPct',           label:'ER %',                eom:false, fmt:'pct' },
+    ],
+    instagram: [
+      { key:'followersGained', label:'Followers Gained',   eom:false },
+      { key:'totalViews',      label:'Total Views',         eom:false },
+      { key:'totalEngagement', label:'Total Engagement',    eom:false },
+      { key:'followersEOM',    label:'Followers (EOM)',     eom:true  },
+    ],
+    twitter:   [
+      { key:'followers',       label:'Followers',           eom:true  },
+      { key:'impressions',     label:'Impressions',         eom:false },
+      { key:'totalEngagement', label:'Total Engagement',    eom:false },
+      { key:'erPct',           label:'ER %',                eom:false, fmt:'pct' },
+    ],
+  };
+  const summaryDefs = SUMMARY_CARDS[platId] || SUMMARY_CARDS.youtube;
+  const latestRow   = displayRows[displayRows.length - 1];
+  const rangeLabel  = (fromM && toM)
     ? `${fmtMonth(fromM)} – ${fmtMonth(toM)}`
     : `${displayRows.length} bulan`;
+
   if (summaryWrap) summaryWrap.innerHTML = `<div class="stat-summary-row">
-    ${keyFields.map(f => {
-      const isPt  = ptKeys.has(f.key);
+    ${summaryDefs.map(card => {
+      const fDef  = platM.fields.find(f => f.key === card.key) || { key: card.key, fmt: card.fmt || 'num' };
+      const isPt  = !!card.eom;
       const val   = isPt
-        ? (+latestRow?.[f.key] || 0)
-        : displayRows.reduce((s, r) => s + (+r[f.key] || 0), 0);
+        ? (+latestRow?.[card.key] || 0)
+        : displayRows.reduce((s, r) => s + (+r[card.key] || 0), 0);
       const period = isPt
         ? `Bulan ${fmtMonth(latestRow?.month || '')}`
         : `Total ${rangeLabel}`;
-      const desc = STAT_FIELD_DESC[f.key] || '';
+      const desc = STAT_FIELD_DESC[card.key] || '';
       return `
         <div class="stat-summary-card">
           <div class="stat-sum-label">
-            ${f.label}
+            ${card.label}
             ${desc ? `<span class="stat-info-wrap"><svg class="stat-info-icon" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg><span class="stat-info-tip">${esc(desc)}</span></span>` : ''}
           </div>
-          <div class="stat-sum-val" style="color:${platM.color}">${fmtStatVal(val, f.fmt)}</div>
+          <div class="stat-sum-val" style="color:${platM.color}">${fmtStatVal(val, fDef.fmt || card.fmt || 'num')}</div>
           <div class="stat-sum-period">${period}</div>
         </div>`;
     }).join('')}
