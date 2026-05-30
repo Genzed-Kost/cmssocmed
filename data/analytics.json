@@ -818,6 +818,26 @@
   "33-official": {
     "instagram": [
       {
+        "month": "2025-06",
+        "followersEOM": 0,
+        "jmlPost": 13,
+        "totalViews": 9761,
+        "totalReach": 476,
+        "followersGained": 1,
+        "totalLikes": 441,
+        "totalComments": 64,
+        "totalShares": 0,
+        "totalSaves": 19,
+        "totalEngagement": 525,
+        "erPct": 110.29,
+        "avgViews": 750,
+        "peakViews": 5082,
+        "avgEng": 40,
+        "reelViews": 7706,
+        "carouselViews": 198,
+        "imageViews": 1857
+      },
+      {
         "month": "2026-01",
         "followersEOM": 0,
         "jmlPost": 12,
