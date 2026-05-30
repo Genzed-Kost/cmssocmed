@@ -20,7 +20,7 @@ const CLAUDE_LS_KEY = 'cmsph_claude_v1';
 function getClaudeKey()     { return localStorage.getItem(CLAUDE_LS_KEY) || ''; }
 function saveClaudeKey(key) { key ? localStorage.setItem(CLAUDE_LS_KEY, key) : localStorage.removeItem(CLAUDE_LS_KEY); }
 
-const CLAUDE_MODELS = ['claude-haiku-4-5', 'claude-3-5-haiku-20241022', 'claude-3-haiku-20240307'];
+const CLAUDE_MODELS = ['claude-3-haiku-20240307', 'claude-haiku-4-5', 'claude-3-5-haiku-20241022'];
 
 const GEMINI_MODELS = [
   'gemini-2.5-flash',
