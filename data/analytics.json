@@ -403,6 +403,21 @@
         "avgEngPerPost": 872,
         "maxViewsSingle": 581972,
         "erPct": 3.94
+      },
+      {
+        "month": "2026-02",
+        "pageFollowers": 3948,
+        "totalPost": 135,
+        "totalViews": 3505175,
+        "totalReach": 2579880,
+        "totalReactions": 87593,
+        "totalComments": 18868,
+        "totalShares": 3596,
+        "totalEngagement": 110057,
+        "avgViewsPerPost": 25964,
+        "avgEngPerPost": 815,
+        "maxViewsSingle": 894707,
+        "erPct": 3.14
       }
     ]
   },
