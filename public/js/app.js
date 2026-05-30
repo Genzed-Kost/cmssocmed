@@ -4409,7 +4409,6 @@ function renderStatChart() {
           <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
         <span>Data <strong>${esc(platM.label)}</strong> terakhir diperbarui:</span>
         <strong style="color:var(--text)">${tgl}, ${jam}</strong>
-        <span style="color:var(--muted-lt)">· oleh ${esc(meta.updatedBy)}</span>
         <span style="margin-left:auto;font-size:.68rem;color:#f59e0b">
           ⚠ Data platform dapat berubah retroaktif — perbarui secara berkala
         </span>
