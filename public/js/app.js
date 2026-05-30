@@ -4178,18 +4178,34 @@ async function importStatFromFile(input) {
 async function importMultiRowsDirectly(acctId, platId, rows) {
   if (!state.analytics[acctId]) state.analytics[acctId] = {};
   if (!state.analytics[acctId][platId]) state.analytics[acctId][platId] = [];
-  const existing     = state.analytics[acctId][platId];
-  const existMonths  = new Set(existing.map(r => r.month));
-  const toAdd        = rows.filter(r => !existMonths.has(r.month));
-  const toUpdate     = rows.filter(r => existMonths.has(r.month));
-  toUpdate.forEach(r => {
-    const idx = existing.findIndex(e => e.month === r.month);
-    if (idx >= 0) existing[idx] = { ...existing[idx], ...r };
+  const existing    = state.analytics[acctId][platId];
+  const existMonths = new Set(existing.map(r => r.month));
+  const toAdd       = rows.filter(r => !existMonths.has(r.month));
+  const toUpdate    = rows.filter(r =>  existMonths.has(r.month));
+
+  toUpdate.forEach(newRow => {
+    const idx = existing.findIndex(e => e.month === newRow.month);
+    if (idx < 0) return;
+    const old = existing[idx];
+    // Smart merge: update field jika nilai baru > 0 atau field belum ada di data lama
+    // Field yang 0 di CSV (tidak tersedia) TIDAK menimpa data yang sudah ada
+    const merged = { ...old };
+    Object.entries(newRow).forEach(([k, v]) => {
+      if (k === 'month') return;
+      if (v !== 0 && v !== null && v !== undefined) {
+        merged[k] = v;              // nilai baru non-zero → gunakan
+      } else if (!(k in old) || old[k] === 0 || old[k] === null) {
+        merged[k] = v;              // data lama juga 0/kosong → tetap update
+      }
+      // else: nilai baru 0 tapi data lama non-zero → pertahankan data lama
+    });
+    existing[idx] = merged;
   });
+
   state.analytics[acctId][platId] = [...existing, ...toAdd]
-    .sort((a,b) => a.month.localeCompare(b.month));
+    .sort((a, b) => a.month.localeCompare(b.month));
   state.shas.analytics = await window.db.writeData('analytics', state.analytics,
-    `Import CSV: ${rows.length} bulan ${platId}`);
+    `Import CSV: update ${toUpdate.length} + tambah ${toAdd.length} bulan ${platId}`);
   saveDataCache();
 }
 
@@ -4214,8 +4230,19 @@ Contoh output yang benar:
 }
 
 async function openStatInputForImport(acctId, platId, monthVal, data) {
-  // Buka form input dan isi dengan data hasil AI
-  renderStatInputFields(acctId, platId, data);
+  // Smart merge dengan data yang sudah ada di bulan yang sama
+  const existing = (state.analytics?.[acctId]?.[platId] || [])
+    .find(r => r.month === monthVal);
+  let merged = { ...data };
+  if (existing) {
+    merged = { ...existing };
+    Object.entries(data).forEach(([k, v]) => {
+      if (k === 'month') return;
+      if (v !== 0 && v !== null && v !== undefined) merged[k] = v;
+      else if (!(k in existing) || existing[k] === 0) merged[k] = v;
+    });
+  }
+  renderStatInputFields(acctId, platId, merged);
   const card = $('statInputCard');
   if (card) card.classList.remove('hidden');
   const monthInp = $('statMonth');
