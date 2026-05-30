@@ -1,5 +1,13 @@
 [
   {
+    "id": "mps48079ticb2",
+    "user": "Admin",
+    "role": "Admin",
+    "action": "login",
+    "target": "masuk ke sistem sebagai Admin",
+    "timestamp": "2026-05-30T08:55:13.413Z"
+  },
+  {
     "id": "mps46h3x3h7wt",
     "user": "Admin",
     "role": "Admin",
@@ -12,7 +20,7 @@
     "user": "Admin",
     "role": "Admin",
     "action": "update statistik",
-    "target": "33 Official Instagram â Des 2025",
+    "target": "33 Official Instagram Ã¢ÂÂ Des 2025",
     "timestamp": "2026-05-30T04:58:44.830Z"
   },
   {
@@ -20,7 +28,7 @@
     "user": "Admin",
     "role": "Admin",
     "action": "update statistik",
-    "target": "33 Official Instagram â Nov 2025",
+    "target": "33 Official Instagram Ã¢ÂÂ Nov 2025",
     "timestamp": "2026-05-30T04:57:28.843Z"
   },
   {
@@ -28,7 +36,7 @@
     "user": "Admin",
     "role": "Admin",
     "action": "update statistik",
-    "target": "33 Official Instagram â Agt 2025",
+    "target": "33 Official Instagram Ã¢ÂÂ Agt 2025",
     "timestamp": "2026-05-30T04:56:23.464Z"
   },
   {
@@ -36,7 +44,7 @@
     "user": "Admin",
     "role": "Admin",
     "action": "update statistik",
-    "target": "33 Official Instagram â Sep 2025",
+    "target": "33 Official Instagram Ã¢ÂÂ Sep 2025",
     "timestamp": "2026-05-30T04:55:04.541Z"
   },
   {
@@ -44,7 +52,7 @@
     "user": "Admin",
     "role": "Admin",
     "action": "update statistik",
-    "target": "33 Official Instagram â Jul 2025",
+    "target": "33 Official Instagram Ã¢ÂÂ Jul 2025",
     "timestamp": "2026-05-30T04:54:13.533Z"
   },
   {
@@ -52,7 +60,7 @@
     "user": "Admin",
     "role": "Admin",
     "action": "update statistik",
-    "target": "33 Official Instagram â Jun 2025",
+    "target": "33 Official Instagram Ã¢ÂÂ Jun 2025",
     "timestamp": "2026-05-30T04:53:32.355Z"
   },
   {
@@ -60,7 +68,7 @@
     "user": "Admin",
     "role": "Admin",
     "action": "update statistik",
-    "target": "33 Official Instagram â Apr 2026",
+    "target": "33 Official Instagram Ã¢ÂÂ Apr 2026",
     "timestamp": "2026-05-30T04:50:00.916Z"
   },
   {
@@ -68,7 +76,7 @@
     "user": "Admin",
     "role": "Admin",
     "action": "update statistik",
-    "target": "33 Official Instagram â Mar 2026",
+    "target": "33 Official Instagram Ã¢ÂÂ Mar 2026",
     "timestamp": "2026-05-30T04:48:26.945Z"
   },
   {
@@ -76,7 +84,7 @@
     "user": "Admin",
     "role": "Admin",
     "action": "update statistik",
-    "target": "33 Official Instagram â Feb 2026",
+    "target": "33 Official Instagram Ã¢ÂÂ Feb 2026",
     "timestamp": "2026-05-30T04:47:17.251Z"
   },
   {
@@ -84,7 +92,7 @@
     "user": "Admin",
     "role": "Admin",
     "action": "update statistik",
-    "target": "33 Official Instagram â Jan 2026",
+    "target": "33 Official Instagram Ã¢ÂÂ Jan 2026",
     "timestamp": "2026-05-30T04:44:27.732Z"
   },
   {
