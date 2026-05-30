@@ -1,35 +1,21 @@
-# ================================================================
-# CMS Penjaga Harapan — Netlify Configuration
-# ================================================================
-
 [build]
   publish = "public"
-  # No build command needed — pure static site
+  functions = "netlify/functions"
 
-# ── Security Headers ─────────────────────────────────────────────
+[build.environment]
+  NODE_VERSION = "18"
+
+# Proxy semua /api/notion/* → Netlify Function (aman, API key tidak terekspos)
+[[redirects]]
+  from = "/api/notion/*"
+  to   = "/.netlify/functions/notion-proxy/:splat"
+  status = 200
+  force  = true
+
+# Izinkan embed sebagai iframe di Notion.so
 [[headers]]
   for = "/*"
   [headers.values]
-    # Prevent clickjacking
-    X-Frame-Options = "DENY"
-
-    # Prevent MIME-type sniffing
-    X-Content-Type-Options = "nosniff"
-
-    # XSS protection (legacy browsers)
-    X-XSS-Protection = "1; mode=block"
-
-    # Limit referrer info leakage
-    Referrer-Policy = "strict-origin-when-cross-origin"
-
-    # Disable unnecessary browser features
-    Permissions-Policy = "geolocation=(), microphone=(), camera=(), payment=(), usb=()"
-
-    # Content Security Policy — only allow trusted origins
-    Content-Security-Policy = "default-src 'self'; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: https:; connect-src 'self' https://api.github.com https://generativelanguage.googleapis.com; frame-ancestors 'none'; base-uri 'self'; form-action 'self';"
-
-# ── SPA Fallback (hash routing, catches 404 on direct URL access) ─
-[[redirects]]
-  from = "/*"
-  to   = "/index.html"
-  status = 200
+    X-Frame-Options = "ALLOWALL"
+    Content-Security-Policy = "frame-ancestors *"
+    Access-Control-Allow-Origin = "*"
