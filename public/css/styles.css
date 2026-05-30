@@ -454,6 +454,7 @@ ul { list-style: none; }
   display: flex; align-items: center; gap: 8px;
   padding: 7px 8px;
   border: 1px solid var(--bd); border-radius: 8px;
+  min-width: 0;
 }
 .todo-empty { grid-column: 1 / -1; }
 .todo-empty, .act-empty, .user-empty { font-size: .82rem; color: var(--muted); padding: 8px 0; }
