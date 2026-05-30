@@ -4370,10 +4370,10 @@ function renderStatChart() {
       { key:'followersEOM',    label:'Followers (EOM)',     eom:true  },
     ],
     facebook:  [
-      { key:'pageFollowers',   label:'Page Followers',      eom:true  },
+      { key:'totalPost',       label:'Total Post',          eom:false },
       { key:'totalViews',      label:'Total Views',         eom:false },
       { key:'totalEngagement', label:'Total Engagement',    eom:false },
-      { key:'erPct',           label:'ER %',                eom:false, fmt:'pct' },
+      { key:'pageFollowers',   label:'Page Followers (EOM)',eom:true  },
     ],
     instagram: [
       { key:'followersGained', label:'Followers Gained',   eom:false },
@@ -4457,11 +4457,11 @@ function renderStatChart() {
 
   /* ── Label Followers/Subs per platform (EOM) ────────────────────── */
   const FOLL_LABEL = {
-    youtube:   'Subscribers (EOM)', tiktok: 'Followers (EOM)',
-    facebook:  'Page Followers',    instagram: 'Followers (EOM)',
+    youtube:   'Subscribers', tiktok: 'Followers',
+    facebook:  'Followers',   instagram: 'Followers',
     twitter:   'Followers',
   };
-  const follLabel = FOLL_LABEL[platId] || 'Followers (EOM)';
+  const follLabel = FOLL_LABEL[platId] || 'Followers';
 
   /* ── Bar chart ──────────────────────────────────────────────────── */
   if (!chartWrap) return;
@@ -4540,13 +4540,13 @@ function renderStatChart() {
       scales: {
         yFoll: {
           type: 'linear', position: 'left',
-          title: { display: true, text: follLabel, font: { size: 10 } },
+          title: { display: false },
           ticks: { callback: v => fmtNum(v), font: { size: 10 } },
           grid: { color: 'rgba(0,0,0,.06)' }
         },
         yView: {
           type: 'linear', position: 'right',
-          title: { display: true, text: 'Views', font: { size: 10 } },
+          title: { display: false },
           ticks: { callback: v => fmtNum(v), font: { size: 10 } },
           grid: { drawOnChartArea: false }
         },
