@@ -3919,85 +3919,111 @@ function parseIDNumber(s) {
 /* ── Helper: parse bulan dari berbagai format ────────────────────────────── */
 function parseMonthStr(s) {
   if (!s) return '';
-  s = String(s).trim();
+  s = String(s).trim().replace(/^﻿/, ''); // strip BOM
   const MMAP = {
     jan:1,feb:2,mar:3,apr:4,mei:5,may:5,jun:6,jul:7,agt:8,aug:8,sep:9,okt:10,oct:10,nov:11,des:12,dec:12,
     januari:1,februari:2,maret:3,april:4,juni:6,juli:7,agustus:8,september:9,oktober:10,november:11,desember:12
   };
+  // YYYY-MM-DD atau YYYY/MM/DD (ambil YYYY-MM saja)
+  const mFull = s.match(/^(\d{4})[-\/](\d{2})[-\/]\d{2}$/);
+  if (mFull) return `${mFull[1]}-${mFull[2]}`;
   // YYYY-MM
   if (/^\d{4}-\d{2}$/.test(s)) return s;
-  // "Jan 2025" / "Januari 2025"
-  const m1 = s.match(/^([a-z]+)\s+(\d{4})$/i);
+  // YYYY/MM
+  if (/^\d{4}\/\d{2}$/.test(s)) return s.replace('/', '-');
+  // "Jan 2025" / "Januari 2025" / "Jan-2025"
+  const m1 = s.match(/([a-z]+)[\s\-]+(\d{4})/i);
   if (m1) { const n = MMAP[m1[1].toLowerCase()]; if (n) return `${m1[2]}-${String(n).padStart(2,'0')}`; }
-  // "2025 Jan"
-  const m2 = s.match(/^(\d{4})\s+([a-z]+)$/i);
+  // "2025 Jan" / "2025-Jan"
+  const m2 = s.match(/(\d{4})[\s\-]+([a-z]+)/i);
   if (m2) { const n = MMAP[m2[2].toLowerCase()]; if (n) return `${m2[1]}-${String(n).padStart(2,'0')}`; }
-  // MM/YYYY atau YYYY/MM
+  // MM/YYYY
   const m3 = s.match(/^(\d{1,2})\/(\d{4})$/);
   if (m3) return `${m3[2]}-${String(+m3[1]).padStart(2,'0')}`;
-  const m4 = s.match(/^(\d{4})\/(\d{1,2})$/);
-  if (m4) return `${m4[1]}-${String(+m4[2]).padStart(2,'0')}`;
   return '';
 }
 
 /* ── CSV direct parser — akurat tanpa AI ────────────────────────────────── */
 function parseCSVDirect(csvText, platM) {
-  // Split baris, handle berbagai line ending
-  const lines = csvText.trim().split(/\r?\n/).filter(l => l.trim());
-  if (lines.length < 2) return null;
+  // Strip BOM UTF-8
+  csvText = csvText.replace(/^﻿/, '');
 
-  // Parse header
-  const splitCSV = row => {
+  // Split baris, handle berbagai line ending, skip baris kosong
+  const lines = csvText.split(/\r?\n/).filter(l => l.trim());
+  if (lines.length < 2) return { error: 'File terlalu pendek (kurang dari 2 baris).' };
+
+  // Deteksi separator dominan dari baris pertama
+  const sample  = lines[0];
+  const sepCount = { ',': (sample.match(/,/g)||[]).length, ';': (sample.match(/;/g)||[]).length, '\t': (sample.match(/\t/g)||[]).length };
+  const sep = Object.entries(sepCount).sort((a,b) => b[1]-a[1])[0][0];
+
+  const splitRow = row => {
     const result = []; let cur = ''; let inQ = false;
     for (const ch of row) {
       if (ch === '"') { inQ = !inQ; }
-      else if ((ch === ',' || ch === ';' || ch === '\t') && !inQ) { result.push(cur.trim()); cur = ''; }
+      else if (ch === sep && !inQ) { result.push(cur.trim()); cur = ''; }
       else cur += ch;
     }
     result.push(cur.trim());
     return result.map(c => c.replace(/^"|"$/g, '').trim());
   };
 
-  const headers = splitCSV(lines[0]).map(h => h.toLowerCase());
+  // Cari baris header (baris pertama yang punya ≥2 kolom non-kosong)
+  let headerLineIdx = 0;
+  for (let i = 0; i < Math.min(5, lines.length); i++) {
+    if (splitRow(lines[i]).filter(c => c).length >= 2) { headerLineIdx = i; break; }
+  }
+  const headers     = splitRow(lines[headerLineIdx]).map(h => h.toLowerCase().replace(/^﻿/, ''));
+  const dataLines   = lines.slice(headerLineIdx + 1);
 
-  // Bangun mapping: colIndex → fieldKey
-  // Prioritas: exact key match → label match → substring match
+  // Cari kolom tanggal/bulan
+  const monthColIdx = headers.findIndex(h => {
+    const hc = h.replace(/[^a-z0-9]/g, '');
+    return /^(bulan|month|periode|period|date|tanggal|waktu|time|tgl)/.test(hc);
+  }) ?? -1;
+
+  // Jika tidak ketemu kolom tanggal, coba kolom pertama
+  const effectiveMonthCol = monthColIdx >= 0 ? monthColIdx : 0;
+
+  // Mapping kolom → field key (exact → label → substring)
   const fieldMap = {};
   platM.fields.forEach(f => {
     const fKey   = f.key.toLowerCase();
     const fLabel = f.label.toLowerCase().replace(/[^a-z0-9]/g, '');
-    let bestIdx  = -1;
-    headers.forEach((h, i) => {
-      const hClean = h.replace(/[^a-z0-9]/g, '');
-      if (hClean === fKey || hClean === fLabel) bestIdx = i;
-    });
-    if (bestIdx < 0) {
-      headers.forEach((h, i) => {
-        const hClean = h.replace(/[^a-z0-9]/g, '');
-        if (hClean.includes(fKey) || fKey.includes(hClean)) bestIdx = i;
-      });
-    }
-    if (bestIdx >= 0) fieldMap[bestIdx] = f.key;
+    let best = -1;
+    // 1. exact match key atau label
+    headers.forEach((h, i) => { const hc = h.replace(/[^a-z0-9]/g,''); if (hc === fKey || hc === fLabel) best = i; });
+    // 2. label contains field key (≥4 chars)
+    if (best < 0 && fKey.length >= 4) headers.forEach((h, i) => { const hc = h.replace(/[^a-z0-9]/g,''); if (hc.includes(fKey)) best = i; });
+    // 3. field key contains cleaned header (≥4 chars)
+    if (best < 0) headers.forEach((h, i) => { const hc = h.replace(/[^a-z0-9]/g,''); if (hc.length >= 4 && fKey.includes(hc)) best = i; });
+    if (best >= 0) fieldMap[best] = f.key;
   });
 
-  // Cari kolom bulan
-  const monthColIdx = headers.findIndex(h =>
-    /bulan|month|periode|period|date|tanggal/.test(h.replace(/[^a-z]/g,''))
-  );
-
-  const results = [];
-  for (let i = 1; i < lines.length; i++) {
-    const cols = splitCSV(lines[i]);
+  // Parse baris data, agregat per bulan (untuk data harian)
+  const monthMap = {};
+  for (const line of dataLines) {
+    const cols  = splitRow(line);
     if (cols.every(c => !c)) continue;
-    const month = monthColIdx >= 0 ? parseMonthStr(cols[monthColIdx]) : '';
+    const month = parseMonthStr(cols[effectiveMonthCol]);
     if (!month) continue;
-    const entry = { month };
+    if (!monthMap[month]) {
+      monthMap[month] = { month };
+      platM.fields.forEach(f => { monthMap[month][f.key] = 0; });
+    }
     Object.entries(fieldMap).forEach(([idx, key]) => {
-      entry[key] = parseIDNumber(cols[+idx]);
+      monthMap[month][key] += parseIDNumber(cols[+idx]);
     });
-    results.push(entry);
   }
-  return results.length ? results : null;
+
+  const results = Object.values(monthMap).sort((a,b) => a.month.localeCompare(b.month));
+
+  if (!results.length) {
+    const detectedCols = headers.filter(h => h).join(', ');
+    const sampleDate   = dataLines[0] ? splitRow(dataLines[0])[effectiveMonthCol] : '?';
+    return { error: `Tidak ada baris valid ditemukan.\n\nKolom terdeteksi: ${detectedCols || '(tidak ada)'}\nContoh nilai di kolom tanggal: "${sampleDate}"\n\nFormat tanggal yang didukung: YYYY-MM, YYYY-MM-DD, "Jan 2025", "Januari 2025"` };
+  }
+  return results;
 }
 
 /* ── Import file: CSV → parse langsung; gambar/PDF → Gemini AI ──────────── */
@@ -4022,15 +4048,18 @@ async function importStatFromFile(input) {
 
     /* ── CSV / TSV: parse langsung, tidak perlu AI ── */
     if (isCSV || name.endsWith('.tsv')) {
-      const text = await file.text();
-      const rows = parseCSVDirect(text, platM);
-      if (!rows?.length) { toast('CSV tidak bisa diparsing. Pastikan ada kolom Bulan dan field data yang sesuai.', 'error'); return; }
-      // Jika banyak baris, tampilkan semua ke form satu per satu
+      const text   = await file.text();
+      const result = parseCSVDirect(text, platM);
+      // Error object → tampilkan pesan detail
+      if (!Array.isArray(result)) {
+        toast(result?.error || 'CSV tidak bisa diparsing.', 'error');
+        return;
+      }
+      const rows = result;
       if (rows.length === 1) {
         await openStatInputForImport(acctId, platId, rows[0].month, rows[0]);
         toast(`✅ Data ${fmtMonth(rows[0].month)} berhasil dibaca dari CSV!`, 'success');
       } else {
-        // Simpan langsung semua baris ke analytics (multi-row import)
         await importMultiRowsDirectly(acctId, platId, rows);
         toast(`✅ ${rows.length} bulan data berhasil diimpor dari CSV!`, 'success');
         renderStatChart();
