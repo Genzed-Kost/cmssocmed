@@ -1,0 +1,101 @@
+{
+  "kpi": {},
+  "users": [],
+  "analyticsUrls": {},
+  "topContent": {
+    "penjaga-harapan": {
+      "2026-05": {
+        "good": [
+          {
+            "title": "",
+            "link": ""
+          },
+          {
+            "title": "",
+            "link": ""
+          },
+          {
+            "title": "",
+            "link": ""
+          }
+        ],
+        "bad": [
+          {
+            "title": "",
+            "link": ""
+          },
+          {
+            "title": "",
+            "link": ""
+          },
+          {
+            "title": "",
+            "link": ""
+          }
+        ]
+      }
+    },
+    "33-official": {
+      "good": [
+        {
+          "title": "",
+          "link": ""
+        },
+        {
+          "title": "",
+          "link": ""
+        },
+        {
+          "title": "",
+          "link": ""
+        }
+      ],
+      "bad": [
+        {
+          "title": "",
+          "link": ""
+        },
+        {
+          "title": "",
+          "link": ""
+        },
+        {
+          "title": "",
+          "link": ""
+        }
+      ]
+    },
+    "jaga-asa": {
+      "good": [
+        {
+          "title": "",
+          "link": ""
+        },
+        {
+          "title": "",
+          "link": ""
+        },
+        {
+          "title": "",
+          "link": ""
+        }
+      ],
+      "bad": [
+        {
+          "title": "",
+          "link": ""
+        },
+        {
+          "title": "",
+          "link": ""
+        },
+        {
+          "title": "",
+          "link": ""
+        }
+      ]
+    }
+  },
+  "adminName": "Admin",
+  "adminHash": "e541fbcd60a15da9a746974cf168c8bfd125cb638ae84c20e36c30721c89ad8a"
+}
