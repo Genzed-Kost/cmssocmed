@@ -2328,10 +2328,33 @@ ul { list-style: none; }
 .stat-chart-wrap {
   background: var(--surface); border: 1.5px solid var(--bd);
   border-radius: 12px; padding: 20px; margin-bottom: 20px;
-  min-height: 120px;
+  min-height: 120px; position: relative;
 }
 .stat-chart-wrap canvas {
   max-height: 320px; width: 100% !important;
+}
+/* Tombol expand grafik */
+.chart-expand-btn {
+  position: absolute; top: 10px; right: 10px;
+  background: var(--surface); border: 1px solid var(--bd);
+  border-radius: 6px; padding: 5px 7px; cursor: pointer;
+  color: var(--muted); line-height: 0; z-index: 10;
+  transition: all .15s;
+}
+.chart-expand-btn:hover { background: var(--hover); color: var(--text); border-color: var(--blue); }
+/* Mode fullscreen grafik */
+.stat-chart-wrap.fullscreen {
+  position: fixed !important;
+  inset: 0; z-index: 9990;
+  border-radius: 0; margin: 0;
+  padding: 24px; display: flex;
+  flex-direction: column; gap: 12px;
+  background: var(--surface);
+  box-shadow: none;
+}
+.stat-chart-wrap.fullscreen canvas {
+  max-height: none !important;
+  flex: 1;
 }
 
 /* ── Todo edit button & inline input ───────────────────────────── */

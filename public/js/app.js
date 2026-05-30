@@ -4455,14 +4455,35 @@ function renderStatChart() {
     updateBanner.style.display = '';
   }
 
+  /* ── Label Followers/Subs per platform (EOM) ────────────────────── */
+  const FOLL_LABEL = {
+    youtube:   'Subscribers (EOM)', tiktok: 'Followers (EOM)',
+    facebook:  'Page Followers',    instagram: 'Followers (EOM)',
+    twitter:   'Followers',
+  };
+  const follLabel = FOLL_LABEL[platId] || 'Followers (EOM)';
+
   /* ── Bar chart ──────────────────────────────────────────────────── */
-  if (chartWrap && !chartWrap.querySelector('canvas')) {
-    chartWrap.innerHTML = '<canvas id="statBarChart"></canvas>';
-  } else if (!chartWrap) return;
+  if (!chartWrap) return;
+
+  // Bersihkan konten lama (no-data message, canvas lama)
+  const prevExpand = chartWrap.querySelector('.chart-expand-btn');
+  chartWrap.innerHTML = '<canvas id="statBarChart"></canvas>';
+
+  // Tambahkan / kembalikan tombol expand
+  const expandBtn = prevExpand || document.createElement('button');
+  expandBtn.className = 'chart-expand-btn';
+  expandBtn.title = 'Perbesar grafik';
+  expandBtn.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+    <polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/>
+    <line x1="21" y1="3" x2="14" y2="10"/><line x1="3" y1="21" x2="10" y2="14"/>
+  </svg>`;
+  expandBtn.onclick = () => toggleChartFullscreen(chartWrap);
+  chartWrap.appendChild(expandBtn);
+
   const labels     = displayRows.map(r => fmtMonth(r.month));
   const follData   = displayRows.map(r => +(r[platM.followerKey] || 0));
   const viewData   = displayRows.map(r => +(r[platM.viewKey]     || 0));
-  const acctObj    = ACCOUNTS.find(a => a.id === acctId);
   const barColor   = platM.color;
 
   if (window._statChart) { window._statChart.destroy(); window._statChart = null; }
@@ -4477,7 +4498,7 @@ function renderStatChart() {
       datasets: [
         {
           type: 'bar',
-          label: 'Followers',
+          label: follLabel,
           data: follData,
           backgroundColor: barColor + '33',
           borderColor: barColor,
@@ -4504,7 +4525,7 @@ function renderStatChart() {
     },
     options: {
       responsive: true,
-      maintainAspectRatio: true,
+      maintainAspectRatio: !chartWrap.classList.contains('fullscreen'),
       interaction: { mode: 'index', intersect: false },
       plugins: {
         legend: { display: true, position: 'top',
@@ -4519,7 +4540,7 @@ function renderStatChart() {
       scales: {
         yFoll: {
           type: 'linear', position: 'left',
-          title: { display: true, text: 'Followers', font: { size: 10 } },
+          title: { display: true, text: follLabel, font: { size: 10 } },
           ticks: { callback: v => fmtNum(v), font: { size: 10 } },
           grid: { color: 'rgba(0,0,0,.06)' }
         },
@@ -4533,6 +4554,21 @@ function renderStatChart() {
       }
     }
   });
+
+  function toggleChartFullscreen(wrap) {
+    const isFs = wrap.classList.toggle('fullscreen');
+    const btn  = wrap.querySelector('.chart-expand-btn');
+    if (btn) btn.innerHTML = isFs
+      ? `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="4 14 10 14 10 20"/><polyline points="20 10 14 10 14 4"/><line x1="10" y1="14" x2="3" y2="21"/><line x1="21" y1="3" x2="14" y2="10"/></svg>`
+      : `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/><line x1="21" y1="3" x2="14" y2="10"/><line x1="3" y1="21" x2="10" y2="14"/></svg>`;
+    // Resize chart setelah fullscreen toggle
+    setTimeout(() => window._statChart?.resize(), 50);
+    // ESC untuk keluar fullscreen
+    if (isFs) {
+      const escHandler = e => { if (e.key === 'Escape') { toggleChartFullscreen(wrap); document.removeEventListener('keydown', escHandler); } };
+      document.addEventListener('keydown', escHandler);
+    }
+  }
 
   // Render admin-only data table below chart
   renderStatDataTable(acctId, platId, rows);
