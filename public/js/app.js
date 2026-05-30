@@ -5179,38 +5179,38 @@ async function callClaude(prompt, image = null) {
   throw new Error(lastErr);
 }
 
-/* ── Unified AI: Claude primary → Gemini fallback (gratis) ──────────────── */
+/* ── Unified AI: Gemini primary (gratis) → Claude fallback (opsional) ───── */
 async function callAI(prompt, image = null) {
-  const hasClaude = !!getClaudeKey();
   const hasGemini = !!getGeminiKey();
-  if (!hasClaude && !hasGemini) {
-    throw new Error('Belum ada AI API Key. Isi Claude API Key (akurat) atau Gemini API Key (gratis) di API Setup.');
+  const hasClaude = !!getClaudeKey();
+  if (!hasGemini && !hasClaude) {
+    throw new Error('Belum ada AI API Key. Isi Gemini API Key (gratis) di API Setup.');
   }
-  // Coba Claude dulu jika tersedia
-  if (hasClaude) {
-    try { return await callClaude(prompt, image); }
-    catch (e) {
-      if (e.message === 'no_key' || !hasGemini) throw e;
-      console.warn('[AI] Claude gagal, fallback ke Gemini:', e.message);
+  // Gemini dulu (gratis)
+  if (hasGemini) {
+    try {
+      if (image) {
+        const model = GEMINI_MODELS[0] || 'gemini-2.5-flash';
+        const url   = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${getGeminiKey()}`;
+        const resp  = await fetch(url, {
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ contents: [{ parts: [
+            { inlineData: { mimeType: image.mimeType, data: image.base64 } },
+            { text: prompt }
+          ]}]})
+        });
+        const j = await resp.json();
+        if (!resp.ok) throw new Error(j.error?.message || 'Gemini error');
+        return j.candidates?.[0]?.content?.parts?.[0]?.text || '';
+      }
+      return await callGemini(prompt);
+    } catch (e) {
+      if (!hasClaude) throw e;
+      console.warn('[AI] Gemini gagal, fallback ke Claude:', e.message);
     }
   }
-  // Fallback Gemini
-  if (image) {
-    // Gemini vision call
-    const model = GEMINI_MODELS[0] || 'gemini-2.5-flash';
-    const url   = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${getGeminiKey()}`;
-    const resp  = await fetch(url, {
-      method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ contents: [{ parts: [
-        { inlineData: { mimeType: image.mimeType, data: image.base64 } },
-        { text: prompt }
-      ]}]})
-    });
-    const j = await resp.json();
-    if (!resp.ok) throw new Error(j.error?.message || 'Gemini error');
-    return j.candidates?.[0]?.content?.parts?.[0]?.text || '';
-  }
-  return await callGemini(prompt);
+  // Fallback Claude (opsional, berbayar)
+  return await callClaude(prompt, image);
 }
 
 /* ── AI Content Analysis (Claude/Gemini) ─────────────────────────────────── */
