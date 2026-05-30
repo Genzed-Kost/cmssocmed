@@ -387,6 +387,23 @@
         "totalEngagement": 80150,
         "erPct": 6.44
       }
+    ],
+    "facebook": [
+      {
+        "month": "2026-01",
+        "pageFollowers": 7198,
+        "totalPost": 212,
+        "totalViews": 4688891,
+        "totalReach": 3613517,
+        "totalReactions": 152045,
+        "totalComments": 26077,
+        "totalShares": 6632,
+        "totalEngagement": 184754,
+        "avgViewsPerPost": 22117,
+        "avgEngPerPost": 872,
+        "maxViewsSingle": 581972,
+        "erPct": 3.94
+      }
     ]
   },
   "33-official": {},
