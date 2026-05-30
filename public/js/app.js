@@ -3924,18 +3924,22 @@ function parseMonthStr(s) {
     jan:1,feb:2,mar:3,apr:4,mei:5,may:5,jun:6,jul:7,agt:8,aug:8,sep:9,okt:10,oct:10,nov:11,des:12,dec:12,
     januari:1,februari:2,maret:3,april:4,juni:6,juli:7,agustus:8,september:9,oktober:10,november:11,desember:12
   };
-  // YYYY-MM-DD atau YYYY/MM/DD (ambil YYYY-MM saja)
-  const mFull = s.match(/^(\d{4})[-\/](\d{2})[-\/]\d{2}$/);
-  if (mFull) return `${mFull[1]}-${mFull[2]}`;
-  // YYYY-MM
-  if (/^\d{4}-\d{2}$/.test(s)) return s;
-  // YYYY/MM
-  if (/^\d{4}\/\d{2}$/.test(s)) return s.replace('/', '-');
+  // MM/DD/YYYY HH:MM atau M/D/YYYY (format US/Instagram export)
+  const mUS = s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})/);
+  if (mUS) return `${mUS[3]}-${String(+mUS[1]).padStart(2,'0')}`;
+  // DD/MM/YYYY (format EU)
+  const mEU = s.match(/^(\d{1,2})\.(\d{1,2})\.(\d{4})/);
+  if (mEU) return `${mEU[3]}-${String(+mEU[2]).padStart(2,'0')}`;
+  // YYYY-MM-DD atau YYYY/MM/DD
+  const mISO = s.match(/^(\d{4})[-\/](\d{2})[-\/]\d{2}/);
+  if (mISO) return `${mISO[1]}-${mISO[2]}`;
+  // YYYY-MM atau YYYY/MM
+  if (/^\d{4}[-\/]\d{2}$/.test(s)) return s.slice(0,7).replace('/','-');
   // "Jan 2025" / "Januari 2025" / "Jan-2025"
-  const m1 = s.match(/([a-z]+)[\s\-]+(\d{4})/i);
+  const m1 = s.match(/([a-z]{3,})[\s\-]+(\d{4})/i);
   if (m1) { const n = MMAP[m1[1].toLowerCase()]; if (n) return `${m1[2]}-${String(n).padStart(2,'0')}`; }
   // "2025 Jan" / "2025-Jan"
-  const m2 = s.match(/(\d{4})[\s\-]+([a-z]+)/i);
+  const m2 = s.match(/(\d{4})[\s\-]+([a-z]{3,})/i);
   if (m2) { const n = MMAP[m2[2].toLowerCase()]; if (n) return `${m2[1]}-${String(n).padStart(2,'0')}`; }
   // MM/YYYY
   const m3 = s.match(/^(\d{1,2})\/(\d{4})$/);
@@ -3944,7 +3948,7 @@ function parseMonthStr(s) {
 }
 
 /* ── CSV direct parser — akurat tanpa AI ────────────────────────────────── */
-function parseCSVDirect(csvText, platM) {
+function parseCSVDirect(csvText, platM, acctUsername = '') {
   // Strip BOM UTF-8
   csvText = csvText.replace(/^﻿/, '');
 
@@ -3976,35 +3980,77 @@ function parseCSVDirect(csvText, platM) {
   const headers     = splitRow(lines[headerLineIdx]).map(h => h.toLowerCase().replace(/^﻿/, ''));
   const dataLines   = lines.slice(headerLineIdx + 1);
 
-  // Cari kolom tanggal/bulan
-  const monthColIdx = headers.findIndex(h => {
-    const hc = h.replace(/[^a-z0-9]/g, '');
-    return /^(bulan|month|periode|period|date|tanggal|waktu|time|tgl)/.test(hc);
-  }) ?? -1;
+  // ── Cari kolom tanggal: coba kandidat berurutan, pilih yang bisa diparsing ──
+  // Prioritas: "publish time/date" > "post time/date" > "date" > "tanggal" > kolom pertama
+  const dateCandidateOrder = [
+    /publishtime|publishdate|publishedat|posttime|postdate/,
+    /uploadtime|uploaddate/,
+    /^tanggal|^tgl|^waktu/,
+    /^date$|^datetime$/,
+    /bulan|month|periode|period/,
+  ];
+  let effectiveMonthCol = -1;
+  for (const pattern of dateCandidateOrder) {
+    const idx = headers.findIndex(h => pattern.test(h.replace(/[^a-z0-9]/g, '')));
+    if (idx < 0) continue;
+    // Verifikasi: coba parse nilai dari baris data pertama
+    const sampleVal = dataLines[0] ? splitRow(dataLines[0])[idx] : '';
+    if (parseMonthStr(sampleVal)) { effectiveMonthCol = idx; break; }
+  }
+  // Fallback: cari kolom mana saja yang nilai pertamanya bisa diparsing jadi bulan
+  if (effectiveMonthCol < 0) {
+    for (let i = 0; i < headers.length; i++) {
+      const sampleVal = dataLines[0] ? splitRow(dataLines[0])[i] : '';
+      if (parseMonthStr(sampleVal)) { effectiveMonthCol = i; break; }
+    }
+  }
+  if (effectiveMonthCol < 0) effectiveMonthCol = 0; // last resort
 
-  // Jika tidak ketemu kolom tanggal, coba kolom pertama
-  const effectiveMonthCol = monthColIdx >= 0 ? monthColIdx : 0;
+  // ── Deteksi kolom akun (untuk filter multi-akun) ─────────────────────────
+  const acctColIdx = headers.findIndex(h => {
+    const hc = h.replace(/[^a-z0-9]/g,'');
+    return /accountusername|username|account|akun/.test(hc);
+  });
 
-  // Mapping kolom → field key (exact → label → substring)
+  // ── Mapping kolom → field key ────────────────────────────────────────────
   const fieldMap = {};
   platM.fields.forEach(f => {
     const fKey   = f.key.toLowerCase();
     const fLabel = f.label.toLowerCase().replace(/[^a-z0-9]/g, '');
     let best = -1;
-    // 1. exact match key atau label
-    headers.forEach((h, i) => { const hc = h.replace(/[^a-z0-9]/g,''); if (hc === fKey || hc === fLabel) best = i; });
-    // 2. label contains field key (≥4 chars)
-    if (best < 0 && fKey.length >= 4) headers.forEach((h, i) => { const hc = h.replace(/[^a-z0-9]/g,''); if (hc.includes(fKey)) best = i; });
-    // 3. field key contains cleaned header (≥4 chars)
-    if (best < 0) headers.forEach((h, i) => { const hc = h.replace(/[^a-z0-9]/g,''); if (hc.length >= 4 && fKey.includes(hc)) best = i; });
+    headers.forEach((h, i) => {
+      if (i === effectiveMonthCol || i === acctColIdx) return;
+      const hc = h.replace(/[^a-z0-9]/g,'');
+      // 1. exact key atau label
+      if (hc === fKey || hc === fLabel) { best = i; return; }
+    });
+    if (best < 0) {
+      headers.forEach((h, i) => {
+        if (i === effectiveMonthCol || i === acctColIdx) return;
+        const hc = h.replace(/[^a-z0-9]/g,'');
+        // 2. field key mengandung header (min 4 char) — "totalviews".includes("views")
+        if (hc.length >= 4 && fKey.includes(hc) && best < 0) best = i;
+        // 3. header mengandung field key (min 4 char)
+        if (fKey.length >= 4 && hc.includes(fKey) && best < 0) best = i;
+      });
+    }
     if (best >= 0) fieldMap[best] = f.key;
   });
 
-  // Parse baris data, agregat per bulan (untuk data harian)
+  // ── Agregasi per bulan, dengan filter akun ───────────────────────────────
   const monthMap = {};
+  let skippedRows = 0;
   for (const line of dataLines) {
-    const cols  = splitRow(line);
+    const cols = splitRow(line);
     if (cols.every(c => !c)) continue;
+
+    // Filter akun jika kolom akun ada
+    if (acctColIdx >= 0 && acctUsername) {
+      const rowAcct = (cols[acctColIdx] || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+      const target  = acctUsername.toLowerCase().replace(/[^a-z0-9]/g, '');
+      if (!rowAcct.includes(target) && !target.includes(rowAcct)) { skippedRows++; continue; }
+    }
+
     const month = parseMonthStr(cols[effectiveMonthCol]);
     if (!month) continue;
     if (!monthMap[month]) {
@@ -4017,12 +4063,12 @@ function parseCSVDirect(csvText, platM) {
   }
 
   const results = Object.values(monthMap).sort((a,b) => a.month.localeCompare(b.month));
-
   if (!results.length) {
     const detectedCols = headers.filter(h => h).join(', ');
-    const sampleDate   = dataLines[0] ? splitRow(dataLines[0])[effectiveMonthCol] : '?';
-    return { error: `Tidak ada baris valid ditemukan.\n\nKolom terdeteksi: ${detectedCols || '(tidak ada)'}\nContoh nilai di kolom tanggal: "${sampleDate}"\n\nFormat tanggal yang didukung: YYYY-MM, YYYY-MM-DD, "Jan 2025", "Januari 2025"` };
+    const sampleVal    = dataLines[0] ? splitRow(dataLines[0])[effectiveMonthCol] : '?';
+    return { error: `Tidak ada baris valid.\n\nKolom terdeteksi: ${detectedCols}\nKolom tanggal (col ${effectiveMonthCol}): "${sampleVal}"\nFilter akun: ${acctUsername || 'semua'}\n\nFormat tanggal didukung: MM/DD/YYYY, YYYY-MM-DD, YYYY-MM, "Jan 2025"` };
   }
+  if (skippedRows > 0) results._skipped = skippedRows;
   return results;
 }
 
@@ -4048,20 +4094,29 @@ async function importStatFromFile(input) {
 
     /* ── CSV / TSV: parse langsung, tidak perlu AI ── */
     if (isCSV || name.endsWith('.tsv')) {
-      const text   = await file.text();
-      const result = parseCSVDirect(text, platM);
+      const text = await file.text();
+      // Map acctId ke username yang mungkin ada di CSV
+      const ACCT_USERNAME_MAP = {
+        'penjaga-harapan': 'penjaga_harapan',
+        '33-official':     '33official',
+        'jaga-asa':        'jagaasa',
+      };
+      const acctUsername = ACCT_USERNAME_MAP[acctId] || '';
+      const result = parseCSVDirect(text, platM, acctUsername);
       // Error object → tampilkan pesan detail
       if (!Array.isArray(result)) {
         toast(result?.error || 'CSV tidak bisa diparsing.', 'error');
         return;
       }
-      const rows = result;
+      const rows    = result;
+      const skipped = result._skipped || 0;
+      const infoMsg = skipped > 0 ? ` (${skipped} baris akun lain diabaikan)` : '';
       if (rows.length === 1) {
         await openStatInputForImport(acctId, platId, rows[0].month, rows[0]);
-        toast(`✅ Data ${fmtMonth(rows[0].month)} berhasil dibaca dari CSV!`, 'success');
+        toast(`✅ Data ${fmtMonth(rows[0].month)} berhasil dibaca dari CSV!${infoMsg}`, 'success');
       } else {
         await importMultiRowsDirectly(acctId, platId, rows);
-        toast(`✅ ${rows.length} bulan data berhasil diimpor dari CSV!`, 'success');
+        toast(`✅ ${rows.length} bulan data berhasil diimpor dari CSV!${infoMsg}`, 'success');
         renderStatChart();
       }
       return;
