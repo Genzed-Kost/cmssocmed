@@ -1212,15 +1212,15 @@ function saveWaToken(t) { if (t) localStorage.setItem(WA_TOKEN_KEY, t); else loc
 
 /* Pesan WA dinamis berdasarkan STATUS konten saat creator dipilih */
 const WA_STATUS_CTA = {
-  'Plan':      { emoji: '📋', cta: 'Konten sudah masuk perencanaan. Yuk mulai siapkan referensi dan materinya ya!' },
-  'Review':    { emoji: '🔍', cta: 'Konten kamu sedang dalam tahap review. Harap standby untuk feedback dari tim.' },
-  'Revisi':    { emoji: '✏️', cta: 'Konten perlu direvisi. Cek catatan di CMS dan segera lakukan perbaikan ya.' },
-  'Preview':   { emoji: '🖼️', cta: 'Konten sudah sampai tahap preview. Tunggu persetujuan akhir dari tim.' },
-  'ACC':       { emoji: '✅', cta: 'Selamat! Konten kamu sudah di-ACC dan siap ditayangkan sesuai jadwal.' },
-  'Done':      { emoji: '🎉', cta: 'Konten sudah selesai — kerja bagus! Tinggal menunggu jadwal publish.' },
-  'Published': { emoji: '🚀', cta: 'Konten kamu sudah LIVE! Yuk pantau performa dan engagement di platform ya.' },
-  'Hold':      { emoji: '⏸️', cta: 'Konten sedang di-hold sementara. Akan ada info lanjutan dari tim secepatnya.' },
-  'Drop':      { emoji: '❌', cta: 'Konten ini tidak dilanjutkan. Terima kasih atas kontribusinya ya.' },
+  'Plan':      { emoji: '📋', cta: 'Konten sudah masuk perencanaan. Yuk mulai siapkan materinya!' },
+  'Review':    { emoji: '🔍', cta: 'Konten menunggu di-review. Mohon segera periksa dan berikan masukan.' },
+  'Revisi':    { emoji: '✏️', cta: 'Konten perlu direvisi. Cek catatan revisi dan lakukan perbaikan segera.' },
+  'Preview':   { emoji: '🖼️', cta: 'Konten sudah di tahap preview. Mohon periksa dan berikan persetujuan.' },
+  'ACC':       { emoji: '✅', cta: 'Konten sudah di-ACC dan siap tayang sesuai jadwal!' },
+  'Done':      { emoji: '🎉', cta: 'Konten sudah selesai. Pastikan semua tahapan sudah terpenuhi.' },
+  'Published': { emoji: '🚀', cta: 'Konten telah dipublikasikan. Pantau performa di CMS.' },
+  'Hold':      { emoji: '⏸️', cta: 'Konten sedang ditahan sementara. Cek CMS untuk info lebih lanjut.' },
+  'Drop':      { emoji: '❌', cta: 'Konten ini dibatalkan. Cek CMS untuk informasi selengkapnya.' },
 };
 
 function waStatusMsg(name, title, theme, status, date, acct, url) {
@@ -1252,29 +1252,6 @@ async function sendWaNotif(phone, message) {
     if (!res.status) console.warn('WA notif failed:', res);
     else console.log('WA sent to', target);
   } catch (e) { console.warn('WA notif error:', e.message); }
-}
-
-/* Buka WhatsApp manual (tanpa Fonnte) — langsung ke wa.me link */
-function openPlannerWa(id) {
-  const c = state.contents.find(x => x.id === id);
-  if (!c) return;
-  const users = state.settings?.users || [];
-  const crArr = Array.isArray(c.creator) ? c.creator : (c.creator ? [c.creator] : []);
-  let phone, name;
-  for (const cr of crArr) {
-    const u = users.find(u => getUserName(u) === cr);
-    if (u?.phone) { phone = u.phone; name = cr; break; }
-  }
-  if (!phone) { toast('Creator tidak memiliki nomor WA', 'error'); return; }
-  const acctObj = ACCOUNTS.find(a => a.id === c.account);
-  const msg = waStatusMsg(
-    name, c.title || '—', c.theme || '—', c.status || 'Plan',
-    fmtDate(c.publishDate), acctObj?.name || c.account || '—',
-    window.location.origin
-  );
-  const clean  = String(phone).replace(/\D/g, '');
-  const target = clean.startsWith('0') ? '62' + clean.slice(1) : clean;
-  window.open(`https://wa.me/${target}?text=${encodeURIComponent(msg)}`, '_blank');
 }
 
 async function notifyCreatorAssigned(content, oldCreator) {
@@ -2047,7 +2024,7 @@ function dashContentCard(c, mode = 'upcoming') {
   const statuses = STATUSES;
 
   // ── Owner row (createdBy) ──────────────────────────────────────
-  const ownerRow = `<div class="dcc-meta-row${!c.createdBy ? ' dcc-empty' : ''}">
+  const ownerRow = `<div class="dcc-meta-row">
     <span class="dcc-label">OWNER</span>
     <span class="dcc-val dcc-owner-val">${esc(c.createdBy || '—')}</span>
   </div>`;
@@ -2091,7 +2068,7 @@ function dashContentCard(c, mode = 'upcoming') {
     ${acct ? `<div class="dcc-owner-tag" style="background:${acct.color}18;color:${acct.color};border-color:${acct.color}30">${acct.name}</div>` : ''}
     <div class="dcc-title">${esc(c.title||'—')}</div>
     ${outputIcon}
-    <div class="dcc-meta-row${!c.theme ? ' dcc-empty' : ''}">
+    <div class="dcc-meta-row">
       <span class="dcc-label">TEMA</span>
       <span class="dcc-val">${esc(c.theme||'—')}</span>
     </div>
@@ -2107,7 +2084,7 @@ function dashContentCard(c, mode = 'upcoming') {
         </select>`;
       })()}
     </div>
-    <div class="dcc-meta-row${!plats ? ' dcc-empty' : ''}">
+    <div class="dcc-meta-row">
       <span class="dcc-label">PLATFORM</span>
       <div style="display:flex;gap:6px;align-items:center">${plats||'<span class="dcc-val">—</span>'}</div>
     </div>
@@ -2367,16 +2344,10 @@ function renderPlanner(page) {
   const slice = rows.slice((state.planPage - 1) * PAGE_SIZE, state.planPage * PAGE_SIZE);
   const admin  = isAdmin();
 
-  const tbody  = $('planBody');
-  const users  = state.settings?.users || [];
+  const tbody = $('planBody');
   tbody.innerHTML = slice.length ? slice.map(c => {
     const plats = (c.platforms||[]).map(p => `<span class="plat-pill plat-${p}">${p.charAt(0).toUpperCase()}</span>`).join('');
     const acct  = ACCOUNTS.find(a => a.id === c.account);
-    const crArr = Array.isArray(c.creator) ? c.creator : (c.creator ? [c.creator] : []);
-    const hasPhone = crArr.some(cr => users.find(u => getUserName(u) === cr)?.phone);
-    const waBtn = hasPhone
-      ? `<button class="btn-xs" style="color:#16a34a;border-color:#bbf7d0;padding:3px 6px" onclick="openPlannerWa('${c.id}')" title="Kirim WA manual">${WA_SVG}</button>`
-      : '';
     return `<tr>
       <td><span class="badge ${STATUS_CLASS[c.status]||'badge-ide'}">${esc(c.status)}</span></td>
       <td>${fmtDate(c.publishDate)}</td>
@@ -2387,14 +2358,9 @@ function renderPlanner(page) {
       <td>${esc(c.theme||'—')}</td>
       <td><div class="plat-pills">${plats||'—'}</div></td>
       <td>${esc(Array.isArray(c.creator) ? c.creator.join(', ') : (c.creator||'—'))}</td>
-      <td><div style="display:flex;gap:5px;align-items:center">
-        <button class="btn-xs" style="padding:4px 6px" onclick="editContent('${c.id}')" title="Edit">
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
-        </button>
-        ${waBtn}
-        ${admin ? `<button class="btn-xs" style="padding:4px 6px;border-color:#fca5a5;color:var(--red)" onclick="deleteContent('${c.id}')" title="Hapus">
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4a1 1 0 011-1h4a1 1 0 011 1v2"/></svg>
-        </button>` : ''}
+      <td><div style="display:flex;gap:5px">
+        <button class="btn-xs" onclick="editContent('${c.id}')">Edit</button>
+        ${admin ? `<button class="btn-xs" style="border-color:#fca5a5;color:var(--red)" onclick="deleteContent('${c.id}')">Hapus</button>` : ''}
       </div></td>
     </tr>`;
   }).join('') : '<tr><td colspan="7" class="empty-cell">Belum ada konten</td></tr>';
@@ -3581,7 +3547,7 @@ function renderUserList() {
         <span class="user-name">${esc(name)}</span>
         ${phone ? `<span class="user-phone">📱 ${esc(phone)}</span>` : '<span class="user-phone muted">— no WA —</span>'}
       </div>
-      <button class="user-pw-btn ${hasPw ? 'has-pw' : 'no-pw'}" onclick="editUser('${esc(name)}')" title="${hasPw ? 'Password diatur, klik ubah' : 'Belum ada password, klik untuk set'}">${hasPw ? '🔒' : '🔓'}</button>
+      <span title="${hasPw ? 'Password diatur' : 'Belum ada password'}" style="font-size:.75rem;cursor:default">${hasPw ? '🔒' : '🔓'}</span>
       ${roleBadge}
       <button class="user-edit" onclick="editUser('${esc(name)}')" title="Edit">✏</button>
       <button class="user-del"  onclick="deleteUser('${esc(name)}')" title="Hapus">×</button>
@@ -3589,17 +3555,9 @@ function renderUserList() {
   }).join('');
 }
 
-function toggleCustomRole(sel, inputId) {
-  const inp = document.getElementById(inputId);
-  if (!inp) return;
-  inp.style.display = sel.value === '__other__' ? 'block' : 'none';
-  if (sel.value === '__other__') { inp.value = ''; inp.focus(); }
-}
-
 async function addUser() {
   const name     = gv('userNameInput').trim();
-  let role   = gv('userRoleInput').trim();
-  if (role === '__other__') role = (gv('userRoleCustomInput') || '').trim();
+  const role     = gv('userRoleInput').trim();   // opsional — boleh kosong
   const phone    = gv('userPhoneInput').trim();
   const password = gv('userPasswordInput').trim();
   if (!name) { toast('Nama tidak boleh kosong', 'error'); return; }
@@ -3644,16 +3602,7 @@ function editUser(oldName) {
   if (!u) return;
   sv('editUserOldName',      oldName);
   sv('editUserName',         getUserName(u));
-  const _roles = ['','Creator','Writer','Designer','Videographer','Editor','Publisher','Producer','Planner','Leader','Ketua','Administrator'];
-  const _cr = getUserRole(u);
-  if (_roles.includes(_cr)) {
-    sv('editUserRole', _cr);
-    const _ci = document.getElementById('editUserRoleCustom'); if (_ci) _ci.style.display = 'none';
-  } else {
-    sv('editUserRole', '__other__');
-    const _ci2 = document.getElementById('editUserRoleCustom');
-    if (_ci2) { _ci2.value = _cr; _ci2.style.display = 'block'; }
-  }
+  sv('editUserRole',         getUserRole(u));
   sv('editUserPhone',        u.phone || '');
   sv('editUserNewPassword',  '');
   $('editUserModal')?.classList.remove('hidden');
@@ -3663,8 +3612,7 @@ function editUser(oldName) {
 async function saveEditUser() {
   const oldName = gv('editUserOldName');
   const newName = gv('editUserName').trim();
-  let newRole = gv('editUserRole').trim();
-  if (newRole === '__other__') newRole = (gv('editUserRoleCustom') || '').trim();
+  const newRole = gv('editUserRole').trim();   // opsional — boleh kosong
   if (!newName) { toast('Nama tidak boleh kosong', 'error'); return; }
 
   const settings = state.settings;
@@ -3779,133 +3727,10 @@ function getCurrentYM() {
   return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;
 }
 
-/* ── Period dropdown → set hidden month inputs ───────────────────────────── */
-function onStatPeriodChange(val) {
-  const fromInp = $('statFromMonth');
-  const toInp   = $('statToMonth');
-  const sep     = $('statRangeSep');
-  const isCustom = val === 'custom';
-  if (fromInp) fromInp.classList.toggle('hidden', !isCustom);
-  if (toInp)   toInp.classList.toggle('hidden', !isCustom);
-  if (sep)     sep.classList.toggle('hidden', !isCustom);
-  if (isCustom) return; // month inputs drive the filter directly
-
-  const now = new Date();
-  const padM = m => String(m + 1).padStart(2, '0');
-  const ym = (y, m) => `${y}-${padM(m)}`;
-
-  let from = '', to = '';
-  if (val === '1') {
-    from = to = ym(now.getFullYear(), now.getMonth());
-  } else if (val === 'year') {
-    from = `${now.getFullYear()}-01`;
-    to   = ym(now.getFullYear(), now.getMonth());
-  } else if (val === 'all') {
-    from = ''; to = '';
-  } else {
-    // numeric = N months back
-    const n  = parseInt(val, 10);
-    const d0 = new Date(now.getFullYear(), now.getMonth() - n + 1, 1);
-    from = ym(d0.getFullYear(), d0.getMonth());
-    to   = ym(now.getFullYear(), now.getMonth());
-  }
-  if (fromInp) fromInp.value = from;
-  if (toInp)   toInp.value   = to;
-  renderStatChart();
-}
-
-/* ── Import file → Gemini Vision → auto-fill Data Bulanan ───────────────── */
-async function importStatFromFile(input) {
-  const file = input?.files?.[0];
-  if (!file) return;
-  input.value = ''; // reset agar bisa upload file yang sama lagi
-
-  const geminiKey = getGeminiKey();
-  if (!geminiKey) { toast('Isi Gemini API Key di API Setup terlebih dahulu', 'error'); return; }
-
-  const platId = state.statActivePlat || 'youtube';
-  const platM  = PLATFORM_FIELDS[platId];
-  const acctId = state.statActiveAcct;
-
-  // Show loader
-  const btn = $('btnStatImportFile');
-  if (btn) { btn.textContent = '⏳ Membaca…'; btn.disabled = true; }
-
-  try {
-    let parts = [];
-    const mimeType = file.type || 'image/png';
-    const isImage = mimeType.startsWith('image/');
-
-    if (isImage) {
-      const base64 = await new Promise((res, rej) => {
-        const r = new FileReader();
-        r.onload  = e => res(e.target.result.split(',')[1]);
-        r.onerror = rej;
-        r.readAsDataURL(file);
-      });
-      parts = [
-        { inlineData: { mimeType, data: base64 } },
-        { text: buildImportPrompt(platM) }
-      ];
-    } else {
-      // PDF / CSV / teks — baca sebagai teks
-      const text = await file.text().catch(() => '');
-      if (!text) { toast('Format file tidak didukung. Gunakan gambar/CSV/teks.', 'error'); return; }
-      parts = [{ text: buildImportPrompt(platM) + '\n\nData:\n' + text.slice(0, 8000) }];
-    }
-
-    const model = GEMINI_MODELS[0] || 'gemini-2.5-flash';
-    const url   = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${geminiKey}`;
-    const resp  = await fetch(url, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ contents: [{ parts }] })
-    });
-    const json = await resp.json();
-    if (!resp.ok) throw new Error(json.error?.message || 'Gemini error');
-
-    const raw  = json.candidates?.[0]?.content?.parts?.[0]?.text || '';
-    const match = raw.match(/```(?:json)?\s*([\s\S]*?)```/) || raw.match(/(\{[\s\S]*\})/);
-    if (!match) throw new Error('Tidak dapat menemukan JSON di respons AI');
-    const parsed = JSON.parse(match[1].trim());
-
-    // Fill the stat input form
-    const monthVal = parsed.month || getCurrentYM();
-    await openStatInputForImport(acctId, platId, monthVal, parsed);
-    toast(`✅ Data ${fmtMonth(monthVal)} berhasil dibaca dari file!`, 'success');
-  } catch (e) {
-    toast('Gagal baca file: ' + e.message, 'error');
-  } finally {
-    if (btn) { btn.innerHTML = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="3" x2="12" y2="15"/><polyline points="17 8 12 3 7 8"/></svg> Import'; btn.disabled = false; }
-  }
-}
-
-function buildImportPrompt(platM) {
-  const fieldList = platM.fields.map(f => `"${f.key}" (${f.label})`).join(', ');
-  return `Kamu adalah asisten ekstraksi data analytics media sosial.
-Ekstrak data dari gambar/dokumen ini untuk platform ${platM.label}.
-Kembalikan HANYA JSON valid dengan field berikut (gunakan 0 jika data tidak ada):
-{ "month": "YYYY-MM", ${platM.fields.map(f => `"${f.key}": <number>`).join(', ')} }
-Field yang tersedia: ${fieldList}.
-Untuk ER%, kembalikan sebagai desimal (misal 3.42 bukan "3,42%").
-Untuk bulan, format YYYY-MM (misal 2025-10).`;
-}
-
-async function openStatInputForImport(acctId, platId, monthVal, data) {
-  // Buka form input dan isi dengan data hasil AI
-  renderStatInputFields(acctId, platId, data);
-  const card = $('statInputCard');
-  if (card) card.classList.remove('hidden');
-  const monthInp = $('statMonth');
-  if (monthInp) monthInp.value = monthVal;
-  card?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-}
-
 function renderStatistics() {
   renderStatAcctBar();
   renderStatPlatBar();
-  // Init period dropdown ke 12 bulan (default)
-  onStatPeriodChange($('statPeriodSel')?.value || '12');
+  renderStatChart();
   renderStatGoodBad(state.statActiveAcct);
   initStatDownloadMonth();
 }
@@ -5574,10 +5399,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   window.editContent    = editContent;
   window.deleteContent  = deleteContent;
   window.selectUrlAcct  = selectUrlAcct;
-  window.renderPlanner       = renderPlanner;
-  window.openPlannerWa       = openPlannerWa;
-  window.onStatPeriodChange   = onStatPeriodChange;
-  window.importStatFromFile   = importStatFromFile;
+  window.renderPlanner  = renderPlanner;
   window.deleteUser     = deleteUser;
   window.switchStatAcct     = switchStatAcct;
   window.switchStatPlat     = switchStatPlat;
