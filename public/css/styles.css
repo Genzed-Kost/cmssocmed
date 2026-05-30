@@ -1657,17 +1657,22 @@ ul { list-style: none; }
   display: flex; flex-direction: column; align-items: center; gap: 12px;
   color: var(--muted);
 }
+/* Summary row — sekarang inline di dalam header card */
+.stat-header-row--summary { padding: 10px 0 4px; }
 .stat-summary-row {
-  display: grid; grid-template-columns: repeat(auto-fill, minmax(150px,1fr));
-  gap: 12px; margin-bottom: 20px;
+  display: flex; flex-wrap: wrap; gap: 0;
+  margin-bottom: 0;
 }
 .stat-summary-card {
-  background: var(--surface); border: 1px solid var(--bd);
-  border-radius: var(--radius); padding: 14px 16px;
+  flex: 1 1 0; min-width: 110px;
+  padding: 8px 14px;
+  border-right: 1px solid var(--bd);
+  background: transparent;
 }
-.stat-sum-label { font-size: .68rem; font-weight: 600; color: var(--muted-lt); text-transform: uppercase; letter-spacing: .06em; margin-bottom: 4px; }
-.stat-sum-val   { font-size: 1.4rem; font-weight: 800; line-height: 1; margin-bottom: 4px; }
-.stat-sum-period{ font-size: .7rem; color: var(--muted); }
+.stat-summary-card:last-child { border-right: none; }
+.stat-sum-label { font-size: .63rem; font-weight: 600; color: var(--muted-lt); text-transform: uppercase; letter-spacing: .06em; margin-bottom: 2px; }
+.stat-sum-val   { font-size: 1.15rem; font-weight: 800; line-height: 1.1; margin-bottom: 2px; }
+.stat-sum-period{ font-size: .65rem; color: var(--muted); }
 
 .stat-table-scroll { overflow-x: auto; border-radius: var(--radius); border: 1px solid var(--bd); }
 .stat-data-table {

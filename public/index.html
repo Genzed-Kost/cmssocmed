@@ -581,15 +581,31 @@
             <div class="stat-plat-bar" id="statPlatBar"></div>
           </div>
 
-          <!-- Row 3: Date range + actions -->
+          <!-- Row 3: Period dropdown + actions -->
           <div class="stat-header-row stat-header-row--actions">
             <div class="stat-range-group">
               <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:var(--muted);flex-shrink:0"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-              <input type="month" id="statFromMonth" class="inp-sm stat-month-inp" title="Dari bulan" />
-              <span class="stat-range-sep">–</span>
-              <input type="month" id="statToMonth" class="inp-sm stat-month-inp" title="Sampai bulan" />
+              <select id="statPeriodSel" class="inp-sm" style="min-width:150px" onchange="onStatPeriodChange(this.value)">
+                <option value="12">12 Bulan Terakhir</option>
+                <option value="6">6 Bulan Terakhir</option>
+                <option value="3">3 Bulan Terakhir</option>
+                <option value="1">Bulan Ini</option>
+                <option value="year">Tahun Ini</option>
+                <option value="all">Semua Data</option>
+                <option value="custom">⚙ Kustom…</option>
+              </select>
+              <!-- Hidden month inputs, diisi oleh dropdown -->
+              <input type="month" id="statFromMonth" class="inp-sm stat-month-inp hidden" title="Dari bulan" onchange="renderStatChart()" />
+              <span id="statRangeSep" class="stat-range-sep hidden">–</span>
+              <input type="month" id="statToMonth" class="inp-sm stat-month-inp hidden" title="Sampai bulan" onchange="renderStatChart()" />
             </div>
             <div class="stat-action-group">
+              <!-- Import file -->
+              <input type="file" id="statImportFile" accept="image/*,.pdf,.xlsx,.csv" style="display:none" onchange="importStatFromFile(this)" />
+              <button class="btn-sm" id="btnStatImportFile" onclick="$('statImportFile').click()" title="Import data dari gambar/dokumen">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="3" x2="12" y2="15"/><polyline points="17 8 12 3 7 8"/></svg>
+                Import
+              </button>
               <div class="stat-dl-dropdown" id="statDlDropWrap">
                 <button class="btn-sm" id="btnDlDropdown">
                   <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
@@ -606,10 +622,13 @@
             </div>
           </div>
 
-        </div><!-- /stat-header-card -->
+          <!-- Row 4: Summary stats inline -->
+          <div class="stat-header-divider"></div>
+          <div class="stat-header-row stat-header-row--summary">
+            <div id="statSummaryWrap" style="width:100%"></div>
+          </div>
 
-        <!-- Summary cards (latest/selected month) -->
-        <div id="statSummaryWrap"></div>
+        </div><!-- /stat-header-card -->
 
         <!-- Chart container -->
         <div class="stat-chart-wrap" id="statChartWrap">
@@ -621,6 +640,19 @@
 
         <!-- Good/Bad content section -->
         <div id="statGoodBadWrap"></div>
+
+        <!-- Import data historis (admin only) -->
+        <div id="statImportCard" class="card hidden" style="margin-top:16px;border:1.5px dashed #cbd5e1">
+          <div class="card-head">
+            <span class="card-title" style="font-size:.82rem;color:var(--muted)">🗄️ Import Data Historis</span>
+          </div>
+          <div style="padding:0 4px 8px;font-size:.78rem;color:var(--muted);line-height:1.6">
+            Import data YouTube, TikTok, Facebook &amp; Instagram Penjaga Harapan (Mei 2025 – Mei 2026). Data yang sudah ada <strong>tidak akan ditimpa</strong>.
+          </div>
+          <div class="form-actions-row">
+            <button class="btn-sm blue" id="btnImportSeedData" onclick="importSeedAnalytics()">📥 Import Data Historis PH</button>
+          </div>
+        </div>
 
         <!-- Input form (collapsible, admin only) -->
         <div class="card hidden" style="margin-top:20px" id="statInputCard">

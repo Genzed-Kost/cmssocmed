@@ -1212,15 +1212,15 @@ function saveWaToken(t) { if (t) localStorage.setItem(WA_TOKEN_KEY, t); else loc
 
 /* Pesan WA dinamis berdasarkan STATUS konten saat creator dipilih */
 const WA_STATUS_CTA = {
-  'Plan':      { emoji: '📋', cta: 'Konten sudah masuk perencanaan. Yuk mulai siapkan materinya!' },
-  'Review':    { emoji: '🔍', cta: 'Konten menunggu di-review. Mohon segera periksa dan berikan masukan.' },
-  'Revisi':    { emoji: '✏️', cta: 'Konten perlu direvisi. Cek catatan revisi dan lakukan perbaikan segera.' },
-  'Preview':   { emoji: '🖼️', cta: 'Konten sudah di tahap preview. Mohon periksa dan berikan persetujuan.' },
-  'ACC':       { emoji: '✅', cta: 'Konten sudah di-ACC dan siap tayang sesuai jadwal!' },
-  'Done':      { emoji: '🎉', cta: 'Konten sudah selesai. Pastikan semua tahapan sudah terpenuhi.' },
-  'Published': { emoji: '🚀', cta: 'Konten telah dipublikasikan. Pantau performa di CMS.' },
-  'Hold':      { emoji: '⏸️', cta: 'Konten sedang ditahan sementara. Cek CMS untuk info lebih lanjut.' },
-  'Drop':      { emoji: '❌', cta: 'Konten ini dibatalkan. Cek CMS untuk informasi selengkapnya.' },
+  'Plan':      { emoji: '📋', cta: 'Konten sudah masuk perencanaan. Yuk mulai siapkan referensi dan materinya ya!' },
+  'Review':    { emoji: '🔍', cta: 'Konten kamu sedang dalam tahap review. Harap standby untuk feedback dari tim.' },
+  'Revisi':    { emoji: '✏️', cta: 'Konten perlu direvisi. Cek catatan di CMS dan segera lakukan perbaikan ya.' },
+  'Preview':   { emoji: '🖼️', cta: 'Konten sudah sampai tahap preview. Tunggu persetujuan akhir dari tim.' },
+  'ACC':       { emoji: '✅', cta: 'Selamat! Konten kamu sudah di-ACC dan siap ditayangkan sesuai jadwal.' },
+  'Done':      { emoji: '🎉', cta: 'Konten sudah selesai — kerja bagus! Tinggal menunggu jadwal publish.' },
+  'Published': { emoji: '🚀', cta: 'Konten kamu sudah LIVE! Yuk pantau performa dan engagement di platform ya.' },
+  'Hold':      { emoji: '⏸️', cta: 'Konten sedang di-hold sementara. Akan ada info lanjutan dari tim secepatnya.' },
+  'Drop':      { emoji: '❌', cta: 'Konten ini tidak dilanjutkan. Terima kasih atas kontribusinya ya.' },
 };
 
 function waStatusMsg(name, title, theme, status, date, acct, url) {
@@ -1252,6 +1252,29 @@ async function sendWaNotif(phone, message) {
     if (!res.status) console.warn('WA notif failed:', res);
     else console.log('WA sent to', target);
   } catch (e) { console.warn('WA notif error:', e.message); }
+}
+
+/* Buka WhatsApp manual (tanpa Fonnte) — langsung ke wa.me link */
+function openPlannerWa(id) {
+  const c = state.contents.find(x => x.id === id);
+  if (!c) return;
+  const users = state.settings?.users || [];
+  const crArr = Array.isArray(c.creator) ? c.creator : (c.creator ? [c.creator] : []);
+  let phone, name;
+  for (const cr of crArr) {
+    const u = users.find(u => getUserName(u) === cr);
+    if (u?.phone) { phone = u.phone; name = cr; break; }
+  }
+  if (!phone) { toast('Creator tidak memiliki nomor WA', 'error'); return; }
+  const acctObj = ACCOUNTS.find(a => a.id === c.account);
+  const msg = waStatusMsg(
+    name, c.title || '—', c.theme || '—', c.status || 'Plan',
+    fmtDate(c.publishDate), acctObj?.name || c.account || '—',
+    window.location.origin
+  );
+  const clean  = String(phone).replace(/\D/g, '');
+  const target = clean.startsWith('0') ? '62' + clean.slice(1) : clean;
+  window.open(`https://wa.me/${target}?text=${encodeURIComponent(msg)}`, '_blank');
 }
 
 async function notifyCreatorAssigned(content, oldCreator) {
@@ -2344,10 +2367,16 @@ function renderPlanner(page) {
   const slice = rows.slice((state.planPage - 1) * PAGE_SIZE, state.planPage * PAGE_SIZE);
   const admin  = isAdmin();
 
-  const tbody = $('planBody');
+  const tbody  = $('planBody');
+  const users  = state.settings?.users || [];
   tbody.innerHTML = slice.length ? slice.map(c => {
     const plats = (c.platforms||[]).map(p => `<span class="plat-pill plat-${p}">${p.charAt(0).toUpperCase()}</span>`).join('');
     const acct  = ACCOUNTS.find(a => a.id === c.account);
+    const crArr = Array.isArray(c.creator) ? c.creator : (c.creator ? [c.creator] : []);
+    const hasPhone = crArr.some(cr => users.find(u => getUserName(u) === cr)?.phone);
+    const waBtn = hasPhone
+      ? `<button class="btn-xs" style="color:#16a34a;border-color:#bbf7d0;padding:3px 6px" onclick="openPlannerWa('${c.id}')" title="Kirim WA manual">${WA_SVG}</button>`
+      : '';
     return `<tr>
       <td><span class="badge ${STATUS_CLASS[c.status]||'badge-ide'}">${esc(c.status)}</span></td>
       <td>${fmtDate(c.publishDate)}</td>
@@ -2358,9 +2387,14 @@ function renderPlanner(page) {
       <td>${esc(c.theme||'—')}</td>
       <td><div class="plat-pills">${plats||'—'}</div></td>
       <td>${esc(Array.isArray(c.creator) ? c.creator.join(', ') : (c.creator||'—'))}</td>
-      <td><div style="display:flex;gap:5px">
-        <button class="btn-xs" onclick="editContent('${c.id}')">Edit</button>
-        ${admin ? `<button class="btn-xs" style="border-color:#fca5a5;color:var(--red)" onclick="deleteContent('${c.id}')">Hapus</button>` : ''}
+      <td><div style="display:flex;gap:5px;align-items:center">
+        <button class="btn-xs" style="padding:4px 6px" onclick="editContent('${c.id}')" title="Edit">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+        </button>
+        ${waBtn}
+        ${admin ? `<button class="btn-xs" style="padding:4px 6px;border-color:#fca5a5;color:var(--red)" onclick="deleteContent('${c.id}')" title="Hapus">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4a1 1 0 011-1h4a1 1 0 011 1v2"/></svg>
+        </button>` : ''}
       </div></td>
     </tr>`;
   }).join('') : '<tr><td colspan="7" class="empty-cell">Belum ada konten</td></tr>';
@@ -3745,10 +3779,217 @@ function getCurrentYM() {
   return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;
 }
 
+/* ── Data historis Penjaga Harapan (Mei 2025 – Mei 2026) ─────────────────── */
+const PH_ANALYTICS_SEED = {
+  youtube: [
+    { month:'2025-05', jmlVideo:5,  totalViews:21453,    uniqueViewers:0, subsEOM:0, subsGained:251,   totalLikes:137,    totalComments:25,   totalEngagement:162,    erPct:0.76, watchHours:190,    impressions:14074,     adImpressions:1538,    avgViewsPerVideo:4291,  peakViews:10498   },
+    { month:'2025-06', jmlVideo:10, totalViews:71946,    uniqueViewers:0, subsEOM:0, subsGained:895,   totalLikes:922,    totalComments:135,  totalEngagement:1057,   erPct:1.47, watchHours:3356,   impressions:267829,    adImpressions:2028,    avgViewsPerVideo:7195,  peakViews:18694   },
+    { month:'2025-07', jmlVideo:5,  totalViews:24932,    uniqueViewers:0, subsEOM:0, subsGained:425,   totalLikes:359,    totalComments:152,  totalEngagement:511,    erPct:2.05, watchHours:1248,   impressions:124750,    adImpressions:2242,    avgViewsPerVideo:4986,  peakViews:8899    },
+    { month:'2025-08', jmlVideo:12, totalViews:31792,    uniqueViewers:0, subsEOM:0, subsGained:123,   totalLikes:427,    totalComments:338,  totalEngagement:765,    erPct:2.41, watchHours:818,    impressions:130278,    adImpressions:10093,   avgViewsPerVideo:2649,  peakViews:7091    },
+    { month:'2025-09', jmlVideo:13, totalViews:68829,    uniqueViewers:0, subsEOM:0, subsGained:355,   totalLikes:984,    totalComments:642,  totalEngagement:1626,   erPct:2.36, watchHours:5164,   impressions:426399,    adImpressions:20929,   avgViewsPerVideo:5295,  peakViews:35412   },
+    { month:'2025-10', jmlVideo:84, totalViews:2811283,  uniqueViewers:0, subsEOM:0, subsGained:29467, totalLikes:46602,  totalComments:9315, totalEngagement:55917,  erPct:1.99, watchHours:391521, impressions:29781830,  adImpressions:3774383, avgViewsPerVideo:33468, peakViews:2004835 },
+    { month:'2025-11', jmlVideo:65, totalViews:448829,   uniqueViewers:0, subsEOM:0, subsGained:1502,  totalLikes:8925,   totalComments:4976, totalEngagement:13901,  erPct:3.10, watchHours:16529,  impressions:1143023,   adImpressions:148478,  avgViewsPerVideo:6905,  peakViews:68754   },
+    { month:'2025-12', jmlVideo:97, totalViews:1038019,  uniqueViewers:0, subsEOM:0, subsGained:1285,  totalLikes:13821,  totalComments:5203, totalEngagement:19024,  erPct:1.83, watchHours:14187,  impressions:789811,    adImpressions:114436,  avgViewsPerVideo:10701, peakViews:139952  },
+    { month:'2026-01', jmlVideo:68, totalViews:493283,   uniqueViewers:0, subsEOM:0, subsGained:545,   totalLikes:8906,   totalComments:5584, totalEngagement:14490,  erPct:2.94, watchHours:4270,   impressions:157351,    adImpressions:33360,   avgViewsPerVideo:7254,  peakViews:86716   },
+    { month:'2026-02', jmlVideo:43, totalViews:692332,   uniqueViewers:0, subsEOM:0, subsGained:1010,  totalLikes:6979,   totalComments:4624, totalEngagement:11603,  erPct:1.68, watchHours:24817,  impressions:1636766,   adImpressions:193804,  avgViewsPerVideo:16101, peakViews:147914  },
+    { month:'2026-03', jmlVideo:49, totalViews:690825,   uniqueViewers:0, subsEOM:0, subsGained:411,   totalLikes:6856,   totalComments:5854, totalEngagement:12710,  erPct:1.84, watchHours:6106,   impressions:222647,    adImpressions:49118,   avgViewsPerVideo:14098, peakViews:69575   },
+    { month:'2026-04', jmlVideo:26, totalViews:279597,   uniqueViewers:0, subsEOM:0, subsGained:163,   totalLikes:1121,   totalComments:290,  totalEngagement:1411,   erPct:0.50, watchHours:4212,   impressions:225165,    adImpressions:23977,   avgViewsPerVideo:10754, peakViews:48143   },
+    { month:'2026-05', jmlVideo:23, totalViews:192697,   uniqueViewers:0, subsEOM:0, subsGained:123,   totalLikes:974,    totalComments:83,   totalEngagement:1057,   erPct:0.55, watchHours:1384,   impressions:67681,     adImpressions:5305,    avgViewsPerVideo:8378,  peakViews:42253   },
+  ],
+  tiktok: [
+    { month:'2025-05', totalVideoViews:558467,   profileViews:2762,  followersEOM:34016, followersGained:384,   totalViewers:459157,  newViewers:164981,  returningViewers:294176, totalLikes:17886,  totalComments:609,   totalShares:615,  totalEngagement:19110,  erPct:3.42 },
+    { month:'2025-06', totalVideoViews:7282312,  profileViews:13811, followersEOM:7090,  followersGained:6824,  totalViewers:6503119, newViewers:5868632, returningViewers:634487, totalLikes:225802, totalComments:8304,  totalShares:5049, totalEngagement:239155, erPct:3.28 },
+    { month:'2025-07', totalVideoViews:2480390,  profileViews:25866, followersEOM:10228, followersGained:3119,  totalViewers:2040718, newViewers:1463850, returningViewers:576868, totalLikes:54063,  totalComments:5796,  totalShares:1768, totalEngagement:61627,  erPct:2.48 },
+    { month:'2025-08', totalVideoViews:2041908,  profileViews:6711,  followersEOM:21420, followersGained:11291, totalViewers:1720980, newViewers:968895,  returningViewers:752085, totalLikes:63238,  totalComments:12969, totalShares:5126, totalEngagement:81333,  erPct:3.98 },
+    { month:'2025-09', totalVideoViews:5241221,  profileViews:39174, followersEOM:23480, followersGained:2082,  totalViewers:4102425, newViewers:2285288, returningViewers:1817137,totalLikes:224788, totalComments:18535, totalShares:5685, totalEngagement:249008, erPct:4.75 },
+    { month:'2025-10', totalVideoViews:4826288,  profileViews:22272, followersEOM:32103, followersGained:12862, totalViewers:4144472, newViewers:1984355, returningViewers:2160117,totalLikes:225165, totalComments:14379, totalShares:5460, totalEngagement:245004, erPct:5.08 },
+    { month:'2025-11', totalVideoViews:6228466,  profileViews:37779, followersEOM:32807, followersGained:-4258, totalViewers:5477770, newViewers:3597043, returningViewers:1880727,totalLikes:341297, totalComments:10915, totalShares:13873,totalEngagement:366085, erPct:5.88 },
+    { month:'2025-12', totalVideoViews:1761797,  profileViews:8320,  followersEOM:30887, followersGained:-1301, totalViewers:1627884, newViewers:735341,  returningViewers:892543, totalLikes:66406,  totalComments:-1499, totalShares:6614, totalEngagement:71521,  erPct:4.06 },
+    { month:'2026-01', totalVideoViews:3245345,  profileViews:11512, followersEOM:32082, followersGained:1198,  totalViewers:2988087, newViewers:1073476, returningViewers:1914611,totalLikes:122377, totalComments:4595,  totalShares:5836, totalEngagement:132808, erPct:4.09 },
+    { month:'2026-02', totalVideoViews:1522330,  profileViews:5730,  followersEOM:33225, followersGained:1146,  totalViewers:1511973, newViewers:635285,  returningViewers:876688, totalLikes:48209,  totalComments:9857,  totalShares:3721, totalEngagement:61787,  erPct:4.06 },
+    { month:'2026-03', totalVideoViews:877176,   profileViews:5107,  followersEOM:33648, followersGained:391,   totalViewers:814153,  newViewers:381013,  returningViewers:433140, totalLikes:32312,  totalComments:3781,  totalShares:2890, totalEngagement:38983,  erPct:4.44 },
+    { month:'2026-04', totalVideoViews:1245009,  profileViews:3068,  followersEOM:33897, followersGained:267,   totalViewers:1130308, newViewers:419223,  returningViewers:711085, totalLikes:76870,  totalComments:1158,  totalShares:2122, totalEngagement:80150,  erPct:6.44 },
+  ],
+  facebook: [
+    { month:'2025-06', pageFollowers:0, totalPost:92,  totalViews:3560,     totalReach:1303,     totalReactions:617,    totalComments:354,   totalShares:50,    totalEngagement:1021,    avgViewsPerPost:39,     avgEngPerPost:11,   maxViewsSingle:281,     erPct:28.68 },
+    { month:'2025-07', pageFollowers:0, totalPost:137, totalViews:11017,    totalReach:4147,     totalReactions:2374,   totalComments:1998,  totalShares:129,   totalEngagement:4501,    avgViewsPerPost:80,     avgEngPerPost:33,   maxViewsSingle:173,     erPct:40.86 },
+    { month:'2025-08', pageFollowers:0, totalPost:256, totalViews:820905,   totalReach:572115,   totalReactions:29820,  totalComments:9374,  totalShares:1172,  totalEngagement:40366,   avgViewsPerPost:3207,   avgEngPerPost:158,  maxViewsSingle:719238,  erPct:4.92  },
+    { month:'2025-09', pageFollowers:0, totalPost:309, totalViews:16671429, totalReach:11535292, totalReactions:402952, totalComments:26944, totalShares:10199, totalEngagement:440095,  avgViewsPerPost:53953,  avgEngPerPost:1424, maxViewsSingle:3355286, erPct:2.64  },
+    { month:'2025-10', pageFollowers:0, totalPost:286, totalViews:36838777, totalReach:26802115, totalReactions:1167383,totalComments:57099, totalShares:44882, totalEngagement:1269364, avgViewsPerPost:128807, avgEngPerPost:4438, maxViewsSingle:2793679, erPct:3.45  },
+    { month:'2025-11', pageFollowers:0, totalPost:229, totalViews:12553716, totalReach:9471102,  totalReactions:444718, totalComments:33208, totalShares:17808, totalEngagement:495734,  avgViewsPerPost:54820,  avgEngPerPost:2165, maxViewsSingle:1961900, erPct:3.95  },
+    { month:'2025-12', pageFollowers:0, totalPost:246, totalViews:10683715, totalReach:8024112,  totalReactions:324316, totalComments:25462, totalShares:8800,  totalEngagement:358578,  avgViewsPerPost:43430,  avgEngPerPost:1458, maxViewsSingle:726076,  erPct:3.36  },
+    { month:'2026-01', pageFollowers:0, totalPost:212, totalViews:4688891,  totalReach:3613517,  totalReactions:152045, totalComments:26077, totalShares:6632,  totalEngagement:184754,  avgViewsPerPost:22117,  avgEngPerPost:872,  maxViewsSingle:581972,  erPct:3.94  },
+    { month:'2026-02', pageFollowers:0, totalPost:135, totalViews:3505175,  totalReach:2579880,  totalReactions:87593,  totalComments:18868, totalShares:3596,  totalEngagement:110057,  avgViewsPerPost:25964,  avgEngPerPost:815,  maxViewsSingle:894707,  erPct:3.14  },
+    { month:'2026-03', pageFollowers:0, totalPost:99,  totalViews:1720943,  totalReach:1361599,  totalReactions:46588,  totalComments:13022, totalShares:2093,  totalEngagement:61703,   avgViewsPerPost:17383,  avgEngPerPost:623,  maxViewsSingle:277888,  erPct:3.59  },
+    { month:'2026-04', pageFollowers:0, totalPost:110, totalViews:1557669,  totalReach:1363813,  totalReactions:41591,  totalComments:2689,  totalShares:1598,  totalEngagement:45878,   avgViewsPerPost:14161,  avgEngPerPost:417,  maxViewsSingle:210531,  erPct:2.95  },
+  ],
+  instagram: [
+    { month:'2025-05', followersEOM:0, jmlPost:60,  totalViews:16118,   totalReach:9146,    followersGained:21,    totalLikes:1475,  totalComments:441,   totalShares:18,   totalSaves:4,    totalEngagement:1938,  erPct:12.02, avgViews:269,   peakViews:2335,    avgEng:32,  reelViews:10765,  carouselViews:2948,   imageViews:2405   },
+    { month:'2025-06', followersEOM:0, jmlPost:160, totalViews:2311962, totalReach:1659866, followersGained:3457,  totalLikes:53883, totalComments:8230,  totalShares:5087, totalSaves:2470, totalEngagement:69670, erPct:3.01,  avgViews:14450, peakViews:1666425, avgEng:435, reelViews:2251224,carouselViews:25914,  imageViews:34824  },
+    { month:'2025-07', followersEOM:0, jmlPost:220, totalViews:329580,  totalReach:165907,  followersGained:273,   totalLikes:13823, totalComments:7261,  totalShares:347,  totalSaves:479,  totalEngagement:21910, erPct:6.65,  avgViews:1498,  peakViews:31487,   avgEng:100, reelViews:288078, carouselViews:6331,   imageViews:35171  },
+    { month:'2025-08', followersEOM:0, jmlPost:259, totalViews:889531,  totalReach:685543,  followersGained:1202,  totalLikes:35560, totalComments:14775, totalShares:3263, totalSaves:953,  totalEngagement:54551, erPct:6.13,  avgViews:3434,  peakViews:588787,  avgEng:211, reelViews:836708, carouselViews:21133,  imageViews:31690  },
+    { month:'2025-09', followersEOM:0, jmlPost:282, totalViews:2702481, totalReach:1484249, followersGained:1433,  totalLikes:76803, totalComments:20542, totalShares:1278, totalSaves:1303, totalEngagement:99926, erPct:3.70,  avgViews:9583,  peakViews:638377,  avgEng:354, reelViews:1870158,carouselViews:193153, imageViews:639170 },
+    { month:'2025-10', followersEOM:0, jmlPost:217, totalViews:6431800, totalReach:3707510, followersGained:12119, totalLikes:177699,totalComments:21301, totalShares:17170,totalSaves:8010, totalEngagement:224180,erPct:3.49,  avgViews:29640, peakViews:1145963, avgEng:1033,reelViews:4835003,carouselViews:819172, imageViews:777625 },
+    { month:'2025-11', followersEOM:0, jmlPost:168, totalViews:2592740, totalReach:1742107, followersGained:4121,  totalLikes:67656, totalComments:17117, totalShares:6374, totalSaves:2680, totalEngagement:93827, erPct:3.62,  avgViews:15433, peakViews:377777,  avgEng:558, reelViews:934889, carouselViews:1565805,imageViews:92046  },
+    { month:'2025-12', followersEOM:0, jmlPost:213, totalViews:1259667, totalReach:894629,  followersGained:1054,  totalLikes:49748, totalComments:16246, totalShares:956,  totalSaves:814,  totalEngagement:67764, erPct:5.38,  avgViews:5914,  peakViews:233441,  avgEng:318, reelViews:707613, carouselViews:522319, imageViews:29735  },
+    { month:'2026-01', followersEOM:0, jmlPost:208, totalViews:4132500, totalReach:3162422, followersGained:4070,  totalLikes:131672,totalComments:25934, totalShares:7343, totalSaves:4220, totalEngagement:169169,erPct:4.09,  avgViews:19868, peakViews:1094506, avgEng:813, reelViews:2412916,carouselViews:1714390,imageViews:5194   },
+    { month:'2026-02', followersEOM:0, jmlPost:149, totalViews:2806156, totalReach:1811607, followersGained:1172,  totalLikes:36154, totalComments:16356, totalShares:2342, totalSaves:1300, totalEngagement:56152, erPct:2.00,  avgViews:18833, peakViews:2192947, avgEng:377, reelViews:2498889,carouselViews:306186, imageViews:1081   },
+    { month:'2026-03', followersEOM:0, jmlPost:123, totalViews:358122,  totalReach:245750,  followersGained:437,   totalLikes:19803, totalComments:13761, totalShares:1040, totalSaves:486,  totalEngagement:35090, erPct:9.80,  avgViews:2912,  peakViews:95132,   avgEng:285, reelViews:282823, carouselViews:73466,  imageViews:1833   },
+    { month:'2026-04', followersEOM:0, jmlPost:126, totalViews:257325,  totalReach:189547,  followersGained:367,   totalLikes:5935,  totalComments:366,   totalShares:423,  totalSaves:266,  totalEngagement:6990,  erPct:2.72,  avgViews:2042,  peakViews:39842,   avgEng:55,  reelViews:193572, carouselViews:62511,  imageViews:1242   },
+  ]
+};
+
+async function importSeedAnalytics() {
+  if (!isAdmin()) { toast('Hanya admin yang dapat mengimpor data', 'error'); return; }
+  const btn = $('btnImportSeedData');
+  if (btn) { btn.textContent = 'Mengimpor…'; btn.disabled = true; }
+  try {
+    if (!state.analytics['penjaga-harapan']) state.analytics['penjaga-harapan'] = {};
+    const ph = state.analytics['penjaga-harapan'];
+    ['youtube','tiktok','facebook','instagram'].forEach(plat => {
+      const existing = ph[plat] || [];
+      const existingMonths = new Set(existing.map(r => r.month));
+      const newRows = PH_ANALYTICS_SEED[plat].filter(r => !existingMonths.has(r.month));
+      ph[plat] = [...existing, ...newRows].sort((a,b) => a.month.localeCompare(b.month));
+    });
+    state.shas.analytics = await window.db.writeData('analytics', state.analytics, 'Import data historis Penjaga Harapan');
+    saveDataCache();
+    toast('✅ Data historis berhasil diimpor!', 'success');
+    renderStatistics();
+  } catch(e) {
+    toast('Gagal impor: ' + e.message, 'error');
+  } finally {
+    if (btn) { btn.textContent = '📥 Import Data Historis PH'; btn.disabled = false; }
+  }
+}
+
+/* ── Period dropdown → set hidden month inputs ───────────────────────────── */
+function onStatPeriodChange(val) {
+  const fromInp = $('statFromMonth');
+  const toInp   = $('statToMonth');
+  const sep     = $('statRangeSep');
+  const isCustom = val === 'custom';
+  if (fromInp) fromInp.classList.toggle('hidden', !isCustom);
+  if (toInp)   toInp.classList.toggle('hidden', !isCustom);
+  if (sep)     sep.classList.toggle('hidden', !isCustom);
+  if (isCustom) return; // month inputs drive the filter directly
+
+  const now = new Date();
+  const padM = m => String(m + 1).padStart(2, '0');
+  const ym = (y, m) => `${y}-${padM(m)}`;
+
+  let from = '', to = '';
+  if (val === '1') {
+    from = to = ym(now.getFullYear(), now.getMonth());
+  } else if (val === 'year') {
+    from = `${now.getFullYear()}-01`;
+    to   = ym(now.getFullYear(), now.getMonth());
+  } else if (val === 'all') {
+    from = ''; to = '';
+  } else {
+    // numeric = N months back
+    const n  = parseInt(val, 10);
+    const d0 = new Date(now.getFullYear(), now.getMonth() - n + 1, 1);
+    from = ym(d0.getFullYear(), d0.getMonth());
+    to   = ym(now.getFullYear(), now.getMonth());
+  }
+  if (fromInp) fromInp.value = from;
+  if (toInp)   toInp.value   = to;
+  renderStatChart();
+}
+
+/* ── Import file → Gemini Vision → auto-fill Data Bulanan ───────────────── */
+async function importStatFromFile(input) {
+  const file = input?.files?.[0];
+  if (!file) return;
+  input.value = ''; // reset agar bisa upload file yang sama lagi
+
+  const geminiKey = getGeminiKey();
+  if (!geminiKey) { toast('Isi Gemini API Key di API Setup terlebih dahulu', 'error'); return; }
+
+  const platId = state.statActivePlat || 'youtube';
+  const platM  = PLATFORM_FIELDS[platId];
+  const acctId = state.statActiveAcct;
+
+  // Show loader
+  const btn = $('btnStatImportFile');
+  if (btn) { btn.textContent = '⏳ Membaca…'; btn.disabled = true; }
+
+  try {
+    let parts = [];
+    const mimeType = file.type || 'image/png';
+    const isImage = mimeType.startsWith('image/');
+
+    if (isImage) {
+      const base64 = await new Promise((res, rej) => {
+        const r = new FileReader();
+        r.onload  = e => res(e.target.result.split(',')[1]);
+        r.onerror = rej;
+        r.readAsDataURL(file);
+      });
+      parts = [
+        { inlineData: { mimeType, data: base64 } },
+        { text: buildImportPrompt(platM) }
+      ];
+    } else {
+      // PDF / CSV / teks — baca sebagai teks
+      const text = await file.text().catch(() => '');
+      if (!text) { toast('Format file tidak didukung. Gunakan gambar/CSV/teks.', 'error'); return; }
+      parts = [{ text: buildImportPrompt(platM) + '\n\nData:\n' + text.slice(0, 8000) }];
+    }
+
+    const model = 'gemini-2.0-flash';
+    const url   = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${geminiKey}`;
+    const resp  = await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ contents: [{ parts }] })
+    });
+    const json = await resp.json();
+    if (!resp.ok) throw new Error(json.error?.message || 'Gemini error');
+
+    const raw  = json.candidates?.[0]?.content?.parts?.[0]?.text || '';
+    const match = raw.match(/```(?:json)?\s*([\s\S]*?)```/) || raw.match(/(\{[\s\S]*\})/);
+    if (!match) throw new Error('Tidak dapat menemukan JSON di respons AI');
+    const parsed = JSON.parse(match[1].trim());
+
+    // Fill the stat input form
+    const monthVal = parsed.month || getCurrentYM();
+    await openStatInputForImport(acctId, platId, monthVal, parsed);
+    toast(`✅ Data ${fmtMonth(monthVal)} berhasil dibaca dari file!`, 'success');
+  } catch (e) {
+    toast('Gagal baca file: ' + e.message, 'error');
+  } finally {
+    if (btn) { btn.innerHTML = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="3" x2="12" y2="15"/><polyline points="17 8 12 3 7 8"/></svg> Import'; btn.disabled = false; }
+  }
+}
+
+function buildImportPrompt(platM) {
+  const fieldList = platM.fields.map(f => `"${f.key}" (${f.label})`).join(', ');
+  return `Kamu adalah asisten ekstraksi data analytics media sosial.
+Ekstrak data dari gambar/dokumen ini untuk platform ${platM.label}.
+Kembalikan HANYA JSON valid dengan field berikut (gunakan 0 jika data tidak ada):
+{ "month": "YYYY-MM", ${platM.fields.map(f => `"${f.key}": <number>`).join(', ')} }
+Field yang tersedia: ${fieldList}.
+Untuk ER%, kembalikan sebagai desimal (misal 3.42 bukan "3,42%").
+Untuk bulan, format YYYY-MM (misal 2025-10).`;
+}
+
+async function openStatInputForImport(acctId, platId, monthVal, data) {
+  // Buka form input dan isi dengan data hasil AI
+  renderStatInputFields(acctId, platId, data);
+  const card = $('statInputCard');
+  if (card) card.classList.remove('hidden');
+  const monthInp = $('statMonth');
+  if (monthInp) monthInp.value = monthVal;
+  card?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
 function renderStatistics() {
   renderStatAcctBar();
   renderStatPlatBar();
-  renderStatChart();
+  // Init period dropdown ke 12 bulan (default)
+  onStatPeriodChange($('statPeriodSel')?.value || '12');
   renderStatGoodBad(state.statActiveAcct);
   initStatDownloadMonth();
 }
@@ -3961,6 +4202,12 @@ function renderStatChart() {
 function renderStatDataTable(acctId, platId, rows) {
   const wrap  = $('statDataTable');
   if (!wrap) return;
+
+  // Tampilkan card import untuk admin akun penjaga-harapan (selalu tampil)
+  const importCard = $('statImportCard');
+  if (importCard) {
+    importCard.classList.toggle('hidden', !(acctId === 'penjaga-harapan' && isAdmin()));
+  }
 
   if (!isAdmin() || !rows.length) { wrap.innerHTML = ''; return; }
 
@@ -5417,7 +5664,11 @@ document.addEventListener('DOMContentLoaded', async () => {
   window.editContent    = editContent;
   window.deleteContent  = deleteContent;
   window.selectUrlAcct  = selectUrlAcct;
-  window.renderPlanner  = renderPlanner;
+  window.renderPlanner       = renderPlanner;
+  window.openPlannerWa       = openPlannerWa;
+  window.importSeedAnalytics  = importSeedAnalytics;
+  window.onStatPeriodChange   = onStatPeriodChange;
+  window.importStatFromFile   = importStatFromFile;
   window.deleteUser     = deleteUser;
   window.switchStatAcct     = switchStatAcct;
   window.switchStatPlat     = switchStatPlat;
