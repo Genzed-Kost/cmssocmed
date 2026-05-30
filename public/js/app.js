@@ -4194,6 +4194,7 @@ async function importMultiRowsDirectly(acctId, platId, rows) {
 
   state.analytics[acctId][platId] = [...existing, ...toAdd]
     .sort((a, b) => a.month.localeCompare(b.month));
+  _setAnalyticsMeta(state.analytics, acctId, platId);
   state.shas.analytics = await window.db.writeData('analytics', state.analytics,
     `Import CSV: update ${toUpdate.length} + tambah ${toAdd.length} bulan ${platId}`);
   saveDataCache();
@@ -4293,6 +4294,19 @@ function switchStatPlat(platId) {
   $('statInputCard')?.classList.add('hidden');
 }
 
+/* ── Simpan metadata update per platform ────────────────────────────────── */
+function _setAnalyticsMeta(analytics, acctId, platId) {
+  if (!analytics[acctId]._meta) analytics[acctId]._meta = {};
+  analytics[acctId]._meta[platId] = {
+    updatedAt: new Date().toISOString(),
+    updatedBy: currentUser() || 'system'
+  };
+}
+
+function _getAnalyticsMeta(acctId, platId) {
+  return state.analytics?.[acctId]?._meta?.[platId] || null;
+}
+
 /* ── alias so existing references to renderStatTable still work ─────────── */
 function renderStatTable() { renderStatChart(); }
 
@@ -4373,6 +4387,45 @@ function renderStatChart() {
         </div>`;
     }).join('')}
   </div>`;
+
+  /* ── Info terakhir diperbarui ───────────────────────────────────── */
+  const meta = _getAnalyticsMeta(acctId, platId);
+  let updateBanner = $('statUpdateBanner');
+  if (!updateBanner) {
+    updateBanner = document.createElement('div');
+    updateBanner.id = 'statUpdateBanner';
+    chartWrap?.parentNode?.insertBefore(updateBanner, chartWrap);
+  }
+  if (meta?.updatedAt) {
+    const d = new Date(meta.updatedAt);
+    const tgl = d.toLocaleDateString('id-ID', { day:'2-digit', month:'long', year:'numeric' });
+    const jam = d.toLocaleTimeString('id-ID', { hour:'2-digit', minute:'2-digit' });
+    updateBanner.innerHTML = `
+      <div style="display:flex;align-items:center;gap:6px;font-size:.72rem;color:var(--muted);
+        background:var(--surface);border:1px solid var(--bd);border-radius:8px;
+        padding:6px 12px;margin-bottom:8px;flex-wrap:wrap">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+          style="color:#16a34a;flex-shrink:0"><polyline points="23 4 23 10 17 10"/>
+          <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+        <span>Data <strong>${esc(platM.label)}</strong> terakhir diperbarui:</span>
+        <strong style="color:var(--text)">${tgl}, ${jam}</strong>
+        <span style="color:var(--muted-lt)">· oleh ${esc(meta.updatedBy)}</span>
+        <span style="margin-left:auto;font-size:.68rem;color:#f59e0b">
+          ⚠ Data platform dapat berubah retroaktif — perbarui secara berkala
+        </span>
+      </div>`;
+    updateBanner.style.display = '';
+  } else {
+    updateBanner.innerHTML = `
+      <div style="display:flex;align-items:center;gap:6px;font-size:.72rem;color:var(--muted);
+        background:#fffbeb;border:1px solid #fde68a;border-radius:8px;padding:6px 12px;margin-bottom:8px">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+          style="color:#f59e0b;flex-shrink:0"><circle cx="12" cy="12" r="10"/>
+          <line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+        <span>Belum ada catatan pembaruan untuk data ini. Perbarui melalui tombol <strong>Import</strong> atau <strong>+ Tambah Bulan</strong>.</span>
+      </div>`;
+    updateBanner.style.display = '';
+  }
 
   /* ── Bar chart ──────────────────────────────────────────────────── */
   if (chartWrap && !chartWrap.querySelector('canvas')) {
@@ -5095,6 +5148,8 @@ async function saveAnalyticsEntry() {
   analytics[acctId][platId].sort((a,b) => a.month.localeCompare(b.month));
   if (analytics[acctId][platId].length > 36)
     analytics[acctId][platId] = analytics[acctId][platId].slice(-36);
+  // Simpan timestamp update terakhir
+  _setAnalyticsMeta(analytics, acctId, platId);
 
   state.analytics = analytics;
   setLoading('btnSaveStats', true, 'Menyimpan…');
