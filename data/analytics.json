@@ -554,6 +554,28 @@
         "maxViewsSingle": 210531,
         "erPct": 2.95
       }
+    ],
+    "instagram": [
+      {
+        "month": "2025-05",
+        "followersEOM": 13,
+        "jmlPost": 60,
+        "totalViews": 16118,
+        "totalReach": 9146,
+        "followersGained": 21,
+        "totalLikes": 1475,
+        "totalComments": 441,
+        "totalShares": 18,
+        "totalSaves": 4,
+        "totalEngagement": 1938,
+        "erPct": 12.02,
+        "avgViews": 269,
+        "peakViews": 2335,
+        "avgEng": 32,
+        "reelViews": 10765,
+        "carouselViews": 2948,
+        "imageViews": 2405
+      }
     ]
   },
   "33-official": {},
