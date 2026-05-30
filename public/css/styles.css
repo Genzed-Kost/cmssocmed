@@ -1670,9 +1670,35 @@ ul { list-style: none; }
   background: transparent;
 }
 .stat-summary-card:last-child { border-right: none; }
-.stat-sum-label { font-size: .63rem; font-weight: 600; color: var(--muted-lt); text-transform: uppercase; letter-spacing: .06em; margin-bottom: 2px; }
+.stat-sum-label { font-size: .63rem; font-weight: 600; color: var(--muted-lt); text-transform: uppercase; letter-spacing: .06em; margin-bottom: 2px; display:flex; align-items:center; gap:3px; }
 .stat-sum-val   { font-size: 1.15rem; font-weight: 800; line-height: 1.1; margin-bottom: 2px; }
 .stat-sum-period{ font-size: .65rem; color: var(--muted); }
+
+/* Info icon + tooltip pada summary card */
+.stat-info-wrap {
+  position: relative; display: inline-flex; align-items: center;
+  cursor: pointer; flex-shrink: 0;
+}
+.stat-info-icon { color: var(--muted-lt); transition: color .15s; }
+.stat-info-wrap:hover .stat-info-icon,
+.stat-info-wrap.open .stat-info-icon { color: #3b82f6; }
+.stat-info-tip {
+  display: none;
+  position: fixed;
+  background: #1e293b; color: #f1f5f9;
+  font-size: .72rem; font-weight: 400; line-height: 1.55;
+  padding: 8px 11px; border-radius: 8px;
+  width: 210px; white-space: normal; text-align: left;
+  box-shadow: 0 6px 20px rgba(0,0,0,.22);
+  z-index: 9999; pointer-events: none;
+  text-transform: none; letter-spacing: 0;
+}
+.stat-info-tip::before {
+  content: ''; position: absolute; bottom: 100%; left: 16px;
+  border: 5px solid transparent; border-bottom-color: #1e293b;
+}
+.stat-info-wrap:hover .stat-info-tip,
+.stat-info-wrap.open .stat-info-tip { display: block; }
 
 .stat-table-scroll { overflow-x: auto; border-radius: var(--radius); border: 1px solid var(--bd); }
 .stat-data-table {

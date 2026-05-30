@@ -3779,6 +3779,55 @@ function getCurrentYM() {
   return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;
 }
 
+/* ── Deskripsi tiap field statistik (tampil di tooltip info icon) ─────────── */
+const STAT_FIELD_DESC = {
+  // YouTube
+  jmlVideo:         'Jumlah video yang diunggah dalam periode ini.',
+  totalViews:       'Total tayangan video pada periode ini (semua video).',
+  uniqueViewers:    'Jumlah penonton unik — satu orang dihitung sekali meski menonton berkali-kali.',
+  subsEOM:          'Jumlah subscriber di akhir bulan (End of Month).',
+  subsGained:       'Pertambahan subscriber baru dalam periode ini.',
+  watchHours:       'Total jam tonton semua video dalam periode ini.',
+  impressions:      'Berapa kali thumbnail video ditampilkan kepada pengguna YouTube.',
+  adImpressions:    'Jumlah tayangan iklan yang muncul di video channel ini.',
+  avgViewsPerVideo: 'Rata-rata tayangan per video = Total Views ÷ Jumlah Video.',
+  peakViews:        'Tayangan tertinggi dari satu video dalam periode ini.',
+  // TikTok
+  totalVideoViews:  'Total tayangan semua video TikTok dalam periode ini.',
+  profileViews:     'Jumlah kunjungan ke halaman profil TikTok.',
+  followersEOM:     'Jumlah followers di akhir bulan (End of Month).',
+  followersGained:  'Pertambahan (atau penurunan) followers dalam periode ini.',
+  totalViewers:     'Jumlah akun unik yang menonton video dalam periode ini.',
+  newViewers:       'Penonton baru yang belum pernah menonton konten sebelumnya.',
+  returningViewers: 'Penonton lama yang kembali menonton dalam periode ini.',
+  // Facebook
+  pageFollowers:    'Total pengikut halaman Facebook saat ini.',
+  totalPost:        'Jumlah postingan yang diterbitkan dalam periode ini.',
+  totalReach:       'Jumlah akun unik yang melihat konten (berbeda dari Views — ini unik).',
+  totalReactions:   'Total reaksi (Like, Love, Haha, dll.) pada semua postingan.',
+  avgViewsPerPost:  'Rata-rata tayangan per postingan = Total Views ÷ Jumlah Postingan.',
+  avgEngPerPost:    'Rata-rata engagement per postingan = Total Engagement ÷ Jumlah Postingan.',
+  maxViewsSingle:   'Tayangan tertinggi dari satu postingan terbaik dalam periode ini.',
+  // Instagram
+  jmlPost:          'Jumlah postingan yang diterbitkan dalam periode ini.',
+  totalSaves:       'Jumlah pengguna yang menyimpan (bookmark) postingan.',
+  avgViews:         'Rata-rata tayangan per postingan = Total Views ÷ Jumlah Postingan.',
+  avgEng:           'Rata-rata engagement per postingan = Total Engagement ÷ Jumlah Postingan.',
+  reelViews:        'Total tayangan khusus dari konten format Reels.',
+  carouselViews:    'Total tayangan khusus dari konten format Carousel (multi-gambar).',
+  imageViews:       'Total tayangan khusus dari konten format gambar tunggal.',
+  // Umum
+  totalLikes:       'Total likes/suka dari semua konten dalam periode ini.',
+  totalComments:    'Total komentar dari semua konten dalam periode ini.',
+  totalShares:      'Total konten yang dibagikan (share/retweet) oleh pengguna.',
+  totalEngagement:  'Total interaksi = Likes + Comments + Shares + Saves (tergantung platform).',
+  erPct:            'Engagement Rate = Total Engagement ÷ Total Views × 100%. Mengukur seberapa aktif audiens berinteraksi.',
+  // Twitter/X
+  impressions:      'Berapa kali tweet ditampilkan ke pengguna di timeline atau pencarian.',
+  totalRetweets:    'Jumlah retweet/quote tweet dalam periode ini.',
+  followers:        'Jumlah followers akun Twitter/X saat ini.',
+};
+
 /* ── Period dropdown → set hidden month inputs ───────────────────────────── */
 function onStatPeriodChange(val) {
   const fromInp = $('statFromMonth');
@@ -4022,9 +4071,13 @@ function renderStatChart() {
       const period = isPt
         ? `Bulan ${fmtMonth(latestRow?.month || '')}`
         : `Total ${rangeLabel}`;
+      const desc = STAT_FIELD_DESC[f.key] || '';
       return `
         <div class="stat-summary-card">
-          <div class="stat-sum-label">${f.label}</div>
+          <div class="stat-sum-label">
+            ${f.label}
+            ${desc ? `<span class="stat-info-wrap"><svg class="stat-info-icon" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg><span class="stat-info-tip">${esc(desc)}</span></span>` : ''}
+          </div>
           <div class="stat-sum-val" style="color:${platM.color}">${fmtStatVal(val, f.fmt)}</div>
           <div class="stat-sum-period">${period}</div>
         </div>`;
@@ -5476,7 +5529,25 @@ document.addEventListener('DOMContentLoaded', async () => {
     e.stopPropagation();
     $('statDlMenu')?.classList.toggle('hidden');
   });
-  document.addEventListener('click', () => $('statDlMenu')?.classList.add('hidden'));
+  document.addEventListener('click', e => {
+    $('statDlMenu')?.classList.add('hidden');
+    // Toggle info tooltip on tap (mobile) — posisi fixed berdasarkan bounding rect
+    const wrap = e.target.closest('.stat-info-wrap');
+    $$('.stat-info-wrap.open').forEach(el => { if (el !== wrap) el.classList.remove('open'); });
+    if (wrap) {
+      const isOpen = wrap.classList.contains('open');
+      wrap.classList.toggle('open');
+      if (!isOpen) {
+        const tip = wrap.querySelector('.stat-info-tip');
+        if (tip) {
+          const r = wrap.getBoundingClientRect();
+          tip.style.top  = (r.bottom + 8) + 'px';
+          tip.style.left = Math.min(r.left, window.innerWidth - 220) + 'px';
+        }
+      }
+      e.stopPropagation();
+    }
+  });
 
   /* ── Statistics ─────────────────────────────────────────────── */
   $('btnCloseStatInput')?.addEventListener('click', () => $('statInputCard')?.classList.add('hidden'));
