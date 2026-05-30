@@ -1923,10 +1923,26 @@ ul { list-style: none; }
   .lem-info-col:nth-last-child(-n+2) { border-bottom: none; }
 
   /* ── Statistics header card ── */
-  .stat-header-row--actions { flex-direction: column; align-items: flex-start; }
-  .stat-action-group { width: 100%; justify-content: flex-start; }
-  .stat-range-group  { width: 100%; }
-  .stat-month-inp { flex: 1; min-width: 80px; }
+  .stat-header-row--actions {
+    flex-wrap: wrap; gap: 6px; padding: 8px 12px;
+    flex-direction: row; align-items: center;
+  }
+  .stat-range-group { flex: 1; min-width: 0; }
+  .stat-range-group select { width: 100%; }
+  .stat-action-group { flex-shrink: 0; gap: 4px; }
+  .stat-action-group .btn-sm { font-size: .7rem; padding: 5px 7px; white-space: nowrap; }
+  /* Sembunyikan teks, tampilkan hanya ikon pada tombol Import & Download di mobile */
+  #btnStatImportFile .btn-text,
+  #btnDlDropdown .btn-text { display: none; }
+  .stat-ai-btn { padding: 5px 8px !important; font-size: .7rem !important; }
+  .stat-month-inp { min-width: 90px; }
+  /* Summary row: satu baris scroll horizontal */
+  .stat-header-row--summary { overflow-x: auto; -webkit-overflow-scrolling: touch; padding: 6px 0 2px; }
+  .stat-summary-row { flex-wrap: nowrap; min-width: max-content; width: 100%; }
+  .stat-summary-card { min-width: 90px; padding: 6px 10px; }
+  .stat-sum-val { font-size: 1rem; }
+  .stat-sum-label { font-size: .58rem; }
+  .stat-sum-period { font-size: .6rem; }
   /* Stat input rows: platform label spans full row */
   .stat-inp-row { grid-template-columns: 1fr 1fr; }
   .stat-inp-plat { grid-column: 1 / -1; }
