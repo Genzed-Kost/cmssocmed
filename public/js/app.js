@@ -4124,11 +4124,12 @@ async function importStatFromFile(input) {
       return;
     }
 
-    /* ── Gambar / PDF: kirim ke Gemini AI ── */
-    const geminiKey = getGeminiKey();
-    if (!geminiKey) { toast('Isi Gemini API Key di API Setup untuk import gambar/PDF', 'error'); return; }
+    /* ── Gambar / PDF: kirim ke Claude (primary) atau Gemini (fallback gratis) ── */
+    if (!getClaudeKey() && !getGeminiKey()) {
+      toast('Isi Claude API Key (akurat) atau Gemini API Key (gratis) di API Setup', 'error'); return;
+    }
 
-    let parts = [];
+    let raw = '';
     if (isImage) {
       const base64 = await new Promise((res, rej) => {
         const r = new FileReader();
@@ -4136,26 +4137,13 @@ async function importStatFromFile(input) {
         r.onerror = rej;
         r.readAsDataURL(file);
       });
-      parts = [
-        { inlineData: { mimeType, data: base64 } },
-        { text: buildImportPrompt(platM) }
-      ];
+      raw = await callAI(buildImportPrompt(platM), { base64, mimeType });
     } else {
       const text = await file.text().catch(() => '');
       if (!text) { toast('Format file tidak didukung. Gunakan CSV, gambar, atau PDF.', 'error'); return; }
-      parts = [{ text: buildImportPrompt(platM) + '\n\nData:\n' + text.slice(0, 8000) }];
+      raw = await callAI(buildImportPrompt(platM) + '\n\nData:\n' + text.slice(0, 8000));
     }
 
-    const model = GEMINI_MODELS[0] || 'gemini-2.5-flash';
-    const resp  = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${geminiKey}`,
-      { method:'POST', headers:{'Content-Type':'application/json'},
-        body: JSON.stringify({ contents:[{ parts }] }) }
-    );
-    const json = await resp.json();
-    if (!resp.ok) throw new Error(json.error?.message || 'Gemini error');
-
-    const raw   = json.candidates?.[0]?.content?.parts?.[0]?.text || '';
     const match = raw.match(/```(?:json)?\s*([\s\S]*?)```/) || raw.match(/(\{[\s\S]*?\})/s);
     if (!match) throw new Error('AI tidak dapat mengekstrak data. Coba gambar yang lebih jelas.');
 
@@ -5160,12 +5148,17 @@ async function callGemini(prompt) {
 function showAiLoad(msg) { $('aiLoadMsg').textContent = msg; $('aiLoadOverlay').classList.remove('hidden'); }
 function hideAiLoad()     { $('aiLoadOverlay').classList.add('hidden'); }
 
-async function callClaude(prompt) {
+/* ── Claude API call (support teks + gambar) ─────────────────────────────── */
+async function callClaude(prompt, image = null) {
   const key = getClaudeKey();
-  if (!key) throw new Error('Claude API Key belum diisi. Masuk ke API Setup → Claude AI dan isi key-nya.');
+  if (!key) throw new Error('no_key');
   let lastErr = 'Semua model gagal';
   for (const model of CLAUDE_MODELS) {
     try {
+      const content = image
+        ? [ { type:'image', source:{ type:'base64', media_type: image.mimeType, data: image.base64 } },
+            { type:'text',  text: prompt } ]
+        : prompt;
       const res = await fetch('https://api.anthropic.com/v1/messages', {
         method: 'POST',
         headers: {
@@ -5174,11 +5167,7 @@ async function callClaude(prompt) {
           'anthropic-version': '2023-06-01',
           'anthropic-dangerous-direct-browser-access': 'true'
         },
-        body: JSON.stringify({
-          model,
-          max_tokens: 2048,
-          messages: [{ role: 'user', content: prompt }]
-        })
+        body: JSON.stringify({ model, max_tokens: 2048, messages: [{ role:'user', content }] })
       });
       const data = await res.json();
       if (data.error) { lastErr = data.error.message; continue; }
@@ -5188,6 +5177,40 @@ async function callClaude(prompt) {
     } catch (e) { lastErr = e.message; }
   }
   throw new Error(lastErr);
+}
+
+/* ── Unified AI: Claude primary → Gemini fallback (gratis) ──────────────── */
+async function callAI(prompt, image = null) {
+  const hasClaude = !!getClaudeKey();
+  const hasGemini = !!getGeminiKey();
+  if (!hasClaude && !hasGemini) {
+    throw new Error('Belum ada AI API Key. Isi Claude API Key (akurat) atau Gemini API Key (gratis) di API Setup.');
+  }
+  // Coba Claude dulu jika tersedia
+  if (hasClaude) {
+    try { return await callClaude(prompt, image); }
+    catch (e) {
+      if (e.message === 'no_key' || !hasGemini) throw e;
+      console.warn('[AI] Claude gagal, fallback ke Gemini:', e.message);
+    }
+  }
+  // Fallback Gemini
+  if (image) {
+    // Gemini vision call
+    const model = GEMINI_MODELS[0] || 'gemini-2.5-flash';
+    const url   = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${getGeminiKey()}`;
+    const resp  = await fetch(url, {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ contents: [{ parts: [
+        { inlineData: { mimeType: image.mimeType, data: image.base64 } },
+        { text: prompt }
+      ]}]})
+    });
+    const j = await resp.json();
+    if (!resp.ok) throw new Error(j.error?.message || 'Gemini error');
+    return j.candidates?.[0]?.content?.parts?.[0]?.text || '';
+  }
+  return await callGemini(prompt);
 }
 
 /* ── AI Content Analysis (Claude/Gemini) ─────────────────────────────────── */
@@ -5262,17 +5285,7 @@ async function analyzeContentWithAI() {
 
   showAiLoad('Menganalisis konten dengan AI…');
   try {
-    let text;
-    const claudeKey = getClaudeKey();
-    const geminiKey = getGeminiKey();
-
-    if (claudeKey) {
-      text = await callClaude(prompt);
-    } else if (geminiKey) {
-      text = await callGemini(prompt);
-    } else {
-      throw new Error('Belum ada AI API Key. Masuk ke API Setup dan isi Claude atau Gemini API Key.');
-    }
+    const text = await callAI(prompt);
     showAiAnalysisModal(text, acctId, platId);
   } catch (e) {
     toast('Analisis gagal: ' + e.message, 'error');
@@ -5352,7 +5365,7 @@ async function generateDraft() {
   showAiLoad(`Generating draft naskah… (${count + 1}/${AI_MAX})`);
   try {
     const isDialog = ['Podcast','Monolog','Video','Short'].includes(format);
-    const text = await callGemini(
+    const text = await callAI(
       `Kamu adalah content writer profesional untuk media sosial Indonesia, khususnya untuk akun "${acct}".\n\nBuatkan naskah/script konten lengkap:\n- Judul: ${title}\n- Tema: ${theme || 'umum'}\n- Format: ${format}\n- Akun: ${acct}\n\n${isDialog ? 'Sertakan dialog/percakapan jika diperlukan, tulis dengan format:\nHOST: [teks]\nNARASI: [teks]\nPERTANYAAN: [teks]\nJAWABAN: [teks]\n\n' : ''}Tulis naskah lengkap dan detail yang siap digunakan. Langsung mulai naskahnya.`
     );
     sv('postScript', text);
@@ -5406,7 +5419,7 @@ ${hasDialog ? '8.' : '7.'} Bahasa Indonesia yang natural, semangat, dan menginsp
 
 Langsung tulis caption-nya sekarang.`;
 
-    const text = await callGemini(prompt);
+    const text = await callAI(prompt);
     sv('postCaption', text);
     incAiCount(key, 'caption');
     const remaining = AI_MAX - (count + 1);

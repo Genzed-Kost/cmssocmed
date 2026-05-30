@@ -774,12 +774,38 @@
             </div>
           </div>
 
-          <!-- Gemini AI Key -->
+          <!-- Claude AI Key (primary) -->
+          <div class="card setup-card">
+            <div class="card-head">
+              <span class="card-title">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:-2px;margin-right:6px;color:#d97706"><path d="M12 2l3 7h7l-5.5 4 2 7L12 16l-6.5 4 2-7L2 9h7z"/></svg>
+                Claude AI <span style="font-size:.68rem;font-weight:500;color:#64748b">— Utama</span>
+              </span>
+              <span id="claudeKeyStatus" class="badge-status">Belum diisi</span>
+            </div>
+            <div class="setup-fields">
+              <div class="form-group">
+                <label class="form-label">Claude API Key</label>
+                <div class="inp-eye-wrap">
+                  <input type="password" id="cfgClaudeKey" class="form-inp" placeholder="sk-ant-…" />
+                  <button type="button" class="eye-btn" id="btnToggleClaudeKey">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                  </button>
+                </div>
+                <p class="form-hint">Dapatkan di <code>console.anthropic.com</code>. Digunakan untuk Generate Draft, Caption, Analisis AI, dan Import gambar/PDF. Lebih akurat dari Gemini. Key hanya tersimpan di browser lokal.</p>
+              </div>
+              <div class="form-actions-row">
+                <button class="btn-sm blue" id="btnSaveClaudeKey">Simpan API Key</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Gemini AI Key (fallback gratis) -->
           <div class="card setup-card">
             <div class="card-head">
               <span class="card-title">
                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:-2px;margin-right:6px;color:#7c3aed"><path d="M12 2l3 7h7l-5.5 4 2 7L12 16l-6.5 4 2-7L2 9h7z"/></svg>
-                Gemini AI
+                Gemini AI <span style="font-size:.68rem;font-weight:500;color:#16a34a">— Gratis (fallback)</span>
               </span>
               <span id="geminiKeyStatus" class="badge-status">Belum diisi</span>
             </div>
@@ -792,7 +818,7 @@
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
                   </button>
                 </div>
-                <p class="form-hint">Dapatkan API key gratis di <code>aistudio.google.com</code>. Key hanya tersimpan di browser lokal, tidak dikirim ke mana pun kecuali ke Google AI.</p>
+                <p class="form-hint">Gratis di <code>aistudio.google.com</code>. Otomatis dipakai jika Claude API Key belum diisi. Key hanya tersimpan di browser lokal.</p>
               </div>
               <div class="form-actions-row">
                 <button class="btn-sm blue" id="btnSaveGeminiKey">Simpan API Key</button>
