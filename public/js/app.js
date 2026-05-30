@@ -3116,6 +3116,40 @@ function saveWaTokenFromForm() {
   toast(t ? 'Token WA disimpan ✓' : 'Token WA dihapus', t ? 'success' : 'warn');
 }
 
+/* ── YouTube Auto-Sync: trigger GitHub Actions workflow_dispatch ─────────── */
+async function triggerYouTubeSync() {
+  const cfg = window.db.getConfig();
+  if (!cfg?.pat) { toast('Konfigurasi GitHub PAT di API Setup terlebih dahulu', 'error'); return; }
+
+  const btn = $('btnTriggerYtSync');
+  if (btn) { btn.textContent = '⏳ Memulai sync…'; btn.disabled = true; }
+  try {
+    const resp = await fetch(
+      `https://api.github.com/repos/${cfg.owner}/${cfg.repo}/actions/workflows/sync-youtube.yml/dispatches`,
+      {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${cfg.pat}`,
+          Accept: 'application/vnd.github+json',
+          'Content-Type': 'application/json',
+          'X-GitHub-Api-Version': '2022-11-28'
+        },
+        body: JSON.stringify({ ref: cfg.branch || 'main' })
+      }
+    );
+    if (resp.status === 204) {
+      toast('✅ YouTube sync dimulai! Data akan terupdate dalam ~1 menit.', 'success');
+    } else {
+      const err = await resp.json().catch(() => ({}));
+      throw new Error(err.message || `HTTP ${resp.status}`);
+    }
+  } catch (e) {
+    toast('Gagal trigger sync: ' + e.message, 'error');
+  } finally {
+    if (btn) { btn.textContent = '▶ Jalankan Sekarang'; btn.disabled = false; }
+  }
+}
+
 /**
  * Simpan API keys (Gemini, Claude, Fonnte) ke settings.json (encoded).
  * Hanya admin yang bisa update — creator tidak punya akses tulis settings.
@@ -3864,27 +3898,151 @@ function onStatPeriodChange(val) {
 }
 
 /* ── Import file → Gemini Vision → auto-fill Data Bulanan ───────────────── */
+/* ── Helper: parse angka format Indonesia (1.234.567 atau 1,234,567) ──────── */
+function parseIDNumber(s) {
+  if (s === null || s === undefined) return 0;
+  s = String(s).trim().replace(/[^\d.,%-]/g, '');
+  if (!s || s === '-') return 0;
+  // Deteksi format: jika ada titik sebagai pemisah ribuan (1.234.567)
+  if (/^\d{1,3}(\.\d{3})+$/.test(s))          return parseFloat(s.replace(/\./g, ''));
+  if (/^\d{1,3}(\.\d{3})+,\d+$/.test(s))      return parseFloat(s.replace(/\./g, '').replace(',', '.'));
+  // Format dengan koma sebagai pemisah ribuan (1,234,567)
+  if (/^\d{1,3}(,\d{3})+$/.test(s))           return parseFloat(s.replace(/,/g, ''));
+  if (/^\d{1,3}(,\d{3})+\.\d+$/.test(s))      return parseFloat(s.replace(/,/g, ''));
+  // Koma sebagai desimal
+  if (/^\d+,\d{1,2}$/.test(s))                return parseFloat(s.replace(',', '.'));
+  // Persen: "3,42%" → 3.42
+  if (s.endsWith('%'))                         return parseFloat(s.slice(0,-1).replace(',','.').replace(/\./g,'')) || 0;
+  return parseFloat(s) || 0;
+}
+
+/* ── Helper: parse bulan dari berbagai format ────────────────────────────── */
+function parseMonthStr(s) {
+  if (!s) return '';
+  s = String(s).trim();
+  const MMAP = {
+    jan:1,feb:2,mar:3,apr:4,mei:5,may:5,jun:6,jul:7,agt:8,aug:8,sep:9,okt:10,oct:10,nov:11,des:12,dec:12,
+    januari:1,februari:2,maret:3,april:4,juni:6,juli:7,agustus:8,september:9,oktober:10,november:11,desember:12
+  };
+  // YYYY-MM
+  if (/^\d{4}-\d{2}$/.test(s)) return s;
+  // "Jan 2025" / "Januari 2025"
+  const m1 = s.match(/^([a-z]+)\s+(\d{4})$/i);
+  if (m1) { const n = MMAP[m1[1].toLowerCase()]; if (n) return `${m1[2]}-${String(n).padStart(2,'0')}`; }
+  // "2025 Jan"
+  const m2 = s.match(/^(\d{4})\s+([a-z]+)$/i);
+  if (m2) { const n = MMAP[m2[2].toLowerCase()]; if (n) return `${m2[1]}-${String(n).padStart(2,'0')}`; }
+  // MM/YYYY atau YYYY/MM
+  const m3 = s.match(/^(\d{1,2})\/(\d{4})$/);
+  if (m3) return `${m3[2]}-${String(+m3[1]).padStart(2,'0')}`;
+  const m4 = s.match(/^(\d{4})\/(\d{1,2})$/);
+  if (m4) return `${m4[1]}-${String(+m4[2]).padStart(2,'0')}`;
+  return '';
+}
+
+/* ── CSV direct parser — akurat tanpa AI ────────────────────────────────── */
+function parseCSVDirect(csvText, platM) {
+  // Split baris, handle berbagai line ending
+  const lines = csvText.trim().split(/\r?\n/).filter(l => l.trim());
+  if (lines.length < 2) return null;
+
+  // Parse header
+  const splitCSV = row => {
+    const result = []; let cur = ''; let inQ = false;
+    for (const ch of row) {
+      if (ch === '"') { inQ = !inQ; }
+      else if ((ch === ',' || ch === ';' || ch === '\t') && !inQ) { result.push(cur.trim()); cur = ''; }
+      else cur += ch;
+    }
+    result.push(cur.trim());
+    return result.map(c => c.replace(/^"|"$/g, '').trim());
+  };
+
+  const headers = splitCSV(lines[0]).map(h => h.toLowerCase());
+
+  // Bangun mapping: colIndex → fieldKey
+  // Prioritas: exact key match → label match → substring match
+  const fieldMap = {};
+  platM.fields.forEach(f => {
+    const fKey   = f.key.toLowerCase();
+    const fLabel = f.label.toLowerCase().replace(/[^a-z0-9]/g, '');
+    let bestIdx  = -1;
+    headers.forEach((h, i) => {
+      const hClean = h.replace(/[^a-z0-9]/g, '');
+      if (hClean === fKey || hClean === fLabel) bestIdx = i;
+    });
+    if (bestIdx < 0) {
+      headers.forEach((h, i) => {
+        const hClean = h.replace(/[^a-z0-9]/g, '');
+        if (hClean.includes(fKey) || fKey.includes(hClean)) bestIdx = i;
+      });
+    }
+    if (bestIdx >= 0) fieldMap[bestIdx] = f.key;
+  });
+
+  // Cari kolom bulan
+  const monthColIdx = headers.findIndex(h =>
+    /bulan|month|periode|period|date|tanggal/.test(h.replace(/[^a-z]/g,''))
+  );
+
+  const results = [];
+  for (let i = 1; i < lines.length; i++) {
+    const cols = splitCSV(lines[i]);
+    if (cols.every(c => !c)) continue;
+    const month = monthColIdx >= 0 ? parseMonthStr(cols[monthColIdx]) : '';
+    if (!month) continue;
+    const entry = { month };
+    Object.entries(fieldMap).forEach(([idx, key]) => {
+      entry[key] = parseIDNumber(cols[+idx]);
+    });
+    results.push(entry);
+  }
+  return results.length ? results : null;
+}
+
+/* ── Import file: CSV → parse langsung; gambar/PDF → Gemini AI ──────────── */
 async function importStatFromFile(input) {
   const file = input?.files?.[0];
   if (!file) return;
-  input.value = ''; // reset agar bisa upload file yang sama lagi
-
-  const geminiKey = getGeminiKey();
-  if (!geminiKey) { toast('Isi Gemini API Key di API Setup terlebih dahulu', 'error'); return; }
+  input.value = '';
 
   const platId = state.statActivePlat || 'youtube';
   const platM  = PLATFORM_FIELDS[platId];
   const acctId = state.statActiveAcct;
+  const btn    = $('btnStatImportFile');
+  const ICON   = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="3" x2="12" y2="15"/><polyline points="17 8 12 3 7 8"/></svg>';
 
-  // Show loader
-  const btn = $('btnStatImportFile');
   if (btn) { btn.textContent = '⏳ Membaca…'; btn.disabled = true; }
 
   try {
-    let parts = [];
-    const mimeType = file.type || 'image/png';
-    const isImage = mimeType.startsWith('image/');
+    const name     = file.name.toLowerCase();
+    const mimeType = file.type || '';
+    const isCSV    = name.endsWith('.csv') || mimeType.includes('csv') || mimeType.includes('text/plain') && name.endsWith('.txt');
+    const isImage  = mimeType.startsWith('image/');
 
+    /* ── CSV / TSV: parse langsung, tidak perlu AI ── */
+    if (isCSV || name.endsWith('.tsv')) {
+      const text = await file.text();
+      const rows = parseCSVDirect(text, platM);
+      if (!rows?.length) { toast('CSV tidak bisa diparsing. Pastikan ada kolom Bulan dan field data yang sesuai.', 'error'); return; }
+      // Jika banyak baris, tampilkan semua ke form satu per satu
+      if (rows.length === 1) {
+        await openStatInputForImport(acctId, platId, rows[0].month, rows[0]);
+        toast(`✅ Data ${fmtMonth(rows[0].month)} berhasil dibaca dari CSV!`, 'success');
+      } else {
+        // Simpan langsung semua baris ke analytics (multi-row import)
+        await importMultiRowsDirectly(acctId, platId, rows);
+        toast(`✅ ${rows.length} bulan data berhasil diimpor dari CSV!`, 'success');
+        renderStatChart();
+      }
+      return;
+    }
+
+    /* ── Gambar / PDF: kirim ke Gemini AI ── */
+    const geminiKey = getGeminiKey();
+    if (!geminiKey) { toast('Isi Gemini API Key di API Setup untuk import gambar/PDF', 'error'); return; }
+
+    let parts = [];
     if (isImage) {
       const base64 = await new Promise((res, rej) => {
         const r = new FileReader();
@@ -3897,47 +4055,78 @@ async function importStatFromFile(input) {
         { text: buildImportPrompt(platM) }
       ];
     } else {
-      // PDF / CSV / teks — baca sebagai teks
       const text = await file.text().catch(() => '');
-      if (!text) { toast('Format file tidak didukung. Gunakan gambar/CSV/teks.', 'error'); return; }
+      if (!text) { toast('Format file tidak didukung. Gunakan CSV, gambar, atau PDF.', 'error'); return; }
       parts = [{ text: buildImportPrompt(platM) + '\n\nData:\n' + text.slice(0, 8000) }];
     }
 
     const model = GEMINI_MODELS[0] || 'gemini-2.5-flash';
-    const url   = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${geminiKey}`;
-    const resp  = await fetch(url, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ contents: [{ parts }] })
-    });
+    const resp  = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${geminiKey}`,
+      { method:'POST', headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({ contents:[{ parts }] }) }
+    );
     const json = await resp.json();
     if (!resp.ok) throw new Error(json.error?.message || 'Gemini error');
 
-    const raw  = json.candidates?.[0]?.content?.parts?.[0]?.text || '';
-    const match = raw.match(/```(?:json)?\s*([\s\S]*?)```/) || raw.match(/(\{[\s\S]*\})/);
-    if (!match) throw new Error('Tidak dapat menemukan JSON di respons AI');
-    const parsed = JSON.parse(match[1].trim());
+    const raw   = json.candidates?.[0]?.content?.parts?.[0]?.text || '';
+    const match = raw.match(/```(?:json)?\s*([\s\S]*?)```/) || raw.match(/(\{[\s\S]*?\})/s);
+    if (!match) throw new Error('AI tidak dapat mengekstrak data. Coba gambar yang lebih jelas.');
 
-    // Fill the stat input form
+    const parsed   = JSON.parse(match[1].trim());
+    // Normalisasi: pastikan semua angka sudah benar format ID
+    platM.fields.forEach(f => {
+      if (parsed[f.key] !== undefined) parsed[f.key] = parseIDNumber(String(parsed[f.key]));
+    });
+
     const monthVal = parsed.month || getCurrentYM();
     await openStatInputForImport(acctId, platId, monthVal, parsed);
     toast(`✅ Data ${fmtMonth(monthVal)} berhasil dibaca dari file!`, 'success');
+
   } catch (e) {
     toast('Gagal baca file: ' + e.message, 'error');
   } finally {
-    if (btn) { btn.innerHTML = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="3" x2="12" y2="15"/><polyline points="17 8 12 3 7 8"/></svg> Import'; btn.disabled = false; }
+    if (btn) { btn.innerHTML = ICON + ' <span class="btn-text">Import</span>'; btn.disabled = false; }
   }
+}
+
+/* Simpan banyak baris CSV langsung ke state & GitHub */
+async function importMultiRowsDirectly(acctId, platId, rows) {
+  if (!state.analytics[acctId]) state.analytics[acctId] = {};
+  if (!state.analytics[acctId][platId]) state.analytics[acctId][platId] = [];
+  const existing     = state.analytics[acctId][platId];
+  const existMonths  = new Set(existing.map(r => r.month));
+  const toAdd        = rows.filter(r => !existMonths.has(r.month));
+  const toUpdate     = rows.filter(r => existMonths.has(r.month));
+  toUpdate.forEach(r => {
+    const idx = existing.findIndex(e => e.month === r.month);
+    if (idx >= 0) existing[idx] = { ...existing[idx], ...r };
+  });
+  state.analytics[acctId][platId] = [...existing, ...toAdd]
+    .sort((a,b) => a.month.localeCompare(b.month));
+  state.shas.analytics = await window.db.writeData('analytics', state.analytics,
+    `Import CSV: ${rows.length} bulan ${platId}`);
+  saveDataCache();
 }
 
 function buildImportPrompt(platM) {
   const fieldList = platM.fields.map(f => `"${f.key}" (${f.label})`).join(', ');
-  return `Kamu adalah asisten ekstraksi data analytics media sosial.
+  return `Kamu adalah asisten ekstraksi data analytics media sosial yang sangat teliti.
 Ekstrak data dari gambar/dokumen ini untuk platform ${platM.label}.
-Kembalikan HANYA JSON valid dengan field berikut (gunakan 0 jika data tidak ada):
-{ "month": "YYYY-MM", ${platM.fields.map(f => `"${f.key}": <number>`).join(', ')} }
+
+ATURAN WAJIB:
+1. Kembalikan HANYA satu JSON object valid, tanpa teks lain, tanpa markdown
+2. Format: { "month": "YYYY-MM", ${platM.fields.map(f => `"${f.key}": <angka>`).join(', ')} }
+3. Gunakan 0 jika field tidak ditemukan (JANGAN gunakan null atau string)
+4. Angka format Indonesia (titik=ribuan, koma=desimal): "1.234.567" → 1234567, "3,42%" → 3.42
+5. ER/Engagement Rate: kembalikan sebagai desimal persen (3.42, bukan 0.0342 dan bukan "3,42%")
+6. Bulan: format YYYY-MM (contoh: "2025-10" untuk Oktober 2025)
+7. Baca SEMUA angka dengan teliti, jangan menebak
+
 Field yang tersedia: ${fieldList}.
-Untuk ER%, kembalikan sebagai desimal (misal 3.42 bukan "3,42%").
-Untuk bulan, format YYYY-MM (misal 2025-10).`;
+
+Contoh output yang benar:
+{"month":"2025-10","${platM.fields[0]?.key}":1234,"${platM.fields[1]?.key}":567890}`;
 }
 
 async function openStatInputForImport(acctId, platId, monthVal, data) {
@@ -5647,8 +5836,9 @@ document.addEventListener('DOMContentLoaded', async () => {
   window.selectUrlAcct  = selectUrlAcct;
   window.renderPlanner       = renderPlanner;
   window.openPlannerWa       = openPlannerWa;
-  window.onStatPeriodChange   = onStatPeriodChange;
-  window.importStatFromFile   = importStatFromFile;
+  window.onStatPeriodChange     = onStatPeriodChange;
+  window.importStatFromFile     = importStatFromFile;
+  window.triggerYouTubeSync     = triggerYouTubeSync;
   window.deleteUser     = deleteUser;
   window.switchStatAcct     = switchStatAcct;
   window.switchStatPlat     = switchStatPlat;

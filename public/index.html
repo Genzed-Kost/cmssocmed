@@ -826,6 +826,44 @@
             </div>
           </div>
 
+          <!-- YouTube Auto-Sync -->
+          <div class="card setup-card">
+            <div class="card-head">
+              <span class="card-title">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor" style="vertical-align:-2px;margin-right:6px;color:#ff0000"><path d="M23.495 6.205a3.007 3.007 0 00-2.088-2.088c-1.87-.501-9.396-.501-9.396-.501s-7.507-.01-9.396.501A3.007 3.007 0 00.527 6.205a31.247 31.247 0 00-.522 5.805 31.247 31.247 0 00.522 5.783 3.007 3.007 0 002.088 2.088c1.868.502 9.396.502 9.396.502s7.506 0 9.396-.502a3.007 3.007 0 002.088-2.088 31.247 31.247 0 00.5-5.783 31.247 31.247 0 00-.5-5.805zM9.609 15.601V8.408l6.264 3.602z"/></svg>
+                YouTube Auto-Sync
+              </span>
+              <span id="ytSyncStatus" class="badge-status">Belum dikonfigurasi</span>
+            </div>
+            <div class="setup-fields">
+              <div class="form-group">
+                <label class="form-label">YouTube API Key</label>
+                <div class="inp-eye-wrap">
+                  <input type="password" id="cfgYtApiKey" class="form-inp" placeholder="AIzaSy…" />
+                  <button type="button" class="eye-btn" id="btnToggleYtKey">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                  </button>
+                </div>
+                <p class="form-hint">Buat di <code>console.cloud.google.com</code> → Library → YouTube Data API v3 → Create credentials. Gratis sampai 10.000 request/hari.</p>
+              </div>
+              <div class="form-group">
+                <label class="form-label">YouTube Channel ID</label>
+                <input type="text" id="cfgYtChannelId" class="form-inp" placeholder="UCxxxxxxxxxxxxxxxxxx" />
+                <p class="form-hint">Buka channel YouTube → klik kanan → Lihat sumber halaman → cari <code>channelId</code>. Atau buka <code>youtube.com/@nama</code> → About → Share → Copy channel ID.</p>
+              </div>
+              <p class="form-hint" style="background:#fffbeb;border:1px solid #fde68a;border-radius:6px;padding:8px 10px;color:#92400e">
+                ⚠️ Simpan <strong>YOUTUBE_API_KEY</strong> dan <strong>YOUTUBE_CHANNEL_ID</strong> juga sebagai <strong>GitHub Repository Secrets</strong> agar GitHub Actions bisa berjalan.<br>
+                GitHub → repo → Settings → Secrets and variables → Actions → New repository secret.
+              </p>
+              <div class="form-actions-row" style="gap:8px;flex-wrap:wrap">
+                <button class="btn-sm blue" id="btnSaveYtConfig">💾 Simpan Konfigurasi</button>
+                <button class="btn-sm" id="btnTriggerYtSync" onclick="triggerYouTubeSync()" title="Jalankan sync sekarang via GitHub Actions">
+                  ▶ Jalankan Sekarang
+                </button>
+              </div>
+            </div>
+          </div>
+
           <!-- WhatsApp Notification -->
           <div class="card setup-card">
             <div class="card-head">
