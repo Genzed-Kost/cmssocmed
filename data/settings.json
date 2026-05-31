@@ -67,6 +67,12 @@
       "role": "Leader",
       "phone": "081310672076",
       "passwordHash": ""
+    },
+    {
+      "name": "Fitria",
+      "role": "Pacar Tercantik",
+      "phone": "081284232148",
+      "passwordHash": ""
     }
   ],
   "analyticsUrls": {
