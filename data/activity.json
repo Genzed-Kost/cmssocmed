@@ -1,11 +1,11 @@
 [
   {
-    "id": "mptsbuayvqx39",
+    "id": "mptsch5oe0h74",
     "user": "Admin",
     "role": "Admin",
-    "action": "hapus anggota",
-    "target": "Fitria",
-    "timestamp": "2026-05-31T12:57:49.354Z"
+    "action": "logout",
+    "target": "keluar dari sistem",
+    "timestamp": "2026-05-31T12:58:18.972Z"
   },
   {
     "id": "mpts99lkw2yn8",
