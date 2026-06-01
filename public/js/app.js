@@ -4735,28 +4735,31 @@ function renderStatChart() {
 
 /* ── Admin-only monthly data table ─────────────────────────────────────── */
 function renderStatDataTable(acctId, platId, rows) {
-  const wrap  = $('statDataTable');
+  const wrap    = $('statDataTable');
   if (!wrap) return;
 
   if (!isAdmin() || !rows.length) { wrap.innerHTML = ''; return; }
 
-  const platM = PLATFORM_FIELDS[platId];
+  const platM   = PLATFORM_FIELDS[platId];
   if (!platM) { wrap.innerHTML = ''; return; }
 
-  const sorted = [...rows].sort((a, b) => b.month.localeCompare(a.month)); // terbaru di atas
+  const isWeekly = state.statViewMode === 'weekly';
+  const rKey     = isWeekly ? 'week' : 'month';
+  const sorted   = [...rows].sort((a, b) => (b[rKey]||'').localeCompare(a[rKey]||''));
 
   const headerCells = platM.fields.map(f => `<th>${f.label}</th>`).join('');
   const bodyRows = sorted.map(r => {
-    const cells = platM.fields.map(f =>
+    const cells  = platM.fields.map(f =>
       `<td style="text-align:right">${fmtStatVal(r[f.key], f.fmt)}</td>`
     ).join('');
-    const m = esc(r.month);
+    const key  = esc(r[rKey] || '');
+    const lbl  = isWeekly ? fmtWeek(r.week||'') : fmtMonth(r.month||'');
     return `<tr>
-      <td style="white-space:nowrap;font-weight:500">${fmtMonth(r.month)}</td>
+      <td style="white-space:nowrap;font-weight:500">${lbl}</td>
       ${cells}
       <td style="white-space:nowrap;text-align:center">
-        <button class="btn-xs" title="Edit baris ini" onclick="openStatEdit('${m}')">✏️</button>
-        <button class="btn-xs" title="Hapus baris ini" style="color:var(--red)" onclick="deleteStatRow('${m}')">🗑</button>
+        <button class="btn-xs" title="Edit baris ini" onclick="openStatEdit('${key}')">✏️</button>
+        <button class="btn-xs" title="Hapus baris ini" style="color:var(--red)" onclick="deleteStatRow('${key}')">🗑</button>
       </td>
     </tr>`;
   }).join('');
