@@ -1,5 +1,13 @@
 [
   {
+    "id": "mpvd417qixdh2",
+    "user": "Admin",
+    "role": "Admin",
+    "action": "hapus konten",
+    "target": "Besok Kita Makan Bareng",
+    "timestamp": "2026-06-01T15:27:23.174Z"
+  },
+  {
     "id": "mpvd3oatct29q",
     "user": "Admin",
     "role": "Admin",
