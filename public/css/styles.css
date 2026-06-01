@@ -2357,6 +2357,11 @@ ul { list-style: none; }
   transition: all .15s;
 }
 .chart-expand-btn:hover { background: var(--hover); color: var(--text); border-color: var(--blue); }
+/* Mobile: chart scroll horizontal (swipe) */
+@media (max-width: 640px) {
+  .stat-chart-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; touch-action: pan-x; }
+  .stat-chart-wrap canvas { min-width: 500px; max-height: 220px !important; }
+}
 /* Mode fullscreen grafik */
 .stat-chart-wrap.fullscreen {
   position: fixed !important;

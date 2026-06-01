@@ -4406,16 +4406,17 @@ function renderStatChart() {
   const periodSel = $('statPeriodSel')?.value || (isWeekly ? '12w' : '12');
   let displayRows = rows;
 
+  let fromM = '', toM = '';
   if (isWeekly) {
-    const now     = new Date();
-    const nWeeks  = periodSel === 'allw' ? 0 : parseInt(periodSel, 10);
+    const now    = new Date();
+    const nWeeks = periodSel === 'allw' ? 0 : parseInt(periodSel, 10);
     if (nWeeks > 0) {
       const cutoff = dateToISOWeek(new Date(now.getTime() - nWeeks * 7 * 86400000));
       displayRows  = rows.filter(r => (r.week||'') >= cutoff);
     }
   } else {
-    const fromM = $('statFromMonth')?.value || '';
-    const toM   = $('statToMonth')?.value   || '';
+    fromM = $('statFromMonth')?.value || '';
+    toM   = $('statToMonth')?.value   || '';
     if (fromM || toM) {
       displayRows = rows.filter(r =>
         (!fromM || r.month >= fromM) && (!toM || r.month <= toM)
@@ -4465,7 +4466,13 @@ function renderStatChart() {
   const latestRow   = displayRows[displayRows.length - 1];
   const rangeLabel  = (fromM && toM)
     ? `${fmtMonth(fromM)} – ${fmtMonth(toM)}`
-    : `${displayRows.length} bulan`;
+    : `${displayRows.length} ${isWeekly?'minggu':'bulan'}`;
+
+  // Periode sebelumnya untuk trend %
+  const prevRows = rows.filter(r => {
+    const k = isWeekly ? (r.week||'') : (r.month||'');
+    return displayRows.length > 0 && k < (isWeekly ? displayRows[0].week : displayRows[0].month);
+  }).slice(-displayRows.length);
 
   if (summaryWrap) summaryWrap.innerHTML = `<div class="stat-summary-row">
     ${summaryDefs.map(card => {
@@ -4474,6 +4481,18 @@ function renderStatChart() {
       const val   = isPt
         ? (+latestRow?.[card.key] || 0)
         : displayRows.reduce((s, r) => s + (+r[card.key] || 0), 0);
+      // Trend vs periode sebelumnya
+      const prevVal = isPt
+        ? (+(prevRows[prevRows.length-1]?.[card.key]) || 0)
+        : prevRows.reduce((s, r) => s + (+r[card.key] || 0), 0);
+      let trendHtml = '';
+      if (prevVal > 0 && !isPt) {
+        const pct   = ((val - prevVal) / prevVal * 100);
+        const up    = pct >= 0;
+        const color = up ? '#16a34a' : '#dc2626';
+        const arrow = up ? '↑' : '↓';
+        trendHtml = `<span style="font-size:.65rem;color:${color};font-weight:700;margin-left:4px">${arrow}${Math.abs(pct).toFixed(1)}%</span>`;
+      }
       const period = isPt
         ? `Bulan ${fmtMonth(latestRow?.month || '')}`
         : `Total ${rangeLabel}`;
@@ -4484,7 +4503,10 @@ function renderStatChart() {
             ${card.label}
             ${desc ? `<span class="stat-info-wrap"><svg class="stat-info-icon" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg><span class="stat-info-tip">${esc(desc)}</span></span>` : ''}
           </div>
-          <div class="stat-sum-val" style="color:${platM.color}">${fmtStatVal(val, fDef.fmt || card.fmt || 'num')}</div>
+          <div style="display:flex;align-items:baseline;gap:2px">
+            <div class="stat-sum-val" style="color:${platM.color}">${fmtStatVal(val, fDef.fmt || card.fmt || 'num')}</div>
+            ${trendHtml}
+          </div>
           <div class="stat-sum-period">${period}</div>
         </div>`;
     }).join('')}
@@ -4499,21 +4521,23 @@ function renderStatChart() {
     chartWrap?.parentNode?.insertBefore(updateBanner, chartWrap);
   }
   if (meta?.updatedAt) {
-    const d = new Date(meta.updatedAt);
-    const tgl = d.toLocaleDateString('id-ID', { day:'2-digit', month:'long', year:'numeric' });
-    const jam = d.toLocaleTimeString('id-ID', { hour:'2-digit', minute:'2-digit' });
+    const d       = new Date(meta.updatedAt);
+    const daysDiff = Math.floor((Date.now() - d) / 86400000);
+    const tgl     = d.toLocaleDateString('id-ID', { day:'2-digit', month:'long', year:'numeric' });
+    const jam     = d.toLocaleTimeString('id-ID', { hour:'2-digit', minute:'2-digit' });
+    const stale   = daysDiff > 7;
+    const bgColor = stale ? '#fef3c7' : 'var(--surface)';
+    const border  = stale ? '#fde68a' : 'var(--bd)';
+    const staleTxt = stale ? `<span style="color:#b45309;font-weight:600;font-size:.68rem">⚠ Sudah ${daysDiff} hari belum diperbarui</span>` : `<span style="font-size:.68rem;color:#f59e0b">⚠ Data platform dapat berubah retroaktif</span>`;
     updateBanner.innerHTML = `
       <div style="display:flex;align-items:center;gap:6px;font-size:.72rem;color:var(--muted);
-        background:var(--surface);border:1px solid var(--bd);border-radius:8px;
+        background:${bgColor};border:1px solid ${border};border-radius:8px;
         padding:6px 12px;margin-bottom:8px;flex-wrap:wrap">
         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
           style="color:#16a34a;flex-shrink:0"><polyline points="23 4 23 10 17 10"/>
           <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
-        <span>Data <strong>${esc(platM.label)}</strong> terakhir diperbarui:</span>
-        <strong style="color:var(--text)">${tgl}, ${jam}</strong>
-        <span style="margin-left:auto;font-size:.68rem;color:#f59e0b">
-          ⚠ Data platform dapat berubah retroaktif — perbarui secara berkala
-        </span>
+        <span>Terakhir diperbarui: <strong style="color:var(--text)">${tgl}, ${jam}</strong></span>
+        <span style="margin-left:auto">${staleTxt}</span>
       </div>`;
     updateBanner.style.display = '';
   } else {
@@ -4523,10 +4547,33 @@ function renderStatChart() {
         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
           style="color:#f59e0b;flex-shrink:0"><circle cx="12" cy="12" r="10"/>
           <line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-        <span>Belum ada catatan pembaruan untuk data ini. Perbarui melalui tombol <strong>Import</strong> atau <strong>+ Tambah Bulan</strong>.</span>
+        <span>Belum ada catatan pembaruan. Perbarui melalui <strong>Import</strong> atau <strong>+ Tambah Bulan</strong>.</span>
       </div>`;
     updateBanner.style.display = '';
   }
+
+  /* ── Auto-narrative (Fitur 7) ─────────────────────────────────── */
+  let narrativeEl = $('statNarrative');
+  if (!narrativeEl) {
+    narrativeEl = document.createElement('div');
+    narrativeEl.id = 'statNarrative';
+    chartWrap?.parentNode?.insertBefore(narrativeEl, chartWrap);
+  }
+  const viewKey  = platM.viewKey;
+  const totalV   = displayRows.reduce((s,r) => s + (+r[viewKey]||0), 0);
+  const totalEng = displayRows.reduce((s,r) => s + (+r.totalEngagement||0), 0);
+  const avgER    = displayRows.reduce((s,r) => s + (+r.erPct||0), 0) / displayRows.length;
+  const bestRow  = displayRows.reduce((b,r) => (+r[viewKey]||0) > (+b[viewKey]||0) ? r : b, displayRows[0]);
+  const bestLbl  = isWeekly ? fmtWeek(bestRow?.week||'') : fmtMonth(bestRow?.month||'');
+  narrativeEl.innerHTML = `
+    <div style="font-size:.74rem;color:var(--muted);background:var(--surface);border:1px solid var(--bd);
+      border-radius:8px;padding:8px 12px;margin-bottom:8px;line-height:1.6">
+      📊 <strong>${fmtNum(totalV)}</strong> total views · <strong>${fmtNum(totalEng)}</strong> total engagement
+      dalam <strong>${displayRows.length}</strong> ${isWeekly?'minggu':'bulan'} terakhir.
+      Periode terbaik: <strong>${bestLbl}</strong> (${fmtNum(+bestRow?.[viewKey]||0)} views).
+      Rata-rata ER: <strong>${avgER.toFixed(2)}%</strong>.
+      <button onclick="copyStatNarrative(this)" style="margin-left:8px;font-size:.68rem;color:var(--blue);background:none;border:none;cursor:pointer;text-decoration:underline">📋 Salin</button>
+    </div>`;
 
   /* ── Label Followers/Subs per platform (EOM) ────────────────────── */
   const FOLL_LABEL = {
@@ -4572,6 +4619,14 @@ function renderStatChart() {
   if (!canvas) return;
   const ctx = canvas.getContext('2d');
 
+  // Fitur 4 — Average reference line
+  const avgViews  = viewData.length ? viewData.reduce((a,b)=>a+b,0)/viewData.length : 0;
+  const avgLine   = viewData.map(() => Math.round(avgViews));
+
+  // Fitur 8 — Perbandingan periode sebelumnya (Views)
+  const showCmp   = !!$('statCmpToggle')?.checked;
+  const cmpData   = showCmp ? prevRows.map(r => +(r[platM.viewKey]||0)) : [];
+
   window._statChart = new Chart(ctx, {
     data: {
       labels,
@@ -4585,7 +4640,7 @@ function renderStatChart() {
           borderWidth: 1.5,
           borderRadius: 5,
           yAxisID: 'yFoll',
-          order: 2
+          order: 3
         },
         {
           type: 'line',
@@ -4600,7 +4655,31 @@ function renderStatChart() {
           fill: true,
           yAxisID: 'yView',
           order: 1
-        }
+        },
+        {
+          type: 'line',
+          label: `Rata-rata (${fmtNum(Math.round(avgViews))})`,
+          data: avgLine,
+          borderColor: '#f59e0b',
+          borderWidth: 1.5,
+          borderDash: [6,4],
+          pointRadius: 0,
+          fill: false,
+          yAxisID: 'yView',
+          order: 2
+        },
+        ...(showCmp && cmpData.length ? [{
+          type: 'line',
+          label: 'Views (periode sebelumnya)',
+          data: cmpData,
+          borderColor: '#94a3b8',
+          borderWidth: 1.5,
+          borderDash: [3,3],
+          pointRadius: 2,
+          fill: false,
+          yAxisID: 'yView',
+          order: 4
+        }] : [])
       ]
     },
     options: {
@@ -4685,14 +4764,20 @@ function renderStatDataTable(acctId, platId, rows) {
   wrap.innerHTML = `
     <div class="card" style="margin-top:16px">
       <div class="card-head">
-        <span class="card-title">📋 Data Bulanan — ${platM.label} · ${getAcctName(acctId)}</span>
-        <span class="badge-status ok" style="font-size:.68rem">Admin Only</span>
+        <span class="card-title">📋 Data ${isWeekly?'Mingguan':'Bulanan'} — ${platM.label} · ${getAcctName(acctId)}</span>
+        <div style="display:flex;align-items:center;gap:8px">
+          <label style="font-size:.7rem;color:var(--muted);display:flex;align-items:center;gap:4px;cursor:pointer">
+            <input type="checkbox" id="statCmpToggle" onchange="renderStatChart()" style="accent-color:var(--blue)">
+            Bandingkan periode sebelumnya
+          </label>
+          <span class="badge-status ok" style="font-size:.68rem">Admin Only</span>
+        </div>
       </div>
-      <div style="overflow-x:auto">
+      <div style="overflow-x:auto;-webkit-overflow-scrolling:touch">
         <table class="data-table" style="font-size:.78rem">
           <thead>
             <tr>
-              <th style="white-space:nowrap">BULAN</th>
+              <th style="white-space:nowrap">${isWeekly?'MINGGU':'BULAN'}</th>
               ${headerCells}
               <th style="white-space:nowrap;text-align:center">Aksi</th>
             </tr>
@@ -4700,16 +4785,62 @@ function renderStatDataTable(acctId, platId, rows) {
           <tbody>${bodyRows}</tbody>
         </table>
       </div>
-      <div style="padding:10px 0 0">
+      <div style="padding:10px 0 0;display:flex;gap:8px;flex-wrap:wrap">
         <button class="btn-sm blue" onclick="addStatRowFromTable()">
           <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-          Tambah Bulan
+          Tambah ${isWeekly?'Minggu':'Bulan'}
         </button>
+        <button class="btn-sm" onclick="copyStatTable('${acctId}','${platId}')">📋 Salin Tabel</button>
+        <button class="btn-sm" onclick="exportStatCSV('${acctId}','${platId}')">📥 Export CSV</button>
       </div>
     </div>`;
 }
 
 /* Tambah baris baru lewat tabel */
+/* ── Fitur 8: Salin narasi otomatis ─────────────────────────────────────── */
+function copyStatNarrative(btn) {
+  const txt = btn?.closest('div')?.textContent?.replace(/📋 Salin/,'').trim() || '';
+  navigator.clipboard.writeText(txt).then(() => toast('Narasi disalin ✓', 'success'));
+}
+
+/* ── Fitur 8: Salin tabel sebagai teks ──────────────────────────────────── */
+function copyStatTable(acctId, platId) {
+  const isW   = state.statViewMode === 'weekly';
+  const key   = isW ? platId + '_w' : platId;
+  const rows  = (state.analytics?.[acctId]?.[key] || [])
+    .slice().sort((a,b) => (a[isW?'week':'month']||'').localeCompare(b[isW?'week':'month']||''));
+  const platM = PLATFORM_FIELDS[platId];
+  if (!rows.length) { toast('Tidak ada data', 'error'); return; }
+  const header = ['Periode', ...platM.fields.map(f => f.label)].join('\t');
+  const body   = rows.map(r => {
+    const lbl = isW ? fmtWeek(r.week||'') : fmtMonth(r.month||'');
+    return [lbl, ...platM.fields.map(f => r[f.key] ?? 0)].join('\t');
+  }).join('\n');
+  navigator.clipboard.writeText(header + '\n' + body)
+    .then(() => toast('Tabel disalin ke clipboard ✓', 'success'));
+}
+
+/* ── Fitur 3: Export CSV ─────────────────────────────────────────────────── */
+function exportStatCSV(acctId, platId) {
+  const isW   = state.statViewMode === 'weekly';
+  const key   = isW ? platId + '_w' : platId;
+  const rows  = (state.analytics?.[acctId]?.[key] || [])
+    .slice().sort((a,b) => (a[isW?'week':'month']||'').localeCompare(b[isW?'week':'month']||''));
+  const platM = PLATFORM_FIELDS[platId];
+  if (!rows.length) { toast('Tidak ada data untuk diexport', 'error'); return; }
+  const header = ['Periode', ...platM.fields.map(f => f.label)].join(',');
+  const body   = rows.map(r => {
+    const lbl = isW ? (r.week||'') : (r.month||'');
+    return [lbl, ...platM.fields.map(f => r[f.key] ?? 0)].join(',');
+  }).join('\n');
+  const blob = new Blob(['﻿' + header + '\n' + body], { type: 'text/csv;charset=utf-8' });
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  a.href = url; a.download = `${getAcctName(acctId)}_${platM.label}_${isW?'weekly':'monthly'}.csv`;
+  a.click(); URL.revokeObjectURL(url);
+  toast('CSV berhasil diexport ✓', 'success');
+}
+
 function addStatRowFromTable() {
   const d    = new Date();
   const platM = PLATFORM_FIELDS[state.statActivePlat || 'youtube'];
@@ -6163,6 +6294,9 @@ document.addEventListener('DOMContentLoaded', async () => {
   window.openPlannerWa       = openPlannerWa;
   window.onStatPeriodChange     = onStatPeriodChange;
   window.setStatViewMode        = setStatViewMode;
+  window.copyStatNarrative      = copyStatNarrative;
+  window.copyStatTable          = copyStatTable;
+  window.exportStatCSV          = exportStatCSV;
   window.importStatFromFile     = importStatFromFile;
   window.triggerYouTubeSync     = triggerYouTubeSync;
   window.deleteUser     = deleteUser;
