@@ -4845,34 +4845,50 @@ function exportStatCSV(acctId, platId) {
 }
 
 function addStatRowFromTable() {
-  const d    = new Date();
-  const platM = PLATFORM_FIELDS[state.statActivePlat || 'youtube'];
-  sv('statMonth', `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`);
+  const isWeekly = state.statViewMode === 'weekly';
+  const platM    = PLATFORM_FIELDS[state.statActivePlat || 'youtube'];
+  const inp      = $('statMonth');
+  if (inp) {
+    if (isWeekly) {
+      inp.type  = 'week';
+      inp.value = dateToISOWeek(new Date()).replace('-W', '-W'); // YYYY-Www
+    } else {
+      inp.type  = 'month';
+      const d   = new Date();
+      inp.value = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;
+    }
+  }
+  const lbl = $('statInputLabel');
+  if (lbl) lbl.textContent = isWeekly ? 'Minggu' : 'Bulan';
   renderStatInputFields(state.statActiveAcct);
   const title = $('statInputTitle');
-  if (title) title.textContent = `📊 Input ${platM?.label||''} — ${getAcctName(state.statActiveAcct)}`;
+  if (title) title.textContent = `📊 Input ${isWeekly?'Mingguan':''} ${platM?.label||''} — ${getAcctName(state.statActiveAcct)}`;
   $('statInputCard')?.classList.remove('hidden');
   $('statInputCard')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 
 /* Hapus satu baris data */
-async function deleteStatRow(month) {
-  const acctId = state.statActiveAcct;
-  const platId = state.statActivePlat || 'youtube';
-  showConfirm(`Hapus data ${fmtMonth(month)}? Tindakan tidak dapat dibatalkan.`, async () => {
+async function deleteStatRow(periodKey) {
+  const acctId   = state.statActiveAcct;
+  const platId   = state.statActivePlat || 'youtube';
+  const isWeekly = state.statViewMode === 'weekly';
+  const storeKey = isWeekly ? platId + '_w' : platId;
+  const rKey     = isWeekly ? 'week' : 'month';
+  const lbl      = isWeekly ? periodKey : fmtMonth(periodKey);
+  showConfirm(`Hapus data ${lbl}? Tindakan tidak dapat dibatalkan.`, async () => {
     const analytics = state.analytics || {};
-    if (analytics[acctId]?.[platId]) {
-      analytics[acctId][platId] = analytics[acctId][platId].filter(r => r.month !== month);
+    if (analytics[acctId]?.[storeKey]) {
+      analytics[acctId][storeKey] = analytics[acctId][storeKey].filter(r => r[rKey] !== periodKey);
     }
     state.analytics = analytics;
     showFlagLoader(600);
     try {
       state.shas.analytics = await window.db.writeData(
         'analytics', analytics,
-        `Hapus statistik: ${getAcctName(acctId)} ${platId} — ${month}`
+        `Hapus statistik: ${getAcctName(acctId)} ${platId} — ${lbl}`
       );
-      await logActivity(currentUser(), 'hapus statistik', `${getAcctName(acctId)} ${platId} — ${fmtMonth(month)}`);
-      toast(`Data ${fmtMonth(month)} dihapus ✓`);
+      await logActivity(currentUser(), 'hapus statistik', `${getAcctName(acctId)} ${platId} — ${lbl}`);
+      toast(`Data ${lbl} dihapus ✓`);
       renderStatChart();
     } catch (e) { toast('Gagal hapus: ' + e.message, 'error'); }
   });
@@ -5356,15 +5372,20 @@ function closeCntPreview() {
   if (frame) frame.src = '';   // stop video
 }
 
-function openStatEdit(month) {
-  const platId = state.statActivePlat || 'youtube';
-  const acctId = state.statActiveAcct;
-  const platM  = PLATFORM_FIELDS[platId];
-  const existing = (state.analytics?.[acctId]?.[platId] || []).find(r => r.month === month);
+function openStatEdit(periodKey) {
+  const isWeekly  = state.statViewMode === 'weekly';
+  const platId    = state.statActivePlat || 'youtube';
+  const acctId    = state.statActiveAcct;
+  const platM     = PLATFORM_FIELDS[platId];
+  const storeKey  = isWeekly ? platId + '_w' : platId;
+  const rKey      = isWeekly ? 'week' : 'month';
+  const existing  = (state.analytics?.[acctId]?.[storeKey] || []).find(r => r[rKey] === periodKey);
+  const lbl       = isWeekly ? fmtWeek(periodKey) : fmtMonth(periodKey);
 
-  sv('statMonth', month);
+  const inp = $('statMonth');
+  if (inp) { inp.type = isWeekly ? 'week' : 'month'; inp.value = periodKey; }
   const title = $('statInputTitle');
-  if (title) title.textContent = `✏️ Edit ${platM?.label} — ${fmtMonth(month)}`;
+  if (title) title.textContent = `✏️ Edit ${platM?.label} — ${lbl}`;
 
   renderStatInputFields(acctId, platId, existing);
   $('statInputCard')?.classList.remove('hidden');
@@ -5398,18 +5419,22 @@ function renderStatInputFields(acctId, platIdOverride, prefill) {
 }
 
 async function saveAnalyticsEntry() {
-  const month  = gv('statMonth');
-  const acctId = state.statActiveAcct;
-  const platId = state.statActivePlat || 'youtube';
-  const platM  = PLATFORM_FIELDS[platId];
-  if (!month) { toast('Pilih bulan terlebih dahulu', 'error'); return; }
+  const isWeekly = state.statViewMode === 'weekly';
+  const periodVal = gv('statMonth');   // bisa YYYY-MM atau YYYY-Www
+  const acctId    = state.statActiveAcct;
+  const platId    = state.statActivePlat || 'youtube';
+  const platM     = PLATFORM_FIELDS[platId];
+  const storeKey  = isWeekly ? platId + '_w' : platId;
+  const rKey      = isWeekly ? 'week' : 'month';
+
+  if (!periodVal) { toast(`Pilih ${isWeekly?'minggu':'bulan'} terlebih dahulu`, 'error'); return; }
 
   const analytics = state.analytics || {};
   if (!analytics[acctId]) analytics[acctId] = {};
-  if (!analytics[acctId][platId]) analytics[acctId][platId] = [];
+  if (!analytics[acctId][storeKey]) analytics[acctId][storeKey] = [];
 
-  // Build entry from inputs
-  const entry = { month };
+  // Build entry dari inputs
+  const entry = { [rKey]: periodVal };
   let hasAny = false;
   platM.fields.forEach(f => {
     const raw = gv(`sif_${f.key}`);
@@ -5420,26 +5445,26 @@ async function saveAnalyticsEntry() {
   });
   if (!hasAny) { toast('Isi minimal satu field', 'error'); return; }
 
-  // Replace or add
-  analytics[acctId][platId] = analytics[acctId][platId].filter(r => r.month !== month);
-  analytics[acctId][platId].push(entry);
-  analytics[acctId][platId].sort((a,b) => a.month.localeCompare(b.month));
-  if (analytics[acctId][platId].length > 36)
-    analytics[acctId][platId] = analytics[acctId][platId].slice(-36);
-  // Simpan timestamp update terakhir
+  // Replace atau tambah — tidak mengganggu array lain
+  analytics[acctId][storeKey] = analytics[acctId][storeKey].filter(r => r[rKey] !== periodVal);
+  analytics[acctId][storeKey].push(entry);
+  analytics[acctId][storeKey].sort((a,b) => (a[rKey]||'').localeCompare(b[rKey]||''));
+  if (analytics[acctId][storeKey].length > 52)  // max 52 minggu / 36 bulan
+    analytics[acctId][storeKey] = analytics[acctId][storeKey].slice(isWeekly ? -52 : -36);
   _setAnalyticsMeta(analytics, acctId, platId);
 
   state.analytics = analytics;
+  const lbl2 = isWeekly ? fmtWeek(periodVal) : fmtMonth(periodVal);
   setLoading('btnSaveStats', true, 'Menyimpan…');
   try {
     state.shas.analytics = await window.db.writeData(
       'analytics', analytics,
-      `Statistik: ${getAcctName(acctId)} ${platM.label} ${fmtMonth(month)}`
+      `Statistik ${isWeekly?'mingguan':''}: ${getAcctName(acctId)} ${platM.label} ${lbl2}`
     );
-    await logActivity(currentUser(), 'update statistik', `${getAcctName(acctId)} ${platM.label} — ${fmtMonth(month)}`);
-    toast(`Data ${platM.label} ${fmtMonth(month)} disimpan ✓`, 'success');
+    await logActivity(currentUser(), 'update statistik', `${getAcctName(acctId)} ${platM.label} — ${lbl2}`);
+    toast(`Data ${platM.label} ${lbl2} disimpan ✓`, 'success');
     const lbl = $('statLastSaved');
-    if (lbl) lbl.textContent = `Tersimpan: ${fmtMonth(month)}`;
+    if (lbl) lbl.textContent = `Tersimpan: ${lbl2}`;
     renderStatTable();
     $('statInputCard')?.classList.add('hidden');
   } catch (e) {
