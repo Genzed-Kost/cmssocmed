@@ -371,6 +371,7 @@ let state = {
   urlActiveAcct:  'penjaga-harapan',
   statActiveAcct: 'penjaga-harapan',
   statActivePlat: 'youtube',
+  statViewMode:   'monthly',   // 'monthly' | 'weekly'
   top3Month:      null,         // selected month for Top 3 (null = latest)
   dashMonth:      null,       // null = current month (used only when no date range)
   dashDateFrom:   null,       // ISO date string or null
@@ -3801,6 +3802,59 @@ function fmtMonth(ym) {
   return `${names[+m - 1]} ${y}`;
 }
 
+/* Format ISO week: "2025-W43" → "W43 Okt '25" */
+function fmtWeek(yw) {
+  if (!yw) return '';
+  const [y, w] = yw.split('-W');
+  // Hitung tanggal Senin minggu ke-W
+  const jan4 = new Date(+y, 0, 4);
+  const mon  = new Date(jan4.getTime() + (parseInt(w,10) - 1) * 7 * 86400000
+    - (jan4.getDay() || 7 - 1) * 86400000);
+  const MNAMES = ['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agt','Sep','Okt','Nov','Des'];
+  return `W${w} ${MNAMES[mon.getMonth()]} '${String(y).slice(-2)}`;
+}
+
+/* Dapatkan ISO week string dari Date */
+function dateToISOWeek(date) {
+  const d = new Date(date);
+  d.setHours(0,0,0,0);
+  d.setDate(d.getDate() + 3 - (d.getDay() + 6) % 7);
+  const y    = d.getFullYear();
+  const jan4 = new Date(y, 0, 4);
+  const wn   = 1 + Math.round(((d - jan4) / 86400000 - 3 + (jan4.getDay() + 6) % 7) / 7);
+  return `${y}-W${String(wn).padStart(2,'0')}`;
+}
+
+/* Fungsi toggle view mode Monthly/Weekly */
+function setStatViewMode(mode) {
+  state.statViewMode = mode;
+  // Update tombol toggle
+  $$('.stat-view-btn').forEach(b => b.classList.toggle('active', b.dataset.mode === mode));
+  // Update dropdown periode sesuai mode
+  const sel = $('statPeriodSel');
+  if (sel) {
+    if (mode === 'weekly') {
+      sel.innerHTML = `
+        <option value="12w">12 Minggu Terakhir</option>
+        <option value="8w">8 Minggu Terakhir</option>
+        <option value="4w">4 Minggu Terakhir</option>
+        <option value="allw">Semua Data</option>`;
+      onStatPeriodChange('12w');
+    } else {
+      sel.innerHTML = `
+        <option value="12">12 Bulan Terakhir</option>
+        <option value="6">6 Bulan Terakhir</option>
+        <option value="3">3 Bulan Terakhir</option>
+        <option value="1">Bulan Ini</option>
+        <option value="year">Tahun Ini</option>
+        <option value="all">Semua Data</option>
+        <option value="custom">⚙ Kustom…</option>`;
+      onStatPeriodChange('12');
+    }
+  }
+  renderStatChart();
+}
+
 /* ── Render ──────────────────────────────────────────────────────────────── */
 function fmtStatVal(val, fmt) {
   if (val === null || val === undefined || val === '') return '<span style="color:var(--muted-lt)">—</span>';
@@ -4166,15 +4220,20 @@ async function importStatFromFile(input) {
 
 /* Simpan banyak baris CSV langsung ke state & GitHub */
 async function importMultiRowsDirectly(acctId, platId, rows) {
+  // Deteksi apakah data weekly (punya field 'week') atau monthly
+  const isWeeklyData = rows.some(r => r.week && !r.month);
+  const storeKey = isWeeklyData ? platId + '_w' : platId;
+  const rowKey   = isWeeklyData ? 'week' : 'month';
+
   if (!state.analytics[acctId]) state.analytics[acctId] = {};
-  if (!state.analytics[acctId][platId]) state.analytics[acctId][platId] = [];
-  const existing    = state.analytics[acctId][platId];
-  const existMonths = new Set(existing.map(r => r.month));
-  const toAdd       = rows.filter(r => !existMonths.has(r.month));
-  const toUpdate    = rows.filter(r =>  existMonths.has(r.month));
+  if (!state.analytics[acctId][storeKey]) state.analytics[acctId][storeKey] = [];
+  const existing    = state.analytics[acctId][storeKey];
+  const existKeys   = new Set(existing.map(r => r[rowKey]));
+  const toAdd       = rows.filter(r => !existKeys.has(r[rowKey]));
+  const toUpdate    = rows.filter(r =>  existKeys.has(r[rowKey]));
 
   toUpdate.forEach(newRow => {
-    const idx = existing.findIndex(e => e.month === newRow.month);
+    const idx = existing.findIndex(e => e[rowKey] === newRow[rowKey]);
     if (idx < 0) return;
     const old = existing[idx];
     // Smart merge: update field jika nilai baru > 0 atau field belum ada di data lama
@@ -4192,8 +4251,8 @@ async function importMultiRowsDirectly(acctId, platId, rows) {
     existing[idx] = merged;
   });
 
-  state.analytics[acctId][platId] = [...existing, ...toAdd]
-    .sort((a, b) => a.month.localeCompare(b.month));
+  state.analytics[acctId][storeKey] = [...existing, ...toAdd]
+    .sort((a, b) => (a[rowKey]||'').localeCompare(b[rowKey]||''));
   _setAnalyticsMeta(state.analytics, acctId, platId);
   state.shas.analytics = await window.db.writeData('analytics', state.analytics,
     `Import CSV: update ${toUpdate.length} + tambah ${toAdd.length} bulan ${platId}`);
@@ -4320,8 +4379,12 @@ function renderStatChart() {
   const title = $('statInputTitle');
   if (title) title.textContent = `📊 Input ${platM.label} — ${getAcctName(acctId)}`;
 
-  const rows = ((state.analytics?.[acctId]?.[platId]) || [])
-    .slice().sort((a,b) => a.month.localeCompare(b.month));
+  const isWeekly = state.statViewMode === 'weekly';
+  const dataKey  = isWeekly ? platId + '_w' : platId;
+  const sortKey  = isWeekly ? 'week' : 'month';
+
+  const rows = ((state.analytics?.[acctId]?.[dataKey]) || [])
+    .slice().sort((a,b) => (a[sortKey]||'').localeCompare(b[sortKey]||''));
 
   const summaryWrap = $('statSummaryWrap');
   const chartWrap   = $('statChartWrap');
@@ -4331,7 +4394,7 @@ function renderStatChart() {
     if (summaryWrap) summaryWrap.innerHTML = '';
     if (chartWrap)   chartWrap.innerHTML = `<div class="stat-no-data">
       <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="color:var(--muted-lt)"><rect x="18" y="3" width="4" height="18" rx="1"/><rect x="10" y="8" width="4" height="13" rx="1"/><rect x="2" y="13" width="4" height="8" rx="1"/></svg>
-      <p>Belum ada data <strong>${platM.label}</strong> untuk <strong>${getAcctName(acctId)}</strong></p>
+      <p>Belum ada data <strong>${isWeekly?'mingguan':''} ${platM.label}</strong> untuk <strong>${getAcctName(acctId)}</strong></p>
       <button class="btn-sm blue" onclick="addStatRowFromTable()">+ Input Data Pertama</button>
     </div>`;
     if (window._statChart) { window._statChart.destroy(); window._statChart = null; }
@@ -4339,16 +4402,26 @@ function renderStatChart() {
     return;
   }
 
-  /* ── Range filter (dari statFromMonth – statToMonth) ────────────── */
-  const fromM = $('statFromMonth')?.value || '';
-  const toM   = $('statToMonth')?.value   || '';
+  /* ── Range filter ───────────────────────────────────────────────── */
+  const periodSel = $('statPeriodSel')?.value || (isWeekly ? '12w' : '12');
   let displayRows = rows;
-  if (fromM || toM) {
-    displayRows = rows.filter(r =>
-      (!fromM || r.month >= fromM) && (!toM || r.month <= toM)
-    );
+
+  if (isWeekly) {
+    const now     = new Date();
+    const nWeeks  = periodSel === 'allw' ? 0 : parseInt(periodSel, 10);
+    if (nWeeks > 0) {
+      const cutoff = dateToISOWeek(new Date(now.getTime() - nWeeks * 7 * 86400000));
+      displayRows  = rows.filter(r => (r.week||'') >= cutoff);
+    }
+  } else {
+    const fromM = $('statFromMonth')?.value || '';
+    const toM   = $('statToMonth')?.value   || '';
+    if (fromM || toM) {
+      displayRows = rows.filter(r =>
+        (!fromM || r.month >= fromM) && (!toM || r.month <= toM)
+      );
+    }
   }
-  // Fallback jika filter terlalu sempit (tidak ada data)
   if (!displayRows.length) displayRows = rows;
 
   /* ── Summary cards: 4 kartu tetap per platform ──────────────────
@@ -4466,12 +4539,19 @@ function renderStatChart() {
   /* ── Bar chart ──────────────────────────────────────────────────── */
   if (!chartWrap) return;
 
-  // Bersihkan konten lama (no-data message, canvas lama)
-  const prevExpand = chartWrap.querySelector('.chart-expand-btn');
+  // Bersihkan konten lama
   chartWrap.innerHTML = '<canvas id="statBarChart"></canvas>';
 
-  // Tambahkan / kembalikan tombol expand
-  const expandBtn = prevExpand || document.createElement('button');
+  // Toggle Bulanan / Mingguan
+  const toggleWrap = document.createElement('div');
+  toggleWrap.className = 'chart-view-toggle';
+  toggleWrap.innerHTML = `
+    <button class="stat-view-btn${!isWeekly?' active':''}" data-mode="monthly" onclick="setStatViewMode('monthly')">Bulanan</button>
+    <button class="stat-view-btn${isWeekly?' active':''}" data-mode="weekly" onclick="setStatViewMode('weekly')">Mingguan</button>`;
+  chartWrap.insertBefore(toggleWrap, chartWrap.firstChild);
+
+  // Tombol expand/fullscreen
+  const expandBtn = document.createElement('button');
   expandBtn.className = 'chart-expand-btn';
   expandBtn.title = 'Perbesar grafik';
   expandBtn.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
@@ -4481,7 +4561,7 @@ function renderStatChart() {
   expandBtn.onclick = () => toggleChartFullscreen(chartWrap);
   chartWrap.appendChild(expandBtn);
 
-  const labels     = displayRows.map(r => fmtMonth(r.month));
+  const labels     = displayRows.map(r => isWeekly ? fmtWeek(r.week||'') : fmtMonth(r.month||''));
   const follData   = displayRows.map(r => +(r[platM.followerKey] || 0));
   const viewData   = displayRows.map(r => +(r[platM.viewKey]     || 0));
   const barColor   = platM.color;
@@ -6082,6 +6162,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   window.renderPlanner       = renderPlanner;
   window.openPlannerWa       = openPlannerWa;
   window.onStatPeriodChange     = onStatPeriodChange;
+  window.setStatViewMode        = setStatViewMode;
   window.importStatFromFile     = importStatFromFile;
   window.triggerYouTubeSync     = triggerYouTubeSync;
   window.deleteUser     = deleteUser;
