@@ -1,0 +1,72 @@
+name: Sync Instagram Analytics
+
+on:
+  schedule:
+    - cron: '0 2 1 * *'    # Tanggal 1 tiap bulan jam 02:00 UTC → bulanan
+    - cron: '0 2 * * 1'    # Tiap Senin jam 02:00 UTC → mingguan
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: 'Mode sync (monthly / weekly)'
+        required: false
+        default: 'monthly'
+      month:
+        description: 'Override bulan target — format YYYY-MM (hanya untuk mode monthly)'
+        required: false
+        default: ''
+      week:
+        description: 'Override minggu target — format YYYY-W## (hanya untuk mode weekly)'
+        required: false
+        default: ''
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Setup Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      # Deteksi mode otomatis: Senin = weekly, tanggal 1 = monthly
+      - name: Resolve sync mode
+        id: mode
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ] && [ -n "${{ inputs.mode }}" ]; then
+            echo "SYNC_MODE=${{ inputs.mode }}" >> $GITHUB_ENV
+          elif [ "$(date +%u)" = "1" ] && [ "$(date +%d)" != "01" ]; then
+            echo "SYNC_MODE=weekly" >> $GITHUB_ENV
+          else
+            echo "SYNC_MODE=monthly" >> $GITHUB_ENV
+          fi
+          echo "OVERRIDE_MONTH=${{ inputs.month }}" >> $GITHUB_ENV
+          echo "OVERRIDE_WEEK=${{ inputs.week }}"   >> $GITHUB_ENV
+
+      - name: Sync Instagram Stats
+        run: node .github/scripts/sync-instagram.js
+        env:
+          # Penjaga Harapan
+          INSTAGRAM_TOKEN_PH: ${{ secrets.INSTAGRAM_TOKEN_PH }}
+          INSTAGRAM_ID_PH:    ${{ secrets.INSTAGRAM_ID_PH }}
+          # 33 Official
+          INSTAGRAM_TOKEN_33: ${{ secrets.INSTAGRAM_TOKEN_33 }}
+          INSTAGRAM_ID_33:    ${{ secrets.INSTAGRAM_ID_33 }}
+          # Jaga Asa
+          INSTAGRAM_TOKEN_JA: ${{ secrets.INSTAGRAM_TOKEN_JA }}
+          INSTAGRAM_ID_JA:    ${{ secrets.INSTAGRAM_ID_JA }}
+
+      - name: Commit & push jika ada perubahan
+        run: |
+          git config user.name  "instagram-sync[bot]"
+          git config user.email "instagram-sync@penjagaharapan.cms"
+          git add data/analytics.json
+          git diff --staged --quiet || git commit -m "chore: auto-sync Instagram stats $(date +'%Y-%m') [${SYNC_MODE}]"
+          git push

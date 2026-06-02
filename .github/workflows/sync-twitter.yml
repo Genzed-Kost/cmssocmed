@@ -1,0 +1,70 @@
+name: Sync X (Twitter) Analytics
+
+on:
+  schedule:
+    - cron: '0 5 1 * *'    # Tanggal 1 tiap bulan jam 05:00 UTC → bulanan
+    - cron: '0 5 * * 1'    # Tiap Senin jam 05:00 UTC → mingguan
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: 'Mode sync (monthly / weekly)'
+        required: false
+        default: 'monthly'
+      month:
+        description: 'Override bulan target — format YYYY-MM'
+        required: false
+        default: ''
+      week:
+        description: 'Override minggu target — format YYYY-W##'
+        required: false
+        default: ''
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Setup Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Resolve sync mode
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ] && [ -n "${{ inputs.mode }}" ]; then
+            echo "SYNC_MODE=${{ inputs.mode }}" >> $GITHUB_ENV
+          elif [ "$(date +%u)" = "1" ] && [ "$(date +%d)" != "01" ]; then
+            echo "SYNC_MODE=weekly" >> $GITHUB_ENV
+          else
+            echo "SYNC_MODE=monthly" >> $GITHUB_ENV
+          fi
+          echo "OVERRIDE_MONTH=${{ inputs.month }}" >> $GITHUB_ENV
+          echo "OVERRIDE_WEEK=${{ inputs.week }}"   >> $GITHUB_ENV
+
+      - name: Sync X (Twitter) Stats
+        run: node .github/scripts/sync-twitter.js
+        env:
+          # Penjaga Harapan
+          TWITTER_BEARER_TOKEN_PH: ${{ secrets.TWITTER_BEARER_TOKEN_PH }}
+          TWITTER_USER_ID_PH:      ${{ secrets.TWITTER_USER_ID_PH }}
+          # 33 Official
+          TWITTER_BEARER_TOKEN_33: ${{ secrets.TWITTER_BEARER_TOKEN_33 }}
+          TWITTER_USER_ID_33:      ${{ secrets.TWITTER_USER_ID_33 }}
+          # Jaga Asa
+          TWITTER_BEARER_TOKEN_JA: ${{ secrets.TWITTER_BEARER_TOKEN_JA }}
+          TWITTER_USER_ID_JA:      ${{ secrets.TWITTER_USER_ID_JA }}
+
+      - name: Commit & push jika ada perubahan
+        run: |
+          git config user.name  "twitter-sync[bot]"
+          git config user.email "twitter-sync@penjagaharapan.cms"
+          git add data/analytics.json
+          git diff --staged --quiet || git commit -m "chore: auto-sync Twitter stats $(date +'%Y-%m') [${SYNC_MODE}]"
+          git push
