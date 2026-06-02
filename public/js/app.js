@@ -2387,6 +2387,10 @@ function renderTodoList() {
   const label = $('todoUserLabel');
   if (label) label.textContent = admin ? '(semua tim)' : `(${me})`;
 
+  const PRIORITY_FORMATS  = ['Podcast', 'Liputan'];   // prioritas 5 hari sebelum
+  const PRIORITY_DAYS     = 5;
+  const in5DaysStr        = new Date(Date.now() + PRIORITY_DAYS * 86400000).toISOString().slice(0, 10);
+
   // Filter & sort konten dari planner
   const myContents = (state.contents || [])
     .filter(c => {
@@ -2396,6 +2400,12 @@ function renderTodoList() {
       return creators.includes(me);
     })
     .sort((a, b) => {
+      // Scoring: Podcast/Liputan dalam 5 hari ke depan → skor tinggi, naik ke atas
+      const isPrioA = PRIORITY_FORMATS.includes(a.format) && a.publishDate >= todayStr && a.publishDate <= in5DaysStr;
+      const isPrioB = PRIORITY_FORMATS.includes(b.format) && b.publishDate >= todayStr && b.publishDate <= in5DaysStr;
+      if (isPrioA && !isPrioB) return -1;
+      if (!isPrioA && isPrioB) return  1;
+      // Dalam grup yang sama: urut tanggal
       const da = a.publishDate ? new Date(a.publishDate) : new Date('9999');
       const db = b.publishDate ? new Date(b.publishDate) : new Date('9999');
       return da - db;
@@ -2406,39 +2416,56 @@ function renderTodoList() {
     return;
   }
 
-  // Kelompokkan: hari ini, besok, sisanya (max 6 total)
-  const todayItems    = myContents.filter(c => c.publishDate === todayStr);
-  const tomorrowItems = myContents.filter(c => c.publishDate === tomorrowStr);
-  const otherItems    = myContents.filter(c => c.publishDate !== todayStr && c.publishDate !== tomorrowStr);
+  // Ambil max 8 total (lebih banyak agar Podcast/Liputan tidak terpotong)
+  const combined = myContents.slice(0, 8);
 
-  // Ambil max 6 total, prioritas: hari ini → besok → lainnya
-  const combined = [...todayItems, ...tomorrowItems, ...otherItems].slice(0, 6);
+  function buildItem(c) {
+    const mode     = c.status === 'Published' ? 'published' : 'upcoming';
+    const overdue  = c.publishDate && c.publishDate < todayStr;
+    const isToday  = c.publishDate === todayStr;
+    const isTomorrow = c.publishDate === tomorrowStr;
 
-  function buildItem(c, tag) {
-    const mode    = c.status === 'Published' ? 'published' : 'upcoming';
-    const overdue = c.publishDate && c.publishDate < todayStr;
+    // Deteksi prioritas Podcast/Liputan dalam 5 hari
+    const daysToDate  = c.publishDate ? Math.round((new Date(c.publishDate) - new Date(todayStr)) / 86400000) : null;
+    const isPrioFormat = PRIORITY_FORMATS.includes(c.format);
+    const isPrio      = isPrioFormat && daysToDate !== null && daysToDate >= 0 && daysToDate <= PRIORITY_DAYS;
+
     const dateStr = c.publishDate
-      ? (overdue ? `⚠ ${fmtDate(c.publishDate)}` : fmtDate(c.publishDate))
+      ? (overdue        ? `⚠ ${fmtDate(c.publishDate)}`
+        : isToday       ? 'Hari Ini'
+        : isTomorrow    ? 'Besok'
+        : daysToDate !== null && daysToDate <= PRIORITY_DAYS
+          ? `${daysToDate} hari lagi`
+          : fmtDate(c.publishDate))
       : '—';
-    const tagHtml = tag
-      ? `<span class="todo-day-tag todo-day-tag--${tag}">${tag === 'today' ? 'Hari Ini' : 'Besok'}</span>`
-      : '';
-    return `<li class="todo-item todo-planner-item${overdue ? ' todo-overdue' : ''}${tag ? ` todo-highlight-${tag}` : ''}"
-        onclick="openLinkModal('${c.id}','${mode}')" title="Klik untuk lihat detail konten">
+
+    // Tag badge
+    let tagHtml = '';
+    if (isToday)         tagHtml = `<span class="todo-day-tag todo-day-tag--today">Hari Ini</span>`;
+    else if (isTomorrow) tagHtml = `<span class="todo-day-tag todo-day-tag--tomorrow">Besok</span>`;
+    else if (isPrio)     tagHtml = `<span class="todo-day-tag todo-day-tag--prio">🔔 ${daysToDate}h lagi</span>`;
+
+    const formatIcon = c.format === 'Podcast' ? '🎙' : c.format === 'Liputan' ? '📰' : '';
+    const liClass = [
+      'todo-item todo-planner-item',
+      overdue  ? 'todo-overdue'          : '',
+      isToday  ? 'todo-highlight-today'  : '',
+      isTomorrow ? 'todo-highlight-tomorrow' : '',
+      isPrio   ? 'todo-highlight-prio'   : '',
+    ].filter(Boolean).join(' ');
+
+    return `<li class="${liClass}"
+        onclick="openLinkModal('${c.id}','${mode}')" title="Klik untuk lihat detail">
       <span class="badge ${STATUS_CLASS[c.status] || 'badge-ide'} todo-status-badge">${esc(c.status || 'Plan')}</span>
       <span class="todo-planner-body">
-        <span class="todo-planner-title">${esc(c.title || '(Tanpa Judul)')}${tagHtml}</span>
+        <span class="todo-planner-title">${formatIcon ? formatIcon + ' ' : ''}${esc(c.title || '(Tanpa Judul)')}${tagHtml}</span>
         <span class="todo-planner-meta">${esc(c.format || '—')} · ${dateStr}</span>
       </span>
       <span class="todo-planner-arrow">›</span>
     </li>`;
   }
 
-  list.innerHTML = combined.map(c => {
-    const isToday    = c.publishDate === todayStr;
-    const isTomorrow = c.publishDate === tomorrowStr;
-    return buildItem(c, isToday ? 'today' : isTomorrow ? 'tomorrow' : null);
-  }).join('');
+  list.innerHTML = combined.map(c => buildItem(c)).join('');
 }
 
 // toggleTodo / deleteTodo / startEditTodo dihapus —
@@ -4902,68 +4929,68 @@ function renderStatChart() {
     }).join('')}
   </div>`;
 
-  /* ── Info terakhir diperbarui ───────────────────────────────────── */
+  /* ── Info + Narrative (digabung jadi satu kotak) ────────────────── */
+  // Hapus elemen narrative lama jika ada (sebelumnya terpisah)
+  $('statNarrative')?.remove();
+
   const meta = _getAnalyticsMeta(acctId, platId);
-  let updateBanner = $('statUpdateBanner');
-  if (!updateBanner) {
-    updateBanner = document.createElement('div');
-    updateBanner.id = 'statUpdateBanner';
-    chartWrap?.parentNode?.insertBefore(updateBanner, chartWrap);
-  }
-  if (meta?.updatedAt) {
-    const d       = new Date(meta.updatedAt);
-    const daysDiff = Math.floor((Date.now() - d) / 86400000);
-    const tgl     = d.toLocaleDateString('id-ID', { day:'2-digit', month:'long', year:'numeric' });
-    const jam     = d.toLocaleTimeString('id-ID', { hour:'2-digit', minute:'2-digit' });
-    const stale   = daysDiff > 7;
-    const bgColor = stale ? '#fef3c7' : 'var(--surface)';
-    const border  = stale ? '#fde68a' : 'var(--bd)';
-    const staleTxt = stale ? `<span style="color:#b45309;font-weight:600;font-size:.68rem">⚠ Sudah ${daysDiff} hari belum diperbarui</span>` : `<span style="font-size:.68rem;color:#f59e0b">⚠ Data platform dapat berubah retroaktif</span>`;
-    updateBanner.innerHTML = `
-      <div style="display:flex;align-items:center;gap:6px;font-size:.72rem;color:var(--muted);
-        background:${bgColor};border:1px solid ${border};border-radius:8px;
-        padding:6px 12px;margin-bottom:8px;flex-wrap:wrap">
-        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-          style="color:#16a34a;flex-shrink:0"><polyline points="23 4 23 10 17 10"/>
-          <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
-        <span>Terakhir diperbarui: <strong style="color:var(--text)">${tgl}, ${jam}</strong></span>
-        <span style="margin-left:auto">${staleTxt}</span>
-      </div>`;
-    updateBanner.style.display = '';
-  } else {
-    updateBanner.innerHTML = `
-      <div style="display:flex;align-items:center;gap:6px;font-size:.72rem;color:var(--muted);
-        background:#fffbeb;border:1px solid #fde68a;border-radius:8px;padding:6px 12px;margin-bottom:8px">
-        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-          style="color:#f59e0b;flex-shrink:0"><circle cx="12" cy="12" r="10"/>
-          <line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-        <span>Belum ada catatan pembaruan. Perbarui melalui <strong>Import</strong> atau <strong>+ Tambah Bulan</strong>.</span>
-      </div>`;
-    updateBanner.style.display = '';
+  let infoBanner = $('statUpdateBanner');
+  if (!infoBanner) {
+    infoBanner = document.createElement('div');
+    infoBanner.id = 'statUpdateBanner';
+    chartWrap?.parentNode?.insertBefore(infoBanner, chartWrap);
   }
 
-  /* ── Auto-narrative (Fitur 7) ─────────────────────────────────── */
-  let narrativeEl = $('statNarrative');
-  if (!narrativeEl) {
-    narrativeEl = document.createElement('div');
-    narrativeEl.id = 'statNarrative';
-    chartWrap?.parentNode?.insertBefore(narrativeEl, chartWrap);
+  // ── Bagian update status ──────────────────────────────────────────
+  let updateHtml = '';
+  if (meta?.updatedAt) {
+    const d        = new Date(meta.updatedAt);
+    const daysDiff = Math.floor((Date.now() - d) / 86400000);
+    const tgl      = d.toLocaleDateString('id-ID', { day:'2-digit', month:'long', year:'numeric' });
+    const jam      = d.toLocaleTimeString('id-ID', { hour:'2-digit', minute:'2-digit' });
+    const stale    = daysDiff > 7;
+    const staleTxt = stale
+      ? `<span style="color:#b45309;font-weight:600"> · ⚠ Sudah ${daysDiff} hari belum diperbarui</span>`
+      : `<span style="color:#f59e0b"> · Data platform dapat berubah retroaktif</span>`;
+    updateHtml = `<div style="display:flex;align-items:center;gap:5px;flex-wrap:wrap">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+        style="color:#16a34a;flex-shrink:0"><polyline points="23 4 23 10 17 10"/>
+        <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+      <span>Diperbarui: <strong style="color:var(--text)">${tgl}, ${jam}</strong>${staleTxt}</span>
+    </div>`;
+  } else {
+    updateHtml = `<div style="display:flex;align-items:center;gap:5px">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+        style="color:#f59e0b;flex-shrink:0"><circle cx="12" cy="12" r="10"/>
+        <line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+      <span>Belum ada catatan pembaruan — perbarui melalui <strong>Import</strong> atau <strong>+ Tambah Bulan</strong>.</span>
+    </div>`;
   }
+
+  // ── Bagian narrative ringkasan ────────────────────────────────────
   const viewKey  = platM.viewKey;
   const totalV   = displayRows.reduce((s,r) => s + (+r[viewKey]||0), 0);
   const totalEng = displayRows.reduce((s,r) => s + (+r.totalEngagement||0), 0);
   const avgER    = displayRows.reduce((s,r) => s + (+r.erPct||0), 0) / displayRows.length;
   const bestRow  = displayRows.reduce((b,r) => (+r[viewKey]||0) > (+b[viewKey]||0) ? r : b, displayRows[0]);
   const bestLbl  = isWeekly ? fmtWeek(bestRow?.week||'') : fmtMonth(bestRow?.month||'');
-  narrativeEl.innerHTML = `
-    <div style="font-size:.74rem;color:var(--muted);background:var(--surface);border:1px solid var(--bd);
+  const narrativeHtml = `<div style="padding-top:7px;margin-top:7px;border-top:1px solid var(--border,#e5e7eb)">
+    📊 <strong>${fmtNum(totalV)}</strong> total views · <strong>${fmtNum(totalEng)}</strong> total engagement
+    dalam <strong>${displayRows.length}</strong> ${isWeekly?'minggu':'bulan'} terakhir.
+    Periode terbaik: <strong>${bestLbl}</strong> (${fmtNum(+bestRow?.[viewKey]||0)} views).
+    Rata-rata ER: <strong>${avgER.toFixed(2)}%</strong>.
+    <button onclick="copyStatNarrative(this)" style="margin-left:6px;font-size:.68rem;color:var(--blue);background:none;border:none;cursor:pointer;text-decoration:underline">📋 Salin</button>
+  </div>`;
+
+  // ── Gabungkan jadi satu kotak ─────────────────────────────────────
+  const bgColor = meta?.updatedAt && Math.floor((Date.now() - new Date(meta.updatedAt)) / 86400000) > 7 ? '#fef3c7' : meta?.updatedAt ? 'var(--surface)' : '#fffbeb';
+  const border  = meta?.updatedAt && Math.floor((Date.now() - new Date(meta.updatedAt)) / 86400000) > 7 ? '#fde68a' : meta?.updatedAt ? 'var(--bd)' : '#fde68a';
+  infoBanner.innerHTML = `
+    <div style="font-size:.72rem;color:var(--muted);background:${bgColor};border:1px solid ${border};
       border-radius:8px;padding:8px 12px;margin-bottom:8px;line-height:1.6">
-      📊 <strong>${fmtNum(totalV)}</strong> total views · <strong>${fmtNum(totalEng)}</strong> total engagement
-      dalam <strong>${displayRows.length}</strong> ${isWeekly?'minggu':'bulan'} terakhir.
-      Periode terbaik: <strong>${bestLbl}</strong> (${fmtNum(+bestRow?.[viewKey]||0)} views).
-      Rata-rata ER: <strong>${avgER.toFixed(2)}%</strong>.
-      <button onclick="copyStatNarrative(this)" style="margin-left:8px;font-size:.68rem;color:var(--blue);background:none;border:none;cursor:pointer;text-decoration:underline">📋 Salin</button>
+      ${updateHtml}${narrativeHtml}
     </div>`;
+  infoBanner.style.display = '';
 
   /* ── Label Followers/Subs per platform (EOM) ────────────────────── */
   const FOLL_LABEL = {

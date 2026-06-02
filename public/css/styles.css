@@ -491,8 +491,10 @@ ul { list-style: none; }
 }
 .todo-day-tag--today    { background: #fee2e2; color: #dc2626; border: 1px solid #fca5a5; }
 .todo-day-tag--tomorrow { background: #fef9c3; color: #ca8a04; border: 1px solid #fde047; }
+.todo-day-tag--prio     { background: #ede9fe; color: #7c3aed; border: 1px solid #c4b5fd; }
 .todo-highlight-today    { border-left: 3px solid #dc2626 !important; padding-left: 5px !important; }
 .todo-highlight-tomorrow { border-left: 3px solid #f59e0b !important; padding-left: 5px !important; }
+.todo-highlight-prio     { border-left: 3px solid #7c3aed !important; padding-left: 5px !important; background: #faf5ff !important; }
 
 /* Activity list (mini) */
 .act-list { display: flex; flex-direction: column; gap: 0; max-height: 220px; overflow-y: auto; }
