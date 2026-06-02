@@ -355,6 +355,143 @@ const PLATFORM_FIELDS = {
   }
 };
 
+/* ── Platform-specific CSV column name aliases ───────────────────────────
+   Key   = header nama kolom dari export platform (lowercase, tanpa spasi/simbol)
+   Value = field key di PLATFORM_FIELDS
+   Digunakan oleh parseCSVDirect agar mapping lebih akurat daripada fuzzy match. */
+const PLATFORM_CSV_ALIASES = {
+  youtube: {
+    // YouTube Studio — Overview CSV
+    'views':                          'totalViews',
+    'videoviews':                     'totalViews',
+    'watchtimehours':                 'watchHours',
+    'watchtime(hours)':               'watchHours',
+    'watchtime':                      'watchHours',
+    'subscribersgained':              'subsGained',
+    'subscriberslost':                '_subsLost',
+    'subscribers':                    'subsEOM',
+    'impressions':                    'impressions',
+    'impressionsclickthroughrate(%)': 'erPct',
+    'impressionsclickthroughrate':    'erPct',
+    'likes':                          'totalLikes',
+    'dislikes':                       '_dislikes',
+    'commentsadded':                  'totalComments',
+    'comments':                       'totalComments',
+    'shares':                         '_shares',
+    'videos':                         'jmlVideo',
+    'videosposted':                   'jmlVideo',
+    'averageviewduration':            '_avgViewDur',
+    'averageviewpercentage(%)':       '_avgViewPct',
+    'uniqueviewers':                  'uniqueViewers',
+    'revenue(usd)':                   '_revenue',
+    'adimpressions':                  'adImpressions',
+    'cpm(usd)':                       '_cpm',
+  },
+  tiktok: {
+    // TikTok Studio — Overview & Content export
+    'videoviews':                     'totalVideoViews',
+    'videoplays':                     'totalVideoViews',
+    'videoplaycounts':                'totalVideoViews',
+    'views':                          'totalVideoViews',
+    'profileviews':                   'profileViews',
+    'profilevisits':                  'profileViews',
+    'likes':                          'totalLikes',
+    'likecounts':                     'totalLikes',
+    'comments':                       'totalComments',
+    'commentcounts':                  'totalComments',
+    'shares':                         'totalShares',
+    'sharecounts':                    'totalShares',
+    'followers':                      'followersEOM',
+    'followercount':                  'followersEOM',
+    'totalfollowers':                 'followersEOM',
+    'newfollowers':                   'followersGained',
+    'followersgained':                'followersGained',
+    'uniqueviewers':                  'totalViewers',
+    'newviewers':                     'newViewers',
+    'returningviewers':               'returningViewers',
+    'totalengagement':                'totalEngagement',
+    'engagement':                     'totalEngagement',
+  },
+  instagram: {
+    // Meta Business Suite — Account-level & Post-level export
+    'impressions':                    'totalViews',
+    'totalimpressions':               'totalViews',
+    'reach':                          'totalReach',
+    'accountsreached':                'totalReach',
+    'totalreach':                     'totalReach',
+    'followers':                      'followersEOM',
+    'totalfollowers':                 'followersEOM',
+    'followercount':                  'followersEOM',
+    'newfollows':                     'followersGained',
+    'follows':                        'followersGained',
+    'followersgained':                'followersGained',
+    'profilevisits':                  '_profileViews',
+    'likes':                          'totalLikes',
+    'likecounts':                     'totalLikes',
+    'comments':                       'totalComments',
+    'commentcounts':                  'totalComments',
+    'shares':                         'totalShares',
+    'sharecounts':                    'totalShares',
+    'saves':                          'totalSaves',
+    'savecounts':                     'totalSaves',
+    'reelplays':                      'reelViews',
+    'reelviews':                      'reelViews',
+    'videoplays':                     'reelViews',
+    'videoviews':                     'reelViews',
+    'totalengagement':                'totalEngagement',
+    'engagement':                     'totalEngagement',
+    // Post-level export columns (digunakan untuk filter & date)
+    'publishtime':                    '_date',
+    'posttime':                       '_date',
+    'accountusername':                '_account',
+    'posttype':                       '_postType',
+    'permalink':                      '_link',
+    'postdescription':                '_desc',
+  },
+  facebook: {
+    // Meta Business Suite — Page Insights export
+    'pagefans':                       'pageFollowers',
+    'totalpagefans':                  'pageFollowers',
+    'pagelikesandfollowers':          'pageFollowers',
+    'followers':                      'pageFollowers',
+    'pageimpressions':                'totalViews',
+    'totalimpressions':               'totalViews',
+    'pageimpressionstotal':           'totalViews',
+    'pagereach':                      'totalReach',
+    'totalreach':                     'totalReach',
+    'pagepostengagements':            'totalEngagement',
+    'totalengagements':               'totalEngagement',
+    'engagement':                     'totalEngagement',
+    'pageviewstotal':                 'totalViews',
+    'reactions':                      'totalReactions',
+    'pagereactions':                  'totalReactions',
+    'totalreactions':                 'totalReactions',
+    'likes':                          'totalReactions',  // FB "likes" = reactions
+    'comments':                       'totalComments',
+    'shares':                         'totalShares',
+    'posts':                          'totalPost',
+    'postspublished':                 'totalPost',
+  },
+  twitter: {
+    // X (Twitter) Analytics export
+    'impressions':                    'impressions',
+    'engagements':                    'totalEngagement',
+    'totalengagements':               'totalEngagement',
+    'likes':                          'totalLikes',
+    'favorites':                      'totalLikes',
+    'retweets':                       'totalRetweets',
+    'replies':                        '_replies',
+    'userprofileclicks':              '_profileClicks',
+    'urllinkclicks':                  '_urlClicks',
+    'followers':                      'followers',
+    'followerscount':                 'followers',
+    'newsfollowers':                  '_newFollowers',
+    'posts':                          'totalPost',
+    'tweets':                         'totalPost',
+    'tweetdate':                      '_date',
+  },
+};
+
 /* ── App state ───────────────────────────────────────────────────────────── */
 let state = {
   contents:       [],
@@ -4025,7 +4162,9 @@ function _csvTokenize(text, sep) {
   return rows;
 }
 
-function parseCSVDirect(csvText, platM, acctUsername = '') {
+/* groupBy: 'auto' | 'month' | 'week'
+   platId : untuk lookup PLATFORM_CSV_ALIASES               */
+function parseCSVDirect(csvText, platM, acctUsername = '', platId = '', groupBy = 'auto') {
   // Strip BOM UTF-8
   csvText = csvText.replace(/^﻿/, '');
   if (csvText.trim().length < 10) return { error: 'File kosong atau terlalu pendek.' };
@@ -4049,14 +4188,14 @@ function parseCSVDirect(csvText, platM, acctUsername = '') {
   for (let i = 0; i < Math.min(5, allRows.length); i++) {
     if (allRows[i].filter(c => c).length >= 2) { headerRowIdx = i; break; }
   }
-  const headers  = allRows[headerRowIdx].map(h => h.toLowerCase().replace(/^﻿/, ''));
-  const dataRows = allRows.slice(headerRowIdx + 1);
+  const rawHeaders = allRows[headerRowIdx].map(h => h.replace(/^﻿/, ''));
+  const headers    = rawHeaders.map(h => h.toLowerCase());
+  const dataRows   = allRows.slice(headerRowIdx + 1);
 
-  // ── Cari kolom tanggal: coba kandidat berurutan, pilih yang bisa diparsing ──
-  // Prioritas: "publish time/date" > "post time/date" > "date" > "tanggal" > kolom pertama
+  // ── Cari kolom tanggal ───────────────────────────────────────────────────
   const dateCandidateOrder = [
     /publishtime|publishdate|publishedat|posttime|postdate/,
-    /uploadtime|uploaddate/,
+    /uploadtime|uploaddate|tweetdate/,
     /^tanggal|^tgl|^waktu/,
     /^date$|^datetime$/,
     /bulan|month|periode|period/,
@@ -4068,7 +4207,6 @@ function parseCSVDirect(csvText, platM, acctUsername = '') {
     const sampleVal = dataRows[0]?.[idx] ?? '';
     if (parseMonthStr(sampleVal)) { effectiveMonthCol = idx; break; }
   }
-  // Fallback: cari kolom yang nilai pertamanya bisa diparsing
   if (effectiveMonthCol < 0) {
     for (let i = 0; i < headers.length; i++) {
       if (parseMonthStr(dataRows[0]?.[i] ?? '')) { effectiveMonthCol = i; break; }
@@ -4076,33 +4214,106 @@ function parseCSVDirect(csvText, platM, acctUsername = '') {
   }
   if (effectiveMonthCol < 0) effectiveMonthCol = 0;
 
+  // ── Deteksi apakah data harian (banyak baris per bulan) ──────────────────
+  const sampleDates = dataRows.slice(0, 30).map(r => parseMonthStr(r[effectiveMonthCol] ?? '')).filter(Boolean);
+  const uniqueMonths = new Set(sampleDates);
+  // Jika banyak baris dengan bulan berbeda di sample kecil → kemungkinan data harian
+  const isDailyData = sampleDates.length > 5 && uniqueMonths.size < sampleDates.length * 0.5;
+
+  // Tentukan groupBy akhir
+  let resolvedGroupBy = groupBy;
+  if (groupBy === 'auto') {
+    resolvedGroupBy = isDailyData ? 'month' : 'month';
+    // catatan: user bisa override ke 'week' via preview modal
+  }
+
   // ── Deteksi kolom akun ───────────────────────────────────────────────────
   const acctColIdx = headers.findIndex(h =>
     /accountusername|username/.test(h.replace(/[^a-z0-9]/g,''))
   );
 
-  // ── Mapping kolom → field key ────────────────────────────────────────────
-  const fieldMap = {};
+  // ── Mapping kolom → field key (platform aliases > exact key/label > fuzzy) ─
+  const aliases     = PLATFORM_CSV_ALIASES[platId] || {};
+  const fieldMap    = {};           // colIdx → fieldKey
+  const mappedCols  = [];           // { colName, fieldKey, fieldLabel }
+  const unmappedCols = [];          // kolom yang tidak bisa dipetakan ke field manapun
+
+  // Pass 1: platform aliases (paling akurat)
+  headers.forEach((h, i) => {
+    if (i === effectiveMonthCol || i === acctColIdx) return;
+    const hc    = h.replace(/[^a-z0-9()%]/g, '');
+    const alias = aliases[hc];
+    if (alias && !alias.startsWith('_')) {     // skip internal aliases (_date, _account, dll)
+      const field = platM.fields.find(f => f.key === alias);
+      if (field && !Object.values(fieldMap).includes(alias)) {
+        fieldMap[i] = alias;
+        mappedCols.push({ col: i, colName: rawHeaders[i], fieldKey: alias, fieldLabel: field.label });
+      }
+    }
+  });
+
+  // Pass 2: exact match key/label (untuk kolom belum terpetakan)
   platM.fields.forEach(f => {
+    if (Object.values(fieldMap).includes(f.key)) return;  // sudah terpetakan
     const fKey   = f.key.toLowerCase();
     const fLabel = f.label.toLowerCase().replace(/[^a-z0-9]/g, '');
     let best = -1;
     headers.forEach((h, i) => {
-      if (i === effectiveMonthCol || i === acctColIdx) return;
+      if (i === effectiveMonthCol || i === acctColIdx || fieldMap[i]) return;
       const hc = h.replace(/[^a-z0-9]/g,'');
       if (hc === fKey || hc === fLabel) best = i;
     });
-    if (best < 0) headers.forEach((h, i) => {
-      if (i === effectiveMonthCol || i === acctColIdx || best >= 0) return;
+    if (best >= 0) {
+      fieldMap[best] = f.key;
+      mappedCols.push({ col: best, colName: rawHeaders[best], fieldKey: f.key, fieldLabel: f.label });
+    }
+  });
+
+  // Pass 3: substring fuzzy (fallback terakhir)
+  platM.fields.forEach(f => {
+    if (Object.values(fieldMap).includes(f.key)) return;
+    const fKey = f.key.toLowerCase();
+    let best = -1;
+    headers.forEach((h, i) => {
+      if (i === effectiveMonthCol || i === acctColIdx || fieldMap[i] || best >= 0) return;
       const hc = h.replace(/[^a-z0-9]/g,'');
       if (hc.length >= 4 && fKey.includes(hc)) best = i;
       else if (fKey.length >= 4 && hc.includes(fKey)) best = i;
     });
-    if (best >= 0) fieldMap[best] = f.key;
+    if (best >= 0) {
+      fieldMap[best] = f.key;
+      mappedCols.push({ col: best, colName: rawHeaders[best], fieldKey: f.key, fieldLabel: f.label, fuzzy: true });
+    }
   });
 
-  // ── Agregasi per bulan, dengan filter akun ───────────────────────────────
-  const monthMap = {}; let skippedRows = 0;
+  // Kolom yang tidak terpetakan ke field manapun
+  headers.forEach((h, i) => {
+    if (i === effectiveMonthCol || i === acctColIdx || !h || fieldMap[i]) return;
+    const hc = h.replace(/[^a-z0-9]/g,'');
+    if (!hc) return;
+    // Skip juga internal alias columns (_date, _account, dll)
+    const alias = aliases[hc];
+    if (!alias || !alias.startsWith('_')) {
+      unmappedCols.push(rawHeaders[i]);
+    }
+  });
+
+  // ── Helper: date → week key "YYYY-W##" ───────────────────────────────────
+  function dateToWeek(monthStr) {
+    // monthStr adalah "YYYY-MM" → konversi ke "YYYY-W##" berdasarkan tanggal tengah bulan
+    // Untuk data yang sudah berbentuk YYYY-MM, gunakan minggu ke-3 bulan itu
+    const [y, m] = monthStr.split('-').map(Number);
+    const d = new Date(y, m - 1, 15); // tanggal 15 = tengah bulan
+    const jan4 = new Date(y, 0, 4);
+    const week = Math.ceil(((d - jan4) / 86400000 + jan4.getDay() + 1) / 7);
+    return `${y}-W${String(week).padStart(2, '0')}`;
+  }
+
+  // ── Agregasi per periode (month atau week) ───────────────────────────────
+  const periodMap = {}; let skippedRows = 0;
+  const isWeekly  = resolvedGroupBy === 'week';
+  const rowKey    = isWeekly ? 'week' : 'month';
+
   for (const cols of dataRows) {
     if (cols.every(c => !c)) continue;
     if (acctColIdx >= 0 && acctUsername) {
@@ -4112,19 +4323,29 @@ function parseCSVDirect(csvText, platM, acctUsername = '') {
     }
     const month = parseMonthStr(cols[effectiveMonthCol] ?? '');
     if (!month) continue;
-    if (!monthMap[month]) { monthMap[month] = { month }; platM.fields.forEach(f => { monthMap[month][f.key] = 0; }); }
+    const periodKey = isWeekly ? dateToWeek(month) : month;
+    if (!periodMap[periodKey]) {
+      periodMap[periodKey] = { [rowKey]: periodKey };
+      platM.fields.forEach(f => { periodMap[periodKey][f.key] = 0; });
+    }
     Object.entries(fieldMap).forEach(([idx, key]) => {
-      monthMap[month][key] += parseIDNumber(cols[+idx] ?? '');
+      periodMap[periodKey][key] += parseIDNumber(cols[+idx] ?? '');
     });
   }
 
-  const results = Object.values(monthMap).sort((a,b) => a.month.localeCompare(b.month));
+  const results = Object.values(periodMap).sort((a, b) => (a[rowKey]||'').localeCompare(b[rowKey]||''));
   if (!results.length) {
-    const detectedCols = headers.filter(h=>h).join(', ');
+    const detectedCols = rawHeaders.filter(h=>h).join(', ');
     const sampleVal    = dataRows[0]?.[effectiveMonthCol] ?? '?';
     return { error: `Tidak ada baris valid.\n\nKolom terdeteksi: ${detectedCols}\nKolom tanggal (col ${effectiveMonthCol}): "${sampleVal}"\nFilter akun: ${acctUsername || 'semua'}\n\nFormat tanggal didukung: MM/DD/YYYY, YYYY-MM-DD, YYYY-MM, "Jan 2025"` };
   }
-  if (skippedRows > 0) results._skipped = skippedRows;
+
+  // Lampirkan info mapping untuk preview modal
+  results._skipped    = skippedRows;
+  results._mappedCols  = mappedCols;
+  results._unmappedCols = unmappedCols;
+  results._isDailyData  = isDailyData;
+  results._groupBy      = resolvedGroupBy;
   return results;
 }
 
@@ -4151,14 +4372,14 @@ async function importStatFromFile(input) {
     /* ── CSV / TSV: parse langsung, tidak perlu AI ── */
     if (isCSV || name.endsWith('.tsv')) {
       const text = await file.text();
-      // Map acctId ke username yang mungkin ada di CSV
+      // Map acctId ke username yang mungkin ada di CSV (untuk filter multi-akun export)
       const ACCT_USERNAME_MAP = {
         'penjaga-harapan': 'penjaga_harapan',
         '33-official':     '33official',
         'jaga-asa':        'jagaasa',
       };
       const acctUsername = ACCT_USERNAME_MAP[acctId] || '';
-      const result = parseCSVDirect(text, platM, acctUsername);
+      const result = parseCSVDirect(text, platM, acctUsername, platId, 'auto');
       // Error object → tampilkan pesan detail
       if (!Array.isArray(result)) {
         toast(result?.error || 'CSV tidak bisa diparsing.', 'error');
@@ -4168,12 +4389,15 @@ async function importStatFromFile(input) {
       const skipped = result._skipped || 0;
       const infoMsg = skipped > 0 ? ` (${skipped} baris akun lain diabaikan)` : '';
       if (rows.length === 1) {
-        await openStatInputForImport(acctId, platId, rows[0].month, rows[0]);
-        toast(`✅ Data ${fmtMonth(rows[0].month)} berhasil dibaca dari CSV!${infoMsg}`, 'success');
+        // Satu periode: langsung buka form review
+        const rowKey = rows[0].week ? 'week' : 'month';
+        await openStatInputForImport(acctId, platId, rows[0][rowKey], rows[0]);
+        toast(`✅ Data ${fmtMonth(rows[0][rowKey])} berhasil dibaca dari CSV!${infoMsg}`, 'success');
       } else {
-        await importMultiRowsDirectly(acctId, platId, rows);
-        toast(`✅ ${rows.length} bulan data berhasil diimpor dari CSV!${infoMsg}`, 'success');
-        renderStatChart();
+        // Multi-periode: tampilkan preview untuk verifikasi sebelum simpan
+        // Simpan raw CSV meta untuk regroupImportPreview (toggle week/month)
+        rows._rawCsvMeta = { csvText: text, platM, acctUsername, platId };
+        showImportPreview(rows, platId, acctId);
       }
       return;
     }
@@ -4216,6 +4440,172 @@ async function importStatFromFile(input) {
   } finally {
     if (btn) { btn.innerHTML = ICON + ' <span class="btn-text">Import</span>'; btn.disabled = false; }
   }
+}
+
+/* ── Import Preview Modal ────────────────────────────────────────────────── */
+function showImportPreview(rows, platId, acctId) {
+  const platM    = PLATFORM_FIELDS[platId];
+  const acctName = ACCOUNTS.find(a => a.id === acctId)?.name || acctId;
+  const rowKey   = rows[0]?.week ? 'week' : 'month';
+  const isWeekly = rowKey === 'week';
+
+  // Simpan data ke state untuk dipakai saat confirm
+  state._importPreview = { rows, platId, acctId, rowKey };
+
+  // ── Title ────────────────────────────────────────────────────────────────
+  const titleEl = $('importPreviewTitle');
+  if (titleEl) titleEl.textContent = `Preview Import — ${platM?.label || platId} · ${acctName}`;
+
+  // ── Info mapping kolom ───────────────────────────────────────────────────
+  const mappedCols   = rows._mappedCols   || [];
+  const unmappedCols = rows._unmappedCols || [];
+  const isDailyData  = rows._isDailyData  || false;
+  const skipped      = rows._skipped      || 0;
+
+  const infoEl = $('importPreviewMappingInfo');
+  if (infoEl) {
+    const mappedHtml = mappedCols.map(c =>
+      `<span class="import-chip import-chip--ok" title="Kolom CSV: ${c.colName}">${c.fieldLabel}${c.fuzzy ? ' ≈' : ''}</span>`
+    ).join('');
+    const unmappedHtml = unmappedCols.map(c =>
+      `<span class="import-chip import-chip--skip" title="Tidak dipetakan ke field manapun">${c}</span>`
+    ).join('');
+    const dailyNote = isDailyData
+      ? `<div class="import-daily-note">⚠ Data tampaknya harian — dikelompokkan per <strong>${isWeekly ? 'minggu' : 'bulan'}</strong> secara otomatis.</div>`
+      : '';
+    const skippedNote = skipped > 0
+      ? `<div class="import-daily-note">ℹ ${skipped} baris akun lain diabaikan.</div>`
+      : '';
+    infoEl.innerHTML = `
+      <div class="import-mapping-row">
+        <span class="import-mapping-label">✅ Dipetakan (${mappedCols.length}):</span>
+        <div class="import-chip-group">${mappedHtml || '<em style="color:var(--muted)">—</em>'}</div>
+      </div>
+      ${unmappedCols.length ? `<div class="import-mapping-row">
+        <span class="import-mapping-label">⚠ Tidak dikenali (${unmappedCols.length}):</span>
+        <div class="import-chip-group">${unmappedHtml}</div>
+      </div>` : ''}
+      ${dailyNote}${skippedNote}`;
+  }
+
+  // ── Tabel preview ────────────────────────────────────────────────────────
+  // Hanya tampilkan kolom yang ada datanya (minimal 1 baris non-zero)
+  const visibleFields = (platM?.fields || []).filter(f =>
+    rows.some(r => r[f.key] && r[f.key] !== 0)
+  );
+  const tableEl = $('importPreviewTable');
+  if (tableEl) {
+    const fmtVal = (v, fmt) => {
+      if (!v && v !== 0) return '—';
+      if (fmt === 'pct') return v.toFixed(2) + '%';
+      return v.toLocaleString('id-ID');
+    };
+    const thead = `<thead><tr>
+      <th>${isWeekly ? 'Minggu' : 'Bulan'}</th>
+      ${visibleFields.map(f => `<th>${f.label}</th>`).join('')}
+    </tr></thead>`;
+    const tbody = `<tbody>${rows.map(r => `<tr>
+      <td class="import-period-cell">${isWeekly ? (r.week || '—') : fmtMonth(r.month)}</td>
+      ${visibleFields.map(f => {
+        const v   = r[f.key];
+        const cls = (!v || v === 0) ? ' class="import-zero"' : '';
+        return `<td${cls}>${fmtVal(v, f.fmt)}</td>`;
+      }).join('')}
+    </tr>`).join('')}</tbody>`;
+    tableEl.innerHTML = thead + tbody;
+  }
+
+  // ── Update tombol simpan ─────────────────────────────────────────────────
+  const confirmBtn = $('btnConfirmImport');
+  if (confirmBtn) {
+    const label = isWeekly ? 'minggu' : 'bulan';
+    confirmBtn.textContent = `Simpan Semua (${rows.length} ${label})`;
+  }
+
+  // ── Toggle weekly/monthly (hanya untuk data harian) ──────────────────────
+  const toggleWrap = $('importPreviewGroupToggle');
+  if (toggleWrap) toggleWrap.style.display = isDailyData ? '' : 'none';
+
+  // ── Tampilkan modal ───────────────────────────────────────────────────────
+  const overlay = $('importPreviewOverlay');
+  if (overlay) overlay.classList.remove('hidden');
+}
+
+function closeImportPreview() {
+  const overlay = $('importPreviewOverlay');
+  if (overlay) overlay.classList.add('hidden');
+  state._importPreview = null;
+}
+
+async function confirmImportPreview() {
+  const prev = state._importPreview;
+  if (!prev) return;
+  const btn = $('btnConfirmImport');
+  if (btn) { btn.textContent = '⏳ Menyimpan…'; btn.disabled = true; }
+  try {
+    await importMultiRowsDirectly(prev.acctId, prev.platId, prev.rows);
+    const rowKey = prev.rowKey;
+    const label  = rowKey === 'week' ? 'minggu' : 'bulan';
+    toast(`✅ ${prev.rows.length} ${label} data berhasil diimpor!`, 'success');
+    renderStatChart();
+    closeImportPreview();
+  } catch (e) {
+    toast('Gagal simpan: ' + e.message, 'error');
+    if (btn) { btn.textContent = 'Coba Lagi'; btn.disabled = false; }
+  }
+}
+
+/* Re-parse CSV dengan groupBy baru (month/week) saat user toggle */
+function regroupImportPreview(groupBy) {
+  const prev = state._importPreview;
+  if (!prev?._rawCsvMeta) return;
+  const { csvText, platM, acctUsername, platId } = prev._rawCsvMeta;
+  const result = parseCSVDirect(csvText, platM, acctUsername, platId, groupBy);
+  if (!Array.isArray(result)) { toast(result?.error || 'Gagal re-parse CSV', 'error'); return; }
+  state._importPreview.rows   = result;
+  state._importPreview.rowKey = result[0]?.week ? 'week' : 'month';
+  showImportPreview(result, platId, prev.acctId);
+}
+
+/* ── Download Template CSV per platform ─────────────────────────────────── */
+function downloadStatTemplate() {
+  const platId = state.statActivePlat || 'youtube';
+  const platM  = PLATFORM_FIELDS[platId];
+  if (!platM) return;
+
+  // Kolom: gunakan nama kolom dari aliases (terbalik: fieldKey → colName)
+  const aliases  = PLATFORM_CSV_ALIASES[platId] || {};
+  const aliasRev = {};  // fieldKey → kolom nama asli (ambil yang pertama ditemukan)
+  Object.entries(aliases).forEach(([colKey, fieldKey]) => {
+    if (!fieldKey.startsWith('_') && !aliasRev[fieldKey]) {
+      // Konversi hc kembali ke nama yang lebih readable
+      aliasRev[fieldKey] = colKey.replace(/([a-z])([A-Z])/g, '$1 $2')
+        .replace(/^./, c => c.toUpperCase());
+    }
+  });
+
+  // Build header row: Bulan, lalu tiap field
+  const headers = ['Bulan', ...platM.fields.map(f => aliasRev[f.key] || f.key)];
+
+  // Build 2 example rows (bulan lalu & 2 bulan lalu)
+  const now = new Date();
+  const exampleRows = [1, 2].map(i => {
+    const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+    const m = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+    return [m, ...platM.fields.map(() => '0')];
+  });
+
+  const csvContent = [
+    headers.join(','),
+    ...exampleRows.map(r => r.map(v => `"${v}"`).join(',')),
+  ].join('\n');
+
+  const blob = new Blob(['﻿' + csvContent], { type: 'text/csv;charset=utf-8;' });
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  a.href = url; a.download = `template-${platId}.csv`; a.click();
+  URL.revokeObjectURL(url);
+  toast(`Template ${platM.label} diunduh ✓`, 'success');
 }
 
 /* Simpan banyak baris CSV langsung ke state & GitHub */

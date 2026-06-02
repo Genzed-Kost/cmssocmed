@@ -2662,3 +2662,117 @@ ul { list-style: none; }
   opacity: 1 !important;
   r: 4;
 }
+
+/* ── Import Preview Modal ─────────────────────────────────────────────────── */
+.modal-import-preview {
+  max-width: 780px;
+  width: 96vw;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+}
+.import-mapping-wrap {
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border);
+  background: var(--bg);
+  font-size: .78rem;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.import-mapping-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.import-mapping-label {
+  flex-shrink: 0;
+  font-weight: 600;
+  color: var(--muted);
+  min-width: 150px;
+  padding-top: 2px;
+}
+.import-chip-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+.import-chip {
+  font-size: .72rem;
+  padding: 2px 8px;
+  border-radius: 20px;
+  font-weight: 500;
+  white-space: nowrap;
+}
+.import-chip--ok   { background: #dcfce7; color: #166534; }
+.import-chip--skip { background: #fef9c3; color: #854d0e; }
+.import-daily-note {
+  font-size: .75rem;
+  color: var(--muted);
+  padding: 2px 0;
+}
+.import-group-toggle {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 16px;
+  border-bottom: 1px solid var(--border);
+  background: var(--bg);
+}
+.import-toggle-label {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: .78rem;
+  font-weight: 500;
+  cursor: pointer;
+  color: var(--text);
+}
+.import-preview-table-wrap {
+  overflow: auto;
+  flex: 1;
+  max-height: 58vh;
+}
+.import-preview-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: .78rem;
+}
+.import-preview-table thead th {
+  position: sticky;
+  top: 0;
+  background: var(--bg);
+  padding: 8px 12px;
+  text-align: right;
+  font-size: .7rem;
+  font-weight: 700;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: .05em;
+  border-bottom: 2px solid var(--border);
+  white-space: nowrap;
+}
+.import-preview-table thead th:first-child { text-align: left; }
+.import-preview-table tbody tr:nth-child(even) { background: var(--bg); }
+.import-preview-table tbody tr:hover { background: var(--hover); }
+.import-preview-table tbody td {
+  padding: 6px 12px;
+  border-bottom: 1px solid var(--border);
+  text-align: right;
+  color: var(--text);
+}
+.import-preview-table tbody td.import-period-cell {
+  text-align: left;
+  font-weight: 600;
+  color: var(--text);
+  white-space: nowrap;
+}
+.import-preview-table tbody td.import-zero {
+  color: var(--muted-lt);
+}
+.stat-import-wrap {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+}
