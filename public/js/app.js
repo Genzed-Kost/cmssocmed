@@ -5399,21 +5399,22 @@ function downloadStatJpg() {
     ? `${fmtMonth(fromM)} – ${fmtMonth(toM)}`
     : fmtMonth(toM);
 
-  // ── Layout ─────────────────────────────────────────────────────
+  // ── Layout — 2× pixel ratio untuk HD ──────────────────────────
+  const DPR      = 2;    // device pixel ratio: 2× = HD
   const PAD      = 20;
-  const HEADER_H = 64;   // area judul + subtitle
-  const FOOTER_H = 28;   // area watermark bawah
-  // Target lebar minimum 900px, scale up jika chart lebih kecil
-  const TARGET_W = Math.max(canvas.width, 900);
+  const HEADER_H = 64;
+  const FOOTER_H = 28;
+  const TARGET_W = Math.max(canvas.width, 1200);   // min 1200px logical
   const scale    = TARGET_W / canvas.width;
   const chartH   = Math.round(canvas.height * scale);
   const totalW   = TARGET_W;
   const totalH   = HEADER_H + chartH + FOOTER_H;
 
   const offCanvas = document.createElement('canvas');
-  offCanvas.width  = totalW;
-  offCanvas.height = totalH;
+  offCanvas.width  = totalW  * DPR;   // canvas fisik 2×
+  offCanvas.height = totalH  * DPR;
   const ctx = offCanvas.getContext('2d');
+  ctx.scale(DPR, DPR);               // semua drawing dalam koordinat logis
 
   // White background
   ctx.fillStyle = '#ffffff';
@@ -5427,13 +5428,13 @@ function downloadStatJpg() {
   const BADGE_SIZE = 32;
   drawPlatformBadge(ctx, platId, PAD + BADGE_SIZE / 2, 4 + BADGE_SIZE / 2 + 4, BADGE_SIZE);
 
-  // Title (offset to right of badge)
+  // Title
   const titleX = PAD + BADGE_SIZE + 10;
   ctx.fillStyle = '#0f172a';
   ctx.font = 'bold 15px Arial, sans-serif';
   ctx.fillText(`${platM?.label || platId} — ${acctObj?.name || acctId}`, titleX, 26);
 
-  // Subtitle: range + tanggal ekspor
+  // Subtitle
   ctx.fillStyle = '#64748b';
   ctx.font = '11px Arial, sans-serif';
   ctx.fillText(
@@ -5449,7 +5450,7 @@ function downloadStatJpg() {
   ctx.lineTo(totalW - PAD, HEADER_H - 6);
   ctx.stroke();
 
-  // Chart (scaled up, white bg sudah ada di offCanvas)
+  // Chart (scaled up ke totalW × chartH)
   ctx.drawImage(canvas, 0, HEADER_H, totalW, chartH);
 
   // Footer watermark
@@ -5461,7 +5462,7 @@ function downloadStatJpg() {
 
   const link = document.createElement('a');
   link.download = `grafik-${acctId}-${platId}-${fileTag}.jpg`;
-  link.href = offCanvas.toDataURL('image/jpeg', 0.95);
+  link.href = offCanvas.toDataURL('image/jpeg', 1.0);   // kualitas max
   link.click();
   toast('Grafik berhasil didownload ✓', 'success');
 }
@@ -5497,19 +5498,21 @@ function downloadStatTableJpg() {
     ...dlCols.map(f => fmtStatVal(r[f.key], f.fmt))
   ]);
 
-  // Layout
+  // Layout — 2× pixel ratio untuk HD
+  const DPR_T   = 2;
   const PAD     = 24;
-  const HEAD_H  = 52;   // title + subtitle area
-  const ROW_H   = 26;
-  const COL0_W  = 88;   // BULAN column
-  const COL_W   = 90;   // other columns
+  const HEAD_H  = 52;
+  const ROW_H   = 28;    // sedikit lebih tinggi agar teks tidak rapat
+  const COL0_W  = 100;
+  const COL_W   = 110;
   const totalW  = PAD * 2 + COL0_W + COL_W * (headers.length - 1);
   const totalH  = PAD + HEAD_H + ROW_H * (dataRows.length + 1) + PAD;
 
   const cv = document.createElement('canvas');
-  cv.width  = totalW;
-  cv.height = totalH;
+  cv.width  = totalW  * DPR_T;
+  cv.height = totalH  * DPR_T;
   const ctx = cv.getContext('2d');
+  ctx.scale(DPR_T, DPR_T);
 
   // White background
   ctx.fillStyle = '#ffffff';
@@ -5603,7 +5606,7 @@ function downloadStatTableJpg() {
   // Download
   const link = document.createElement('a');
   link.download = `tabel-${acctId}-${platId}-${fileTag}.jpg`;
-  link.href = cv.toDataURL('image/jpeg', 0.92);
+  link.href = cv.toDataURL('image/jpeg', 1.0);   // kualitas max HD
   link.click();
   toast('Tabel berhasil didownload ✓', 'success');
 }

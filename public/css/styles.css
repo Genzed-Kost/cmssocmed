@@ -2327,6 +2327,7 @@ ul { list-style: none; }
   transition: background .12s;
 }
 .stat-dl-menu button:hover { background: var(--bg); }
+.stat-dl-divider { height: 1px; background: var(--border, #e5e7eb); margin: 3px 0; }
 .stat-chart-wrap {
   background: var(--surface); border: 1.5px solid var(--bd);
   border-radius: 12px; padding: 20px; margin-bottom: 20px;

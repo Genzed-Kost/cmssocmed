@@ -600,26 +600,23 @@
               <input type="month" id="statToMonth" class="inp-sm stat-month-inp hidden" title="Sampai bulan" onchange="renderStatChart()" />
             </div>
             <div class="stat-action-group">
-              <!-- Import file + Template download -->
+              <!-- Import file -->
               <input type="file" id="statImportFile" accept="image/*,.pdf,.xlsx,.csv,.tsv,.txt" style="display:none" onchange="importStatFromFile(this)" />
-              <div class="stat-import-wrap">
-                <button class="btn-sm" id="btnStatImportFile" onclick="$('statImportFile').click()" title="Import data dari CSV atau gambar/dokumen">
-                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="3" x2="12" y2="15"/><polyline points="17 8 12 3 7 8"/></svg>
-                  <span class="btn-text">Import CSV</span>
-                </button>
-                <button class="btn-sm" onclick="downloadStatTemplate()" title="Download template CSV untuk platform ini">
-                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><polyline points="9 15 12 18 15 15"/></svg>
-                  <span class="btn-text">Template</span>
-                </button>
-              </div>
+              <button class="btn-sm" id="btnStatImportFile" onclick="$('statImportFile').click()" title="Import data dari CSV atau gambar/dokumen">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="3" x2="12" y2="15"/><polyline points="17 8 12 3 7 8"/></svg>
+                <span class="btn-text">Import</span>
+              </button>
+              <!-- Download dropdown: JPG + Template CSV -->
               <div class="stat-dl-dropdown" id="statDlDropWrap">
                 <button class="btn-sm" id="btnDlDropdown">
                   <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
                   <span class="btn-text">Download</span> ▾
                 </button>
                 <div class="stat-dl-menu hidden" id="statDlMenu">
-                  <button onclick="downloadStatJpg()">📊 Grafik (JPG)</button>
-                  <button onclick="downloadStatTableJpg()">📋 Tabel (JPG)</button>
+                  <button onclick="downloadStatJpg()">📊 Grafik (JPG HD)</button>
+                  <button onclick="downloadStatTableJpg()">📋 Tabel (JPG HD)</button>
+                  <div class="stat-dl-divider"></div>
+                  <button onclick="downloadStatTemplate()">📄 Template CSV</button>
                 </div>
               </div>
               <button class="btn-sm stat-ai-btn" id="btnStatAnalyze" onclick="analyzeContentWithAI()" title="Analisis performa konten dengan AI">
