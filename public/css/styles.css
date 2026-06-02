@@ -2774,8 +2774,3 @@ ul { list-style: none; }
 .import-preview-table tbody td.import-zero {
   color: var(--muted-lt);
 }
-.stat-import-wrap {
-  display: flex;
-  gap: 4px;
-  align-items: center;
-}

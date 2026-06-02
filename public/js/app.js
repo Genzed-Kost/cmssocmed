@@ -1008,8 +1008,6 @@ async function showLogin() {
   }
 }
 
-function _showLoginFetchError() { /* tidak digunakan lagi — login pakai input teks */ }
-function _hideLoginFetchError() { /* tidak digunakan lagi — login pakai input teks */ }
 
 function populateLoginSelect() {
   // Input teks — tidak ada dropdown yang perlu diisi.
@@ -2036,9 +2034,6 @@ function renderDashNearContent() {
     </div>`;
 }
 
-/* stubs — HTML containers removed, kept for safety */
-function renderDashUpcoming() {}
-function renderDashPublished() {}
 
 function renderAnalyticsCompact() { renderAnalyticsPanel(); }
 
@@ -4696,15 +4691,20 @@ Contoh output yang benar:
 {"month":"2025-10","${platM.fields[0]?.key}":1234,"${platM.fields[1]?.key}":567890}`;
 }
 
-async function openStatInputForImport(acctId, platId, monthVal, data) {
-  // Smart merge dengan data yang sudah ada di bulan yang sama
-  const existing = (state.analytics?.[acctId]?.[platId] || [])
-    .find(r => r.month === monthVal);
+async function openStatInputForImport(acctId, platId, periodVal, data) {
+  // Deteksi apakah data weekly atau monthly
+  const isWeeklyData = !!(data.week && !data.month);
+  const storeKey     = isWeeklyData ? platId + '_w' : platId;
+  const rowKey       = isWeeklyData ? 'week' : 'month';
+
+  // Smart merge dengan data yang sudah ada di periode yang sama
+  const existing = (state.analytics?.[acctId]?.[storeKey] || [])
+    .find(r => r[rowKey] === periodVal);
   let merged = { ...data };
   if (existing) {
     merged = { ...existing };
     Object.entries(data).forEach(([k, v]) => {
-      if (k === 'month') return;
+      if (k === rowKey) return;
       if (v !== 0 && v !== null && v !== undefined) merged[k] = v;
       else if (!(k in existing) || existing[k] === 0) merged[k] = v;
     });
@@ -4713,7 +4713,7 @@ async function openStatInputForImport(acctId, platId, monthVal, data) {
   const card = $('statInputCard');
   if (card) card.classList.remove('hidden');
   const monthInp = $('statMonth');
-  if (monthInp) monthInp.value = monthVal;
+  if (monthInp) monthInp.value = periodVal;
   card?.scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 
