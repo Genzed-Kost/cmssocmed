@@ -23,11 +23,11 @@ function saveClaudeKey(key) { key ? localStorage.setItem(CLAUDE_LS_KEY, key) : l
 const CLAUDE_MODELS = ['claude-3-haiku-20240307', 'claude-haiku-4-5', 'claude-3-5-haiku-20241022'];
 
 const GEMINI_MODELS = [
-  'gemini-2.5-flash',
-  'gemini-2.5-flash-preview-04-17',
-  'gemini-2.0-flash-lite',
-  'gemini-1.5-pro-latest',
-  'gemini-pro'
+  'gemini-2.5-flash',        // model utama (stabil & cepat)
+  'gemini-2.0-flash-lite',   // fallback ringan
+  'gemini-1.5-flash',        // fallback lama tapi stabil
+  'gemini-1.5-pro',          // fallback pro (lebih lambat)
+  // 'gemini-pro' ← DIHAPUS: deprecated di v1beta sejak 2025
 ];
 const NEWS_KEY        = 'cmsph_news_v1';
 const NEWS_TTL        = 60 * 60 * 1000;
@@ -1372,22 +1372,80 @@ function waStatusMsg(name, title, theme, status, date, acct, url) {
   );
 }
 
+/* Kirim notif WA via Fonnte. Return {ok, detail} agar caller bisa bereaksi.
+   Gagal = tampilkan toast error ke admin (tidak silent lagi).            */
 async function sendWaNotif(phone, message) {
   const token = getWaToken();
-  if (!token || !phone) return;
-  const clean = String(phone).replace(/\D/g, '');
+  if (!token) return { ok: false, detail: 'Token Fonnte belum dikonfigurasi' };
+  if (!phone) return { ok: false, detail: 'Nomor WA tidak ada' };
+
+  // Normalisasi nomor: +62…/08… → 628…
+  const clean  = String(phone).replace(/\D/g, '');
   const target = clean.startsWith('0') ? '62' + clean.slice(1) : clean;
+
   try {
     const fd = new FormData();
-    fd.append('target', target);
+    fd.append('target',  target);
     fd.append('message', message);
     const r = await fetch('https://api.fonnte.com/send', {
-      method: 'POST', headers: { Authorization: token }, body: fd
+      method: 'POST',
+      headers: { Authorization: token },
+      body: fd
     });
+
+    // Cek HTTP error terlebih dahulu
+    if (!r.ok) {
+      const detail = `HTTP ${r.status} ${r.statusText}`;
+      console.warn('WA notif HTTP error:', detail);
+      if (isAdmin()) toast(`⚠ WA gagal terkirim: ${detail}`, 'error');
+      return { ok: false, detail };
+    }
+
     const res = await r.json();
-    if (!res.status) console.warn('WA notif failed:', res);
-    else console.log('WA sent to', target);
-  } catch (e) { console.warn('WA notif error:', e.message); }
+    if (!res.status) {
+      // Fonnte mengembalikan status false → pesan ditolak
+      const detail = res.reason || res.message || JSON.stringify(res);
+      console.warn('WA notif rejected by Fonnte:', res);
+      if (isAdmin()) toast(`⚠ WA ditolak Fonnte: ${detail}`, 'error');
+      return { ok: false, detail };
+    }
+
+    console.log('WA sent to', target, '—', res);
+    return { ok: true, detail: res.detail || 'Terkirim' };
+
+  } catch (e) {
+    console.warn('WA notif error:', e.message);
+    if (isAdmin()) toast(`⚠ WA gagal: ${e.message}`, 'error');
+    return { ok: false, detail: e.message };
+  }
+}
+
+/* Test koneksi Fonnte — kirim pesan ke nomor admin sendiri */
+async function testWaToken() {
+  const token = getWaToken();
+  if (!token) { toast('Isi dan simpan Token Fonnte terlebih dahulu', 'error'); return; }
+
+  // Cari nomor HP admin yang sedang login
+  const me      = currentUser();
+  const users   = state.settings?.users || [];
+  const userObj = users.find(u => getUserName(u) === me);
+  const phone   = userObj?.phone;
+  if (!phone) {
+    toast('Nomor WA tidak ditemukan di profil Anda. Isi nomor di daftar pengguna dulu.', 'error');
+    return;
+  }
+
+  const btn = $('btnTestWa');
+  if (btn) { btn.textContent = '⏳ Mengirim…'; btn.disabled = true; }
+  try {
+    const result = await sendWaNotif(phone,
+      `✅ *Test Notifikasi Penjaga Harapan CMS*\n\nKoneksi Fonnte berhasil! Token aktif dan pesan dapat dikirim.\n\n_Waktu: ${new Date().toLocaleString('id-ID')}_`
+    );
+    if (result.ok) toast('✅ Pesan test berhasil dikirim ke ' + phone, 'success');
+    // Error sudah ditampilkan oleh sendWaNotif
+  } finally {
+    if (btn) { btn.textContent = '🧪 Test Kirim'; btn.disabled = false; }
+  }
 }
 
 /* Buka WhatsApp manual (tanpa Fonnte) — langsung ke wa.me link */
@@ -1704,12 +1762,14 @@ async function checkBankKontenReminders() {
 
   // Ada Fonnte token → kirim WA otomatis
   const users = state.settings?.users || [];
+  let sentCount = 0; let failCount = 0;
   for (const item of toRemind) {
     const co = users.find(u => getUserName(u) === item.creator);
     if (co?.phone) {
       const refLine = item.reference ? `\n🔗 *Referensi:* ${item.reference}` : '';
       const msg = `Halo ${item.creator}! ⏰ *Jadwal Tayang Hari Ini*\n\nKonten *${item.title || '(tanpa judul)'}* dijadwalkan tayang ${fmtDate(item.publishDate)}.${refLine}\n\nSegera siapkan kontennya! 🚀\n\n_- Penjaga Harapan CMS_`;
-      await sendWaNotif(co.phone, msg);
+      const result = await sendWaNotif(co.phone, msg);
+      if (result.ok) sentCount++; else failCount++;
     }
     item.remindedDate = todayStr;
   }
@@ -1719,7 +1779,13 @@ async function checkBankKontenReminders() {
     state.shas.bankKonten = await window.db.writeData('contentBank', state.bankKonten, 'Bank Konten: catat reminder terkirim');
   } catch { /* non-critical */ }
 
-  toast(`✓ Reminder WA terkirim ke ${toRemind.length} creator`, 'success');
+  if (sentCount > 0 && failCount === 0) {
+    toast(`✓ Reminder WA terkirim ke ${sentCount} creator`, 'success');
+  } else if (sentCount > 0) {
+    toast(`⚠ Reminder WA: ${sentCount} terkirim, ${failCount} gagal`, 'warn');
+  } else if (failCount > 0) {
+    toast(`✗ Semua reminder WA gagal (${failCount} pesan)`, 'error');
+  }
 }
 
 /* ══════════════════════════════════════════════════════════════════════════
