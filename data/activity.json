@@ -1,5 +1,13 @@
 [
   {
+    "id": "mpxpuss71rf1a",
+    "user": "Admin",
+    "role": "Admin",
+    "action": "logout",
+    "target": "keluar dari sistem",
+    "timestamp": "2026-06-03T06:59:39.703Z"
+  },
+  {
     "id": "mpxptoti0cp7h",
     "user": "Admin",
     "role": "Admin",
