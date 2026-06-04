@@ -1448,8 +1448,10 @@ async function testWaToken() {
   }
 }
 
-/* Buka WhatsApp manual (tanpa Fonnte) — langsung ke wa.me link */
-function openPlannerWa(id) {
+/* Kirim WA ke creator dari Planner.
+   Jika token Fonnte ada → kirim otomatis via API.
+   Jika tidak → buka wa.me (manual).                */
+async function openPlannerWa(id) {
   const c = state.contents.find(x => x.id === id);
   if (!c) return;
   const users = state.settings?.users || [];
@@ -1460,15 +1462,25 @@ function openPlannerWa(id) {
     if (u?.phone) { phone = u.phone; name = cr; break; }
   }
   if (!phone) { toast('Creator tidak memiliki nomor WA', 'error'); return; }
+
   const acctObj = ACCOUNTS.find(a => a.id === c.account);
   const msg = waStatusMsg(
     name, c.title || '—', c.theme || '—', c.status || 'Plan',
     fmtDate(c.publishDate), acctObj?.name || c.account || '—',
     window.location.origin
   );
-  const clean  = String(phone).replace(/\D/g, '');
-  const target = clean.startsWith('0') ? '62' + clean.slice(1) : clean;
-  window.open(`https://wa.me/${target}?text=${encodeURIComponent(msg)}`, '_blank');
+
+  if (getWaToken()) {
+    // Kirim via Fonnte — langsung otomatis
+    const result = await sendWaNotif(phone, msg);
+    if (result.ok) toast(`✅ Pesan terkirim ke ${name}`, 'success');
+    await logActivity(currentUser(), 'Kirim WA Planner', `ke ${name} — "${c.title || 'tanpa judul'}" (${c.status})`);
+  } else {
+    // Fallback: buka wa.me
+    const clean  = String(phone).replace(/\D/g, '');
+    const target = clean.startsWith('0') ? '62' + clean.slice(1) : clean;
+    window.open(`https://wa.me/${target}?text=${encodeURIComponent(msg)}`, '_blank');
+  }
 }
 
 async function notifyCreatorAssigned(content, oldCreator) {
@@ -1726,8 +1738,9 @@ async function sendBankKontenWa(id) {
   const msg = `Halo ${item.creator}! 📢\n\nKonten *${item.title || '(belum ada judul)'}* dijadwalkan tayang *${dateStr}*.${refLine}\n\nYuk segera siapkan kontennya! 💪\n\n_- Penjaga Harapan CMS_`;
 
   if (getWaToken()) {
-    await sendWaNotif(creatorObj.phone, msg);
-    toast(`Pesan terkirim ke ${item.creator} ✓`, 'success');
+    const result = await sendWaNotif(creatorObj.phone, msg);
+    if (result.ok) toast(`✅ Pesan terkirim ke ${item.creator}`, 'success');
+    // Error sudah ditampilkan oleh sendWaNotif
   } else {
     const clean = creatorObj.phone.replace(/\D/g, '');
     const num   = clean.startsWith('0') ? '62' + clean.slice(1) : clean;
@@ -5040,21 +5053,24 @@ function renderStatChart() {
   const avgER    = displayRows.reduce((s,r) => s + (+r.erPct||0), 0) / displayRows.length;
   const bestRow  = displayRows.reduce((b,r) => (+r[viewKey]||0) > (+b[viewKey]||0) ? r : b, displayRows[0]);
   const bestLbl  = isWeekly ? fmtWeek(bestRow?.week||'') : fmtMonth(bestRow?.month||'');
-  const narrativeHtml = `<div style="padding-top:7px;margin-top:7px;border-top:1px solid var(--border,#e5e7eb)">
+  const narrativeHtml = `<span>
     📊 <strong>${fmtNum(totalV)}</strong> total views · <strong>${fmtNum(totalEng)}</strong> total engagement
     dalam <strong>${displayRows.length}</strong> ${isWeekly?'minggu':'bulan'} terakhir.
     Periode terbaik: <strong>${bestLbl}</strong> (${fmtNum(+bestRow?.[viewKey]||0)} views).
     Rata-rata ER: <strong>${avgER.toFixed(2)}%</strong>.
-    <button onclick="copyStatNarrative(this)" style="margin-left:6px;font-size:.68rem;color:var(--blue);background:none;border:none;cursor:pointer;text-decoration:underline">📋 Salin</button>
-  </div>`;
+    <button onclick="copyStatNarrative(this)" style="margin-left:4px;font-size:.68rem;color:var(--blue);background:none;border:none;cursor:pointer;text-decoration:underline">📋 Salin</button>
+  </span>`;
 
-  // ── Gabungkan jadi satu kotak ─────────────────────────────────────
+  // ── Satu baris: kiri = status update · garis | · kanan = narrative ──
   const bgColor = meta?.updatedAt && Math.floor((Date.now() - new Date(meta.updatedAt)) / 86400000) > 7 ? '#fef3c7' : meta?.updatedAt ? 'var(--surface)' : '#fffbeb';
   const border  = meta?.updatedAt && Math.floor((Date.now() - new Date(meta.updatedAt)) / 86400000) > 7 ? '#fde68a' : meta?.updatedAt ? 'var(--bd)' : '#fde68a';
   infoBanner.innerHTML = `
     <div style="font-size:.72rem;color:var(--muted);background:${bgColor};border:1px solid ${border};
-      border-radius:8px;padding:8px 12px;margin-bottom:8px;line-height:1.6">
-      ${updateHtml}${narrativeHtml}
+      border-radius:8px;padding:7px 12px;margin-bottom:8px;line-height:1.55;
+      display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+      <span style="flex-shrink:0">${updateHtml.replace(/^<div[^>]*>/, '').replace(/<\/div>$/, '')}</span>
+      <span style="width:1px;height:14px;background:var(--border,#e2e8f0);flex-shrink:0;align-self:center"></span>
+      ${narrativeHtml}
     </div>`;
   infoBanner.style.display = '';
 
