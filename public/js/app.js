@@ -22,12 +22,13 @@ function saveClaudeKey(key) { key ? localStorage.setItem(CLAUDE_LS_KEY, key) : l
 
 const CLAUDE_MODELS = ['claude-3-haiku-20240307', 'claude-haiku-4-5', 'claude-3-5-haiku-20241022'];
 
+// Model yang mendukung thinkingConfig (gemini-2.5+)
+const GEMINI_THINKING_MODELS = new Set(['gemini-2.5-flash', 'gemini-2.5-pro']);
 const GEMINI_MODELS = [
-  'gemini-2.5-flash',        // model utama
-  'gemini-2.0-flash',        // fallback
-  'gemini-2.0-flash-lite',   // fallback ringan
-  'gemini-1.5-flash-latest', // fallback lama
-  // gemini-1.5-pro / gemini-pro ← deprecated, dihapus
+  'gemini-2.5-flash',   // utama — thinking support
+  'gemini-2.0-flash',   // fallback stabil
+  'gemini-2.0-flash-lite', // fallback ringan
+  'gemini-1.5-flash',   // fallback lama (tanpa -latest)
 ];
 const NEWS_KEY        = 'cmsph_news_v1';
 const NEWS_TTL        = 60 * 60 * 1000;
@@ -5998,14 +5999,20 @@ function geminiUrl(model) {
 async function callGemini(prompt) {
   const key = getGeminiKey();
   if (!key) throw new Error('Gemini API Key belum diisi. Masuk ke API Setup → Gemini AI dan isi key-nya.');
-  const body = JSON.stringify({
-    contents: [{ parts: [{ text: prompt }] }],
-    generationConfig: { temperature: 0.8, maxOutputTokens: 2048, thinkingConfig: { thinkingBudget: 0 } }
-  });
+
   let lastErr = 'Semua model gagal';
   for (const model of GEMINI_MODELS) {
     try {
-      const res  = await fetch(geminiUrl(model), { method:'POST', headers:{'Content-Type':'application/json'}, body });
+      // thinkingConfig hanya untuk model yang mendukungnya (gemini-2.5+)
+      const generationConfig = GEMINI_THINKING_MODELS.has(model)
+        ? { temperature: 0.7, maxOutputTokens: 2048, thinkingConfig: { thinkingBudget: 0 } }
+        : { temperature: 0.8, maxOutputTokens: 2048 };
+
+      const body = JSON.stringify({
+        contents: [{ parts: [{ text: prompt }] }],
+        generationConfig,
+      });
+      const res  = await fetch(geminiUrl(model), { method: 'POST', headers: { 'Content-Type': 'application/json' }, body });
       const data = await res.json();
       if (data.error) { lastErr = data.error.message; continue; }
       const text = data.candidates?.[0]?.content?.parts?.find(p => p.text)?.text;
