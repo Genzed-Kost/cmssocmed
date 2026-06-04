@@ -692,7 +692,8 @@ ul { list-style: none; }
 .badge-plan      { background: #f1f5f9; color: #475569; }
 .badge-review    { background: #fff7ed; color: #c2410c; }
 .badge-revisi    { background: var(--red-lt); color: var(--red); }
-.badge-preview   { background: #fdf4ff; color: #9333ea; }
+.badge-ongoing   { background: #fef9c3; color: #92400e; }  /* amber — sedang berjalan */
+.badge-preview   { background: #fef9c3; color: #92400e; }  /* alias lama → sama dengan ongoing */
 .badge-acc       { background: var(--green-lt); color: var(--green); }
 .badge-done      { background: #ecfeff; color: #0891b2; }
 .badge-published { background: var(--blue-lt); color: var(--blue); }

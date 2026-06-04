@@ -191,7 +191,7 @@ const STATUS_CLASS = {
   'Plan':      'badge-plan',
   'Review':    'badge-review',
   'Revisi':    'badge-revisi',
-  'Preview':   'badge-preview',
+  'Ongoing':   'badge-ongoing',   // sedang dalam pengerjaan / pelaksanaan
   'ACC':       'badge-acc',
   'Done':      'badge-done',
   'Published': 'badge-published',
@@ -201,10 +201,11 @@ const STATUS_CLASS = {
   'Ide':       'badge-plan',
   'Draft':     'badge-review',
   'Approved':  'badge-acc',
-  'Scheduled': 'badge-preview'
+  'Preview':   'badge-ongoing',   // alias lama → Ongoing
+  'Scheduled': 'badge-ongoing',
 };
 
-const STATUSES  = ['Plan','Review','Revisi','Preview','ACC','Done','Published','Drop','Hold'];
+const STATUSES  = ['Plan','Review','Revisi','Ongoing','ACC','Done','Published','Drop','Hold'];
 const FORMATS   = ['Flayer','Meme','Karikatur','Komikstrip','Animasi','Video','Short','Monolog','Carousell','Podcast','Liputan'];
 const FORMATS_DUAL_ROLE = ['Podcast','Liputan']; // formats that need Creator + Editor fields
 
@@ -1351,7 +1352,7 @@ const WA_STATUS_CTA = {
   'Plan':      { emoji: '📋', cta: 'Konten sudah masuk perencanaan. Yuk mulai siapkan referensi dan materinya ya!' },
   'Review':    { emoji: '🔍', cta: 'Konten kamu sedang dalam tahap review. Harap standby untuk feedback dari tim.' },
   'Revisi':    { emoji: '✏️', cta: 'Konten perlu direvisi. Cek catatan di CMS dan segera lakukan perbaikan ya.' },
-  'Preview':   { emoji: '🖼️', cta: 'Konten sudah sampai tahap preview. Tunggu persetujuan akhir dari tim.' },
+  'Ongoing':   { emoji: '🎙', cta: 'Konten sedang dalam pelaksanaan. Semangat, pantau terus progresnya ya!' },
   'ACC':       { emoji: '✅', cta: 'Selamat! Konten kamu sudah di-ACC dan siap ditayangkan sesuai jadwal.' },
   'Done':      { emoji: '🎉', cta: 'Konten sudah selesai — kerja bagus! Tinggal menunggu jadwal publish.' },
   'Published': { emoji: '🚀', cta: 'Konten kamu sudah LIVE! Yuk pantau performa dan engagement di platform ya.' },
