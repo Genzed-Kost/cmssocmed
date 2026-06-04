@@ -5545,28 +5545,35 @@ function downloadStatJpg() {
 
   const link = document.createElement('a');
   link.download = `grafik-${acctId}-${platId}-${fileTag}.jpg`;
-  link.href = offCanvas.toDataURL('image/jpeg', 1.0);   // kualitas max
+  link.href = offCanvas.toDataURL('image/jpeg', 1.0);
+  document.body.appendChild(link);
   link.click();
+  document.body.removeChild(link);
   toast('Grafik berhasil didownload ✓', 'success');
 }
 
 function downloadStatTableJpg() {
-  const acctId = state.statActiveAcct;
-  const platId = state.statActivePlat || 'youtube';
-  const platM  = PLATFORM_FIELDS[platId];
+  const acctId   = state.statActiveAcct;
+  const platId   = state.statActivePlat || 'youtube';
+  const platM    = PLATFORM_FIELDS[platId];
   if (!platM) return;
 
-  const allRows = ((state.analytics?.[acctId]?.[platId]) || [])
-    .slice().sort((a,b) => a.month.localeCompare(b.month));
+  // Deteksi mode weekly/monthly sesuai tampilan aktif
+  const isWeekly = state.statViewMode === 'weekly';
+  const storeKey = isWeekly ? platId + '_w' : platId;
+  const rowKey   = isWeekly ? 'week' : 'month';
+
+  const allRows = ((state.analytics?.[acctId]?.[storeKey]) || [])
+    .slice().sort((a, b) => (a[rowKey] || '').localeCompare(b[rowKey] || ''));
   if (!allRows.length) { toast('Belum ada data untuk didownload', 'error'); return; }
 
   const fromM = $('statFromMonth')?.value || '';
   const toM   = $('statToMonth')?.value   || getCurrentYM();
   const rows  = (fromM || toM)
-    ? allRows.filter(r => (!fromM || r.month >= fromM) && (!toM || r.month <= toM))
+    ? allRows.filter(r => (!fromM || (r[rowKey] || '') >= fromM) && (!toM || (r[rowKey] || '') <= toM))
     : allRows;
-  const dlRows  = rows.length ? rows : allRows;   // fallback jika filter kosong
-  const fileTag = fromM ? `${fromM}_${toM}` : toM;
+  const dlRows  = rows.length ? rows : allRows;
+  const fileTag = fromM ? `${fromM}_${toM}` : (toM || new Date().toISOString().slice(0,7));
   const acctObj = ACCOUNTS.find(a => a.id === acctId);
 
   // 4 kolom ringkas: Bulan · Total Views · Subscribers/Followers EOM · Total Engagement
@@ -5575,9 +5582,10 @@ function downloadStatTableJpg() {
   const engF   = platM.fields.find(f => f.key === 'totalEngagement')  || null;
   const dlCols = [viewF, follF, engF].filter(Boolean);
 
-  const headers  = ['BULAN', ...dlCols.map(f => f.label)];
+  const periodLabel = isWeekly ? 'MINGGU' : 'BULAN';
+  const headers  = [periodLabel, ...dlCols.map(f => f.label)];
   const dataRows = dlRows.map(r => [
-    fmtMonth(r.month),
+    isWeekly ? (r.week || '—') : fmtMonth(r.month),
     ...dlCols.map(f => fmtStatVal(r[f.key], f.fmt))
   ]);
 
@@ -5686,11 +5694,13 @@ function downloadStatTableJpg() {
   ctx.lineWidth = 1;
   ctx.strokeRect(PAD, tblTop, totalW - PAD * 2, ROW_H * (dataRows.length + 1));
 
-  // Download
+  // Download — append ke DOM agar semua browser men-trigger download
   const link = document.createElement('a');
   link.download = `tabel-${acctId}-${platId}-${fileTag}.jpg`;
-  link.href = cv.toDataURL('image/jpeg', 1.0);   // kualitas max HD
+  link.href = cv.toDataURL('image/jpeg', 1.0);
+  document.body.appendChild(link);
   link.click();
+  document.body.removeChild(link);
   toast('Tabel berhasil didownload ✓', 'success');
 }
 
