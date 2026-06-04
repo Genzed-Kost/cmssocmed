@@ -1,10 +1,18 @@
 [
   {
+    "id": "mpzca8gza9d29",
+    "user": "Admin",
+    "role": "Admin",
+    "action": "ubah status",
+    "target": "\"Podcsat Kepala KSP Pak Dudung\" menjadi Ongoing",
+    "timestamp": "2026-06-04T10:15:17.603Z"
+  },
+  {
     "id": "mpzc9sew6blen",
     "user": "Admin",
     "role": "Admin",
     "action": "Kirim WA Planner",
-    "target": "ke Umar — \"Podcsat Kepala KSP Pak Dudung\" (Preview)",
+    "target": "ke Umar â \"Podcsat Kepala KSP Pak Dudung\" (Preview)",
     "timestamp": "2026-06-04T10:14:56.792Z"
   },
   {
@@ -12,7 +20,7 @@
     "user": "Admin",
     "role": "Admin",
     "action": "Kirim WA Bank Konten",
-    "target": "ke Umar â \"Go Prabowo\"",
+    "target": "ke Umar Ã¢ÂÂ \"Go Prabowo\"",
     "timestamp": "2026-06-04T10:08:50.330Z"
   },
   {
