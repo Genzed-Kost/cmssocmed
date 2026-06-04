@@ -2625,6 +2625,7 @@ function renderPlanner(page) {
         ${acct ? `<div style="font-size:.7rem;color:${acct.color};margin-top:2px">${acct.name}</div>` : ''}
       </td>
       <td>${esc(c.theme||'—')}</td>
+      <td><span class="format-pill format-${(c.format||'').toLowerCase()}">${esc(c.format||'—')}</span></td>
       <td><div class="plat-pills">${plats||'—'}</div></td>
       <td>${esc(Array.isArray(c.creator) ? c.creator.join(', ') : (c.creator||'—'))}</td>
       <td><div style="display:flex;gap:5px;align-items:center">
@@ -2637,7 +2638,7 @@ function renderPlanner(page) {
         </button>` : ''}
       </div></td>
     </tr>`;
-  }).join('') : '<tr><td colspan="7" class="empty-cell">Belum ada konten</td></tr>';
+  }).join('') : '<tr><td colspan="8" class="empty-cell">Belum ada konten</td></tr>';
 
   $('planPagination').innerHTML = Array.from({length:total},(_,i) =>
     `<button class="page-btn ${i+1===state.planPage?'active':''}" onclick="renderPlanner(${i+1})">${i+1}</button>`
@@ -6474,6 +6475,7 @@ function downloadPlannerPdf() {
         <th style="padding:8px 10px;text-align:left;border:1px solid #334155">No</th>
         <th style="padding:8px 10px;text-align:left;border:1px solid #334155">Tanggal</th>
         <th style="padding:8px 10px;text-align:left;border:1px solid #334155">Judul Konten</th>
+        <th style="padding:8px 10px;text-align:left;border:1px solid #334155">Tipe</th>
         <th style="padding:8px 10px;text-align:left;border:1px solid #334155">Status</th>
         <th style="padding:8px 10px;text-align:left;border:1px solid #334155">Akun</th>
         <th style="padding:8px 10px;text-align:left;border:1px solid #334155">Creator</th>
@@ -6483,6 +6485,7 @@ function downloadPlannerPdf() {
         <td style="padding:7px 10px;border:1px solid #e2e8f0;color:#94a3b8">${i+1}</td>
         <td style="padding:7px 10px;border:1px solid #e2e8f0">${fmtDate(c.publishDate)}</td>
         <td style="padding:7px 10px;border:1px solid #e2e8f0;font-weight:600">${esc(c.title)}</td>
+        <td style="padding:7px 10px;border:1px solid #e2e8f0;font-size:10px">${esc(c.format||'—')}</td>
         <td style="padding:7px 10px;border:1px solid #e2e8f0">
           <span style="background:${statusBg[c.status]||'#f1f5f9'};border-radius:4px;padding:2px 7px;font-size:10px;font-weight:700">${esc(c.status)}</span>
         </td>
@@ -6500,8 +6503,8 @@ function downloadPlannerPdf() {
     html2pdf().from(div).set({
       margin: 8,
       filename: `planner-${downloader.replace(/\s+/g,'-')}-${new Date().toISOString().slice(0,10)}.pdf`,
-      image: { type:'jpeg', quality:.95 },
-      html2canvas: { scale: 2 },
+      image: { type:'jpeg', quality: 1.0 },
+      html2canvas: { scale: 3, useCORS: true, logging: false },
       jsPDF: { unit:'mm', format:'a4', orientation:'landscape' }
     }).save();
   } else {

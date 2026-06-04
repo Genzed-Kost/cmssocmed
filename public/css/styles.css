@@ -717,6 +717,23 @@ ul { list-style: none; }
 .plat-facebook  { background: #1877f2; }
 .plat-youtube   { background: #ff0000; }
 
+/* ── Format / Content-type pill ──────────────────────────────────── */
+.format-pill {
+  display: inline-block; padding: 2px 7px; border-radius: 20px;
+  font-size: .65rem; font-weight: 700; white-space: nowrap;
+}
+.format-podcast    { background: #ede9fe; color: #6d28d9; }
+.format-liputan    { background: #fef9c3; color: #92400e; }
+.format-video      { background: #fee2e2; color: #b91c1c; }
+.format-short      { background: #fce7f3; color: #be185d; }
+.format-monolog    { background: #e0f2fe; color: #0369a1; }
+.format-animasi    { background: #d1fae5; color: #065f46; }
+.format-carousell  { background: #fef3c7; color: #b45309; }
+.format-meme       { background: #f0fdf4; color: #15803d; }
+.format-flayer     { background: #fff7ed; color: #c2410c; }
+.format-karikatur  { background: #fdf4ff; color: #9333ea; }
+.format-komikstrip { background: #ecfdf5; color: #047857; }
+
 /* ── Activity Log ─────────────────────────────────────────────── */
 .activity-list { display: flex; flex-direction: column; gap: 0; }
 .activity-item {
