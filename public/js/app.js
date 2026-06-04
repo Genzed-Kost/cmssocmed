@@ -2287,6 +2287,17 @@ function dashContentCard(c, mode = 'upcoming') {
       </div>`
     : '';
 
+  // ── WA button — tampil jika creator punya nomor & Fonnte/wa.me tersedia ──
+  const crArrCard = Array.isArray(c.creator) ? c.creator : (c.creator ? [c.creator] : []);
+  const hasPhoneCard = crArrCard.some(cr => users.find(u => getUserName(u) === cr)?.phone);
+  const waCardBtn = hasPhoneCard
+    ? `<button class="btn-xs dcc-wa-btn" onclick="event.stopPropagation();openPlannerWa('${c.id}')"
+         title="Kirim WA ke creator"
+         style="display:inline-flex;align-items:center;gap:4px;color:#16a34a;border-color:#bbf7d0;padding:3px 8px;font-size:.7rem">
+        ${WA_SVG} Kirim WA
+       </button>`
+    : '';
+
   // Whole-card click → open popup (skip interactive elements)
   const cardClick = `onclick="if(!event.target.closest('select,button,a,input'))openLinkModal('${c.id}','${mode}')"`;
 
@@ -2304,6 +2315,7 @@ function dashContentCard(c, mode = 'upcoming') {
     ${acct ? `<div class="dcc-owner-tag" style="background:${acct.color}18;color:${acct.color};border-color:${acct.color}30">${acct.name}</div>` : ''}
     <div class="dcc-title">${esc(c.title||'—')}</div>
     ${outputIcon}
+    ${waCardBtn ? `<div style="margin:4px 0 6px">${waCardBtn}</div>` : ''}
     <div class="dcc-meta-row${!c.theme ? ' dcc-empty' : ''}">
       <span class="dcc-label">TEMA</span>
       <span class="dcc-val">${esc(c.theme||'—')}</span>
