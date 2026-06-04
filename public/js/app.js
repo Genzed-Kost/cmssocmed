@@ -5996,6 +5996,82 @@ function geminiUrl(model) {
   return `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${getGeminiKey()}`;
 }
 
+/* ── Test & diagnosa koneksi Gemini — dipanggil dari tombol di API Setup ── */
+async function testGeminiKey() {
+  const key = getGeminiKey();
+  const btn = $('btnTestGemini');
+  const out = $('geminiTestResult');
+  if (!key) {
+    if (out) { out.style.display=''; out.style.background='#fef2f2'; out.style.color='#b91c1c'; out.textContent='⚠ API Key belum diisi.'; }
+    return;
+  }
+  if (btn) { btn.textContent='⏳ Mengecek…'; btn.disabled=true; }
+  if (out)  { out.style.display=''; out.style.background='#f8fafc'; out.style.color='#475569'; out.textContent='Memeriksa model yang tersedia…'; }
+
+  // Step 1: cek apakah key valid dengan list models
+  let availableModels = [];
+  try {
+    const r = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${key}`);
+    const d = await r.json();
+    if (d.error) throw new Error(d.error.message);
+    availableModels = (d.models || [])
+      .filter(m => m.supportedGenerationMethods?.includes('generateContent'))
+      .map(m => m.name.replace('models/', ''));
+  } catch (e) {
+    if (out) {
+      out.style.background='#fef2f2'; out.style.color='#b91c1c';
+      out.innerHTML = `❌ <strong>API Key tidak valid atau tidak dapat diakses.</strong><br>
+        Error: ${e.message}<br><br>
+        <strong>Solusi:</strong><br>
+        1. Pastikan key dari <a href="https://aistudio.google.com/app/apikey" target="_blank" style="color:#2563eb">aistudio.google.com</a><br>
+        2. Cek apakah "Generative Language API" sudah diaktifkan di Google Cloud Console<br>
+        3. Pastikan key tidak dibatasi IP/domain`;
+    }
+    if (btn) { btn.textContent='🧪 Test Koneksi'; btn.disabled=false; }
+    return;
+  }
+
+  // Step 2: cek mana model dari GEMINI_MODELS yang tersedia
+  const ourModels   = GEMINI_MODELS;
+  const supported   = ourModels.filter(m => availableModels.includes(m));
+  const unsupported = ourModels.filter(m => !availableModels.includes(m));
+
+  if (supported.length === 0) {
+    if (out) {
+      out.style.background='#fef9c3'; out.style.color='#92400e';
+      out.innerHTML = `⚠ <strong>Key valid, tapi tidak ada model yang cocok.</strong><br>
+        Model tersedia di akun Anda: <em>${availableModels.slice(0,5).join(', ')}</em><br>
+        Hubungi admin untuk update daftar model.`;
+    }
+  } else {
+    // Step 3: coba kirim pesan singkat dengan model pertama yang tersedia
+    let testOk = false; let testErr = '';
+    try {
+      const testBody = JSON.stringify({ contents:[{parts:[{text:'Jawab satu kata: halo'}]}] });
+      const tr = await fetch(geminiUrl(supported[0]), { method:'POST', headers:{'Content-Type':'application/json'}, body: testBody });
+      const td = await tr.json();
+      if (td.error) throw new Error(td.error.message);
+      testOk = !!(td.candidates?.[0]?.content?.parts?.[0]?.text);
+    } catch(e) { testErr = e.message; }
+
+    if (testOk) {
+      if (out) {
+        out.style.background='#f0fdf4'; out.style.color='#166534';
+        out.innerHTML = `✅ <strong>Gemini berfungsi normal!</strong><br>
+          Model aktif: <strong>${supported[0]}</strong><br>
+          ${unsupported.length ? `Model tidak tersedia di akun ini: <em>${unsupported.join(', ')}</em>` : 'Semua model tersedia.'}`;
+      }
+    } else {
+      if (out) {
+        out.style.background='#fef2f2'; out.style.color='#b91c1c';
+        out.innerHTML = `⚠ Key valid, model <strong>${supported[0]}</strong> ditemukan, tapi gagal merespons.<br>
+          Error: ${testErr}<br>Kemungkinan: quota habis atau region dibatasi.`;
+      }
+    }
+  }
+  if (btn) { btn.textContent='🧪 Test Koneksi'; btn.disabled=false; }
+}
+
 async function callGemini(prompt) {
   const key = getGeminiKey();
   if (!key) throw new Error('Gemini API Key belum diisi. Masuk ke API Setup → Gemini AI dan isi key-nya.');
