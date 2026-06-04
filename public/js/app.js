@@ -23,11 +23,11 @@ function saveClaudeKey(key) { key ? localStorage.setItem(CLAUDE_LS_KEY, key) : l
 const CLAUDE_MODELS = ['claude-3-haiku-20240307', 'claude-haiku-4-5', 'claude-3-5-haiku-20241022'];
 
 const GEMINI_MODELS = [
-  'gemini-2.5-flash',        // model utama (stabil & cepat)
+  'gemini-2.5-flash',        // model utama
+  'gemini-2.0-flash',        // fallback
   'gemini-2.0-flash-lite',   // fallback ringan
-  'gemini-1.5-flash',        // fallback lama tapi stabil
-  'gemini-1.5-pro',          // fallback pro (lebih lambat)
-  // 'gemini-pro' ← DIHAPUS: deprecated di v1beta sejak 2025
+  'gemini-1.5-flash-latest', // fallback lama
+  // gemini-1.5-pro / gemini-pro ← deprecated, dihapus
 ];
 const NEWS_KEY        = 'cmsph_news_v1';
 const NEWS_TTL        = 60 * 60 * 1000;
