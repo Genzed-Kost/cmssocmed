@@ -1,10 +1,18 @@
 [
   {
+    "id": "mq0u2hid6rqbg",
+    "user": "Umar",
+    "role": "Publisher",
+    "action": "login",
+    "target": "masuk ke sistem sebagai Publisher",
+    "timestamp": "2026-06-05T11:20:55.333Z"
+  },
+  {
     "id": "mpzcqwi5i0wv9",
     "user": "Admin",
     "role": "Admin",
     "action": "unduh PDF planner",
-    "target": "1 konten · filter: Semua Konten",
+    "target": "1 konten Â· filter: Semua Konten",
     "timestamp": "2026-06-04T10:28:15.245Z"
   },
   {
@@ -20,7 +28,7 @@
     "user": "Admin",
     "role": "Admin",
     "action": "Kirim WA Planner",
-    "target": "ke Umar Ã¢ÂÂ \"Podcsat Kepala KSP Pak Dudung\" (Ongoing)",
+    "target": "ke Umar ÃÂ¢ÃÂÃÂ \"Podcsat Kepala KSP Pak Dudung\" (Ongoing)",
     "timestamp": "2026-06-04T10:15:27.393Z"
   },
   {
@@ -36,7 +44,7 @@
     "user": "Admin",
     "role": "Admin",
     "action": "Kirim WA Planner",
-    "target": "ke Umar ÃÂ¢ÃÂÃÂ \"Podcsat Kepala KSP Pak Dudung\" (Preview)",
+    "target": "ke Umar ÃÂÃÂ¢ÃÂÃÂÃÂÃÂ \"Podcsat Kepala KSP Pak Dudung\" (Preview)",
     "timestamp": "2026-06-04T10:14:56.792Z"
   },
   {
@@ -44,7 +52,7 @@
     "user": "Admin",
     "role": "Admin",
     "action": "Kirim WA Bank Konten",
-    "target": "ke Umar ÃÂÃÂ¢ÃÂÃÂÃÂÃÂ \"Go Prabowo\"",
+    "target": "ke Umar ÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ \"Go Prabowo\"",
     "timestamp": "2026-06-04T10:08:50.330Z"
   },
   {
