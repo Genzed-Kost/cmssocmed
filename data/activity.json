@@ -1,5 +1,21 @@
 [
   {
+    "id": "mq5arcir2eob5",
+    "user": "Admin",
+    "role": "Admin",
+    "action": "login",
+    "target": "masuk ke sistem sebagai Admin",
+    "timestamp": "2026-06-08T14:19:13.827Z"
+  },
+  {
+    "id": "mq5ar1p9r68ey",
+    "user": "Umar",
+    "role": "Publisher",
+    "action": "logout",
+    "target": "keluar dari sistem",
+    "timestamp": "2026-06-08T14:18:59.805Z"
+  },
+  {
     "id": "mq5aqyufurst4",
     "user": "Umar",
     "role": "Publisher",
