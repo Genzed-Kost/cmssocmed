@@ -805,6 +805,10 @@
       "facebook": {
         "updatedAt": "2026-06-08T05:48:50.379Z",
         "updatedBy": "Admin"
+      },
+      "youtube": {
+        "updatedAt": "2026-06-08T05:54:38.772Z",
+        "updatedBy": "Admin"
       }
     },
     "instagram_w": [
@@ -828,6 +832,20 @@
         "totalReach": 1363813,
         "totalReactions": 29856,
         "maxViewsSingle": 202377
+      }
+    ],
+    "youtube_w": [
+      {
+        "week": "2026-W23",
+        "jmlVideo": 40,
+        "totalViews": 274470,
+        "uniqueViewers": 9518,
+        "subsEOM": 68423,
+        "subsGained": 1749,
+        "totalEngagement": 1411,
+        "watchHours": 10279,
+        "impressions": 528154,
+        "peakViews": 48143
       }
     ]
   },
