@@ -978,7 +978,7 @@
       },
       {
         "month": "2026-02",
-        "followersEOM": 0,
+        "followersEOM": 12345,
         "jmlPost": 28,
         "totalViews": 955123,
         "totalReach": 502923,
@@ -1022,7 +1022,7 @@
     ],
     "_meta": {
       "instagram": {
-        "updatedAt": "2026-06-08T08:31:03.763Z",
+        "updatedAt": "2026-06-08T08:31:28.687Z",
         "updatedBy": "Admin"
       }
     }
