@@ -938,6 +938,15 @@
         "totalEngagement": 13418
       },
       {
+        "month": "2025-10",
+        "followersEOM": 0,
+        "jmlPost": 58,
+        "totalViews": 263846,
+        "totalReach": 143048,
+        "followersGained": -226,
+        "totalEngagement": 18841
+      },
+      {
         "month": "2025-11",
         "followersEOM": 0,
         "jmlPost": 52,
@@ -1023,7 +1032,7 @@
     ],
     "_meta": {
       "instagram": {
-        "updatedAt": "2026-06-08T08:02:58.503Z",
+        "updatedAt": "2026-06-08T08:04:13.773Z",
         "updatedBy": "Admin"
       }
     }
