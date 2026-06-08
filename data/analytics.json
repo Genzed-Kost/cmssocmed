@@ -809,6 +809,10 @@
       "youtube": {
         "updatedAt": "2026-06-08T05:54:38.772Z",
         "updatedBy": "Admin"
+      },
+      "tiktok": {
+        "updatedAt": "2026-06-08T06:02:46.548Z",
+        "updatedBy": "Admin"
       }
     },
     "instagram_w": [
@@ -846,6 +850,22 @@
         "watchHours": 10279,
         "impressions": 528154,
         "peakViews": 48143
+      }
+    ],
+    "tiktok_w": [
+      {
+        "week": "2026-W23",
+        "totalVideoViews": 1647884,
+        "profileViews": 6600,
+        "followersEOM": 35215,
+        "followersGained": 824,
+        "totalViewers": 1372200,
+        "newViewers": 657200,
+        "returningViewers": 715000,
+        "totalLikes": 124400,
+        "totalComments": 1952,
+        "totalShares": 10608,
+        "totalEngagement": 136960
       }
     ]
   },
