@@ -1041,21 +1041,31 @@ async function doLogin() {
     const adminName = auth?.adminName || 'Admin';
     const isAdm     = typedName.toLowerCase() === adminName.toLowerCase();
 
+    // ── Helper: shake input + toast error password ─────────────────
+    const shakeAndToast = (msg) => {
+      const pwWrap = $('loginPwWrap');
+      if (pwWrap) {
+        pwWrap.classList.remove('login-shake');
+        void pwWrap.offsetWidth; // reflow untuk restart animasi
+        pwWrap.classList.add('login-shake');
+      }
+      toast(msg, 'error');
+    };
+
     if (isAdm) {
       const hash = await hashPw(pw);
       if (hash !== auth?.adminHash) {
         const a = _recordFailedAttempt();
-        toast(a.lockedUntil
-          ? 'Password salah. Terlalu banyak percobaan — akun dikunci 5 menit.'
-          : `Password salah (${LOGIN_MAX_ATTEMPTS - a.count} percobaan tersisa)`,
-          'error');
+        shakeAndToast(a.lockedUntil
+          ? '🔒 Terlalu banyak percobaan — akun dikunci 5 menit.'
+          : `❌ Password salah. Sisa percobaan: ${LOGIN_MAX_ATTEMPTS - a.count}`);
         return;
       }
       _resetLoginAttempts();
       setSess({ role: 'admin', name: adminName });
 
     } else {
-      // ── Cari user di cache; jika kosong, fetch dulu dari GitHub ──
+      // ── Cari user di cache; jika kosong, fetch dulu dari server ──
       let users = getPubUsers();
       userObj   = users.find(u => getUserName(u).toLowerCase() === typedName.toLowerCase());
 
@@ -1072,20 +1082,22 @@ async function doLogin() {
         btn.textContent = 'Masuk…';
       }
 
-      if (!userObj) { toast('Nama tidak ditemukan dalam daftar tim', 'error'); return; }
+      if (!userObj) {
+        shakeAndToast('❌ Nama tidak ditemukan dalam daftar tim');
+        return;
+      }
 
       if (userObj.passwordHash) {
         const hash = await hashPw(pw);
         if (hash !== userObj.passwordHash) {
           const a = _recordFailedAttempt();
-          toast(a.lockedUntil
-            ? 'Password salah. Terlalu banyak percobaan — akun dikunci 5 menit.'
-            : `Password salah (${LOGIN_MAX_ATTEMPTS - a.count} percobaan tersisa)`,
-            'error');
+          shakeAndToast(a.lockedUntil
+            ? '🔒 Terlalu banyak percobaan — akun dikunci 5 menit.'
+            : `❌ Password salah. Sisa percobaan: ${LOGIN_MAX_ATTEMPTS - a.count}`);
           return;
         }
       }
-      // Tidak ada passwordHash = izinkan masuk (backward compat, admin perlu set password)
+      // Tidak ada passwordHash = izinkan masuk (backward compat)
       _resetLoginAttempts();
       setSess({ role: 'creator', name: getUserName(userObj) });
     }
@@ -1096,12 +1108,22 @@ async function doLogin() {
     if (inp) inp.value = '';
     applyAuthState();
     handleHash();
+
+    // Tampilkan pantun SEGERA (sebelum loadAllData) agar user langsung lihat
+    const earlyRole = isAdm ? 'Admin' : 'Creator';
+    showPantun('login', earlyRole, loginName);
+
     setTimeout(async () => {
       await loadAllData();
+      // Update pantun badge ke role sebenarnya jika berbeda
       const loginRole = isAdm ? 'Admin' : (getUserRole((state.settings?.users||[]).find(u=>getUserName(u)===loginName)||null)||'Creator');
       logActivity(loginName, 'login', `masuk ke sistem sebagai ${loginRole}`);
-      // Pantun selamat datang
-      showPantun('login', loginRole, loginName);
+      if (loginRole !== earlyRole) {
+        // Re-show pantun dengan role yang benar jika belum ditutup
+        if (!$('pantunOverlay')?.classList.contains('hidden')) {
+          showPantun('login', loginRole, loginName);
+        }
+      }
     }, 200);
   } finally {
     btn.textContent = 'Masuk →'; btn.disabled = false;
@@ -1115,11 +1137,10 @@ function doLogout() {
     : (getUserRole((state.settings?.users||[]).find(u=>getUserName(u)===name)||null)||'Creator');
   logActivity(name, 'logout', 'keluar dari sistem').catch(() => {});
   clearSess();
-  // Clear page
   $$('.page').forEach(s => s.classList.remove('active'));
   showLogin();
   applyAuthState();
-  // Pantun selamat tinggal (shown above login page)
+  // Pantun selamat tinggal
   showPantun('logout', role, name);
 }
 
