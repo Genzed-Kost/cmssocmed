@@ -940,22 +940,11 @@
       {
         "month": "2025-11",
         "followersEOM": 0,
-        "jmlPost": 12,
-        "totalViews": 9121,
-        "totalReach": 1793,
-        "followersGained": 0,
-        "totalLikes": 956,
-        "totalComments": 926,
-        "totalShares": 0,
-        "totalSaves": 3,
-        "totalEngagement": 1885,
-        "erPct": 0,
-        "avgViews": 760,
-        "peakViews": 1053,
-        "avgEng": 157,
-        "reelViews": 0,
-        "carouselViews": 6206,
-        "imageViews": 2915
+        "jmlPost": 52,
+        "totalViews": 353540,
+        "totalReach": 212934,
+        "followersGained": 827,
+        "totalEngagement": 22470
       },
       {
         "month": "2025-12",
@@ -1034,7 +1023,7 @@
     ],
     "_meta": {
       "instagram": {
-        "updatedAt": "2026-06-08T08:01:36.718Z",
+        "updatedAt": "2026-06-08T08:02:58.503Z",
         "updatedBy": "Admin"
       }
     }
