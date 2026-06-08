@@ -795,11 +795,19 @@
         "reelViews": 193572,
         "carouselViews": 62511,
         "imageViews": 1242
+      },
+      {
+        "month": "2026-05",
+        "jmlPost": 180,
+        "totalViews": 1913501,
+        "totalReach": 835833,
+        "followersGained": 1132,
+        "totalEngagement": 77483
       }
     ],
     "_meta": {
       "instagram": {
-        "updatedAt": "2026-06-08T06:16:16.294Z",
+        "updatedAt": "2026-06-08T06:19:25.278Z",
         "updatedBy": "Admin"
       },
       "facebook": {
