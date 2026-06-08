@@ -801,6 +801,10 @@
       "instagram": {
         "updatedAt": "2026-06-08T05:45:04.133Z",
         "updatedBy": "Admin"
+      },
+      "facebook": {
+        "updatedAt": "2026-06-08T05:48:50.379Z",
+        "updatedBy": "Admin"
       }
     },
     "instagram_w": [
@@ -813,6 +817,17 @@
         "followersGained": 775,
         "totalEngagement": 16702,
         "peakViews": 19686
+      }
+    ],
+    "facebook_w": [
+      {
+        "week": "2026-W23",
+        "pageFollowers": 157953,
+        "totalPost": 47,
+        "totalViews": 755616,
+        "totalReach": 1363813,
+        "totalReactions": 29856,
+        "maxViewsSingle": 202377
       }
     ]
   },
