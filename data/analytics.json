@@ -738,11 +738,11 @@
       },
       {
         "month": "2026-02",
-        "followersEOM": 0,
+        "followersEOM": 65834,
         "jmlPost": 149,
         "totalViews": 2806156,
         "totalReach": 1811607,
-        "followersGained": 1172,
+        "followersGained": 1515,
         "totalLikes": 36154,
         "totalComments": 16356,
         "totalShares": 2342,
@@ -798,7 +798,7 @@
     ],
     "_meta": {
       "instagram": {
-        "updatedAt": "2026-06-08T06:13:53.840Z",
+        "updatedAt": "2026-06-08T06:14:44.032Z",
         "updatedBy": "Admin"
       },
       "facebook": {
