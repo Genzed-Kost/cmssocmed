@@ -1003,20 +1003,11 @@
       {
         "month": "2026-01",
         "followersEOM": 0,
-        "jmlPost": 12,
-        "totalViews": 117291,
-        "totalReach": 93470,
-        "followersGained": 48,
-        "totalLikes": 5406,
-        "totalComments": 135,
-        "totalShares": 24,
-        "totalSaves": 1041,
-        "totalEngagement": 6606,
-        "erPct": 7.07,
-        "avgViews": 9774,
-        "peakViews": 44084,
-        "avgEng": 550,
-        "reelViews": 117291,
+        "jmlPost": 38,
+        "totalViews": 302562,
+        "totalReach": 190204,
+        "followersGained": 478,
+        "totalEngagement": 19172,
         "carouselViews": 0,
         "imageViews": 0
       },
@@ -1080,7 +1071,13 @@
         "carouselViews": 0,
         "imageViews": 0
       }
-    ]
+    ],
+    "_meta": {
+      "instagram": {
+        "updatedAt": "2026-06-08T07:47:07.349Z",
+        "updatedBy": "Admin"
+      }
+    }
   },
   "jaga-asa": {}
 }
