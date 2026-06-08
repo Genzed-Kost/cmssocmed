@@ -1,11 +1,11 @@
 [
   {
-    "id": "mq5aqp3xe9z5a",
-    "user": "Admin",
-    "role": "Admin",
-    "action": "logout",
-    "target": "keluar dari sistem",
-    "timestamp": "2026-06-08T14:18:43.485Z"
+    "id": "mq5aqyufurst4",
+    "user": "Umar",
+    "role": "Publisher",
+    "action": "login",
+    "target": "masuk ke sistem sebagai Publisher",
+    "timestamp": "2026-06-08T14:18:56.103Z"
   },
   {
     "id": "mq5aka01z0ng0",
