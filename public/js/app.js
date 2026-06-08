@@ -2207,13 +2207,13 @@ function dashContentCard(c, mode = 'upcoming') {
       </div>`
     : '';
 
-  // ── Output icon — sejajar dengan tanggal di baris atas ─────────────────
-  const outputDateIcon = (mode === 'upcoming' && c.outputLink)
+  // ── Output icon — sejajar nama akun (kiri) ──────────────────────────────
+  const outputAcctIcon = c.outputLink
     ? `<a href="${esc(c.outputLink)}" target="_blank" rel="noopener"
-         class="dcc-output-date-icon" title="Output tersimpan — klik untuk buka"
-         onclick="event.stopPropagation()"
-         style="display:inline-flex;align-items:center;gap:3px;color:#16a34a;font-size:.68rem;font-weight:600;text-decoration:none">
-        <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor" style="flex-shrink:0">
+         title="Output tersimpan — klik untuk buka" onclick="event.stopPropagation()"
+         style="display:inline-flex;align-items:center;gap:3px;color:#16a34a;
+                font-size:.68rem;font-weight:600;text-decoration:none;flex-shrink:0">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor">
           <path d="M22 9H13.4L11.7 7.3A1 1 0 0011 7H6a1 1 0 00-1 1v1H3a1 1 0 00-1 1v9a2 2 0 002 2h16a2 2 0 002-2V11a2 2 0 00-2-2z" opacity=".4"/>
           <path d="M20 11H4a1 1 0 00-1 1v7a1 1 0 001 1h16a1 1 0 001-1v-7a1 1 0 00-1-1z"/>
         </svg>
@@ -2233,13 +2233,15 @@ function dashContentCard(c, mode = 'upcoming') {
         <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
         ${fmtDate(c.publishDate)}
       </span>
-      ${outputDateIcon}
     </div>
-    ${acct ? `<div class="dcc-owner-tag" style="background:${acct.color}18;color:${acct.color};border-color:${acct.color}30">${acct.name}</div>` : ''}
+    <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">
+      ${acct ? `<div class="dcc-owner-tag" style="background:${acct.color}18;color:${acct.color};border-color:${acct.color}30">${acct.name}</div>` : ''}
+      ${outputAcctIcon}
+    </div>
     <div class="dcc-title">${esc(c.title||'—')}</div>
-    <div class="dcc-meta-row${!c.theme ? ' dcc-empty' : ''}">
-      <span class="dcc-label">TEMA</span>
-      <span class="dcc-val">${esc(c.theme||'—')}</span>
+    <div class="dcc-meta-row${!c.format ? ' dcc-empty' : ''}">
+      <span class="dcc-label">TIPE KONTEN</span>
+      <span class="dcc-val"><span class="format-pill format-${(c.format||'').toLowerCase()}">${esc(c.format||'—')}</span></span>
     </div>
     <div class="dcc-meta-row">
       <span class="dcc-label">CREATOR</span>
