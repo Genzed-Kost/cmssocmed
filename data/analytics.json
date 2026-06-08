@@ -1042,11 +1042,22 @@
         "totalEngagement": 11096,
         "erPct": 0,
         "imageViews": 0
+      },
+      {
+        "month": "2026-05",
+        "followersEOM": 0,
+        "jmlPost": 74,
+        "totalViews": 4469635,
+        "totalReach": 2695072,
+        "followersGained": 864,
+        "totalEngagement": 220892,
+        "erPct": 0,
+        "imageViews": 0
       }
     ],
     "_meta": {
       "instagram": {
-        "updatedAt": "2026-06-08T07:50:43.256Z",
+        "updatedAt": "2026-06-08T07:52:28.485Z",
         "updatedBy": "Admin"
       }
     }
