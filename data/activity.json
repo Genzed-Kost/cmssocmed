@@ -1,10 +1,18 @@
 [
   {
+    "id": "mq505io23wlwz",
+    "user": "Admin",
+    "role": "Admin",
+    "action": "logout",
+    "target": "keluar dari sistem",
+    "timestamp": "2026-06-08T09:22:19.202Z"
+  },
+  {
     "id": "mq5015rzrmldf",
     "user": "Admin",
     "role": "Admin",
     "action": "update statistik",
-    "target": "33 Official Instagram — W23 Jun '26",
+    "target": "33 Official Instagram â W23 Jun '26",
     "timestamp": "2026-06-08T09:18:55.871Z"
   },
   {
@@ -12,7 +20,7 @@
     "user": "Admin",
     "role": "Admin",
     "action": "update statistik",
-    "target": "Penjaga Harapan YouTube — W23 Jun '26",
+    "target": "Penjaga Harapan YouTube â W23 Jun '26",
     "timestamp": "2026-06-08T08:41:59.599Z"
   },
   {
@@ -20,7 +28,7 @@
     "user": "Admin",
     "role": "Admin",
     "action": "update statistik",
-    "target": "33 Official Instagram — Mar 2026",
+    "target": "33 Official Instagram â Mar 2026",
     "timestamp": "2026-06-08T08:31:55.443Z"
   },
   {
@@ -28,7 +36,7 @@
     "user": "Admin",
     "role": "Admin",
     "action": "update statistik",
-    "target": "33 Official Instagram — Feb 2026",
+    "target": "33 Official Instagram â Feb 2026",
     "timestamp": "2026-06-08T08:31:29.916Z"
   },
   {
@@ -36,7 +44,7 @@
     "user": "Admin",
     "role": "Admin",
     "action": "update statistik",
-    "target": "33 Official Instagram — Jan 2026",
+    "target": "33 Official Instagram â Jan 2026",
     "timestamp": "2026-06-08T08:31:05.205Z"
   },
   {
@@ -44,7 +52,7 @@
     "user": "Admin",
     "role": "Admin",
     "action": "update statistik",
-    "target": "33 Official Instagram — Des 2025",
+    "target": "33 Official Instagram â Des 2025",
     "timestamp": "2026-06-08T08:30:24.888Z"
   },
   {
@@ -52,7 +60,7 @@
     "user": "Admin",
     "role": "Admin",
     "action": "update statistik",
-    "target": "33 Official Instagram — Nov 2025",
+    "target": "33 Official Instagram â Nov 2025",
     "timestamp": "2026-06-08T08:30:02.937Z"
   },
   {
@@ -60,7 +68,7 @@
     "user": "Admin",
     "role": "Admin",
     "action": "update statistik",
-    "target": "33 Official Instagram — Okt 2025",
+    "target": "33 Official Instagram â Okt 2025",
     "timestamp": "2026-06-08T08:29:39.544Z"
   },
   {
@@ -68,7 +76,7 @@
     "user": "Admin",
     "role": "Admin",
     "action": "update statistik",
-    "target": "33 Official Instagram — Apr 2026",
+    "target": "33 Official Instagram â Apr 2026",
     "timestamp": "2026-06-08T08:29:10.911Z"
   },
   {
@@ -76,7 +84,7 @@
     "user": "Admin",
     "role": "Admin",
     "action": "update statistik",
-    "target": "33 Official Instagram — Mei 2026",
+    "target": "33 Official Instagram â Mei 2026",
     "timestamp": "2026-06-08T08:28:44.163Z"
   },
   {
@@ -84,7 +92,7 @@
     "user": "Admin",
     "role": "Admin",
     "action": "update statistik",
-    "target": "33 Official Instagram — Mei 2026",
+    "target": "33 Official Instagram â Mei 2026",
     "timestamp": "2026-06-08T08:28:14.236Z"
   },
   {
@@ -92,7 +100,7 @@
     "user": "Admin",
     "role": "Admin",
     "action": "update statistik",
-    "target": "33 Official Instagram — Sep 2025",
+    "target": "33 Official Instagram â Sep 2025",
     "timestamp": "2026-06-08T08:26:59.702Z"
   },
   {
@@ -100,7 +108,7 @@
     "user": "Admin",
     "role": "Admin",
     "action": "update statistik",
-    "target": "33 Official Instagram — Agt 2025",
+    "target": "33 Official Instagram â Agt 2025",
     "timestamp": "2026-06-08T08:26:27.138Z"
   },
   {
@@ -108,7 +116,7 @@
     "user": "Admin",
     "role": "Admin",
     "action": "update statistik",
-    "target": "33 Official Instagram — Jul 2025",
+    "target": "33 Official Instagram â Jul 2025",
     "timestamp": "2026-06-08T08:25:55.441Z"
   },
   {
@@ -116,7 +124,7 @@
     "user": "Admin",
     "role": "Admin",
     "action": "update statistik",
-    "target": "33 Official Instagram — Jun 2025",
+    "target": "33 Official Instagram â Jun 2025",
     "timestamp": "2026-06-08T08:25:20.378Z"
   },
   {
@@ -124,7 +132,7 @@
     "user": "Admin",
     "role": "Admin",
     "action": "Kirim WA Bank Konten",
-    "target": "ke Umar — \"Go Prabowo\"",
+    "target": "ke Umar â \"Go Prabowo\"",
     "timestamp": "2026-06-08T08:20:02.932Z"
   },
   {
@@ -132,7 +140,7 @@
     "user": "Admin",
     "role": "Admin",
     "action": "Kirim WA Planner",
-    "target": "ke Umar — \"Podcsat Kepala KSP Pak Dudung\" (Published)",
+    "target": "ke Umar â \"Podcsat Kepala KSP Pak Dudung\" (Published)",
     "timestamp": "2026-06-08T08:19:49.869Z"
   },
   {
@@ -140,7 +148,7 @@
     "user": "Admin",
     "role": "Admin",
     "action": "update statistik",
-    "target": "33 Official Instagram — Jul 2025",
+    "target": "33 Official Instagram â Jul 2025",
     "timestamp": "2026-06-08T08:10:34.464Z"
   },
   {
@@ -148,7 +156,7 @@
     "user": "Admin",
     "role": "Admin",
     "action": "update statistik",
-    "target": "33 Official Instagram — Jun 2025",
+    "target": "33 Official Instagram â Jun 2025",
     "timestamp": "2026-06-08T08:10:09.837Z"
   },
   {
@@ -156,7 +164,7 @@
     "user": "Admin",
     "role": "Admin",
     "action": "update statistik",
-    "target": "33 Official Instagram — Des 2025",
+    "target": "33 Official Instagram â Des 2025",
     "timestamp": "2026-06-08T08:05:48.802Z"
   },
   {
@@ -164,7 +172,7 @@
     "user": "Admin",
     "role": "Admin",
     "action": "update statistik",
-    "target": "33 Official Instagram — Des 2025",
+    "target": "33 Official Instagram â Des 2025",
     "timestamp": "2026-06-08T08:05:26.161Z"
   },
   {
@@ -172,7 +180,7 @@
     "user": "Admin",
     "role": "Admin",
     "action": "update statistik",
-    "target": "33 Official Instagram — Okt 2025",
+    "target": "33 Official Instagram â Okt 2025",
     "timestamp": "2026-06-08T08:04:15.043Z"
   },
   {
@@ -180,7 +188,7 @@
     "user": "Admin",
     "role": "Admin",
     "action": "update statistik",
-    "target": "33 Official Instagram — Nov 2025",
+    "target": "33 Official Instagram â Nov 2025",
     "timestamp": "2026-06-08T08:02:59.780Z"
   },
   {
@@ -188,7 +196,7 @@
     "user": "Admin",
     "role": "Admin",
     "action": "update statistik",
-    "target": "33 Official Instagram — Sep 2025",
+    "target": "33 Official Instagram â Sep 2025",
     "timestamp": "2026-06-08T08:01:37.951Z"
   },
   {
@@ -196,7 +204,7 @@
     "user": "Admin",
     "role": "Admin",
     "action": "update statistik",
-    "target": "33 Official Instagram — Agt 2025",
+    "target": "33 Official Instagram â Agt 2025",
     "timestamp": "2026-06-08T07:54:34.517Z"
   },
   {
@@ -204,7 +212,7 @@
     "user": "Admin",
     "role": "Admin",
     "action": "update statistik",
-    "target": "33 Official Instagram — Mei 2026",
+    "target": "33 Official Instagram â Mei 2026",
     "timestamp": "2026-06-08T07:52:29.709Z"
   },
   {
@@ -212,7 +220,7 @@
     "user": "Admin",
     "role": "Admin",
     "action": "update statistik",
-    "target": "33 Official Instagram — Apr 2026",
+    "target": "33 Official Instagram â Apr 2026",
     "timestamp": "2026-06-08T07:50:44.504Z"
   },
   {
@@ -220,7 +228,7 @@
     "user": "Admin",
     "role": "Admin",
     "action": "update statistik",
-    "target": "33 Official Instagram — Mar 2026",
+    "target": "33 Official Instagram â Mar 2026",
     "timestamp": "2026-06-08T07:49:31.206Z"
   },
   {
@@ -228,7 +236,7 @@
     "user": "Admin",
     "role": "Admin",
     "action": "update statistik",
-    "target": "33 Official Instagram — Feb 2026",
+    "target": "33 Official Instagram â Feb 2026",
     "timestamp": "2026-06-08T07:48:18.928Z"
   },
   {
@@ -236,7 +244,7 @@
     "user": "Admin",
     "role": "Admin",
     "action": "update statistik",
-    "target": "33 Official Instagram — Jan 2026",
+    "target": "33 Official Instagram â Jan 2026",
     "timestamp": "2026-06-08T07:47:08.885Z"
   },
   {
@@ -244,7 +252,7 @@
     "user": "Admin",
     "role": "Admin",
     "action": "update statistik",
-    "target": "Penjaga Harapan Instagram — Okt 2025",
+    "target": "Penjaga Harapan Instagram â Okt 2025",
     "timestamp": "2026-06-08T07:41:48.013Z"
   },
   {
@@ -252,7 +260,7 @@
     "user": "Admin",
     "role": "Admin",
     "action": "update statistik",
-    "target": "Penjaga Harapan Instagram — Jan 2026",
+    "target": "Penjaga Harapan Instagram â Jan 2026",
     "timestamp": "2026-06-08T07:39:21.842Z"
   },
   {
@@ -260,7 +268,7 @@
     "user": "Admin",
     "role": "Admin",
     "action": "update statistik",
-    "target": "Penjaga Harapan Instagram — Mei 2026",
+    "target": "Penjaga Harapan Instagram â Mei 2026",
     "timestamp": "2026-06-08T07:37:27.452Z"
   },
   {
@@ -268,7 +276,7 @@
     "user": "Admin",
     "role": "Admin",
     "action": "update statistik",
-    "target": "Penjaga Harapan Instagram — Apr 2026",
+    "target": "Penjaga Harapan Instagram â Apr 2026",
     "timestamp": "2026-06-08T07:37:03.180Z"
   },
   {
@@ -276,7 +284,7 @@
     "user": "Admin",
     "role": "Admin",
     "action": "update statistik",
-    "target": "Penjaga Harapan Instagram — Mar 2026",
+    "target": "Penjaga Harapan Instagram â Mar 2026",
     "timestamp": "2026-06-08T07:36:41.610Z"
   },
   {
@@ -284,7 +292,7 @@
     "user": "Admin",
     "role": "Admin",
     "action": "update statistik",
-    "target": "Penjaga Harapan Instagram — Feb 2026",
+    "target": "Penjaga Harapan Instagram â Feb 2026",
     "timestamp": "2026-06-08T07:36:20.263Z"
   },
   {
@@ -292,7 +300,7 @@
     "user": "Admin",
     "role": "Admin",
     "action": "update statistik",
-    "target": "Penjaga Harapan Instagram — Jan 2026",
+    "target": "Penjaga Harapan Instagram â Jan 2026",
     "timestamp": "2026-06-08T07:35:43.278Z"
   },
   {
@@ -300,7 +308,7 @@
     "user": "Admin",
     "role": "Admin",
     "action": "update statistik",
-    "target": "Penjaga Harapan Instagram — Des 2025",
+    "target": "Penjaga Harapan Instagram â Des 2025",
     "timestamp": "2026-06-08T07:35:16.433Z"
   },
   {
@@ -308,7 +316,7 @@
     "user": "Admin",
     "role": "Admin",
     "action": "update statistik",
-    "target": "Penjaga Harapan Instagram — Nov 2025",
+    "target": "Penjaga Harapan Instagram â Nov 2025",
     "timestamp": "2026-06-08T07:34:11.505Z"
   },
   {
@@ -316,7 +324,7 @@
     "user": "Admin",
     "role": "Admin",
     "action": "update statistik",
-    "target": "Penjaga Harapan Instagram — Apr 2026",
+    "target": "Penjaga Harapan Instagram â Apr 2026",
     "timestamp": "2026-06-08T07:32:06.365Z"
   },
   {
@@ -324,7 +332,7 @@
     "user": "Admin",
     "role": "Admin",
     "action": "update statistik",
-    "target": "Penjaga Harapan Instagram — Mar 2026",
+    "target": "Penjaga Harapan Instagram â Mar 2026",
     "timestamp": "2026-06-08T07:31:43.562Z"
   },
   {
@@ -332,7 +340,7 @@
     "user": "Admin",
     "role": "Admin",
     "action": "update statistik",
-    "target": "Penjaga Harapan Instagram — Feb 2026",
+    "target": "Penjaga Harapan Instagram â Feb 2026",
     "timestamp": "2026-06-08T07:31:13.866Z"
   },
   {
@@ -340,7 +348,7 @@
     "user": "Admin",
     "role": "Admin",
     "action": "update statistik",
-    "target": "Penjaga Harapan Instagram — Jan 2026",
+    "target": "Penjaga Harapan Instagram â Jan 2026",
     "timestamp": "2026-06-08T07:30:45.895Z"
   },
   {
@@ -348,7 +356,7 @@
     "user": "Admin",
     "role": "Admin",
     "action": "update statistik",
-    "target": "Penjaga Harapan Instagram — Des 2025",
+    "target": "Penjaga Harapan Instagram â Des 2025",
     "timestamp": "2026-06-08T07:30:21.043Z"
   },
   {
@@ -356,7 +364,7 @@
     "user": "Admin",
     "role": "Admin",
     "action": "update statistik",
-    "target": "Penjaga Harapan Instagram — Nov 2025",
+    "target": "Penjaga Harapan Instagram â Nov 2025",
     "timestamp": "2026-06-08T07:29:24.992Z"
   },
   {
@@ -364,7 +372,7 @@
     "user": "Admin",
     "role": "Admin",
     "action": "update statistik",
-    "target": "Penjaga Harapan Instagram — Mar 2026",
+    "target": "Penjaga Harapan Instagram â Mar 2026",
     "timestamp": "2026-06-08T07:21:23.033Z"
   },
   {
@@ -372,7 +380,7 @@
     "user": "Admin",
     "role": "Admin",
     "action": "update statistik",
-    "target": "Penjaga Harapan Instagram — Feb 2026",
+    "target": "Penjaga Harapan Instagram â Feb 2026",
     "timestamp": "2026-06-08T07:20:54.387Z"
   },
   {
@@ -380,7 +388,7 @@
     "user": "Admin",
     "role": "Admin",
     "action": "update statistik",
-    "target": "Penjaga Harapan Instagram — Feb 2026",
+    "target": "Penjaga Harapan Instagram â Feb 2026",
     "timestamp": "2026-06-08T07:20:02.655Z"
   },
   {
@@ -388,7 +396,7 @@
     "user": "Admin",
     "role": "Admin",
     "action": "update statistik",
-    "target": "Penjaga Harapan Instagram — Jan 2026",
+    "target": "Penjaga Harapan Instagram â Jan 2026",
     "timestamp": "2026-06-08T07:19:06.347Z"
   },
   {
@@ -396,7 +404,7 @@
     "user": "Admin",
     "role": "Admin",
     "action": "update statistik",
-    "target": "Penjaga Harapan Instagram — Des 2025",
+    "target": "Penjaga Harapan Instagram â Des 2025",
     "timestamp": "2026-06-08T06:22:55.420Z"
   },
   {
@@ -404,7 +412,7 @@
     "user": "Admin",
     "role": "Admin",
     "action": "update statistik",
-    "target": "Penjaga Harapan Instagram — Jan 2026",
+    "target": "Penjaga Harapan Instagram â Jan 2026",
     "timestamp": "2026-06-08T06:21:39.213Z"
   },
   {
@@ -412,7 +420,7 @@
     "user": "Admin",
     "role": "Admin",
     "action": "update statistik",
-    "target": "Penjaga Harapan Instagram — Mei 2026",
+    "target": "Penjaga Harapan Instagram â Mei 2026",
     "timestamp": "2026-06-08T06:19:26.443Z"
   },
   {
@@ -420,7 +428,7 @@
     "user": "Admin",
     "role": "Admin",
     "action": "update statistik",
-    "target": "Penjaga Harapan Instagram — Apr 2026",
+    "target": "Penjaga Harapan Instagram â Apr 2026",
     "timestamp": "2026-06-08T06:16:17.218Z"
   },
   {
@@ -428,7 +436,7 @@
     "user": "Admin",
     "role": "Admin",
     "action": "update statistik",
-    "target": "Penjaga Harapan Instagram — Mar 2026",
+    "target": "Penjaga Harapan Instagram â Mar 2026",
     "timestamp": "2026-06-08T06:15:33.415Z"
   },
   {
@@ -436,7 +444,7 @@
     "user": "Admin",
     "role": "Admin",
     "action": "update statistik",
-    "target": "Penjaga Harapan Instagram — Feb 2026",
+    "target": "Penjaga Harapan Instagram â Feb 2026",
     "timestamp": "2026-06-08T06:14:45.242Z"
   },
   {
@@ -444,7 +452,7 @@
     "user": "Admin",
     "role": "Admin",
     "action": "update statistik",
-    "target": "Penjaga Harapan Instagram — Jan 2026",
+    "target": "Penjaga Harapan Instagram â Jan 2026",
     "timestamp": "2026-06-08T06:13:54.994Z"
   },
   {
@@ -452,7 +460,7 @@
     "user": "Admin",
     "role": "Admin",
     "action": "update statistik",
-    "target": "Penjaga Harapan Instagram — Des 2025",
+    "target": "Penjaga Harapan Instagram â Des 2025",
     "timestamp": "2026-06-08T06:12:57.683Z"
   },
   {
@@ -460,7 +468,7 @@
     "user": "Admin",
     "role": "Admin",
     "action": "update statistik",
-    "target": "Penjaga Harapan Instagram — Nov 2025",
+    "target": "Penjaga Harapan Instagram â Nov 2025",
     "timestamp": "2026-06-08T06:11:52.471Z"
   },
   {
@@ -468,7 +476,7 @@
     "user": "Admin",
     "role": "Admin",
     "action": "update statistik",
-    "target": "Penjaga Harapan Instagram — Okt 2025",
+    "target": "Penjaga Harapan Instagram â Okt 2025",
     "timestamp": "2026-06-08T06:11:09.324Z"
   },
   {
@@ -476,7 +484,7 @@
     "user": "Admin",
     "role": "Admin",
     "action": "update statistik",
-    "target": "Penjaga Harapan Instagram — Sep 2025",
+    "target": "Penjaga Harapan Instagram â Sep 2025",
     "timestamp": "2026-06-08T06:10:34.864Z"
   },
   {
@@ -484,7 +492,7 @@
     "user": "Admin",
     "role": "Admin",
     "action": "update statistik",
-    "target": "Penjaga Harapan Instagram — Agt 2025",
+    "target": "Penjaga Harapan Instagram â Agt 2025",
     "timestamp": "2026-06-08T06:09:51.593Z"
   },
   {
@@ -492,7 +500,7 @@
     "user": "Admin",
     "role": "Admin",
     "action": "update statistik",
-    "target": "Penjaga Harapan Instagram — Jul 2025",
+    "target": "Penjaga Harapan Instagram â Jul 2025",
     "timestamp": "2026-06-08T06:09:05.699Z"
   },
   {
@@ -500,7 +508,7 @@
     "user": "Admin",
     "role": "Admin",
     "action": "update statistik",
-    "target": "Penjaga Harapan Instagram — Jun 2025",
+    "target": "Penjaga Harapan Instagram â Jun 2025",
     "timestamp": "2026-06-08T06:08:14.573Z"
   },
   {
@@ -508,7 +516,7 @@
     "user": "Admin",
     "role": "Admin",
     "action": "update statistik",
-    "target": "Penjaga Harapan Instagram — Mei 2025",
+    "target": "Penjaga Harapan Instagram â Mei 2025",
     "timestamp": "2026-06-08T06:07:36.806Z"
   },
   {
@@ -516,7 +524,7 @@
     "user": "Admin",
     "role": "Admin",
     "action": "update statistik",
-    "target": "Penjaga Harapan Instagram — Apr 2026",
+    "target": "Penjaga Harapan Instagram â Apr 2026",
     "timestamp": "2026-06-08T06:04:24.481Z"
   },
   {
@@ -524,7 +532,7 @@
     "user": "Admin",
     "role": "Admin",
     "action": "update statistik",
-    "target": "Penjaga Harapan TikTok — W23 Jun '26",
+    "target": "Penjaga Harapan TikTok â W23 Jun '26",
     "timestamp": "2026-06-08T06:02:47.675Z"
   },
   {
@@ -532,7 +540,7 @@
     "user": "Admin",
     "role": "Admin",
     "action": "update statistik",
-    "target": "Penjaga Harapan YouTube — W23 Jun '26",
+    "target": "Penjaga Harapan YouTube â W23 Jun '26",
     "timestamp": "2026-06-08T05:54:39.917Z"
   },
   {
@@ -540,7 +548,7 @@
     "user": "Admin",
     "role": "Admin",
     "action": "update statistik",
-    "target": "Penjaga Harapan Facebook — W23 Jun '26",
+    "target": "Penjaga Harapan Facebook â W23 Jun '26",
     "timestamp": "2026-06-08T05:48:51.562Z"
   },
   {
@@ -548,7 +556,7 @@
     "user": "Admin",
     "role": "Admin",
     "action": "update statistik",
-    "target": "Penjaga Harapan Instagram — W23 Jun '26",
+    "target": "Penjaga Harapan Instagram â W23 Jun '26",
     "timestamp": "2026-06-08T05:45:05.524Z"
   },
   {
@@ -588,7 +596,7 @@
     "user": "Umar",
     "role": "Publisher",
     "action": "Kirim WA Planner",
-    "target": "ke Umar ÃÂÃÂ¢ÃÂÃÂÃÂÃÂ \"Podcsat Kepala KSP Pak Dudung\" (Ongoing)",
+    "target": "ke Umar ÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ \"Podcsat Kepala KSP Pak Dudung\" (Ongoing)",
     "timestamp": "2026-06-06T00:55:59.153Z"
   },
   {
@@ -604,7 +612,7 @@
     "user": "Umar",
     "role": "Publisher",
     "action": "Kirim WA Bank Konten",
-    "target": "ke Umar ÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ \"Go Prabowo\"",
+    "target": "ke Umar ÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ \"Go Prabowo\"",
     "timestamp": "2026-06-05T11:21:29.507Z"
   },
   {
@@ -620,7 +628,7 @@
     "user": "Admin",
     "role": "Admin",
     "action": "unduh PDF planner",
-    "target": "1 konten ÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ· filter: Semua Konten",
+    "target": "1 konten ÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ· filter: Semua Konten",
     "timestamp": "2026-06-04T10:28:15.245Z"
   },
   {
@@ -636,7 +644,7 @@
     "user": "Admin",
     "role": "Admin",
     "action": "Kirim WA Planner",
-    "target": "ke Umar ÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ \"Podcsat Kepala KSP Pak Dudung\" (Ongoing)",
+    "target": "ke Umar ÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ \"Podcsat Kepala KSP Pak Dudung\" (Ongoing)",
     "timestamp": "2026-06-04T10:15:27.393Z"
   },
   {
@@ -652,7 +660,7 @@
     "user": "Admin",
     "role": "Admin",
     "action": "Kirim WA Planner",
-    "target": "ke Umar ÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ \"Podcsat Kepala KSP Pak Dudung\" (Preview)",
+    "target": "ke Umar ÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ \"Podcsat Kepala KSP Pak Dudung\" (Preview)",
     "timestamp": "2026-06-04T10:14:56.792Z"
   },
   {
@@ -660,7 +668,7 @@
     "user": "Admin",
     "role": "Admin",
     "action": "Kirim WA Bank Konten",
-    "target": "ke Umar ÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ \"Go Prabowo\"",
+    "target": "ke Umar ÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ \"Go Prabowo\"",
     "timestamp": "2026-06-04T10:08:50.330Z"
   },
   {
