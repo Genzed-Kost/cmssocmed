@@ -799,10 +799,22 @@
     ],
     "_meta": {
       "instagram": {
-        "updatedAt": "2026-05-30T09:19:06.297Z",
+        "updatedAt": "2026-06-08T05:45:04.133Z",
         "updatedBy": "Admin"
       }
-    }
+    },
+    "instagram_w": [
+      {
+        "week": "2026-W23",
+        "followersEOM": 58003,
+        "jmlPost": 52,
+        "totalViews": 389043,
+        "totalReach": 114704,
+        "followersGained": 775,
+        "totalEngagement": 16702,
+        "peakViews": 19686
+      }
+    ]
   },
   "33-official": {
     "instagram": [
