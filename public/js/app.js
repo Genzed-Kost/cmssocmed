@@ -841,7 +841,7 @@ async function wizardCreateRepo() {
   const repo  = gv('setupRepo');
   const pat   = gv('setupPat');
   const branch = gv('setupBranch') || 'main';
-  if (!owner || !repo || !pat) { toast('Isi GitHub Username, Nama Repo, dan PAT', 'error'); return; }
+  if (!owner || !repo || !pat) { toast('Isi semua kolom yang diperlukan', 'error'); return; }
 
   // Temporarily save config so db can use it
   window.db.saveConfig({ owner, repo, branch, pat });
@@ -867,7 +867,7 @@ async function wizardStep2Finish() {
   const repo   = gv('setupRepo');
   const branch = gv('setupBranch') || 'main';
   const pat    = gv('setupPat');
-  if (!owner || !repo || !pat) { toast('Isi semua field GitHub', 'error'); return; }
+  if (!owner || !repo || !pat) { toast('Isi semua kolom yang diperlukan', 'error'); return; }
 
   window.db.saveConfig({ owner, repo, branch, pat });
 
@@ -885,7 +885,7 @@ async function wizardStep2Finish() {
     // Auto-login as admin
     setSess({ role: 'admin', name: auth.adminName });
     showWizardStep(3);
-    toast('GitHub terhubung!', 'success');
+    toast('Server terhubung!', 'success');
   } catch (e) {
     toast('Gagal: ' + e.message, 'error');
     btn.textContent = 'Simpan & Selesai'; btn.disabled = false;
@@ -923,7 +923,7 @@ async function connectExistingDevice() {
     branch: gv('connectBranch').trim() || 'main',
     pat:    gv('connectPat').trim()
   };
-  if (!cfg.owner || !cfg.repo || !cfg.pat) { toast('Isi semua field GitHub', 'error'); return; }
+  if (!cfg.owner || !cfg.repo || !cfg.pat) { toast('Isi semua kolom yang diperlukan', 'error'); return; }
   const btn = $('btnConnectDevice');
   btn.textContent = 'Menghubungkan…'; btn.disabled = true;
   window.db.saveConfig(cfg);
@@ -1627,7 +1627,7 @@ function renderBankKonten() {
           value="${esc(item.publishDate || '')}" />
       </td>
       <td class="bk-actions">
-        <button type="button" class="icon-btn bk-save-btn" data-id="${item.id}" title="Simpan baris ini ke GitHub">
+        <button type="button" class="icon-btn bk-save-btn" data-id="${item.id}" title="Simpan baris ini">
           <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
             <path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"/>
             <polyline points="17 21 17 13 7 13 7 21"/>
@@ -3360,7 +3360,7 @@ function saveWaTokenFromForm() {
 /* ── YouTube Auto-Sync: trigger GitHub Actions workflow_dispatch ─────────── */
 async function triggerYouTubeSync() {
   const cfg = window.db.getConfig();
-  if (!cfg?.pat) { toast('Konfigurasi GitHub PAT di API Setup terlebih dahulu', 'error'); return; }
+  if (!cfg?.pat) { toast('Konfigurasi token akses di API Setup terlebih dahulu', 'error'); return; }
 
   const btn = $('btnTriggerYtSync');
   if (btn) { btn.textContent = '⏳ Memulai sync…'; btn.disabled = true; }
@@ -3476,7 +3476,7 @@ function _randomInviteId() {
 async function createDeviceInvite(pin) {
   const cfg = window.db.getConfig();
   if (!cfg?.owner || !cfg?.repo || !cfg?.pat)
-    throw new Error('Konfigurasi GitHub belum lengkap');
+    throw new Error('Konfigurasi server belum lengkap');
 
   const payload = {
     owner: cfg.owner, repo: cfg.repo, branch: cfg.branch || 'main', pat: cfg.pat,
@@ -3563,11 +3563,11 @@ async function saveTeamTokenFromForm() {
     saveDataCache();
     sv('cfgTeamToken', '');          // kosongkan field setelah simpan
     updateTeamTokenStatus();
-    toast('✅ Token disimpan di GitHub — anggota bisa langsung login!', 'success');
+    toast('✅ Token disimpan — anggota bisa langsung login!', 'success');
   } catch (e) {
     toast('Gagal simpan: ' + e.message, 'error');
   } finally {
-    if (btn) { btn.textContent = '💾 Simpan ke GitHub'; btn.disabled = false; }
+    if (btn) { btn.textContent = '💾 Simpan'; btn.disabled = false; }
   }
 }
 
@@ -3666,7 +3666,7 @@ async function fetchExchangeRate() {
 function showInviteCreatorModal() {
   const cfg = window.db.getConfig();
   if (!cfg?.owner || !cfg?.repo || !cfg?.pat) {
-    toast('Konfigurasi GitHub belum lengkap', 'error'); return;
+    toast('Konfigurasi server belum lengkap', 'error'); return;
   }
   const pin = _randomPin6();
   const modal = document.getElementById('inviteCreatorModal');
@@ -3736,7 +3736,7 @@ async function doConsumeInvite() {
 
     // Load settings untuk restore auth
     const settings = await window.db.readData('settings');
-    if (!settings?.adminHash) throw new Error('Data admin belum tersedia di GitHub');
+    if (!settings?.adminHash) throw new Error('Data admin belum tersedia di server');
     saveAuth({ adminName: settings.adminName || 'Admin', adminHash: settings.adminHash });
     if (settings.users?.length) setPubUsers(settings.users);
 
@@ -3755,7 +3755,7 @@ async function doConsumeInvite() {
 /* GitHub config */
 async function testGithub() {
   const cfg = { owner: gv('cfgOwner'), repo: gv('cfgRepo'), branch: gv('cfgBranch')||'main', pat: gv('cfgPat') };
-  if (!cfg.owner || !cfg.repo || !cfg.pat) { toast('Isi semua field GitHub', 'error'); return; }
+  if (!cfg.owner || !cfg.repo || !cfg.pat) { toast('Isi semua kolom yang diperlukan', 'error'); return; }
   window.db.saveConfig(cfg);
   toast('Menguji koneksi…');
   try {
@@ -3771,13 +3771,13 @@ async function testGithub() {
 
 async function saveAndInitGithub() {
   const cfg = { owner: gv('cfgOwner'), repo: gv('cfgRepo'), branch: gv('cfgBranch')||'main', pat: gv('cfgPat') };
-  if (!cfg.owner || !cfg.repo || !cfg.pat) { toast('Isi semua field GitHub', 'error'); return; }
+  if (!cfg.owner || !cfg.repo || !cfg.pat) { toast('Isi semua kolom yang diperlukan', 'error'); return; }
   window.db.saveConfig(cfg);
   setSyncStatus(null, 'Menginisialisasi…');
   try {
     await window.db.testConnection();
     await window.db.initDataFiles();
-    toast('GitHub tersambung. File data dibuat.', 'success');
+    toast('Server tersambung. Data berhasil diinisialisasi.', 'success');
     $('githubConnStatus').textContent = 'Tersambung'; $('githubConnStatus').className = 'badge-status ok';
     setSyncStatus(true);
     await loadAllData();
@@ -5984,7 +5984,7 @@ async function saveAnalyticsEntry() {
   } catch (e) {
     toast('Gagal simpan: ' + e.message, 'error');
   } finally {
-    setLoading('btnSaveStats', false, 'Simpan ke GitHub');
+    setLoading('btnSaveStats', false, 'Simpan');
   }
 }
 

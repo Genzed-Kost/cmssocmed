@@ -117,12 +117,12 @@
         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
         Info Presiden
       </button>
-      <button class="icon-btn" id="btnGitSync" title="Sinkronkan GitHub">
+      <button class="icon-btn" id="btnGitSync" title="Sinkronisasi">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"/></svg>
       </button>
       <div class="topbar-user" id="topbarUser">
         <div class="user-avatar" id="userAvatar">—</div>
-        <span id="userLabel">Setup GitHub</span>
+        <span id="userLabel">Menghubungkan...</span>
       </div>
     </div>
   </header>
@@ -374,7 +374,7 @@
               <input type="date" id="actDateTo" class="inp-sm" title="Sampai tanggal" />
             </div>
             <button class="btn-xs" id="btnClearActFilter" title="Reset filter">✕ Reset</button>
-            <button class="btn-xs" id="btnRefreshActivity" title="Muat ulang dari GitHub" style="gap:4px">
+            <button class="btn-xs" id="btnRefreshActivity" title="Muat ulang" style="gap:4px">
               <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
               Refresh
             </button>
@@ -664,7 +664,7 @@
           <div class="form-actions-row" style="margin-top:16px">
             <button class="btn-sm blue" id="btnSaveStats">
               <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/></svg>
-              Simpan ke GitHub
+              Simpan
             </button>
           </div>
         </div>
@@ -680,19 +680,19 @@
           <!-- ── Kolom Kiri: GitHub + Anggota Tim ───────────────── -->
           <div class="setup-col">
 
-          <!-- GitHub Config -->
+          <!-- Server Config -->
           <div class="card setup-card">
             <div class="card-head">
               <span class="card-title">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="vertical-align:-2px;margin-right:6px"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
-                Koneksi GitHub
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:-2px;margin-right:6px"><rect x="2" y="2" width="20" height="8" rx="2"/><rect x="2" y="14" width="20" height="8" rx="2"/><line x1="6" y1="6" x2="6.01" y2="6"/><line x1="6" y1="18" x2="6.01" y2="18"/></svg>
+                Koneksi Server
               </span>
               <span id="githubConnStatus" class="badge-status">Belum tersambung</span>
             </div>
             <div class="setup-fields">
               <div class="form-group">
-                <label class="form-label">GitHub Owner (username / org)</label>
-                <input type="text" id="cfgOwner" class="form-inp" placeholder="username-github" />
+                <label class="form-label">Username</label>
+                <input type="text" id="cfgOwner" class="form-inp" placeholder="username" />
               </div>
               <div class="form-group">
                 <label class="form-label">Repository Name</label>
@@ -867,20 +867,19 @@
             </div>
             <div class="setup-fields">
               <div class="form-group">
-                <label class="form-label">GitHub Fine-Grained PAT (akses terbatas)</label>
+                <label class="form-label">Token Akses Tim</label>
                 <div class="inp-eye-wrap">
-                  <input type="password" id="cfgTeamToken" class="form-inp" placeholder="github_pat_…" />
+                  <input type="password" id="cfgTeamToken" class="form-inp" placeholder="token akses…" />
                   <button type="button" class="eye-btn" id="btnToggleTeamToken">
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
                   </button>
                 </div>
                 <p class="form-hint">
-                  Token ini disimpan di <code>settings.json</code> GitHub sehingga <strong>perangkat baru otomatis terhubung</strong> tanpa input apapun — cukup buka link <code>/loginuser</code> dan login dengan nama + password.<br>
-                  Gunakan <strong>Fine-Grained PAT</strong> yang hanya punya izin <em>Contents: Read &amp; Write</em> pada repo ini saja.
+                  Token ini disimpan di server sehingga <strong>perangkat baru otomatis terhubung</strong> tanpa input apapun — cukup buka link <code>/loginuser</code> dan login dengan nama + password.
                 </p>
               </div>
               <div class="form-actions-row">
-                <button class="btn-sm blue" id="btnSaveTeamToken">💾 Simpan ke GitHub</button>
+                <button class="btn-sm blue" id="btnSaveTeamToken">💾 Simpan</button>
                 <button class="btn-sm" id="btnDeleteTeamToken" style="color:var(--red);border-color:var(--red)">Hapus Token</button>
               </div>
             </div>
@@ -959,12 +958,12 @@
       <div class="form-group" style="text-align:left">
         <label class="form-label">Token Akses Tim</label>
         <div class="inp-eye-wrap">
-          <input type="password" id="setupToken" class="form-inp" placeholder="github_pat_…" autocomplete="off" />
+          <input type="password" id="setupToken" class="form-inp" placeholder="token akses…" autocomplete="off" />
           <button type="button" class="eye-btn" id="btnToggleSetupToken">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
           </button>
         </div>
-        <p class="form-hint">Token tersimpan hanya di perangkat ini — tidak dikirim ke mana pun selain GitHub.</p>
+        <p class="form-hint">Token tersimpan hanya di perangkat ini.</p>
       </div>
     </div>
     <div class="modal-foot">
@@ -1024,11 +1023,11 @@
     <div class="wizard-step hidden" id="wsConnect">
       <div class="modal-body">
         <div class="wizard-title">Hubungkan Perangkat</div>
-        <div class="wizard-desc">Masukkan konfigurasi GitHub dari instalasi yang sudah ada. Admin hash akan diambil otomatis dan kamu bisa langsung login.</div>
+        <div class="wizard-desc">Masukkan konfigurasi server dari instalasi yang sudah ada. Admin akan diambil otomatis dan kamu bisa langsung login.</div>
         <div class="setup-fields">
           <div class="form-group">
-            <label class="form-label">GitHub Owner (username / org)</label>
-            <input type="text" id="connectOwner" class="form-inp" placeholder="username-github" />
+            <label class="form-label">Username</label>
+            <input type="text" id="connectOwner" class="form-inp" placeholder="username" />
           </div>
           <div class="form-row-2">
             <div class="form-group">
@@ -1062,32 +1061,31 @@
       </div>
     </div>
 
-    <!-- Step 2: GitHub -->
+    <!-- Step 2: Server -->
     <div class="wizard-step hidden" id="ws2">
       <div class="modal-body">
-        <div class="wizard-title">Hubungkan GitHub</div>
-        <div class="wizard-desc">GitHub digunakan sebagai database. Semua data konten tersimpan di repository GitHub Anda.</div>
+        <div class="wizard-title">Hubungkan Server</div>
+        <div class="wizard-desc">Data konten tersimpan dengan aman di server yang Anda konfigurasi.</div>
 
         <details class="pat-guide">
           <summary>
             <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-            Cara membuat Personal Access Token (PAT)
+            Cara mendapatkan Token Akses
           </summary>
           <div class="pat-guide-body">
             <ol>
-              <li>Buka <code>github.com</code> → klik foto profil → <code>Settings</code></li>
-              <li>Scroll ke bawah → <code>Developer settings</code> → <code>Personal access tokens</code> → <code>Tokens (classic)</code></li>
-              <li>Klik <code>Generate new token (classic)</code></li>
-              <li>Beri nama token, pilih expiration, centang scope: <code>repo</code> (full control)</li>
-              <li>Klik <code>Generate token</code> → salin token yang muncul (hanya tampil sekali!)</li>
+              <li>Hubungi Admin untuk mendapatkan token akses</li>
+              <li>Atau buat token baru di halaman pengaturan akun</li>
+              <li>Salin token dan simpan di tempat aman</li>
+              <li>Token hanya tampil sekali — jaga kerahasiaannya</li>
             </ol>
           </div>
         </details>
 
         <div class="setup-fields">
           <div class="form-group">
-            <label class="form-label">GitHub Username / Organization</label>
-            <input type="text" id="setupOwner" class="form-inp" placeholder="username-github" />
+            <label class="form-label">Username</label>
+            <input type="text" id="setupOwner" class="form-inp" placeholder="username" />
           </div>
           <div class="form-row-2">
             <div class="form-group">
@@ -1129,7 +1127,7 @@
         <div class="wizard-done">
           <div class="wizard-done-icon">🎉</div>
           <h3>CMS Siap Digunakan!</h3>
-          <p>GitHub berhasil terhubung dan data telah diinisialisasi. Anda sudah masuk sebagai <strong>Admin</strong>.</p>
+          <p>Server berhasil terhubung dan data telah diinisialisasi. Anda sudah masuk sebagai <strong>Admin</strong>.</p>
           <p style="margin-top:10px;font-size:.74rem;color:#64748b;background:#f8fafc;border-radius:8px;padding:10px 12px;text-align:left">
             💡 <strong>Langkah berikutnya:</strong> Buka <strong>API Setup → Gemini AI</strong> untuk mengisi API Key dan mengaktifkan fitur Generate Draft AI &amp; Info Presiden.
           </p>
