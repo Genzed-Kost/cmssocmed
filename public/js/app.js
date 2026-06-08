@@ -2229,6 +2229,7 @@ function dashContentCard(c, mode = 'upcoming') {
         onchange="updateContentField('${c.id}','status',this.value)" title="Ubah status">
         ${statuses.map(s=>`<option value="${s}" ${s===c.status?'selected':''}>${s}</option>`).join('')}
       </select>
+      ${outputAcctIcon}
       <span class="dcc-date">
         <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
         ${fmtDate(c.publishDate)}
@@ -2238,7 +2239,6 @@ function dashContentCard(c, mode = 'upcoming') {
       ${acct ? `<div class="dcc-owner-tag" style="background:${acct.color}18;color:${acct.color};border-color:${acct.color}30">${acct.name}</div>` : '<span></span>'}
       ${c.theme ? `<span style="font-size:.68rem;color:var(--muted);font-weight:500;text-align:right;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:110px">${esc(c.theme)}</span>` : ''}
     </div>
-    ${outputAcctIcon ? `<div style="text-align:center;margin:6px 0 2px">${outputAcctIcon}</div>` : ''}
     <div class="dcc-title">${esc(c.title||'—')}</div>
     <div class="dcc-meta-row${!c.format ? ' dcc-empty' : ''}">
       <span class="dcc-label">TIPE KONTEN</span>
