@@ -1026,7 +1026,7 @@
         "updatedBy": "Admin"
       },
       "tiktok": {
-        "updatedAt": "2026-06-08T09:32:31.541Z",
+        "updatedAt": "2026-06-08T09:34:26.159Z",
         "updatedBy": "Admin"
       }
     },
@@ -1049,6 +1049,14 @@
         "followersEOM": 7600,
         "followersGained": 25,
         "totalEngagement": 2236
+      },
+      {
+        "month": "2026-02",
+        "totalVideoViews": 118800,
+        "profileViews": 296,
+        "followersEOM": 7606,
+        "followersGained": 6,
+        "totalEngagement": 2839
       }
     ]
   },
