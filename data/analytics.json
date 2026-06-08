@@ -1036,26 +1036,17 @@
         "month": "2026-04",
         "followersEOM": 0,
         "jmlPost": 19,
-        "totalViews": 274373,
-        "totalReach": 208636,
-        "followersGained": 303,
-        "totalLikes": 3783,
-        "totalComments": 171,
-        "totalShares": 422,
-        "totalSaves": 103,
-        "totalEngagement": 4479,
+        "totalViews": 573723,
+        "totalReach": 396328,
+        "followersGained": 308,
+        "totalEngagement": 11096,
         "erPct": 0,
-        "avgViews": 14440,
-        "peakViews": 166271,
-        "avgEng": 235,
-        "reelViews": 274373,
-        "carouselViews": 0,
         "imageViews": 0
       }
     ],
     "_meta": {
       "instagram": {
-        "updatedAt": "2026-06-08T07:49:29.921Z",
+        "updatedAt": "2026-06-08T07:50:43.256Z",
         "updatedBy": "Admin"
       }
     }
