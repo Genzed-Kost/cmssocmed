@@ -1,11 +1,11 @@
 [
   {
-    "id": "mq6xqdcnfytrd",
+    "id": "mq6xvhnhylw1b",
     "user": "Umar",
     "role": "Publisher",
-    "action": "login",
-    "target": "masuk ke sistem sebagai Publisher",
-    "timestamp": "2026-06-09T17:50:05.591Z"
+    "action": "logout",
+    "target": "keluar dari sistem",
+    "timestamp": "2026-06-09T17:54:04.445Z"
   },
   {
     "id": "mq6xak8y3gws2",
