@@ -1,5 +1,13 @@
 [
   {
+    "id": "mq6ubgnt1rm6c",
+    "user": "Umar",
+    "role": "Publisher",
+    "action": "login",
+    "target": "masuk ke sistem sebagai Publisher",
+    "timestamp": "2026-06-09T16:14:31.193Z"
+  },
+  {
     "id": "mq6qajde9mse3",
     "user": "Umar",
     "role": "Publisher",
@@ -52,7 +60,7 @@
     "user": "Admin",
     "role": "Admin",
     "action": "Kirim WA Planner",
-    "target": "ke Idham ÃÂÃÂ¢ÃÂÃÂÃÂÃÂ \"Podcsat Kepala KSP Pak Dudung\" (Published)",
+    "target": "ke Idham ÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ \"Podcsat Kepala KSP Pak Dudung\" (Published)",
     "timestamp": "2026-06-09T05:01:09.875Z"
   },
   {
