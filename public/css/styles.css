@@ -2776,7 +2776,7 @@ ul { list-style: none; }
 }
 .asset-empty span { font-size: 2.5rem; }
 
-/* Tiap folder item */
+/* Tiap folder item — overflow:visible agar dropdown ⋮ tidak ter-clip */
 .asset-folder-item {
   position: relative;
   display: flex;
@@ -2785,10 +2785,12 @@ ul { list-style: none; }
   background: var(--card);
   border: 1px solid var(--border);
   border-radius: 10px;
-  overflow: hidden;
+  overflow: visible;
   transition: background .12s, box-shadow .12s;
 }
 .asset-folder-item:hover { background: var(--hover); box-shadow: 0 2px 8px rgba(0,0,0,.08); }
+/* Clip radius pada link (bukan item agar dropdown bisa keluar) */
+.asset-folder-link { border-radius: 10px 0 0 10px; }
 
 /* Link area (klik → buka Drive) */
 .asset-folder-link {

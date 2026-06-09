@@ -3255,22 +3255,19 @@ async function savePost() {
    ASSETS & DRIVE
    ══════════════════════════════════════════════════════════════════════════ */
 
-// Tutup dropdown ⋮ jika klik di luar
-document.addEventListener('click', e => {
-  if (!e.target.closest('.asset-menu-wrap')) {
-    $$('.asset-dropdown').forEach(d => d.classList.add('hidden'));
-  }
-});
+function _closeAllAssetDrops() {
+  $$('.asset-dropdown').forEach(d => d.classList.add('hidden'));
+}
 
 function renderAssets() {
   const sec = $('assetsSection');
   if (!sec) return;
-  const admin   = isAdmin();
-  const folders = state.assets || [];
+  const admin  = isAdmin();
+  const files  = state.assets || [];
 
-  const foldersHtml = folders.length === 0
-    ? `<div class="asset-empty"><span>📂</span><p>Belum ada folder aset.${admin ? ' Klik "+ Tambah Folder" untuk mulai.' : ''}</p></div>`
-    : folders.map(f => {
+  const filesHtml = files.length === 0
+    ? `<div class="asset-empty"><span>📂</span><p>Belum ada file aset.${admin ? ' Klik "+ Tambah File" untuk mulai.' : ''}</p></div>`
+    : files.map(f => {
         const url = f.url || '#';
         return `
           <div class="asset-folder-item">
@@ -3282,115 +3279,187 @@ function renderAssets() {
               </span>
               <span class="asset-folder-name">${esc(f.name)}</span>
             </a>
-            ${admin ? `
             <div class="asset-menu-wrap">
-              <button class="asset-menu-btn" title="Opsi" onclick="toggleAssetMenu('${f.id}',event)">
+              <button class="asset-menu-btn" title="Opsi" onclick="toggleAssetMenu(event,'${f.id}')">
                 <svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16"><circle cx="12" cy="5" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="12" cy="19" r="1.5"/></svg>
               </button>
-              <div id="assetDrop_${f.id}" class="asset-dropdown hidden">
-                <button onclick="openEditAssetFolder('${f.id}')">✏️ Edit</button>
-                <button class="red" onclick="deleteAssetFolder('${f.id}')">🗑 Hapus</button>
+              <div class="asset-dropdown hidden" data-fid="${f.id}">
+                ${admin ? `<button onclick="_closeAllAssetDrops();openEditAssetFile('${f.id}')">✏️ Edit</button>` : ''}
+                <button onclick="_closeAllAssetDrops();openAssetInfo('${f.id}')">ℹ️ Informasi File</button>
+                ${admin ? `<button class="red" onclick="_closeAllAssetDrops();deleteAssetFile('${f.id}')">🗑️ Hapus</button>` : ''}
               </div>
-            </div>` : ''}
+            </div>
           </div>`;
       }).join('');
 
   sec.innerHTML = `
-    ${admin ? `<div style="margin-bottom:14px"><button class="btn blue" onclick="openAddAssetFolder()">+ Tambah Folder</button></div>` : ''}
-    <div class="asset-grid">${foldersHtml}</div>
+    ${admin ? `<div style="margin-bottom:14px"><button class="btn blue" onclick="openAddAssetFile()">+ Tambah File</button></div>` : ''}
+    <div class="asset-grid">${filesHtml}</div>
 
-    <!-- Modal folder -->
-    <div id="assetFolderModal" class="modal-overlay hidden">
+    <!-- Modal tambah/edit file -->
+    <div id="assetFileModal" class="modal-overlay hidden">
       <div class="modal-box" style="max-width:420px">
-        <h3 id="assetFolderModalTitle" class="modal-title">Folder Baru</h3>
-        <input type="hidden" id="assetFolderEditId">
+        <h3 id="assetFileModalTitle" class="modal-title">Tambah File</h3>
+        <input type="hidden" id="assetFileEditId">
         <div class="form-group">
           <label class="form-label">Emoji / Ikon <span style="color:var(--muted);font-weight:400">(opsional, mis. 🎬 📸 🎨)</span></label>
-          <input id="assetFolderEmoji" class="form-input" placeholder="📁" maxlength="4" style="width:70px">
+          <input id="assetFileEmoji" class="form-input" placeholder="📁" maxlength="4" style="width:70px">
         </div>
         <div class="form-group">
-          <label class="form-label">Nama Folder *</label>
-          <input id="assetFolderName" class="form-input" placeholder="mis. Stock Video, Foto, Logo...">
+          <label class="form-label">Nama File *</label>
+          <input id="assetFileName" class="form-input" placeholder="mis. Stock Video, Foto PH, Logo...">
         </div>
         <div class="form-group">
           <label class="form-label">URL Drive / Link *</label>
-          <input id="assetFolderUrl" class="form-input" type="url" placeholder="https://drive.google.com/drive/folders/...">
+          <input id="assetFileUrl" class="form-input" type="url" placeholder="https://drive.google.com/...">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Keterangan</label>
+          <input id="assetFileNotes" class="form-input" placeholder="Opsional — deskripsi singkat isi file">
         </div>
         <div class="modal-footer">
-          <button class="btn" onclick="closeAssetFolderModal()">Batal</button>
-          <button class="btn blue" onclick="saveAssetFolder()">Simpan</button>
+          <button class="btn" onclick="closeAssetFileModal()">Batal</button>
+          <button class="btn blue" onclick="saveAssetFile()">Simpan</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal informasi file -->
+    <div id="assetInfoModal" class="modal-overlay hidden">
+      <div class="modal-box" style="max-width:380px">
+        <h3 class="modal-title">ℹ️ Informasi File</h3>
+        <div id="assetInfoBody" style="display:flex;flex-direction:column;gap:10px;padding:4px 0 8px"></div>
+        <div class="modal-footer">
+          <button class="btn blue" onclick="$('assetInfoModal').classList.add('hidden')">Tutup</button>
         </div>
       </div>
     </div>`;
 }
 
-function toggleAssetMenu(folderId, e) {
+function toggleAssetMenu(e, fileId) {
   e.stopPropagation();
-  const drop = $('assetDrop_' + folderId);
+  e.preventDefault();
+  const btn  = e.currentTarget;
+  const wrap = btn.closest('.asset-menu-wrap');
+  const drop = wrap?.querySelector('.asset-dropdown');
   if (!drop) return;
-  const isHidden = drop.classList.contains('hidden');
-  $$('.asset-dropdown').forEach(d => d.classList.add('hidden'));
-  if (isHidden) drop.classList.remove('hidden');
+  const wasHidden = drop.classList.contains('hidden');
+  _closeAllAssetDrops();
+  if (wasHidden) {
+    drop.classList.remove('hidden');
+    // posisi: kalau dekat tepi bawah, buka ke atas
+    const rect = btn.getBoundingClientRect();
+    const spaceBelow = window.innerHeight - rect.bottom;
+    drop.style.top    = spaceBelow < 120 ? 'auto' : 'calc(100% + 4px)';
+    drop.style.bottom = spaceBelow < 120 ? 'calc(100% + 4px)' : 'auto';
+  }
+}
+
+// Tutup semua dropdown jika klik di luar — dipasang saat init
+function _initAssetClickOutside() {
+  document.addEventListener('click', e => {
+    if (!e.target.closest('.asset-menu-wrap')) _closeAllAssetDrops();
+  });
 }
 
 /* ── Asset CRUD ─────────────────────────────────────────────────────────── */
-function openAddAssetFolder() {
-  $('assetFolderModalTitle').textContent = 'Folder Baru';
-  $('assetFolderEditId').value = '';
-  $('assetFolderEmoji').value  = '';
-  $('assetFolderName').value   = '';
-  $('assetFolderUrl').value    = '';
-  $('assetFolderModal').classList.remove('hidden');
-  $('assetFolderName').focus();
+function openAddAssetFile() {
+  $('assetFileModalTitle').textContent = 'Tambah File';
+  $('assetFileEditId').value  = '';
+  $('assetFileEmoji').value   = '';
+  $('assetFileName').value    = '';
+  $('assetFileUrl').value     = '';
+  $('assetFileNotes').value   = '';
+  $('assetFileModal').classList.remove('hidden');
+  $('assetFileName').focus();
 }
-function openEditAssetFolder(folderId) {
-  $$('.asset-dropdown').forEach(d => d.classList.add('hidden'));
-  const f = (state.assets || []).find(x => x.id === folderId);
+function openEditAssetFile(fileId) {
+  const f = (state.assets || []).find(x => x.id === fileId);
   if (!f) return;
-  $('assetFolderModalTitle').textContent = 'Edit Folder';
-  $('assetFolderEditId').value = f.id;
-  $('assetFolderEmoji').value  = f.emoji || '';
-  $('assetFolderName').value   = f.name  || '';
-  $('assetFolderUrl').value    = f.url   || '';
-  $('assetFolderModal').classList.remove('hidden');
-  $('assetFolderName').focus();
+  $('assetFileModalTitle').textContent = 'Edit File';
+  $('assetFileEditId').value  = f.id;
+  $('assetFileEmoji').value   = f.emoji || '';
+  $('assetFileName').value    = f.name  || '';
+  $('assetFileUrl').value     = f.url   || '';
+  $('assetFileNotes').value   = f.notes || '';
+  $('assetFileModal').classList.remove('hidden');
+  $('assetFileName').focus();
 }
-function closeAssetFolderModal() {
-  $('assetFolderModal')?.classList.add('hidden');
+function closeAssetFileModal() {
+  $('assetFileModal')?.classList.add('hidden');
 }
-async function saveAssetFolder() {
-  const name = $('assetFolderName').value.trim();
-  const url  = $('assetFolderUrl').value.trim();
-  if (!name) { toast('Nama folder wajib diisi', 'error'); return; }
+async function saveAssetFile() {
+  const name  = $('assetFileName').value.trim();
+  const url   = $('assetFileUrl').value.trim();
+  if (!name) { toast('Nama file wajib diisi', 'error'); return; }
   if (!url)  { toast('URL Drive wajib diisi', 'error'); return; }
-  const editId = $('assetFolderEditId').value;
+  const editId = $('assetFileEditId').value;
   state.assets = state.assets || [];
   if (editId) {
     const f = state.assets.find(x => x.id === editId);
-    if (f) { f.emoji = $('assetFolderEmoji').value.trim() || ''; f.name = name; f.url = url; }
+    if (f) { f.emoji = $('assetFileEmoji').value.trim(); f.name = name; f.url = url; f.notes = $('assetFileNotes').value.trim(); }
   } else {
-    state.assets.push({ id: uid(), emoji: $('assetFolderEmoji').value.trim() || '', name, url });
+    state.assets.push({ id: uid(), emoji: $('assetFileEmoji').value.trim(), name, url, notes: $('assetFileNotes').value.trim(), addedBy: currentUser(), addedAt: new Date().toISOString() });
   }
-  closeAssetFolderModal();
+  closeAssetFileModal();
   renderAssets();
   try {
-    state.shas.assets = await window.db.writeData('assets', state.assets, `Aset: ${editId ? 'edit' : 'tambah'} folder "${name}"`);
+    state.shas.assets = await window.db.writeData('assets', state.assets, `Aset: ${editId ? 'edit' : 'tambah'} "${name}"`);
     saveDataCache();
-    toast(editId ? 'Folder diperbarui ✓' : 'Folder ditambahkan ✓', 'success');
+    toast(editId ? 'File diperbarui ✓' : 'File ditambahkan ✓', 'success');
   } catch(e) { toast('Gagal simpan: ' + e.message, 'error'); }
 }
-async function deleteAssetFolder(folderId) {
-  $$('.asset-dropdown').forEach(d => d.classList.add('hidden'));
-  const f = (state.assets || []).find(x => x.id === folderId);
+async function deleteAssetFile(fileId) {
+  const f = (state.assets || []).find(x => x.id === fileId);
   if (!f) return;
-  if (!confirm(`Hapus folder "${f.name}"?`)) return;
-  state.assets = state.assets.filter(x => x.id !== folderId);
+  if (!confirm(`Hapus file "${f.name}"?`)) return;
+  state.assets = state.assets.filter(x => x.id !== fileId);
   renderAssets();
   try {
-    state.shas.assets = await window.db.writeData('assets', state.assets, `Aset: hapus folder "${f.name}"`);
+    state.shas.assets = await window.db.writeData('assets', state.assets, `Aset: hapus "${f.name}"`);
     saveDataCache();
-    toast('Folder dihapus');
+    toast('File dihapus');
   } catch(e) { toast('Gagal hapus: ' + e.message, 'error'); }
+}
+function openAssetInfo(fileId) {
+  const f = (state.assets || []).find(x => x.id === fileId);
+  if (!f) return;
+  const body = $('assetInfoBody');
+  if (!body) return;
+  const row = (label, val) => val
+    ? `<div style="display:flex;gap:8px;align-items:flex-start"><span style="color:var(--muted);font-size:.8rem;min-width:90px;padding-top:1px">${label}</span><span style="font-size:.85rem;word-break:break-all">${val}</span></div>`
+    : '';
+  body.innerHTML = [
+    row('Nama', esc(f.name)),
+    row('Emoji', f.emoji ? esc(f.emoji) : '—'),
+    row('URL', f.url ? `<a href="${esc(f.url)}" target="_blank" style="color:var(--primary)">${esc(f.url)}</a>` : '—'),
+    row('Keterangan', f.notes ? esc(f.notes) : ''),
+    row('Ditambahkan', f.addedBy ? `${esc(f.addedBy)}` : ''),
+    row('Tanggal', f.addedAt ? fmtDate(f.addedAt.slice(0,10)) : ''),
+  ].filter(Boolean).join('');
+  $('assetInfoModal').classList.remove('hidden');
+}
+
+// backward-compat stubs
+function openAddAssetFolder()  { openAddAssetFile(); }
+function openEditAssetFolder(id) { openEditAssetFile(id); }
+function closeAssetFolderModal() { closeAssetFileModal(); }
+async function saveAssetFolder() { await saveAssetFile(); }
+async function deleteAssetFolder(id) { await deleteAssetFile(id); }
+function openAddAssetLink()    {}
+function openEditAssetLink()   {}
+function closeAssetLinkModal() {}
+async function saveAssetLink() {}
+async function deleteAssetLink() {}
+function copyAssetLink(url) {
+  if (navigator.clipboard?.writeText) {
+    navigator.clipboard.writeText(url).then(() => toast('Link disalin ✓', 'success'));
+  } else {
+    const ta = document.createElement('textarea');
+    ta.value = url; document.body.appendChild(ta); ta.select();
+    document.execCommand('copy'); document.body.removeChild(ta);
+    toast('Link disalin ✓', 'success');
+  }
 }
 // stub — tidak dipakai lagi tapi aman jika ada referensi lama
 function openAddAssetLink()    {}
@@ -7052,18 +7121,27 @@ document.addEventListener('DOMContentLoaded', async () => {
   window.navigate           = navigate;
   window.renderNewPostForm  = renderNewPostForm;
   // Assets
-  window.toggleAssetMenu     = toggleAssetMenu;
-  window.openAddAssetFolder  = openAddAssetFolder;
-  window.openEditAssetFolder = openEditAssetFolder;
-  window.closeAssetFolderModal = closeAssetFolderModal;
-  window.saveAssetFolder     = saveAssetFolder;
-  window.deleteAssetFolder   = deleteAssetFolder;
-  window.openAddAssetLink    = openAddAssetLink;
-  window.openEditAssetLink   = openEditAssetLink;
-  window.closeAssetLinkModal = closeAssetLinkModal;
-  window.saveAssetLink       = saveAssetLink;
-  window.deleteAssetLink     = deleteAssetLink;
-  window.copyAssetLink       = copyAssetLink;
+  _initAssetClickOutside();
+  window.toggleAssetMenu      = toggleAssetMenu;
+  window._closeAllAssetDrops  = _closeAllAssetDrops;
+  window.openAddAssetFile     = openAddAssetFile;
+  window.openEditAssetFile    = openEditAssetFile;
+  window.closeAssetFileModal  = closeAssetFileModal;
+  window.saveAssetFile        = saveAssetFile;
+  window.deleteAssetFile      = deleteAssetFile;
+  window.openAssetInfo        = openAssetInfo;
+  // backward-compat
+  window.openAddAssetFolder   = openAddAssetFolder;
+  window.openEditAssetFolder  = openEditAssetFolder;
+  window.closeAssetFolderModal= closeAssetFolderModal;
+  window.saveAssetFolder      = saveAssetFolder;
+  window.deleteAssetFolder    = deleteAssetFolder;
+  window.openAddAssetLink     = openAddAssetLink;
+  window.openEditAssetLink    = openEditAssetLink;
+  window.closeAssetLinkModal  = closeAssetLinkModal;
+  window.saveAssetLink        = saveAssetLink;
+  window.deleteAssetLink      = deleteAssetLink;
+  window.copyAssetLink        = copyAssetLink;
   window.updateContentField = updateContentField;
   window.setKpiPeriod       = setKpiPeriod;
   window.previewContent     = previewContent;
