@@ -2317,10 +2317,6 @@ ul { list-style: none; }
 .stat-chart-wrap canvas {
   max-height: 320px; width: 100% !important;
 }
-/* Toggle Bulanan/Mingguan */
-.chart-view-toggle {
-  display: flex; gap: 4px; margin-bottom: 10px;
-}
 .stat-view-btn {
   padding: 4px 12px; font-size: .74rem; font-weight: 600;
   border: 1.5px solid var(--bd); border-radius: 20px;
@@ -2332,12 +2328,19 @@ ul { list-style: none; }
 }
 .stat-view-btn:hover:not(.active) { border-color: var(--blue); color: var(--blue); }
 
-/* Tombol expand grafik */
+/* Toggle header row (Bulanan/Mingguan + tombol expand) */
+.chart-view-toggle {
+  display: flex; align-items: center;
+  justify-content: space-between; gap: 4px; margin-bottom: 4px;
+}
+.chart-view-toggle > div { display: flex; gap: 4px; }
+
+/* Tombol expand grafik — di dalam header row (bukan absolute) */
 .chart-expand-btn {
-  position: absolute; top: 10px; right: 10px;
   background: var(--surface); border: 1px solid var(--bd);
-  border-radius: 6px; padding: 5px 7px; cursor: pointer;
-  color: var(--muted); line-height: 0; z-index: 10;
+  border-radius: 7px; padding: 5px 7px; cursor: pointer;
+  color: var(--muted); line-height: 0; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
   transition: all .15s;
 }
 .chart-expand-btn:hover { background: var(--hover); color: var(--text); border-color: var(--blue); }
@@ -2351,30 +2354,47 @@ ul { list-style: none; }
 .stat-chart-backdrop {
   display: none;
   position: fixed; inset: 0; z-index: 9989;
-  background: rgba(0,0,0,.55);
+  background: rgba(0,0,0,.6);
+  backdrop-filter: blur(2px);
 }
 .stat-chart-backdrop.active { display: block; }
 
 .stat-chart-wrap.fullscreen {
   position: fixed !important;
-  inset: 12px; z-index: 9990;
-  border-radius: 14px; margin: 0;
-  padding: 20px 20px 16px; display: flex;
-  flex-direction: column; gap: 10px;
+  inset: 16px; z-index: 9990;
+  border-radius: 16px; margin: 0;
+  padding: 14px 18px 14px;
+  display: flex; flex-direction: column; gap: 8px;
   background: var(--surface);
-  box-shadow: 0 20px 60px rgba(0,0,0,.3);
+  box-shadow: 0 24px 80px rgba(0,0,0,.35);
   overflow: hidden;
 }
+/* Header row fullscreen: toggle + close button */
+.stat-chart-wrap.fullscreen .chart-fs-header {
+  display: flex; align-items: center; justify-content: space-between;
+}
+.stat-chart-wrap.fullscreen .chart-view-toggle { margin-bottom: 0; }
+.stat-chart-wrap.fullscreen .chart-expand-btn {
+  position: static !important;  /* tidak absolute, masuk dalam header row */
+}
+/* Canvas fullscreen — gunakan min-height 0 agar flex bisa shrink */
 .stat-chart-wrap.fullscreen canvas {
+  flex: 1 1 0;
+  min-height: 0 !important;
   max-height: none !important;
   min-width: 0 !important;
-  flex: 1; width: 100% !important;
+  width: 100% !important;
 }
-.stat-chart-wrap.fullscreen .chart-expand-btn {
-  top: 14px; right: 14px;
-}
+
+/* Mobile fullscreen: full layar, canvas jangan terlalu tinggi */
 @media (max-width: 640px) {
-  .stat-chart-wrap.fullscreen { inset: 0; border-radius: 0; }
+  .stat-chart-wrap.fullscreen {
+    inset: 0; border-radius: 0;
+    padding: 12px 10px 10px;
+  }
+  .stat-chart-wrap.fullscreen canvas {
+    max-height: calc(100dvh - 90px) !important;
+  }
 }
 
 /* ── Todo edit button & inline input ───────────────────────────── */

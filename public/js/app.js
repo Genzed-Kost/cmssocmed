@@ -5280,24 +5280,19 @@ function renderStatChart() {
   // Bersihkan konten lama
   chartWrap.innerHTML = '<canvas id="statBarChart"></canvas>';
 
-  // Toggle Bulanan / Mingguan
-  const toggleWrap = document.createElement('div');
-  toggleWrap.className = 'chart-view-toggle';
-  toggleWrap.innerHTML = `
-    <button class="stat-view-btn${!isWeekly?' active':''}" data-mode="monthly" onclick="setStatViewMode('monthly')">Bulanan</button>
-    <button class="stat-view-btn${isWeekly?' active':''}" data-mode="weekly" onclick="setStatViewMode('weekly')">Mingguan</button>`;
-  chartWrap.insertBefore(toggleWrap, chartWrap.firstChild);
-
-  // Tombol expand/fullscreen
-  const expandBtn = document.createElement('button');
-  expandBtn.className = 'chart-expand-btn';
-  expandBtn.title = 'Perbesar grafik';
-  expandBtn.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-    <polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/>
-    <line x1="21" y1="3" x2="14" y2="10"/><line x1="3" y1="21" x2="10" y2="14"/>
-  </svg>`;
-  expandBtn.onclick = () => toggleChartFullscreen(chartWrap);
-  chartWrap.appendChild(expandBtn);
+  // Header row: toggle Bulanan/Mingguan + tombol expand
+  const headerRow = document.createElement('div');
+  headerRow.className = 'chart-view-toggle chart-fs-header';
+  headerRow.innerHTML = `
+    <div style="display:flex;gap:4px">
+      <button class="stat-view-btn${!isWeekly?' active':''}" data-mode="monthly" onclick="setStatViewMode('monthly')">Bulanan</button>
+      <button class="stat-view-btn${isWeekly?' active':''}" data-mode="weekly" onclick="setStatViewMode('weekly')">Mingguan</button>
+    </div>
+    <button class="chart-expand-btn" id="chartExpandBtn" title="Perbesar / Perkecil">
+      <svg class="icon-expand" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/><line x1="21" y1="3" x2="14" y2="10"/><line x1="3" y1="21" x2="10" y2="14"/></svg>
+    </button>`;
+  chartWrap.insertBefore(headerRow, chartWrap.firstChild);
+  headerRow.querySelector('#chartExpandBtn').onclick = () => toggleChartFullscreen(chartWrap);
 
   const labels     = displayRows.map(r => isWeekly ? fmtWeek(r.week||'') : fmtMonth(r.month||''));
   const follData   = displayRows.map(r => +(r[platM.followerKey] || 0));
@@ -5422,34 +5417,41 @@ function renderStatChart() {
     const backdrop = $('statChartBackdrop');
     if (backdrop) backdrop.classList.toggle('active', isFs);
 
+    // Ikon expand/collapse pada tombol di header row
     const btn = wrap.querySelector('.chart-expand-btn');
-    const ICON_EXPAND   = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/><line x1="21" y1="3" x2="14" y2="10"/><line x1="3" y1="21" x2="10" y2="14"/></svg>`;
-    const ICON_COLLAPSE = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="4 14 10 14 10 20"/><polyline points="20 10 14 10 14 4"/><line x1="10" y1="14" x2="3" y2="21"/><line x1="21" y1="3" x2="14" y2="10"/></svg>`;
-    if (btn) btn.innerHTML = isFs ? ICON_COLLAPSE : ICON_EXPAND;
+    if (btn) btn.innerHTML = isFs
+      ? `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="4 14 10 14 10 20"/><polyline points="20 10 14 10 14 4"/><line x1="10" y1="14" x2="3" y2="21"/><line x1="21" y1="3" x2="14" y2="10"/></svg>`
+      : `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/><line x1="21" y1="3" x2="14" y2="10"/><line x1="3" y1="21" x2="10" y2="14"/></svg>`;
 
-    // Update maintainAspectRatio dinamis
+    // Update chart options dinamis
     if (window._statChart) {
+      const isMob = window.innerWidth <= 640;
       window._statChart.options.maintainAspectRatio = !isFs;
-      window._statChart.options.plugins.legend.labels.font = { size: isFs ? 12 : (isMobile ? 9 : 11) };
-      window._statChart.options.scales.x.ticks.maxTicksLimit = isFs ? 24 : (isMobile ? 6 : 12);
+      // Saat fullscreen: ticks lebih banyak & lebih besar
+      const tickSize  = isFs ? (isMob ? 10 : 12) : (isMob ? 8 : 10);
+      const legendSz  = isFs ? (isMob ? 10 : 13) : (isMob ? 9 : 11);
+      const maxTicks  = isFs ? 24 : (isMob ? 6 : 12);
+      window._statChart.options.scales.x.ticks.font     = { size: tickSize };
+      window._statChart.options.scales.x.ticks.maxTicksLimit = maxTicks;
+      window._statChart.options.scales.x.ticks.maxRotation   = isFs ? 30 : 45;
+      window._statChart.options.scales.yFoll.ticks.font = { size: tickSize };
+      window._statChart.options.scales.yView.ticks.font = { size: tickSize };
+      window._statChart.options.plugins.legend.labels.font = { size: legendSz };
+      window._statChart.options.plugins.legend.labels.boxWidth = isFs ? 16 : 12;
       window._statChart.update('none');
-      // Resize setelah layout selesai
-      requestAnimationFrame(() => {
-        requestAnimationFrame(() => window._statChart?.resize());
-      });
+      // Double rAF agar layout CSS selesai dulu baru chart di-resize
+      requestAnimationFrame(() => requestAnimationFrame(() => {
+        window._statChart?.resize();
+      }));
     }
 
     // ESC untuk keluar fullscreen
     if (isFs) {
       const escHandler = e => {
-        if (e.key === 'Escape') {
-          toggleChartFullscreen(wrap);
-          document.removeEventListener('keydown', escHandler);
-        }
+        if (e.key === 'Escape') { toggleChartFullscreen(wrap); document.removeEventListener('keydown', escHandler); }
       };
       document.addEventListener('keydown', escHandler);
     }
-    // Cegah scroll background saat fullscreen
     document.body.style.overflow = isFs ? 'hidden' : '';
   }
 
