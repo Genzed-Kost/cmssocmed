@@ -6,12 +6,15 @@
       "youtube"
     ],
     "publishDate": "2026-06-05",
-    "creator": "Umar",
+    "creator": [
+      "Idham",
+      "Umar"
+    ],
     "editor": "Umar",
     "account": "penjaga-harapan",
     "status": "Published",
     "theme": "Podcast",
-    "format": "Carousell",
+    "format": "Podcast",
     "script": "",
     "caption": "",
     "outputLink": "https://instagram.com/penjaga_harapan",
@@ -19,6 +22,6 @@
     "platformLinks": {},
     "createdBy": "Admin",
     "createdAt": "2026-06-04T09:55:51.377Z",
-    "updatedAt": "2026-06-08T14:58:39.482Z"
+    "updatedAt": "2026-06-09T05:00:36.774Z"
   }
 ]
