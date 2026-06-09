@@ -28,7 +28,7 @@ const GEMINI_MODELS = [
   'gemini-2.5-flash',   // utama — thinking support
   'gemini-2.0-flash',   // fallback stabil
   'gemini-2.0-flash-lite', // fallback ringan
-  'gemini-1.5-flash',   // fallback lama (tanpa -latest)
+  'gemini-1.5-flash-002', // fallback lama v2
 ];
 const NEWS_KEY        = 'cmsph_news_v1';
 const NEWS_TTL        = 60 * 60 * 1000;
@@ -1391,28 +1391,38 @@ async function openPlannerWa(id) {
   if (!c) return;
   const users = state.settings?.users || [];
   const crArr = Array.isArray(c.creator) ? c.creator : (c.creator ? [c.creator] : []);
-  let phone, name;
-  for (const cr of crArr) {
-    const u = users.find(u => getUserName(u) === cr);
-    if (u?.phone) { phone = u.phone; name = cr; break; }
-  }
-  if (!phone) { toast('Creator tidak memiliki nomor WA', 'error'); return; }
-
   const acctObj = ACCOUNTS.find(a => a.id === c.account);
-  const msg = waStatusMsg(
-    name, c.title || '—', c.theme || '—', c.status || 'Plan',
-    fmtDate(c.publishDate), acctObj?.name || c.account || '—',
-    window.location.origin
-  );
+
+  // Kumpulkan semua creator yang punya nomor WA
+  const targets = crArr
+    .map(cr => ({ name: cr, user: users.find(u => getUserName(u) === cr) }))
+    .filter(t => t.user?.phone);
+
+  if (!targets.length) { toast('Creator tidak memiliki nomor WA', 'error'); return; }
 
   if (getWaToken()) {
-    // Kirim via Fonnte — langsung otomatis
-    const result = await sendWaNotif(phone, msg);
-    if (result.ok) toast(`✅ Pesan terkirim ke ${name}`, 'success');
-    await logActivity(currentUser(), 'Kirim WA Planner', `ke ${name} — "${c.title || 'tanpa judul'}" (${c.status})`);
+    // Kirim ke SEMUA creator
+    const sent = [];
+    for (const t of targets) {
+      const msg = waStatusMsg(
+        t.name, c.title || '—', c.theme || '—', c.status || 'Plan',
+        fmtDate(c.publishDate), acctObj?.name || c.account || '—',
+        window.location.origin
+      );
+      const result = await sendWaNotif(t.user.phone, msg);
+      if (result.ok) sent.push(t.name);
+    }
+    if (sent.length) toast(`✅ Pesan terkirim ke ${sent.join(', ')}`, 'success');
+    await logActivity(currentUser(), 'Kirim WA Planner', `ke ${sent.join(', ')} — "${c.title || 'tanpa judul'}" (${c.status})`);
   } else {
-    // Fallback: buka wa.me
-    const clean  = String(phone).replace(/\D/g, '');
+    // Fallback: buka wa.me hanya ke creator pertama
+    const t = targets[0];
+    const msg = waStatusMsg(
+      t.name, c.title || '—', c.theme || '—', c.status || 'Plan',
+      fmtDate(c.publishDate), acctObj?.name || c.account || '—',
+      window.location.origin
+    );
+    const clean  = String(t.user.phone).replace(/\D/g, '');
     const target = clean.startsWith('0') ? '62' + clean.slice(1) : clean;
     window.open(`https://wa.me/${target}?text=${encodeURIComponent(msg)}`, '_blank');
   }
@@ -3153,7 +3163,6 @@ async function savePost() {
   // Validate required fields
   const required = [
     { id: 'postDate',    label: 'Tanggal Tayang' },
-    { id: 'postCreator', label: 'Creator' },
     { id: 'postAccount', label: 'Akun Target' },
     { id: 'postTitle',   label: 'Judul Konten' },
     { id: 'postTheme',   label: 'Tema' }
@@ -3166,6 +3175,16 @@ async function savePost() {
       setTimeout(() => $(f.id)?.classList.remove('inp-error'), 2000);
       return;
     }
+  }
+  // Validasi creator: dual-role (Podcast/Liputan) pakai chip UI, bukan select
+  const _isDualNow = FORMATS_DUAL_ROLE.includes(gv('postFormat'));
+  const _creatorCheck = _isDualNow ? _getMultiCreators() : [gv('postCreator')];
+  if (!_creatorCheck.length || !_creatorCheck[0]) {
+    toast('Creator wajib diisi (*)', 'error');
+    const elC = _isDualNow ? $('postCreatorMulti') : $('postCreator');
+    elC?.classList.add('inp-error');
+    setTimeout(() => elC?.classList.remove('inp-error'), 2000);
+    return;
   }
   const platforms = Array.from($$('#platformChecks input:checked')).map(cb => cb.value);
   if (!platforms.length) {
