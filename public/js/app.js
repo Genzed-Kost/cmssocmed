@@ -6006,11 +6006,15 @@ function renderStatGoodBad(acctId) {
     const valid = items.filter(it => it.link);
     const cards = valid.length
       ? valid.map(it => {
-          let domain = '';
-          try { domain = new URL(it.link).hostname.replace('www.',''); } catch {}
+          const viewsHtml = it.views
+            ? `<div class="sgb-card-views">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                ${esc(it.views)}
+               </div>`
+            : '';
           return `<a href="${esc(it.link)}" target="_blank" rel="noopener" class="sgb-card sgb-${type}">
             <div class="sgb-card-title">${esc(it.title || '(Tanpa Judul)')}</div>
-            ${domain ? `<div class="sgb-card-link"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>${esc(domain)}</div>` : ''}
+            ${viewsHtml}
           </a>`;
         }).join('')
       : '';
@@ -6020,11 +6024,14 @@ function renderStatGoodBad(acctId) {
       const inputRows = items.map((item, i) => `
         <div class="sgb-input-row">
           <input type="text" class="inp-sm" placeholder="Judul konten…"
-            value="${esc(item.title||'')}" style="flex:1;min-width:0"
+            value="${esc(item.title||'')}" style="flex:2;min-width:0"
             oninput="updateTopSlot('${esc(acctId)}','${type}',${i},'title',this.value,'${selMonth}')" />
-          <input type="url" class="inp-sm" placeholder="https://link-konten…"
+          <input type="url" class="inp-sm" placeholder="https://link…"
             value="${esc(item.link||'')}" style="flex:2;min-width:0"
             oninput="updateTopSlot('${esc(acctId)}','${type}',${i},'link',this.value,'${selMonth}')" />
+          <input type="text" class="inp-sm" placeholder="▷ Views (mis. 1.3M)"
+            value="${esc(item.views||'')}" style="flex:1;min-width:60px;max-width:90px"
+            oninput="updateTopSlot('${esc(acctId)}','${type}',${i},'views',this.value,'${selMonth}')" />
         </div>`).join('');
 
       return `<div class="sgb-col">
