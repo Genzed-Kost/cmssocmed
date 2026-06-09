@@ -4,6 +4,13 @@
     "emoji": "📁",
     "name": "Stock Foto",
     "desc": "",
-    "links": []
+    "links": [
+      {
+        "id": "mq6c9nfryfyjo",
+        "label": "Bumper PH",
+        "url": "https://drive.google.com/drive/folders/1JU7Eb4isKF_7D4KLTaHIlK4t3voI-XJs?usp=drive_link",
+        "notes": ""
+      }
+    ]
   }
 ]
