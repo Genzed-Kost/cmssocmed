@@ -386,6 +386,17 @@
         "totalShares": 2122,
         "totalEngagement": 80150,
         "erPct": 6.44
+      },
+      {
+        "month": "2026-05",
+        "totalVideoViews": 1203100,
+        "profileViews": 7187,
+        "followersEOM": 34391,
+        "followersGained": 501,
+        "totalViewers": 1042657,
+        "newViewers": 379257,
+        "returningViewers": 663400,
+        "totalEngagement": 36553
       }
     ],
     "facebook": [
@@ -820,7 +831,7 @@
         "updatedBy": "Admin"
       },
       "tiktok": {
-        "updatedAt": "2026-06-08T06:02:46.548Z",
+        "updatedAt": "2026-06-09T17:10:50.009Z",
         "updatedBy": "Admin"
       }
     },
