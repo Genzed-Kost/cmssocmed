@@ -1,5 +1,13 @@
 [
   {
+    "id": "mq66d488co0qu",
+    "user": "Idham",
+    "role": "Creator",
+    "action": "login",
+    "target": "masuk ke sistem sebagai Creator",
+    "timestamp": "2026-06-09T05:03:57.608Z"
+  },
+  {
     "id": "mq66ah9lso46a",
     "user": "Admin",
     "role": "Admin",
@@ -12,7 +20,7 @@
     "user": "Admin",
     "role": "Admin",
     "action": "Kirim WA Planner",
-    "target": "ke Idham â \"Podcsat Kepala KSP Pak Dudung\" (Published)",
+    "target": "ke Idham Ã¢ÂÂ \"Podcsat Kepala KSP Pak Dudung\" (Published)",
     "timestamp": "2026-06-09T05:01:09.875Z"
   },
   {
