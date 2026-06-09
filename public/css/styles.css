@@ -1951,8 +1951,8 @@ ul { list-style: none; }
   /* Stat input rows: platform label spans full row */
   .stat-inp-row { grid-template-columns: 1fr 1fr; }
   .stat-inp-plat { grid-column: 1 / -1; }
-  /* Stat chart: shorter on mobile */
-  .stat-chart-wrap canvas { max-height: 200px; }
+  /* Stat chart: responsive on mobile, no fixed max-height */
+  .stat-chart-wrap canvas { max-height: none; }
   /* Stat summary: 2-col grid */
   .stat-summary-row { grid-template-columns: repeat(2, 1fr); }
   /* Stat plat actions: full width */
@@ -2085,7 +2085,6 @@ ul { list-style: none; }
 
   /* Plat stat chart: more compact */
   .stat-chart-wrap { padding: 12px; }
-  .stat-chart-wrap canvas { max-height: 160px; }
 
   /* Dashboard period bar HP: ikon saja, ticker isi sisa lebar */
   /* New Post: icon only */
@@ -2342,24 +2341,40 @@ ul { list-style: none; }
   transition: all .15s;
 }
 .chart-expand-btn:hover { background: var(--hover); color: var(--text); border-color: var(--blue); }
-/* Mobile: chart scroll horizontal (swipe) */
+/* Mobile: chart fully responsive (tidak scroll horizontal) */
 @media (max-width: 640px) {
-  .stat-chart-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; touch-action: pan-x; }
-  .stat-chart-wrap canvas { min-width: 500px; max-height: 220px !important; }
+  .stat-chart-wrap { overflow-x: visible; padding: 12px 10px; }
+  .stat-chart-wrap canvas { min-width: 0 !important; max-height: 220px !important; width: 100% !important; }
 }
+
 /* Mode fullscreen grafik */
+.stat-chart-backdrop {
+  display: none;
+  position: fixed; inset: 0; z-index: 9989;
+  background: rgba(0,0,0,.55);
+}
+.stat-chart-backdrop.active { display: block; }
+
 .stat-chart-wrap.fullscreen {
   position: fixed !important;
-  inset: 0; z-index: 9990;
-  border-radius: 0; margin: 0;
-  padding: 24px; display: flex;
-  flex-direction: column; gap: 12px;
+  inset: 12px; z-index: 9990;
+  border-radius: 14px; margin: 0;
+  padding: 20px 20px 16px; display: flex;
+  flex-direction: column; gap: 10px;
   background: var(--surface);
-  box-shadow: none;
+  box-shadow: 0 20px 60px rgba(0,0,0,.3);
+  overflow: hidden;
 }
 .stat-chart-wrap.fullscreen canvas {
   max-height: none !important;
-  flex: 1;
+  min-width: 0 !important;
+  flex: 1; width: 100% !important;
+}
+.stat-chart-wrap.fullscreen .chart-expand-btn {
+  top: 14px; right: 14px;
+}
+@media (max-width: 640px) {
+  .stat-chart-wrap.fullscreen { inset: 0; border-radius: 0; }
 }
 
 /* ── Todo edit button & inline input ───────────────────────────── */

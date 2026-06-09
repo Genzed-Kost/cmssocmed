@@ -5318,6 +5318,7 @@ function renderStatChart() {
   const showCmp   = !!$('statCmpToggle')?.checked;
   const cmpData   = showCmp ? prevRows.map(r => +(r[platM.viewKey]||0)) : [];
 
+  const isMobile = window.innerWidth <= 640;
   window._statChart = new Chart(ctx, {
     data: {
       labels,
@@ -5375,11 +5376,12 @@ function renderStatChart() {
     },
     options: {
       responsive: true,
-      maintainAspectRatio: !chartWrap.classList.contains('fullscreen'),
+      maintainAspectRatio: true,
+      aspectRatio: isMobile ? 1.8 : 2.5,
       interaction: { mode: 'index', intersect: false },
       plugins: {
         legend: { display: true, position: 'top',
-          labels: { boxWidth: 12, font: { size: 11 } }
+          labels: { boxWidth: 12, font: { size: isMobile ? 9 : 11 } }
         },
         tooltip: {
           callbacks: {
@@ -5391,33 +5393,64 @@ function renderStatChart() {
         yFoll: {
           type: 'linear', position: 'left',
           title: { display: false },
-          ticks: { callback: v => fmtNum(v), font: { size: 10 } },
+          ticks: { callback: v => fmtNum(v), font: { size: isMobile ? 8 : 10 }, maxTicksLimit: 5 },
           grid: { color: 'rgba(0,0,0,.06)' }
         },
         yView: {
           type: 'linear', position: 'right',
           title: { display: false },
-          ticks: { callback: v => fmtNum(v), font: { size: 10 } },
+          ticks: { callback: v => fmtNum(v), font: { size: isMobile ? 8 : 10 }, maxTicksLimit: 5 },
           grid: { drawOnChartArea: false }
         },
-        x: { ticks: { font: { size: 10 } } }
+        x: { ticks: { font: { size: isMobile ? 8 : 10 }, maxRotation: 45, autoSkip: true, maxTicksLimit: isMobile ? 6 : 12 } }
       }
     }
   });
 
+  // Backdrop element (singleton)
+  let _chartBackdrop = $('statChartBackdrop');
+  if (!_chartBackdrop) {
+    _chartBackdrop = document.createElement('div');
+    _chartBackdrop.id = 'statChartBackdrop';
+    _chartBackdrop.className = 'stat-chart-backdrop';
+    _chartBackdrop.onclick = () => toggleChartFullscreen(chartWrap);
+    document.body.appendChild(_chartBackdrop);
+  }
+
   function toggleChartFullscreen(wrap) {
     const isFs = wrap.classList.toggle('fullscreen');
-    const btn  = wrap.querySelector('.chart-expand-btn');
-    if (btn) btn.innerHTML = isFs
-      ? `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="4 14 10 14 10 20"/><polyline points="20 10 14 10 14 4"/><line x1="10" y1="14" x2="3" y2="21"/><line x1="21" y1="3" x2="14" y2="10"/></svg>`
-      : `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/><line x1="21" y1="3" x2="14" y2="10"/><line x1="3" y1="21" x2="10" y2="14"/></svg>`;
-    // Resize chart setelah fullscreen toggle
-    setTimeout(() => window._statChart?.resize(), 50);
+    const backdrop = $('statChartBackdrop');
+    if (backdrop) backdrop.classList.toggle('active', isFs);
+
+    const btn = wrap.querySelector('.chart-expand-btn');
+    const ICON_EXPAND   = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/><line x1="21" y1="3" x2="14" y2="10"/><line x1="3" y1="21" x2="10" y2="14"/></svg>`;
+    const ICON_COLLAPSE = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="4 14 10 14 10 20"/><polyline points="20 10 14 10 14 4"/><line x1="10" y1="14" x2="3" y2="21"/><line x1="21" y1="3" x2="14" y2="10"/></svg>`;
+    if (btn) btn.innerHTML = isFs ? ICON_COLLAPSE : ICON_EXPAND;
+
+    // Update maintainAspectRatio dinamis
+    if (window._statChart) {
+      window._statChart.options.maintainAspectRatio = !isFs;
+      window._statChart.options.plugins.legend.labels.font = { size: isFs ? 12 : (isMobile ? 9 : 11) };
+      window._statChart.options.scales.x.ticks.maxTicksLimit = isFs ? 24 : (isMobile ? 6 : 12);
+      window._statChart.update('none');
+      // Resize setelah layout selesai
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => window._statChart?.resize());
+      });
+    }
+
     // ESC untuk keluar fullscreen
     if (isFs) {
-      const escHandler = e => { if (e.key === 'Escape') { toggleChartFullscreen(wrap); document.removeEventListener('keydown', escHandler); } };
+      const escHandler = e => {
+        if (e.key === 'Escape') {
+          toggleChartFullscreen(wrap);
+          document.removeEventListener('keydown', escHandler);
+        }
+      };
       document.addEventListener('keydown', escHandler);
     }
+    // Cegah scroll background saat fullscreen
+    document.body.style.overflow = isFs ? 'hidden' : '';
   }
 
   // Render admin-only data table below chart
