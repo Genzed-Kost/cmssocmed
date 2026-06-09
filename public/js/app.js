@@ -196,7 +196,8 @@ const PAGE_TITLES = {
   contents:    'New Contents',
   newpost:     'New Post',
   statistics:  'Statistik',
-  apisetup:    'API Setup'
+  apisetup:    'API Setup',
+  assets:      'Aset & Drive'
 };
 
 const chartInstances = {};   // canvasId → Chart instance
@@ -441,6 +442,7 @@ let state = {
   activity:       [],
   todos:          [],
   bankKonten:     [],
+  assets:         [],
   settings:       { kpi: {}, users: [], analyticsUrls: {} },
   analytics:      {},
   shas:           {},
@@ -1077,7 +1079,8 @@ function saveDataCache() {
       todos:      state.todos,
       settings:   state.settings,
       analytics:  state.analytics,
-      bankKonten: state.bankKonten
+      bankKonten: state.bankKonten,
+      assets:     state.assets
     }));
   } catch { /* storage full — ignore */ }
 }
@@ -1174,6 +1177,7 @@ async function loadAllData(force = false) {
         state.settings   = cached.settings   || { kpi:{}, users:[], analyticsUrls:{} };
         state.analytics  = cached.analytics  || {};
         state.bankKonten = cached.bankKonten || [];
+        state.assets     = Array.isArray(cached.assets) ? cached.assets : [];
         // SHAs sengaja tidak di-cache — db.writeData() akan auto-fetch SHA saat write
         state.shas = {};
         _applyTopContentDefaults();
@@ -1192,18 +1196,20 @@ async function loadAllData(force = false) {
   const syncIcon = $('btnGitSync');
   if (syncIcon) syncIcon.classList.add('spinning');
   try {
-    const [cR, aR, tR, sR, anlR, bkR] = await Promise.all([
+    const [cR, aR, tR, sR, anlR, bkR, asR] = await Promise.all([
       window.db.read('contents'),
       window.db.read('activity'),
       window.db.read('todos'),
       window.db.read('settings'),
       window.db.read('analytics'),
-      window.db.read('contentBank')
+      window.db.read('contentBank'),
+      window.db.read('assets')
     ]);
     state.contents   = Array.isArray(cR?.data)  ? cR.data  : [];
     state.activity   = Array.isArray(aR?.data)  ? aR.data  : [];
     state.todos      = Array.isArray(tR?.data)  ? tR.data  : [];
     state.bankKonten = Array.isArray(bkR?.data) ? bkR.data : [];
+    state.assets     = Array.isArray(asR?.data) ? asR.data : [];
     state.settings   = sR?.data   || { kpi: {}, users: [], analyticsUrls: {} };
     _applyTopContentDefaults();
     _syncApiKeysFromSettings();   // sync API keys dari GitHub settings → localStorage
@@ -1214,7 +1220,8 @@ async function loadAllData(force = false) {
       todos:       tR?.sha,
       settings:    sR?.sha,
       analytics:   anlR?.sha,
-      bankKonten:  bkR?.sha
+      bankKonten:  bkR?.sha,
+      assets:      asR?.sha
     };
     // Check Bank Konten reminders after data loaded (jam 8 pagi on publish date)
     checkBankKontenReminders();
@@ -1783,6 +1790,7 @@ function renderCurrentPage() {
     case 'newpost':     renderNewPostForm();  break;
     case 'statistics':  renderStatistics();   break;
     case 'apisetup':    renderApiSetup();     break;
+    case 'assets':      renderAssets();       break;
   }
 }
 
@@ -3241,6 +3249,270 @@ async function savePost() {
     toast(`Konten berhasil ${id ? 'diperbarui' : 'disimpan'}`, 'success');
     navigate('planner');
   } catch (e) { toast('Gagal simpan: ' + e.message, 'error'); }
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   ASSETS & DRIVE
+   ══════════════════════════════════════════════════════════════════════════ */
+
+const ASSET_FOLDER_COLORS = [
+  { bg: '#dbeafe', border: '#93c5fd', text: '#1e40af' }, // biru
+  { bg: '#dcfce7', border: '#86efac', text: '#166534' }, // hijau
+  { bg: '#fef9c3', border: '#fde047', text: '#92400e' }, // kuning
+  { bg: '#fce7f3', border: '#f9a8d4', text: '#9d174d' }, // pink
+  { bg: '#ede9fe', border: '#c4b5fd', text: '#5b21b6' }, // ungu
+  { bg: '#ffedd5', border: '#fdba74', text: '#9a3412' }, // oranye
+  { bg: '#e0f2fe', border: '#7dd3fc', text: '#075985' }, // sky
+  { bg: '#f0fdf4', border: '#a3e635', text: '#3f6212' }, // lime
+];
+
+function renderAssets() {
+  const sec = $('assetsSection');
+  if (!sec) return;
+  const admin   = isAdmin();
+  const folders = state.assets || [];
+
+  const foldersHtml = folders.length === 0
+    ? `<div class="asset-empty"><span>📂</span><p>Belum ada folder aset. ${admin ? 'Klik "+ Folder Baru" untuk mulai.' : 'Hubungi admin untuk menambahkan aset.'}</p></div>`
+    : folders.map((f, fi) => {
+        const col   = ASSET_FOLDER_COLORS[fi % ASSET_FOLDER_COLORS.length];
+        const links = f.links || [];
+        const linksHtml = links.length === 0
+          ? `<div class="asset-link-empty">Belum ada link. ${admin ? 'Klik "+ Link" untuk menambah.' : ''}</div>`
+          : links.map(lk => `
+              <div class="asset-link-row" data-lid="${lk.id}">
+                <div class="asset-link-info">
+                  <a class="asset-link-url" href="${esc(lk.url)}" target="_blank" rel="noopener">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+                    ${esc(lk.label || lk.url)}
+                  </a>
+                  ${lk.notes ? `<span class="asset-link-notes">${esc(lk.notes)}</span>` : ''}
+                </div>
+                <div class="asset-link-actions">
+                  <button class="asset-btn-icon" title="Salin link" onclick="copyAssetLink('${esc(lk.url)}')">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+                  </button>
+                  ${admin ? `
+                  <button class="asset-btn-icon" title="Edit link" onclick="openEditAssetLink('${f.id}','${lk.id}')">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                  </button>
+                  <button class="asset-btn-icon red" title="Hapus link" onclick="deleteAssetLink('${f.id}','${lk.id}')">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/></svg>
+                  </button>` : ''}
+                </div>
+              </div>`).join('');
+
+        return `
+          <div class="asset-folder-card" style="border-color:${col.border}">
+            <div class="asset-folder-header" style="background:${col.bg}">
+              <div class="asset-folder-title">
+                <span class="asset-folder-emoji">${esc(f.emoji || '📁')}</span>
+                <span class="asset-folder-name" style="color:${col.text}">${esc(f.name)}</span>
+                ${f.desc ? `<span class="asset-folder-desc">${esc(f.desc)}</span>` : ''}
+              </div>
+              <div class="asset-folder-actions">
+                ${admin ? `
+                  <button class="btn-xs" style="color:${col.text};border-color:${col.border}" onclick="openAddAssetLink('${f.id}')">+ Link</button>
+                  <button class="asset-btn-icon" title="Edit folder" onclick="openEditAssetFolder('${f.id}')">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                  </button>
+                  <button class="asset-btn-icon red" title="Hapus folder" onclick="deleteAssetFolder('${f.id}')">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/></svg>
+                  </button>` : ''}
+              </div>
+            </div>
+            <div class="asset-links-list">
+              ${linksHtml}
+              <div class="asset-link-count">${links.length} link tersimpan</div>
+            </div>
+          </div>`;
+      }).join('');
+
+  sec.innerHTML = `
+    <div class="section-header" style="margin-bottom:16px">
+      ${admin ? `<button class="btn blue" onclick="openAddAssetFolder()">+ Folder Baru</button>` : ''}
+    </div>
+    <div class="asset-grid">${foldersHtml}</div>
+
+    <!-- Modal folder -->
+    <div id="assetFolderModal" class="modal-overlay hidden">
+      <div class="modal-box" style="max-width:400px">
+        <h3 id="assetFolderModalTitle" class="modal-title">Folder Baru</h3>
+        <input type="hidden" id="assetFolderEditId">
+        <div class="form-group">
+          <label class="form-label">Emoji / Ikon</label>
+          <input id="assetFolderEmoji" class="form-input" placeholder="📁" maxlength="4" style="width:60px">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Nama Folder *</label>
+          <input id="assetFolderName" class="form-input" placeholder="mis. Stock Video, Foto, Logo...">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Deskripsi</label>
+          <input id="assetFolderDesc" class="form-input" placeholder="Opsional — keterangan singkat">
+        </div>
+        <div class="modal-footer">
+          <button class="btn" onclick="closeAssetFolderModal()">Batal</button>
+          <button class="btn blue" onclick="saveAssetFolder()">Simpan</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal link -->
+    <div id="assetLinkModal" class="modal-overlay hidden">
+      <div class="modal-box" style="max-width:420px">
+        <h3 id="assetLinkModalTitle" class="modal-title">Tambah Link</h3>
+        <input type="hidden" id="assetLinkFolderId">
+        <input type="hidden" id="assetLinkEditId">
+        <div class="form-group">
+          <label class="form-label">Label *</label>
+          <input id="assetLinkLabel" class="form-input" placeholder="mis. B-Roll Alam, Logo Penjaga Harapan...">
+        </div>
+        <div class="form-group">
+          <label class="form-label">URL Drive / Link *</label>
+          <input id="assetLinkUrl" class="form-input" type="url" placeholder="https://drive.google.com/...">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Catatan</label>
+          <input id="assetLinkNotes" class="form-input" placeholder="Opsional — keterangan tambahan">
+        </div>
+        <div class="modal-footer">
+          <button class="btn" onclick="closeAssetLinkModal()">Batal</button>
+          <button class="btn blue" onclick="saveAssetLink()">Simpan</button>
+        </div>
+      </div>
+    </div>`;
+}
+
+/* ── Asset folder CRUD ──────────────────────────────────────────────────── */
+function openAddAssetFolder() {
+  $('assetFolderModalTitle').textContent = 'Folder Baru';
+  $('assetFolderEditId').value = '';
+  $('assetFolderEmoji').value  = '📁';
+  $('assetFolderName').value   = '';
+  $('assetFolderDesc').value   = '';
+  $('assetFolderModal').classList.remove('hidden');
+  $('assetFolderName').focus();
+}
+function openEditAssetFolder(folderId) {
+  const f = (state.assets || []).find(x => x.id === folderId);
+  if (!f) return;
+  $('assetFolderModalTitle').textContent = 'Edit Folder';
+  $('assetFolderEditId').value = f.id;
+  $('assetFolderEmoji').value  = f.emoji || '📁';
+  $('assetFolderName').value   = f.name  || '';
+  $('assetFolderDesc').value   = f.desc  || '';
+  $('assetFolderModal').classList.remove('hidden');
+  $('assetFolderName').focus();
+}
+function closeAssetFolderModal() {
+  $('assetFolderModal')?.classList.add('hidden');
+}
+async function saveAssetFolder() {
+  const name = $('assetFolderName').value.trim();
+  if (!name) { toast('Nama folder wajib diisi', 'error'); return; }
+  const editId = $('assetFolderEditId').value;
+  if (editId) {
+    const f = (state.assets || []).find(x => x.id === editId);
+    if (f) { f.emoji = $('assetFolderEmoji').value.trim() || '📁'; f.name = name; f.desc = $('assetFolderDesc').value.trim(); }
+  } else {
+    state.assets = state.assets || [];
+    state.assets.push({ id: uid(), emoji: $('assetFolderEmoji').value.trim() || '📁', name, desc: $('assetFolderDesc').value.trim(), links: [] });
+  }
+  closeAssetFolderModal();
+  renderAssets();
+  try {
+    state.shas.assets = await window.db.writeData('assets', state.assets, `Aset: ${editId ? 'edit' : 'tambah'} folder "${name}"`);
+    saveDataCache();
+    toast(editId ? 'Folder diperbarui ✓' : 'Folder dibuat ✓', 'success');
+  } catch(e) { toast('Gagal simpan: ' + e.message, 'error'); }
+}
+async function deleteAssetFolder(folderId) {
+  const f = (state.assets || []).find(x => x.id === folderId);
+  if (!f) return;
+  if (!confirm(`Hapus folder "${f.name}" beserta semua link di dalamnya?`)) return;
+  state.assets = state.assets.filter(x => x.id !== folderId);
+  renderAssets();
+  try {
+    state.shas.assets = await window.db.writeData('assets', state.assets, `Aset: hapus folder "${f.name}"`);
+    saveDataCache();
+    toast('Folder dihapus');
+  } catch(e) { toast('Gagal hapus: ' + e.message, 'error'); }
+}
+
+/* ── Asset link CRUD ────────────────────────────────────────────────────── */
+function openAddAssetLink(folderId) {
+  $('assetLinkModalTitle').textContent = 'Tambah Link';
+  $('assetLinkFolderId').value = folderId;
+  $('assetLinkEditId').value   = '';
+  $('assetLinkLabel').value    = '';
+  $('assetLinkUrl').value      = '';
+  $('assetLinkNotes').value    = '';
+  $('assetLinkModal').classList.remove('hidden');
+  $('assetLinkLabel').focus();
+}
+function openEditAssetLink(folderId, linkId) {
+  const f  = (state.assets || []).find(x => x.id === folderId);
+  const lk = f?.links?.find(l => l.id === linkId);
+  if (!lk) return;
+  $('assetLinkModalTitle').textContent = 'Edit Link';
+  $('assetLinkFolderId').value = folderId;
+  $('assetLinkEditId').value   = linkId;
+  $('assetLinkLabel').value    = lk.label || '';
+  $('assetLinkUrl').value      = lk.url   || '';
+  $('assetLinkNotes').value    = lk.notes || '';
+  $('assetLinkModal').classList.remove('hidden');
+  $('assetLinkLabel').focus();
+}
+function closeAssetLinkModal() {
+  $('assetLinkModal')?.classList.add('hidden');
+}
+async function saveAssetLink() {
+  const label = $('assetLinkLabel').value.trim();
+  const url   = $('assetLinkUrl').value.trim();
+  if (!label) { toast('Label wajib diisi', 'error'); return; }
+  if (!url)   { toast('URL wajib diisi', 'error'); return; }
+  const folderId = $('assetLinkFolderId').value;
+  const editId   = $('assetLinkEditId').value;
+  const f        = (state.assets || []).find(x => x.id === folderId);
+  if (!f) return;
+  f.links = f.links || [];
+  if (editId) {
+    const lk = f.links.find(l => l.id === editId);
+    if (lk) { lk.label = label; lk.url = url; lk.notes = $('assetLinkNotes').value.trim(); }
+  } else {
+    f.links.push({ id: uid(), label, url, notes: $('assetLinkNotes').value.trim() });
+  }
+  closeAssetLinkModal();
+  renderAssets();
+  try {
+    state.shas.assets = await window.db.writeData('assets', state.assets, `Aset: ${editId ? 'edit' : 'tambah'} link "${label}" di "${f.name}"`);
+    saveDataCache();
+    toast(editId ? 'Link diperbarui ✓' : 'Link ditambahkan ✓', 'success');
+  } catch(e) { toast('Gagal simpan: ' + e.message, 'error'); }
+}
+async function deleteAssetLink(folderId, linkId) {
+  const f  = (state.assets || []).find(x => x.id === folderId);
+  const lk = f?.links?.find(l => l.id === linkId);
+  if (!lk) return;
+  if (!confirm(`Hapus link "${lk.label}"?`)) return;
+  f.links = f.links.filter(l => l.id !== linkId);
+  renderAssets();
+  try {
+    state.shas.assets = await window.db.writeData('assets', state.assets, `Aset: hapus link "${lk.label}"`);
+    saveDataCache();
+    toast('Link dihapus');
+  } catch(e) { toast('Gagal hapus: ' + e.message, 'error'); }
+}
+function copyAssetLink(url) {
+  if (navigator.clipboard?.writeText) {
+    navigator.clipboard.writeText(url).then(() => toast('Link disalin ✓', 'success'));
+  } else {
+    const ta = document.createElement('textarea');
+    ta.value = url; document.body.appendChild(ta); ta.select();
+    document.execCommand('copy'); document.body.removeChild(ta);
+    toast('Link disalin ✓', 'success');
+  }
 }
 
 /* ══════════════════════════════════════════════════════════════════════════
@@ -6885,6 +7157,18 @@ document.addEventListener('DOMContentLoaded', async () => {
   window.openStatEdit       = openStatEdit;
   window.navigate           = navigate;
   window.renderNewPostForm  = renderNewPostForm;
+  // Assets
+  window.openAddAssetFolder  = openAddAssetFolder;
+  window.openEditAssetFolder = openEditAssetFolder;
+  window.closeAssetFolderModal = closeAssetFolderModal;
+  window.saveAssetFolder     = saveAssetFolder;
+  window.deleteAssetFolder   = deleteAssetFolder;
+  window.openAddAssetLink    = openAddAssetLink;
+  window.openEditAssetLink   = openEditAssetLink;
+  window.closeAssetLinkModal = closeAssetLinkModal;
+  window.saveAssetLink       = saveAssetLink;
+  window.deleteAssetLink     = deleteAssetLink;
+  window.copyAssetLink       = copyAssetLink;
   window.updateContentField = updateContentField;
   window.setKpiPeriod       = setKpiPeriod;
   window.previewContent     = previewContent;
