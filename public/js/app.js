@@ -15,51 +15,6 @@ const GEMINI_LS_KEY = 'cmsph_gemini_v1';
 function getGeminiKey()     { return localStorage.getItem(GEMINI_LS_KEY) || ''; }
 function saveGeminiKey(key) { key ? localStorage.setItem(GEMINI_LS_KEY, key) : localStorage.removeItem(GEMINI_LS_KEY); }
 
-const YT_API_LS_KEY = 'cmsph_yt_api_v1';
-function getYtApiKey()     { return localStorage.getItem(YT_API_LS_KEY) || ''; }
-function saveYtApiKey(key) { key ? localStorage.setItem(YT_API_LS_KEY, key) : localStorage.removeItem(YT_API_LS_KEY); }
-
-/* ── Auto-fetch view count dari URL publik ───────────────────────────── */
-function _extractYtVideoId(url) {
-  // Mendukung: youtube.com/watch?v=ID, youtu.be/ID, youtube.com/shorts/ID
-  try {
-    const u = new URL(url);
-    if (u.hostname.includes('youtube.com')) {
-      return u.searchParams.get('v') || u.pathname.split('/').filter(Boolean).pop() || null;
-    }
-    if (u.hostname === 'youtu.be') {
-      return u.pathname.slice(1).split('?')[0] || null;
-    }
-  } catch {}
-  return null;
-}
-
-function _fmtViews(n) {
-  if (n >= 1_000_000) return (n / 1_000_000).toFixed(n >= 10_000_000 ? 0 : 1).replace(/\.0$/, '') + 'M';
-  if (n >= 1_000)     return (n / 1_000).toFixed(n >= 10_000 ? 0 : 1).replace(/\.0$/, '') + 'K';
-  return String(n);
-}
-
-async function autoFetchViews(url, viewsInputEl) {
-  const ytId = _extractYtVideoId(url);
-  if (!ytId) return;   // bukan YouTube — tidak bisa auto-fetch
-  const apiKey = getYtApiKey();
-  if (!apiKey) { toast('Isi YouTube API Key di API Setup untuk auto-fetch views', 'warn'); return; }
-  if (viewsInputEl) { viewsInputEl.placeholder = 'Memuat…'; viewsInputEl.disabled = true; }
-  try {
-    const res  = await fetch(`https://www.googleapis.com/youtube/v3/videos?part=statistics&id=${encodeURIComponent(ytId)}&key=${encodeURIComponent(apiKey)}`);
-    const data = await res.json();
-    const stats = data?.items?.[0]?.statistics;
-    if (!stats) throw new Error('Video tidak ditemukan');
-    const views = _fmtViews(parseInt(stats.viewCount) || 0);
-    if (viewsInputEl) { viewsInputEl.value = views; viewsInputEl.disabled = false; viewsInputEl.placeholder = '▷ Views'; }
-    return views;
-  } catch (e) {
-    if (viewsInputEl) { viewsInputEl.disabled = false; viewsInputEl.placeholder = '▷ Views'; }
-    toast('Gagal fetch views: ' + e.message, 'error');
-  }
-}
-
 /* Claude AI key (Anthropic) */
 const CLAUDE_LS_KEY = 'cmsph_claude_v1';
 function getClaudeKey()     { return localStorage.getItem(CLAUDE_LS_KEY) || ''; }
@@ -3551,9 +3506,6 @@ function renderApiSetup() {
   sv('cfgClaudeKey', getClaudeKey());
   updateClaudeStatus();
 
-  // YouTube API key (untuk auto-fetch views di Top 3)
-  sv('cfgYtApiKey', getYtApiKey());
-
   // WhatsApp API token
   sv('cfgWaToken', getWaToken());
   updateWaStatus();
@@ -6076,19 +6028,10 @@ function renderStatGoodBad(acctId) {
             oninput="updateTopSlot('${esc(acctId)}','${type}',${i},'title',this.value,'${selMonth}')" />
           <input type="url" class="inp-sm" placeholder="https://link…"
             value="${esc(item.link||'')}" style="flex:2;min-width:0"
-            id="sgbLink_${type}_${i}"
-            oninput="updateTopSlot('${esc(acctId)}','${type}',${i},'link',this.value,'${selMonth}')"
-            onblur="autoFetchViews(this.value, document.getElementById('sgbViews_${type}_${i}'))" />
-          <div style="display:flex;align-items:center;gap:3px;flex:1;min-width:60px;max-width:110px">
-            <input type="text" class="inp-sm" placeholder="▷ views"
-              value="${esc(item.views||'')}" style="flex:1;min-width:0"
-              id="sgbViews_${type}_${i}"
-              oninput="updateTopSlot('${esc(acctId)}','${type}',${i},'views',this.value,'${selMonth}')" />
-            <button type="button" class="icon-btn" style="padding:4px;flex-shrink:0" title="Auto-fetch views dari YouTube"
-              onclick="autoFetchViews(document.getElementById('sgbLink_${type}_${i}').value, document.getElementById('sgbViews_${type}_${i}'))">
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 11-2.12-9.36L23 10"/></svg>
-            </button>
-          </div>
+            oninput="updateTopSlot('${esc(acctId)}','${type}',${i},'link',this.value,'${selMonth}')" />
+          <input type="text" class="inp-sm" placeholder="▷ views (mis. 1.3M)"
+            value="${esc(item.views||'')}" style="flex:1;min-width:60px;max-width:100px"
+            oninput="updateTopSlot('${esc(acctId)}','${type}',${i},'views',this.value,'${selMonth}')" />
         </div>`).join('');
 
       return `<div class="sgb-col">
@@ -6966,12 +6909,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     toast(key ? 'Claude API Key disimpan ✓' : 'Claude API Key dihapus', key ? 'success' : '');
   });
   $('btnToggleClaudeKey')?.addEventListener('click', () => { const i=$('cfgClaudeKey'); i.type=i.type==='password'?'text':'password'; });
-  $('btnSaveYtApiKey')?.addEventListener('click', () => {
-    const key = gv('cfgYtApiKey').trim();
-    saveYtApiKey(key);
-    toast(key ? 'YouTube API Key disimpan ✓' : 'YouTube API Key dihapus', key ? 'success' : '');
-  });
-  $('btnToggleYtApiKey')?.addEventListener('click', () => { const i=$('cfgYtApiKey'); i.type=i.type==='password'?'text':'password'; });
   $('btnSaveWaToken')?.addEventListener('click', saveWaTokenFromForm);
   $('btnToggleWaToken')?.addEventListener('click', () => { const i=$('cfgWaToken'); i.type=i.type==='password'?'text':'password'; });
   $('btnSaveTeamToken')?.addEventListener('click', saveTeamTokenFromForm);
@@ -7248,7 +7185,6 @@ document.addEventListener('DOMContentLoaded', async () => {
   window.saveAssetLink        = saveAssetLink;
   window.deleteAssetLink      = deleteAssetLink;
   window.copyAssetLink        = copyAssetLink;
-  window.autoFetchViews       = autoFetchViews;
   window.updateContentField = updateContentField;
   window.setKpiPeriod       = setKpiPeriod;
   window.previewContent     = previewContent;
