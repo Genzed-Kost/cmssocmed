@@ -80,34 +80,36 @@
   },
   "topContent": {
     "penjaga-harapan": {
-      "good": [
-        {
-          "title": "",
-          "link": ""
-        },
-        {
-          "title": "",
-          "link": ""
-        },
-        {
-          "title": "",
-          "link": ""
-        }
-      ],
-      "bad": [
-        {
-          "title": "",
-          "link": ""
-        },
-        {
-          "title": "",
-          "link": ""
-        },
-        {
-          "title": "",
-          "link": ""
-        }
-      ]
+      "2026-06": {
+        "good": [
+          {
+            "title": "🚙🔥 3 Fakta Menarik Mobil Maung Presiden Prabowo Sampai bikin delegasi ASEAN & warga Filipina salah fokus!",
+            "link": "https://www.tiktok.com/@penjaga.harapan/video/7637807876853058836"
+          },
+          {
+            "title": "anyak yang skeptis dan bilang program MBG cuma bakal \"bocor\" atau sekadar buang-buang anggaran negara. Tapi kalau kita bedah datanya, faktanya justru 180 derajat berbeda! ",
+            "link": "https://www.tiktok.com/@penjaga.harapan/video/7637809598962928903"
+          },
+          {
+            "title": "Simak kesaksian eksklusif Ibu Marsini tentang sosok asli Marsinah yang belum banyak terungkap ke publik. Sebuah pengingat bahwa perjuangan hak buruh dibayar dengan pengorbanan yang tak ternilai.",
+            "link": "https://www.tiktok.com/@penjaga.harapan/video/7635641437828287751"
+          }
+        ],
+        "bad": [
+          {
+            "title": "",
+            "link": ""
+          },
+          {
+            "title": "",
+            "link": ""
+          },
+          {
+            "title": "",
+            "link": ""
+          }
+        ]
+      }
     },
     "33-official": {
       "good": [
