@@ -1,10 +1,18 @@
 [
   {
+    "id": "mq66ah9lso46a",
+    "user": "Admin",
+    "role": "Admin",
+    "action": "login",
+    "target": "masuk ke sistem sebagai Admin",
+    "timestamp": "2026-06-09T05:01:54.537Z"
+  },
+  {
     "id": "mq669iszg5r8j",
     "user": "Admin",
     "role": "Admin",
     "action": "Kirim WA Planner",
-    "target": "ke Idham — \"Podcsat Kepala KSP Pak Dudung\" (Published)",
+    "target": "ke Idham â \"Podcsat Kepala KSP Pak Dudung\" (Published)",
     "timestamp": "2026-06-09T05:01:09.875Z"
   },
   {
