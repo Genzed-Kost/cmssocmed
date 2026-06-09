@@ -772,13 +772,13 @@
         "followersEOM": 56875,
         "jmlPost": 123,
         "totalViews": 954755,
-        "totalReach": 245750,
+        "totalReach": 381285,
         "followersGained": -261,
         "totalLikes": 19803,
         "totalComments": 13761,
         "totalShares": 1040,
         "totalSaves": 486,
-        "totalEngagement": 35090,
+        "totalEngagement": 61953,
         "erPct": 9.8,
         "avgViews": 2912,
         "peakViews": 95132,
@@ -819,7 +819,7 @@
     ],
     "_meta": {
       "instagram": {
-        "updatedAt": "2026-06-09T17:55:11.826Z",
+        "updatedAt": "2026-06-09T17:56:10.441Z",
         "updatedBy": "Admin"
       },
       "facebook": {
