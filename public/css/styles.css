@@ -2760,8 +2760,8 @@ ul { list-style: none; }
 /* ── Assets & Drive ──────────────────────────────────────────────────── */
 .asset-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-  gap: 16px;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 8px;
 }
 .asset-empty {
   grid-column: 1 / -1;
@@ -2769,77 +2769,93 @@ ul { list-style: none; }
   flex-direction: column;
   align-items: center;
   gap: 10px;
-  padding: 48px 24px;
+  padding: 56px 24px;
   color: var(--muted);
   font-size: .9rem;
   text-align: center;
 }
 .asset-empty span { font-size: 2.5rem; }
-.asset-folder-card {
+
+/* Tiap folder item */
+.asset-folder-item {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 0;
+  background: var(--card);
   border: 1px solid var(--border);
   border-radius: 10px;
   overflow: hidden;
-  background: var(--card);
-  box-shadow: 0 1px 3px rgba(0,0,0,.06);
-  transition: box-shadow .15s;
+  transition: background .12s, box-shadow .12s;
 }
-.asset-folder-card:hover { box-shadow: 0 3px 10px rgba(0,0,0,.1); }
-.asset-folder-header {
+.asset-folder-item:hover { background: var(--hover); box-shadow: 0 2px 8px rgba(0,0,0,.08); }
+
+/* Link area (klik → buka Drive) */
+.asset-folder-link {
+  flex: 1;
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  padding: 10px 12px;
-  gap: 8px;
-}
-.asset-folder-title {
-  display: flex;
-  align-items: center;
-  gap: 8px;
+  gap: 10px;
+  padding: 11px 10px 11px 14px;
+  text-decoration: none;
+  color: var(--text);
   min-width: 0;
 }
-.asset-folder-emoji { font-size: 1.25rem; flex-shrink: 0; }
-.asset-folder-name  { font-weight: 700; font-size: .92rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.asset-folder-desc  { font-size: .75rem; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.asset-folder-actions { display: flex; align-items: center; gap: 4px; flex-shrink: 0; }
-.asset-links-list { padding: 8px 0; }
-.asset-link-empty { padding: 10px 14px; font-size: .8rem; color: var(--muted); font-style: italic; }
-.asset-link-count { padding: 4px 14px 8px; font-size: .72rem; color: var(--muted); border-top: 1px solid var(--border); margin-top: 4px; }
-.asset-link-row {
+.asset-folder-icon {
+  flex-shrink: 0;
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  padding: 7px 12px;
-  gap: 8px;
-  border-bottom: 1px solid var(--border);
-  transition: background .1s;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
 }
-.asset-link-row:hover { background: var(--hover); }
-.asset-link-info { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
-.asset-link-url {
-  display: flex;
-  align-items: center;
-  gap: 5px;
-  font-size: .83rem;
-  color: var(--primary);
-  text-decoration: none;
+.asset-folder-name {
+  font-size: .85rem;
+  font-weight: 500;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  max-width: 220px;
+  color: var(--text);
 }
-.asset-link-url:hover { text-decoration: underline; }
-.asset-link-notes { font-size: .73rem; color: var(--muted); }
-.asset-link-actions { display: flex; align-items: center; gap: 3px; flex-shrink: 0; }
-.asset-btn-icon {
+
+/* Tombol ⋮ */
+.asset-menu-wrap { position: relative; flex-shrink: 0; }
+.asset-menu-btn {
   background: none;
   border: none;
-  padding: 4px;
   cursor: pointer;
   color: var(--muted);
-  border-radius: 5px;
+  padding: 10px 10px;
   display: flex;
   align-items: center;
-  transition: background .12s, color .12s;
+  transition: color .12s;
 }
-.asset-btn-icon:hover { background: var(--hover); color: var(--text); }
-.asset-btn-icon.red:hover { background: #fee2e2; color: #dc2626; }
+.asset-menu-btn:hover { color: var(--text); }
+
+/* Dropdown ⋮ */
+.asset-dropdown {
+  position: absolute;
+  right: 0; top: calc(100% + 2px);
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  box-shadow: 0 4px 16px rgba(0,0,0,.12);
+  min-width: 120px;
+  z-index: 200;
+  overflow: hidden;
+}
+.asset-dropdown button {
+  width: 100%;
+  background: none;
+  border: none;
+  padding: 9px 14px;
+  text-align: left;
+  font-size: .83rem;
+  cursor: pointer;
+  color: var(--text);
+  transition: background .1s;
+  display: block;
+}
+.asset-dropdown button:hover { background: var(--hover); }
+.asset-dropdown button.red { color: #dc2626; }
+.asset-dropdown button.red:hover { background: #fee2e2; }
