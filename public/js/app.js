@@ -6002,16 +6002,17 @@ function renderStatGoodBad(acctId) {
       ${adminBadge}
     </div>`;
 
-    // Preview cards (semua user bisa lihat)
+    // Preview cards (semua user bisa lihat) — klik kartu langsung buka link
     const valid = items.filter(it => it.link);
     const cards = valid.length
-      ? valid.map(it => `<a href="${esc(it.link)}" target="_blank" class="sgb-card sgb-${type}">
-          <div class="sgb-card-title">${esc(it.title || '(Tanpa Judul)')}</div>
-          <div class="sgb-card-actions">
-            <span class="btn-xs blue">🔗 Buka</span>
-            <button type="button" class="btn-xs" onclick="event.preventDefault();previewContent('${esc(it.link)}','${esc(it.title||'')}')">👁 Preview</button>
-          </div>
-        </a>`).join('')
+      ? valid.map(it => {
+          let domain = '';
+          try { domain = new URL(it.link).hostname.replace('www.',''); } catch {}
+          return `<a href="${esc(it.link)}" target="_blank" rel="noopener" class="sgb-card sgb-${type}">
+            <div class="sgb-card-title">${esc(it.title || '(Tanpa Judul)')}</div>
+            ${domain ? `<div class="sgb-card-link"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>${esc(domain)}</div>` : ''}
+          </a>`;
+        }).join('')
       : '';
 
     // Form edit hanya untuk admin
