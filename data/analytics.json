@@ -827,7 +827,7 @@
         "updatedBy": "Admin"
       },
       "youtube": {
-        "updatedAt": "2026-06-08T08:41:58.454Z",
+        "updatedAt": "2026-06-15T09:02:08.904Z",
         "updatedBy": "Admin"
       },
       "tiktok": {
@@ -870,6 +870,20 @@
         "watchHours": 10279,
         "impressions": 528154,
         "peakViews": 48143
+      },
+      {
+        "week": "2026-W24",
+        "jmlVideo": 40,
+        "totalViews": 287035,
+        "uniqueViewers": 0,
+        "subsEOM": 69406,
+        "subsGained": 1440,
+        "totalLikes": 845,
+        "totalComments": 125,
+        "totalEngagement": 99152,
+        "watchHours": 3375,
+        "impressions": 195225,
+        "adImpressions": 23977
       }
     ],
     "tiktok_w": [
