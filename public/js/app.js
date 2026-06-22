@@ -591,8 +591,8 @@ function clearSess()  { sessionStorage.removeItem(SESS_KEY); }
 
 function isFirstRun() { return !getAuth(); }
 function isLoggedIn() { return !!getSess(); }
-function isAdmin()      { return ['admin','administrator'].includes(getSess()?.role?.toLowerCase()); }
-function isSuperAdmin() { return getSess()?.role?.toLowerCase() === 'admin'; }
+function isAdmin()         { return getSess()?.role?.toLowerCase() === 'admin'; }
+function isAdministrator() { return getSess()?.role?.toLowerCase() === 'administrator'; }
 function currentUser(){ return getSess()?.name || 'Creator'; }
 
 function getPubUsers() {
@@ -655,9 +655,9 @@ function applyAuthState() {
     roleEl.classList.remove('hidden');
   }
 
-  // API Setup nav: hanya admin (bukan Administrator)
+  // API Setup nav: hanya admin/Admin (bukan Administrator)
   const apiNav = document.querySelector('.nav-item[data-page="apisetup"]');
-  if (apiNav) apiNav.style.display = isSuperAdmin() ? '' : 'none';
+  if (apiNav) apiNav.style.display = isAdmin() ? '' : 'none';
 
   // Sync/refresh button: visible to all logged-in users
   if ($('btnGitSync')) $('btnGitSync').style.display = sess ? '' : 'none';
@@ -1770,7 +1770,7 @@ function navigate(page) {
   if (!PAGE_TITLES[page]) page = 'dashboard';
 
   // Guard: API Setup — admin only
-  if (page === 'apisetup' && !isSuperAdmin()) {
+  if (page === 'apisetup' && !isAdmin()) {
     toast('Hanya admin yang dapat mengakses halaman ini', 'error');
     page = 'dashboard';
     history.replaceState(null, '', '#dashboard');
@@ -2577,7 +2577,7 @@ function renderPlanner(page) {
       : '';
     const isDualFmt = FORMATS_DUAL_ROLE.includes(c.format);
     const budgetTotal = (c.budget||[]).reduce((s,r)=>s+(r.qty||0)*(r.price||0),0);
-    const budgetBtn = (admin && isDualFmt)
+    const budgetBtn = (isAdministrator() && isDualFmt)
       ? `<button class="btn-xs budget-planner-btn${budgetTotal>0?' has-budget':''}"
            onclick="openBudgetModal('${c.id}')" title="Budget Produksi">
            💰${budgetTotal>0?` Rp ${budgetTotal>=1e6?(budgetTotal/1e6).toFixed(1)+'jt':budgetTotal>=1e3?(budgetTotal/1e3).toFixed(0)+'rb':budgetTotal}`:''}
