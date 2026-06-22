@@ -249,6 +249,7 @@ const PLATFORM_FIELDS = {
     followerKey: 'pageFollowers', viewKey: 'totalViews',
     fields: [
       { key:'pageFollowers',    label:'Page Followers',   fmt:'num' },
+      { key:'followersGained',  label:'Follows Monthly',  fmt:'num' },
       { key:'totalPost',        label:'Total Post',       fmt:'num' },
       { key:'totalViews',       label:'Total Views',      fmt:'num' },
       { key:'totalReach',       label:'Total Reach',      fmt:'num' },
