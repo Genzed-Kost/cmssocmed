@@ -578,6 +578,14 @@
         "avgEngPerPost": 417,
         "maxViewsSingle": 210531,
         "erPct": 2.95
+      },
+      {
+        "month": "2026-05",
+        "pageFollowers": 156253,
+        "followersGained": 6135,
+        "totalPost": 178,
+        "totalViews": 4185957,
+        "totalEngagement": 100481
       }
     ],
     "instagram": [
@@ -837,7 +845,7 @@
         "updatedBy": "Admin"
       },
       "facebook": {
-        "updatedAt": "2026-06-22T08:44:51.741Z",
+        "updatedAt": "2026-06-22T08:46:58.713Z",
         "updatedBy": "Admin"
       },
       "youtube": {
