@@ -2608,7 +2608,7 @@ function renderPlanner(page) {
     const budgetBtn = (isAdministrator() && isDualFmt)
       ? `<button class="btn-xs budget-planner-btn${budgetTotal>0?' has-budget':''}"
            onclick="openBudgetModal('${c.id}')" title="Budget Produksi">
-           💰${budgetTotal>0?` Rp ${budgetTotal>=1e6?(budgetTotal/1e6).toFixed(1)+'jt':budgetTotal>=1e3?(budgetTotal/1e3).toFixed(0)+'rb':budgetTotal}`:''}
+           💰
          </button>`
       : '';
     return `<tr>
