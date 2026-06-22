@@ -591,7 +591,7 @@ function clearSess()  { sessionStorage.removeItem(SESS_KEY); }
 
 function isFirstRun() { return !getAuth(); }
 function isLoggedIn() { return !!getSess(); }
-function isAdmin()    { return getSess()?.role === 'admin'; }
+function isAdmin()    { return ['admin','administrator'].includes(getSess()?.role?.toLowerCase()); }
 function currentUser(){ return getSess()?.name || 'Creator'; }
 
 function getPubUsers() {
