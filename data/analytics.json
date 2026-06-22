@@ -505,7 +505,8 @@
       },
       {
         "month": "2025-12",
-        "pageFollowers": 25849,
+        "pageFollowers": 109076,
+        "followersGained": 25849,
         "totalPost": 246,
         "totalViews": 10683715,
         "totalReach": 8024112,
@@ -848,7 +849,7 @@
         "updatedBy": "Admin"
       },
       "facebook": {
-        "updatedAt": "2026-06-22T08:51:57.225Z",
+        "updatedAt": "2026-06-22T08:52:58.262Z",
         "updatedBy": "Admin"
       },
       "youtube": {
