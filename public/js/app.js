@@ -229,6 +229,7 @@ const PLATFORM_FIELDS = {
     label: 'TikTok', color: '#010101',
     followerKey: 'followersEOM', viewKey: 'totalVideoViews',
     fields: [
+      { key:'jmlVideo',         label:'Jml Video',        fmt:'num' },
       { key:'totalVideoViews',  label:'Total Vid Views',  fmt:'num' },
       { key:'profileViews',     label:'Profile Views',    fmt:'num' },
       { key:'followersEOM',     label:'Followers (EOM)',  fmt:'num' },
@@ -5035,6 +5036,7 @@ function switchStatAcct(acctId) {
 
 function switchStatPlat(platId) {
   state.statActivePlat = platId;
+  state.top3Month = null;  // reset agar month default disesuaikan ke platform baru
   renderStatPlatBar();
   renderStatChart();
   renderStatGoodBad(state.statActiveAcct);
@@ -5120,13 +5122,13 @@ function renderStatChart() {
   // eom=true → tampilkan nilai bulan terakhir (point-in-time), bukan sum
   const SUMMARY_CARDS = {
     youtube:   [
-      { key:'subsGained',      label:'Subs Gained',        eom:false },
+      { key:'jmlVideo',        label:'Total Video',         eom:false },
       { key:'totalViews',      label:'Total Views',         eom:false },
       { key:'totalEngagement', label:'Total Engagement',    eom:false },
       { key:'subsEOM',         label:'Subscribers (EOM)',   eom:true  },
     ],
     tiktok:    [
-      { key:'followersGained', label:'Followers Gained',   eom:false },
+      { key:'jmlVideo',        label:'Total Video',         eom:false },
       { key:'totalVideoViews', label:'Total Views',         eom:false },
       { key:'totalEngagement', label:'Total Engagement',    eom:false },
       { key:'followersEOM',    label:'Followers (EOM)',     eom:true  },
@@ -5138,7 +5140,7 @@ function renderStatChart() {
       { key:'pageFollowers',   label:'Page Followers (EOM)',eom:true  },
     ],
     instagram: [
-      { key:'followersGained', label:'Followers Gained',   eom:false },
+      { key:'jmlPost',         label:'Total Post',          eom:false },
       { key:'totalViews',      label:'Total Views',         eom:false },
       { key:'totalEngagement', label:'Total Engagement',    eom:false },
       { key:'followersEOM',    label:'Followers (EOM)',     eom:true  },
@@ -5932,62 +5934,156 @@ function downloadStatTableJpg() {
 
 /* ── Top 3 per-bulan — semua user bisa edit ─────────────────────────────── */
 
-function _getTop3MonthOptions(acctId) {
-  // Kumpulkan semua bulan dari semua platform untuk akun ini
-  const platRows = Object.values(state.analytics?.[acctId] || {}).flat();
-  const months = [...new Set(platRows.map(r => r.month))].sort().reverse();
+function _getTop3MonthOptions(acctId, platId) {
+  // Kumpulkan bulan dari platform tertentu (jika platId diberikan) atau semua platform
+  const acctAnl = state.analytics?.[acctId] || {};
+  const rows = platId
+    ? (acctAnl[platId] || [])
+    : Object.values(acctAnl).flat();
+  // Filter hanya row yang punya field month (bukan weekly row)
+  const months = [...new Set(rows.map(r => r.month).filter(Boolean))].sort().reverse();
   if (!months.includes(getCurrentYM())) months.unshift(getCurrentYM());
   return months;
 }
 
-function _ensureTop3(acctId, month) {
+function _ensureTop3(acctId, platId, month) {
   const empty3 = () => [{title:'',link:''},{title:'',link:''},{title:'',link:''}];
   if (!state.settings.topContent) state.settings.topContent = {};
   if (!state.settings.topContent[acctId]) state.settings.topContent[acctId] = {};
   const acctData = state.settings.topContent[acctId];
 
-  // Migrasi format lama ({ good, bad }) → per-bulan
-  if (acctData.good && !acctData[month]) {
-    const refMonth = Object.keys(acctData).find(k => acctData[k]?.good) || month;
-    if (!acctData[refMonth]?.good) {
-      const oldGood = acctData.good;
-      const oldBad  = acctData.bad;
-      // Hapus key lama, simpan ke bulan saat ini
-      delete state.settings.topContent[acctId].good;
-      delete state.settings.topContent[acctId].bad;
-      state.settings.topContent[acctId][getCurrentYM()] = { good: oldGood, bad: oldBad };
+  // ── Migrasi format lama ────────────────────────────────────────────
+  // Format lama-1: acctData.good / acctData.bad langsung
+  if (acctData.good || acctData.bad) {
+    const migData = { good: acctData.good || empty3(), bad: acctData.bad || empty3() };
+    delete acctData.good; delete acctData.bad;
+    // Simpan di bawah platId 'youtube' (platform default) + bulan sekarang
+    if (!acctData['youtube']) acctData['youtube'] = {};
+    acctData['youtube'][getCurrentYM()] = migData;
+  }
+  // Format lama-2: acctData[month] = { good, bad } — tanpa platId
+  // Deteksi: key yang cocok pola YYYY-MM dan valuenya objek {good, bad}
+  for (const key of Object.keys(acctData)) {
+    if (/^\d{4}-\d{2}$/.test(key) && acctData[key]?.good) {
+      const migData = acctData[key];
+      delete acctData[key];
+      if (!acctData['youtube']) acctData['youtube'] = {};
+      if (!acctData['youtube'][key]) acctData['youtube'][key] = migData;
     }
   }
+  // ─────────────────────────────────────────────────────────────────
 
-  if (!acctData[month]) {
-    acctData[month] = { good: empty3(), bad: empty3() };
+  if (!acctData[platId]) acctData[platId] = {};
+  const platData = acctData[platId];
+  if (!platData[month]) platData[month] = { good: empty3(), bad: empty3() };
+  if (!platData[month].good) platData[month].good = empty3();
+  if (!platData[month].bad)  platData[month].bad  = empty3();
+  return platData[month];
+}
+
+/* ── Top 3 Month Calendar Picker ─────────────────────────────────────────── */
+const _MO_NAMES = ['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agt','Sep','Okt','Nov','Des'];
+
+function _buildTop3MoPickerHtml(availMonths, selMonth) {
+  const availSet = new Set(availMonths);
+  // Tahun yang ditampilkan: dari state atau ambil dari selMonth
+  const dispYear = state._top3PickerYear ||
+    (selMonth ? parseInt(selMonth.slice(0,4)) : new Date().getFullYear());
+  state._top3PickerYear = dispYear;
+
+  // Range tahun dari data
+  const years = [...new Set(availMonths.map(m => parseInt(m.slice(0,4))))].sort();
+  const minYear = years[0] || dispYear;
+  const maxYear = Math.max(years[years.length-1] || dispYear, new Date().getFullYear());
+
+  const cells = _MO_NAMES.map((name, i) => {
+    const ym = `${dispYear}-${String(i+1).padStart(2,'0')}`;
+    const isAvail = availSet.has(ym);
+    const isSel   = ym === selMonth;
+    return `<button class="top3-mopick-cell${isSel?' active':''}${!isAvail?' dim':''}"
+      onclick="pickTop3Month('${ym}')">${name}</button>`;
+  }).join('');
+
+  return `
+    <div class="top3-mopick-head">
+      <button class="top3-mopick-nav" onclick="navTop3PickerYear(-1)"${dispYear<=minYear?' disabled':''}>&#8249;</button>
+      <span class="top3-mopick-year">${dispYear}</span>
+      <button class="top3-mopick-nav" onclick="navTop3PickerYear(1)"${dispYear>=maxYear?' disabled':''}>&#8250;</button>
+    </div>
+    <div class="top3-mopick-grid">${cells}</div>`;
+}
+
+function toggleTop3MoPicker(e) {
+  e.stopPropagation();
+  const drop = $('top3MoPickerDrop');
+  if (!drop) return;
+  const isOpen = drop.classList.toggle('open');
+  if (isOpen) {
+    // Close on outside click
+    setTimeout(() => {
+      document.addEventListener('click', _closeTop3Picker, { once: true });
+    }, 0);
   }
-  if (!acctData[month].good) acctData[month].good = empty3();
-  if (!acctData[month].bad)  acctData[month].bad  = empty3();
-  return acctData[month];
+}
+
+function _closeTop3Picker() {
+  $('top3MoPickerDrop')?.classList.remove('open');
+}
+
+function navTop3PickerYear(dir) {
+  state._top3PickerYear = (state._top3PickerYear || new Date().getFullYear()) + dir;
+  // Re-render hanya bagian dalam picker
+  const drop = $('top3MoPickerDrop');
+  if (!drop) return;
+  const months = _getTop3MonthOptions(state.statActiveAcct, state.statActivePlat || 'youtube');
+  drop.innerHTML = _buildTop3MoPickerHtml(months, state.top3Month || months[0] || getCurrentYM());
+  drop.classList.add('open');
+}
+
+function pickTop3Month(ym) {
+  state.top3Month = ym;
+  state._top3PickerYear = parseInt(ym.slice(0,4));
+  _closeTop3Picker();
+  renderStatGoodBad(state.statActiveAcct);
 }
 
 function renderStatGoodBad(acctId) {
   const wrap = $('statGoodBadWrap');
   if (!wrap) return;
-  const acct = ACCOUNTS.find(a => a.id === acctId);
+  const acct   = ACCOUNTS.find(a => a.id === acctId);
+  const platId = state.statActivePlat || 'youtube';
 
-  // Resolve bulan aktif
-  const months  = _getTop3MonthOptions(acctId);
+  // Label platform untuk ditampilkan
+  const PLAT_LABELS = {
+    youtube: 'YouTube', tiktok: 'TikTok', instagram: 'Instagram',
+    twitter: 'X/Twitter', facebook: 'Facebook', threads: 'Threads', spotify: 'Spotify'
+  };
+  const platLabel = PLAT_LABELS[platId] || platId;
+
+  // Resolve bulan aktif (per platform agar tidak cross-platform confusion)
+  const months  = _getTop3MonthOptions(acctId, platId);
   const selMonth = state.top3Month && months.includes(state.top3Month)
     ? state.top3Month
     : months[0] || getCurrentYM();
   state.top3Month = selMonth;
 
-  const topData = _ensureTop3(acctId, selMonth);
+  const topData = _ensureTop3(acctId, platId, selMonth);
 
-  // Month selector HTML
+  // Month selector HTML — calendar picker dropdown
   const monthSelHtml = `
     <div class="top3-month-bar">
-      <span style="font-size:.75rem;color:var(--muted);font-weight:500">📅 Bulan:</span>
-      <select class="inp-sm" id="top3MonthSel" onchange="switchTop3Month(this.value)" style="min-width:120px">
-        ${months.map(m => `<option value="${m}" ${m === selMonth ? 'selected' : ''}>${fmtMonth(m)}</option>`).join('')}
-      </select>
+      <span style="font-size:.75rem;color:var(--muted);font-weight:500;flex-shrink:0">📅 Bulan:</span>
+      <div class="top3-mopicker-wrap" id="top3MoPickerWrap">
+        <button class="top3-mopicker-trigger" id="top3MoPickerTrigger"
+          onclick="toggleTop3MoPicker(event)">
+          ${fmtMonth(selMonth)}
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+        </button>
+        <div class="top3-mopicker-drop" id="top3MoPickerDrop">
+          ${_buildTop3MoPickerHtml(months, selMonth)}
+        </div>
+      </div>
+      <span class="badge-status" style="font-size:.72rem;padding:2px 8px;background:var(--bg2);border-radius:99px;flex-shrink:0">${platLabel}</span>
     </div>`;
 
   function sectionHtml(type, items, label, icon, headCls) {
@@ -5998,7 +6094,7 @@ function renderStatGoodBad(acctId) {
     const head = `<div class="sgb-section-head ${headCls}">
       <span class="sgb-icon">${icon}</span>
       <span>${label}</span>
-      <span class="sgb-acct" style="color:${acctColor}">${acct?.name||''} · ${fmtMonth(selMonth)}</span>
+      <span class="sgb-acct" style="color:${acctColor}">${acct?.name||''} · ${platLabel} · ${fmtMonth(selMonth)}</span>
       ${adminBadge}
     </div>`;
 
@@ -6025,20 +6121,20 @@ function renderStatGoodBad(acctId) {
         <div class="sgb-input-row">
           <input type="text" class="inp-sm" placeholder="Judul konten…"
             value="${esc(item.title||'')}" style="flex:2;min-width:0"
-            oninput="updateTopSlot('${esc(acctId)}','${type}',${i},'title',this.value,'${selMonth}')" />
+            oninput="updateTopSlot('${esc(acctId)}','${esc(platId)}','${type}',${i},'title',this.value,'${selMonth}')" />
           <input type="url" class="inp-sm" placeholder="https://link…"
             value="${esc(item.link||'')}" style="flex:2;min-width:0"
-            oninput="updateTopSlot('${esc(acctId)}','${type}',${i},'link',this.value,'${selMonth}')" />
+            oninput="updateTopSlot('${esc(acctId)}','${esc(platId)}','${type}',${i},'link',this.value,'${selMonth}')" />
           <input type="text" class="inp-sm" placeholder="▷ views (mis. 1.3M)"
             value="${esc(item.views||'')}" style="flex:1;min-width:60px;max-width:100px"
-            oninput="updateTopSlot('${esc(acctId)}','${type}',${i},'views',this.value,'${selMonth}')" />
+            oninput="updateTopSlot('${esc(acctId)}','${esc(platId)}','${type}',${i},'views',this.value,'${selMonth}')" />
         </div>`).join('');
 
       return `<div class="sgb-col">
         ${head}
         <div class="sgb-admin-form">${inputRows}
           <button class="btn-xs blue" style="margin-top:6px"
-            onclick="saveTopContent('${esc(acctId)}','${selMonth}')">💾 Simpan Top Content</button>
+            onclick="saveTopContent('${esc(acctId)}','${esc(platId)}','${selMonth}')">💾 Simpan Top Content</button>
         </div>
         ${cards ? `<div class="sgb-list" style="margin-top:8px">${cards}</div>` : ''}
       </div>`;
@@ -6066,20 +6162,22 @@ function switchTop3Month(month) {
   renderStatGoodBad(state.statActiveAcct);
 }
 
-function updateTopSlot(acctId, type, idx, field, val, month) {
-  const m = month || state.top3Month || getCurrentYM();
-  _ensureTop3(acctId, m);
-  state.settings.topContent[acctId][m][type][idx][field] = val;
+function updateTopSlot(acctId, platId, type, idx, field, val, month) {
+  const p = platId || state.statActivePlat || 'youtube';
+  const m = month  || state.top3Month     || getCurrentYM();
+  _ensureTop3(acctId, p, m);
+  state.settings.topContent[acctId][p][m][type][idx][field] = val;
 }
 
-async function saveTopContent(acctId, month) {
+async function saveTopContent(acctId, platId, month) {
   if (!state.settings) return;
-  const m = month || state.top3Month || getCurrentYM();
-  _ensureTop3(acctId, m);
+  const p = platId || state.statActivePlat || 'youtube';
+  const m = month  || state.top3Month     || getCurrentYM();
+  _ensureTop3(acctId, p, m);
   showFlagLoader(600);
   try {
-    state.shas.settings = await window.db.writeData('settings', state.settings, `Top Content: ${acctId} ${m}`);
-    await logActivity(currentUser(), 'Update Top Content', `${getAcctName(acctId)} — ${fmtMonth(m)}`);
+    state.shas.settings = await window.db.writeData('settings', state.settings, `Top Content: ${acctId}/${p} ${m}`);
+    await logActivity(currentUser(), 'Update Top Content', `${getAcctName(acctId)} — ${p} — ${fmtMonth(m)}`);
     toast(`Top Content ${fmtMonth(m)} disimpan ✓`, 'success');
     renderStatGoodBad(acctId);   // re-render agar preview terbaru muncul
   } catch(e) { toast('Gagal menyimpan: ' + e.message, 'error'); }
@@ -7196,6 +7294,9 @@ document.addEventListener('DOMContentLoaded', async () => {
   window.updateTopSlot        = updateTopSlot;
   window.saveTopContent       = saveTopContent;
   window.switchTop3Month      = switchTop3Month;
+  window.toggleTop3MoPicker   = toggleTop3MoPicker;
+  window.navTop3PickerYear    = navTop3PickerYear;
+  window.pickTop3Month        = pickTop3Month;
   window.generateShareLink       = generateShareLink;
   window.saveTeamTokenFromForm   = saveTeamTokenFromForm;
   window.deleteTeamToken         = deleteTeamToken;

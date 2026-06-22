@@ -2064,9 +2064,6 @@ ul { list-style: none; }
   .form-card { padding: 12px; gap: 12px; }
   .card { padding: 12px; }
 
-  /* Top 3 bar */
-  .top3-month-bar { flex-wrap: wrap; }
-
   /* Bank reminder banner */
   .bk-reminder-banner { font-size: .76rem; padding: 8px 10px; gap: 6px; }
 
@@ -2482,8 +2479,50 @@ ul { list-style: none; }
 /* ── Statistik: Top 3 month bar ────────────────────────────────── */
 .top3-month-bar {
   display: flex; align-items: center; gap: 8px;
-  margin-bottom: 10px; padding: 10px 0 4px;
+  margin-bottom: 10px; padding: 10px 0 4px; flex-wrap: wrap;
 }
+
+/* ── Month Calendar Picker ── */
+.top3-mopicker-wrap { position: relative; }
+.top3-mopicker-trigger {
+  display: flex; align-items: center; gap: 5px;
+  padding: 5px 12px; border-radius: 8px; border: 1.5px solid var(--border);
+  background: var(--bg2); color: var(--text); font-size: .82rem; font-weight: 600;
+  cursor: pointer; transition: border-color .12s, background .12s; white-space: nowrap;
+}
+.top3-mopicker-trigger:hover { border-color: var(--accent); background: var(--hover); }
+.top3-mopicker-drop {
+  display: none; position: absolute; top: calc(100% + 6px); left: 0;
+  z-index: 300; background: var(--card); border: 1.5px solid var(--border);
+  border-radius: 12px; padding: 10px; box-shadow: 0 8px 24px rgba(0,0,0,.13);
+  min-width: 220px;
+}
+.top3-mopicker-drop.open { display: block; }
+.top3-mopick-head {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 8px; padding: 0 2px;
+}
+.top3-mopick-year { font-size: .88rem; font-weight: 700; color: var(--text); }
+.top3-mopick-nav {
+  background: none; border: none; cursor: pointer; color: var(--muted);
+  font-size: 1.3rem; line-height: 1; padding: 0 6px; border-radius: 6px;
+  transition: color .1s, background .1s;
+}
+.top3-mopick-nav:hover:not(:disabled) { color: var(--accent); background: var(--hover); }
+.top3-mopick-nav:disabled { opacity: .3; cursor: default; }
+.top3-mopick-grid {
+  display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px;
+}
+.top3-mopick-cell {
+  padding: 6px 4px; border-radius: 7px; border: none;
+  background: transparent; color: var(--text); font-size: .78rem; font-weight: 500;
+  cursor: pointer; text-align: center; transition: background .1s, color .1s;
+}
+.top3-mopick-cell:hover:not(.dim) { background: var(--hover); color: var(--accent); }
+.top3-mopick-cell.active {
+  background: var(--accent); color: #fff; font-weight: 700;
+}
+.top3-mopick-cell.dim { opacity: .35; cursor: default; }
 
 /* ══════════════════════════════════════════════════════════════════
    BANK OF CONTENTS
