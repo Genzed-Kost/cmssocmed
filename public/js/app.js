@@ -658,8 +658,8 @@ function applyAuthState() {
   const apiNav = document.querySelector('.nav-item[data-page="apisetup"]');
   if (apiNav) apiNav.style.display = admin ? '' : 'none';
 
-  // GitHub sync button: only visible to admin
-  if ($('btnGitSync')) $('btnGitSync').style.display = admin ? '' : 'none';
+  // Sync/refresh button: visible to all logged-in users
+  if ($('btnGitSync')) $('btnGitSync').style.display = sess ? '' : 'none';
 
   // Logout button
   if ($('btnLogout')) $('btnLogout').style.display = sess ? '' : 'none';
@@ -7235,7 +7235,12 @@ document.addEventListener('DOMContentLoaded', async () => {
   });
 
   /* ── GitHub sync ────────────────────────────────────────────── */
-  $('btnGitSync')?.addEventListener('click', () => { clearDataCache(); loadAllData(true); });
+  $('btnGitSync')?.addEventListener('click', async () => {
+    clearDataCache();
+    toast('🔄 Memuat data terbaru…', 'info');
+    await loadAllData(true);
+    toast('✅ Data berhasil diperbarui', 'success');
+  });
 
   /* ── Expose globals for inline onclick ─────────────────────── */
   window.loadAndRenderActivity = loadAndRenderActivity;
