@@ -1190,8 +1190,13 @@ ul { list-style: none; }
   border-radius: var(--radius);
   box-shadow: var(--shadow);
   margin-bottom: 20px;
-  overflow: hidden;
+  /* overflow:visible agar dropdown tidak terpotong; clip-path untuk border-radius */
+  overflow: visible;
+  isolation: isolate;
 }
+/* Baris pertama dan terakhir menjaga sudut rounded */
+.stat-header-row:first-child { border-radius: var(--radius) var(--radius) 0 0; overflow: hidden; }
+.stat-header-row:last-child  { border-radius: 0 0 var(--radius) var(--radius); overflow: hidden; }
 .stat-header-row {
   display: flex; align-items: center;
   flex-wrap: wrap;
@@ -2302,10 +2307,10 @@ ul { list-style: none; }
   display: flex; align-items: center; gap: 6px; flex-wrap: wrap;
 }
 .stat-range-sep { color: var(--muted); font-size: .85rem; flex-shrink: 0; user-select: none; }
-.stat-dl-dropdown { position: relative; }
+.stat-dl-dropdown { position: relative; z-index: 9100; }
 .stat-dl-menu {
-  position: absolute; top: calc(100% + 4px); right: 0; z-index: 200;
-  background: #fff; border: 1px solid var(--bd);
+  position: absolute; top: calc(100% + 4px); right: 0; z-index: 9100;
+  background: var(--card); border: 1px solid var(--border);
   border-radius: 10px; box-shadow: var(--shadow-lg);
   min-width: 160px; overflow: hidden;
 }
