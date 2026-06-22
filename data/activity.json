@@ -1,5 +1,13 @@
 [
   {
+    "id": "mqorkrp9f1mu8",
+    "user": "Admin",
+    "role": "Admin",
+    "action": "login",
+    "target": "masuk ke sistem sebagai Admin",
+    "timestamp": "2026-06-22T05:17:37.725Z"
+  },
+  {
     "id": "mqor5xcatsi16",
     "user": "Umar",
     "role": "Publisher",
@@ -20,7 +28,7 @@
     "user": "Admin",
     "role": "Admin",
     "action": "update statistik",
-    "target": "Penjaga Harapan YouTube — Mei 2026",
+    "target": "Penjaga Harapan YouTube â Mei 2026",
     "timestamp": "2026-06-22T05:01:10.304Z"
   },
   {
@@ -28,7 +36,7 @@
     "user": "Admin",
     "role": "Admin",
     "action": "update statistik",
-    "target": "Penjaga Harapan YouTube — Mei 2026",
+    "target": "Penjaga Harapan YouTube â Mei 2026",
     "timestamp": "2026-06-22T05:00:34.687Z"
   },
   {
