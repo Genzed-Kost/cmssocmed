@@ -1,5 +1,13 @@
 [
   {
+    "id": "mqpa5lo07py85",
+    "user": "Lisa",
+    "role": "Administrator",
+    "action": "login",
+    "target": "masuk ke sistem sebagai Administrator",
+    "timestamp": "2026-06-22T13:57:42.768Z"
+  },
+  {
     "id": "mqpa5ibtt6lr9",
     "user": "Siska",
     "role": "Administrator",
