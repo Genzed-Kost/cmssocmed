@@ -80,72 +80,226 @@
   },
   "topContent": {
     "penjaga-harapan": {
-      "2026-06": {
-        "good": [
-          {
-            "title": "",
-            "link": "",
-            "views": ""
-          },
-          {
-            "title": "",
-            "link": ""
-          },
-          {
-            "title": "",
-            "link": ""
-          }
-        ],
-        "bad": [
-          {
-            "title": "",
-            "link": ""
-          },
-          {
-            "title": "",
-            "link": ""
-          },
-          {
-            "title": "",
-            "link": ""
-          }
-        ]
+      "youtube": {
+        "2026-06": {
+          "good": [
+            {
+              "title": "",
+              "link": "",
+              "views": ""
+            },
+            {
+              "title": "",
+              "link": ""
+            },
+            {
+              "title": "",
+              "link": ""
+            }
+          ],
+          "bad": [
+            {
+              "title": "",
+              "link": ""
+            },
+            {
+              "title": "",
+              "link": ""
+            },
+            {
+              "title": "",
+              "link": ""
+            }
+          ]
+        },
+        "2026-05": {
+          "good": [
+            {
+              "title": "ÃÂ°ÃÂÃÂÃÂÃÂ°ÃÂÃÂÃÂ¥ 3 Fakta Menarik Mobil Maung Presiden Prabowo Sampai bikin delegasi ASEAN & warga Filipina salah fokus!",
+              "link": "",
+              "views": "163K"
+            },
+            {
+              "title": "anyak yang skeptis dan bilang program MBG cuma bakal \"bocor\" atau sekadar buang-buang anggaran negara. Tapi kalau kita bedah datanya, faktanya justru 180 derajat berbeda! ",
+              "link": "https://www.tiktok.com/@penjaga.harapan/video/7637809598962928903",
+              "views": "82K"
+            },
+            {
+              "title": "Simak kesaksian eksklusif Ibu Marsini tentang sosok asli Marsinah yang belum banyak terungkap ke publik. Sebuah pengingat bahwa perjuangan hak buruh dibayar dengan pengorbanan yang tak ternilai.",
+              "link": "https://www.tiktok.com/@penjaga.harapan/video/7635641437828287751",
+              "views": "72K"
+            }
+          ],
+          "bad": [
+            {
+              "title": "Wamenkeu Thomas Djiwandono menegaskan bahwa narasi krisis ekonomi yang ramai beredar di media sosial tidak sesuai dengan data dan kondisi riil Indonesia saat ini.",
+              "link": "https://www.tiktok.com/@penjaga.harapan/video/7644051814576295189",
+              "views": "92"
+            },
+            {
+              "title": "Banyak orang baru sadar pentingnya jaminan sosial saat musibah datang tiba-tiba.",
+              "link": "https://www.tiktok.com/@penjaga.harapan/video/7643733819178126612",
+              "views": "137"
+            },
+            {
+              "title": "#Kampungnelayan bukan sekadar tempat tinggal, tapi sumber kehidupan yang harus terus dijaga bersama.",
+              "link": "https://www.tiktok.com/@penjaga.harapan/video/7645502232451894548",
+              "views": "146"
+            }
+          ]
+        },
+        "2026-02": {
+          "good": [
+            {
+              "title": "",
+              "link": ""
+            },
+            {
+              "title": "",
+              "link": ""
+            },
+            {
+              "title": "",
+              "link": ""
+            }
+          ],
+          "bad": [
+            {
+              "title": "",
+              "link": ""
+            },
+            {
+              "title": "",
+              "link": ""
+            },
+            {
+              "title": "",
+              "link": ""
+            }
+          ]
+        }
       },
-      "2026-05": {
-        "good": [
-          {
-            "title": "Ã°ÂÂÂÃ°ÂÂÂ¥ 3 Fakta Menarik Mobil Maung Presiden Prabowo Sampai bikin delegasi ASEAN & warga Filipina salah fokus!",
-            "link": "https://www.tiktok.com/@penjaga.harapan/video/7637807876853058836",
-            "views": "163K"
-          },
-          {
-            "title": "anyak yang skeptis dan bilang program MBG cuma bakal \"bocor\" atau sekadar buang-buang anggaran negara. Tapi kalau kita bedah datanya, faktanya justru 180 derajat berbeda! ",
-            "link": "https://www.tiktok.com/@penjaga.harapan/video/7637809598962928903",
-            "views": "82K"
-          },
-          {
-            "title": "Simak kesaksian eksklusif Ibu Marsini tentang sosok asli Marsinah yang belum banyak terungkap ke publik. Sebuah pengingat bahwa perjuangan hak buruh dibayar dengan pengorbanan yang tak ternilai.",
-            "link": "https://www.tiktok.com/@penjaga.harapan/video/7635641437828287751",
-            "views": "72K"
-          }
-        ],
-        "bad": [
-          {
-            "title": "Wamenkeu Thomas Djiwandono menegaskan bahwa narasi krisis ekonomi yang ramai beredar di media sosial tidak sesuai dengan data dan kondisi riil Indonesia saat ini.",
-            "link": "https://www.tiktok.com/@penjaga.harapan/video/7644051814576295189",
-            "views": "92"
-          },
-          {
-            "title": "Banyak orang baru sadar pentingnya jaminan sosial saat musibah datang tiba-tiba.",
-            "link": "https://www.tiktok.com/@penjaga.harapan/video/7643733819178126612",
-            "views": "137"
-          },
-          {
-            "title": "#Kampungnelayan bukan sekadar tempat tinggal, tapi sumber kehidupan yang harus terus dijaga bersama.",
-            "link": "https://www.tiktok.com/@penjaga.harapan/video/7645502232451894548",
-            "views": "146"
-          }
-        ]
+      "tiktok": {
+        "2026-06": {
+          "good": [
+            {
+              "title": "",
+              "link": ""
+            },
+            {
+              "title": "",
+              "link": ""
+            },
+            {
+              "title": "",
+              "link": ""
+            }
+          ],
+          "bad": [
+            {
+              "title": "",
+              "link": ""
+            },
+            {
+              "title": "",
+              "link": ""
+            },
+            {
+              "title": "",
+              "link": ""
+            }
+          ]
+        },
+        "2026-05": {
+          "good": [
+            {
+              "title": "",
+              "link": "https://www.tiktok.com/@penjaga.harapan/video/7637807876853058836"
+            },
+            {
+              "title": "",
+              "link": ""
+            },
+            {
+              "title": "",
+              "link": ""
+            }
+          ],
+          "bad": [
+            {
+              "title": "",
+              "link": ""
+            },
+            {
+              "title": "",
+              "link": ""
+            },
+            {
+              "title": "",
+              "link": ""
+            }
+          ]
+        },
+        "2026-07": {
+          "good": [
+            {
+              "title": "",
+              "link": ""
+            },
+            {
+              "title": "",
+              "link": ""
+            },
+            {
+              "title": "",
+              "link": ""
+            }
+          ],
+          "bad": [
+            {
+              "title": "",
+              "link": ""
+            },
+            {
+              "title": "",
+              "link": ""
+            },
+            {
+              "title": "",
+              "link": ""
+            }
+          ]
+        },
+        "2026-08": {
+          "good": [
+            {
+              "title": "",
+              "link": ""
+            },
+            {
+              "title": "",
+              "link": ""
+            },
+            {
+              "title": "",
+              "link": ""
+            }
+          ],
+          "bad": [
+            {
+              "title": "",
+              "link": ""
+            },
+            {
+              "title": "",
+              "link": ""
+            },
+            {
+              "title": "",
+              "link": ""
+            }
+          ]
+        }
       }
     },
     "33-official": {
