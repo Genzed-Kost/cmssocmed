@@ -2594,7 +2594,7 @@ function renderPlanner(page) {
       <td><span class="format-pill format-${(c.format||'').toLowerCase()}">${esc(c.format||'—')}</span></td>
       <td><div class="plat-pills">${plats||'—'}</div></td>
       <td>${esc(Array.isArray(c.creator) ? c.creator.join(', ') : (c.creator||'—'))}</td>
-      <td><div style="display:flex;gap:4px;align-items:center;flex-wrap:wrap">
+      <td><div style="display:grid;grid-template-columns:1fr 1fr;gap:4px;align-items:center">
         <button class="btn-xs" style="padding:4px 6px" onclick="editContent('${c.id}')" title="Edit">
           <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
         </button>
