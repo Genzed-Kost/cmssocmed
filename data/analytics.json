@@ -210,6 +210,7 @@
         "jmlVideo": 155,
         "totalViews": 1101274,
         "uniqueViewers": 357433,
+        "subsEOM": 66754,
         "subsGained": 3702,
         "totalLikes": 3965,
         "totalComments": 582,
@@ -839,7 +840,7 @@
         "updatedBy": "Admin"
       },
       "youtube": {
-        "updatedAt": "2026-06-22T05:00:32.838Z",
+        "updatedAt": "2026-06-22T05:01:08.870Z",
         "updatedBy": "Admin"
       },
       "tiktok": {
