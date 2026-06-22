@@ -1024,7 +1024,9 @@ async function doLogin() {
       }
       // Tidak ada passwordHash = izinkan masuk (backward compat)
       _resetLoginAttempts();
-      setSess({ role: 'creator', name: getUserName(userObj) });
+      // Simpan role asli dari settings (administrator, supervisor, creator, dll)
+      const userRole = (userObj.role || 'creator').toLowerCase();
+      setSess({ role: userRole, name: getUserName(userObj) });
     }
 
     const loginName = isAdm ? adminName : getUserName(userObj);
