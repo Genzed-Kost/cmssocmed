@@ -204,6 +204,18 @@
         "adImpressions": 23977,
         "avgViewsPerVideo": 10754,
         "peakViews": 48143
+      },
+      {
+        "month": "2026-05",
+        "jmlVideo": 155,
+        "totalViews": 1101274,
+        "uniqueViewers": 357433,
+        "subsGained": 3702,
+        "totalLikes": 3965,
+        "totalComments": 582,
+        "totalEngagement": 461876,
+        "watchHours": 18581,
+        "impressions": 1318056
       }
     ],
     "tiktok": [
@@ -827,7 +839,7 @@
         "updatedBy": "Admin"
       },
       "youtube": {
-        "updatedAt": "2026-06-15T09:02:08.904Z",
+        "updatedAt": "2026-06-22T05:00:32.838Z",
         "updatedBy": "Admin"
       },
       "tiktok": {
