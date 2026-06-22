@@ -2559,6 +2559,55 @@ ul { list-style: none; }
 .top3-mopick-cell.dim { opacity: .28; cursor: default; font-style: italic; }
 
 /* ══════════════════════════════════════════════════════════════════
+   BUDGET MODAL
+   ══════════════════════════════════════════════════════════════════ */
+.budget-modal { width: min(680px, 95vw); max-height: 90vh; display: flex; flex-direction: column; }
+.budget-modal-body { flex: 1; overflow-y: auto; padding: 16px 20px 8px; display: flex; flex-direction: column; gap: 12px; }
+
+.budget-table-wrap { overflow-x: auto; border: 1px solid var(--border); border-radius: 10px; }
+.budget-table { width: 100%; border-collapse: collapse; font-size: .8rem; }
+.budget-table thead th {
+  padding: 9px 10px; text-align: left; font-size: .72rem; font-weight: 600;
+  color: var(--muted); background: var(--bg); border-bottom: 1px solid var(--border);
+  white-space: nowrap;
+}
+.budget-table thead th:first-child { border-radius: 10px 0 0 0; }
+.budget-table thead th:last-child  { border-radius: 0 10px 0 0; }
+.budget-row td { padding: 6px 8px; border-bottom: 1px solid var(--border); vertical-align: middle; }
+.budget-row:last-child td { border-bottom: none; }
+.budget-row:hover td { background: var(--hover); }
+
+.budget-inp { width: 100%; font-size: .79rem; padding: 5px 7px; }
+.budget-num { text-align: right; }
+.budget-subtotal { text-align: right; font-weight: 600; color: var(--text); white-space: nowrap; padding-right: 10px; }
+
+.budget-del-btn {
+  display: flex; align-items: center; justify-content: center;
+  width: 24px; height: 24px; border-radius: 6px; border: none;
+  background: none; color: var(--muted); cursor: pointer; transition: background .12s, color .12s;
+}
+.budget-del-btn:hover { background: #fee2e2; color: var(--red); }
+
+.budget-add-btn {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 7px 14px; border-radius: 8px; border: 1.5px dashed var(--border);
+  background: none; color: var(--muted); font-size: .8rem; font-weight: 500;
+  cursor: pointer; transition: border-color .12s, color .12s, background .12s;
+  align-self: flex-start;
+}
+.budget-add-btn:hover { border-color: var(--accent); color: var(--accent); background: var(--hover); }
+
+.budget-total-wrap { display: flex; align-items: center; gap: 10px; }
+
+/* Tombol budget di Planner */
+.budget-planner-btn {
+  padding: 3px 7px; font-size: .72rem; border-color: #fde68a; color: #92400e; background: #fffbeb;
+  white-space: nowrap;
+}
+.budget-planner-btn.has-budget { border-color: #86efac; color: #14532d; background: #f0fdf4; font-weight: 600; }
+.budget-planner-btn:hover { border-color: #f59e0b; background: #fef3c7; color: #78350f; }
+
+/* ══════════════════════════════════════════════════════════════════
    BANK OF CONTENTS
    ══════════════════════════════════════════════════════════════════ */
 

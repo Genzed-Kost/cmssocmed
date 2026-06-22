@@ -2574,6 +2574,14 @@ function renderPlanner(page) {
     const waBtn = hasPhone
       ? `<button class="btn-xs" style="color:#16a34a;border-color:#bbf7d0;padding:3px 6px" onclick="openPlannerWa('${c.id}')" title="Kirim WA manual">${WA_SVG}</button>`
       : '';
+    const isDualFmt = FORMATS_DUAL_ROLE.includes(c.format);
+    const budgetTotal = (c.budget||[]).reduce((s,r)=>s+(r.qty||0)*(r.price||0),0);
+    const budgetBtn = (admin && isDualFmt)
+      ? `<button class="btn-xs budget-planner-btn${budgetTotal>0?' has-budget':''}"
+           onclick="openBudgetModal('${c.id}')" title="Budget Produksi">
+           💰${budgetTotal>0?` Rp ${budgetTotal>=1e6?(budgetTotal/1e6).toFixed(1)+'jt':budgetTotal>=1e3?(budgetTotal/1e3).toFixed(0)+'rb':budgetTotal}`:''}
+         </button>`
+      : '';
     return `<tr>
       <td><span class="badge ${STATUS_CLASS[c.status]||'badge-ide'}">${esc(c.status)}</span></td>
       <td>${fmtDate(c.publishDate)}</td>
@@ -2585,11 +2593,12 @@ function renderPlanner(page) {
       <td><span class="format-pill format-${(c.format||'').toLowerCase()}">${esc(c.format||'—')}</span></td>
       <td><div class="plat-pills">${plats||'—'}</div></td>
       <td>${esc(Array.isArray(c.creator) ? c.creator.join(', ') : (c.creator||'—'))}</td>
-      <td><div style="display:flex;gap:5px;align-items:center">
+      <td><div style="display:flex;gap:4px;align-items:center;flex-wrap:wrap">
         <button class="btn-xs" style="padding:4px 6px" onclick="editContent('${c.id}')" title="Edit">
           <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
         </button>
         ${waBtn}
+        ${budgetBtn}
         ${admin ? `<button class="btn-xs" style="padding:4px 6px;border-color:#fca5a5;color:var(--red)" onclick="deleteContent('${c.id}')" title="Hapus">
           <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4a1 1 0 011-1h4a1 1 0 011 1v2"/></svg>
         </button>` : ''}
@@ -6188,6 +6197,107 @@ async function saveTopContent(acctId, platId, month) {
   } catch(e) { toast('Gagal menyimpan: ' + e.message, 'error'); }
 }
 
+/* ══════════════════════════════════════════════════════════════════════════
+   BUDGET PRODUKSI — Podcast & Liputan
+   ══════════════════════════════════════════════════════════════════════════ */
+
+let _budgetContentId = null;
+let _budgetRows      = [];
+
+const BUDGET_UNITS = ['Orang','Hari','Jam','Kali','Buah','Paket','Box','Porsi','Liter','Km'];
+
+function openBudgetModal(contentId) {
+  const c = state.contents.find(x => x.id === contentId);
+  if (!c) return;
+  _budgetContentId = contentId;
+  _budgetRows = (c.budget || []).map(r => ({ ...r }));
+  if (!_budgetRows.length) _budgetRows.push(_emptyBudgetRow());
+
+  const sub = $('budgetModalSubtitle');
+  if (sub) sub.textContent = `${c.title || '—'}  ·  ${c.format || ''}  ·  ${fmtDate(c.publishDate) || '—'}`;
+
+  _renderBudgetTable();
+  $('budgetModal')?.classList.remove('hidden');
+}
+
+function closeBudgetModal() {
+  $('budgetModal')?.classList.add('hidden');
+  _budgetContentId = null;
+  _budgetRows = [];
+}
+
+function _emptyBudgetRow() {
+  return { id: uid(), item: '', qty: 1, unit: 'Orang', price: 0 };
+}
+
+function addBudgetRow() {
+  _budgetRows.push(_emptyBudgetRow());
+  _renderBudgetTable();
+  // Fokus ke input item baris baru
+  const inputs = $$('#budgetTableBody input[data-field="item"]');
+  inputs[inputs.length - 1]?.focus();
+}
+
+function removeBudgetRow(idx) {
+  _budgetRows.splice(idx, 1);
+  if (!_budgetRows.length) _budgetRows.push(_emptyBudgetRow());
+  _renderBudgetTable();
+}
+
+function updateBudgetRow(idx, field, val) {
+  if (!_budgetRows[idx]) return;
+  _budgetRows[idx][field] = (field === 'qty' || field === 'price') ? (+val || 0) : val;
+  _updateBudgetTotal();
+}
+
+function _updateBudgetTotal() {
+  const total = _budgetRows.reduce((s, r) => s + (r.qty || 0) * (r.price || 0), 0);
+  const el = $('budgetTotalDisplay');
+  if (el) el.textContent = 'Rp ' + total.toLocaleString('id-ID');
+}
+
+function _renderBudgetTable() {
+  const tbody = $('budgetTableBody');
+  if (!tbody) return;
+  const unitOpts = BUDGET_UNITS.map(u => `<option>${u}</option>`).join('');
+  tbody.innerHTML = _budgetRows.map((r, i) => `
+    <tr class="budget-row">
+      <td><input class="inp-sm budget-inp" data-field="item" value="${esc(r.item)}"
+        placeholder="Nama item…" oninput="updateBudgetRow(${i},'item',this.value)"></td>
+      <td><input class="inp-sm budget-inp budget-num" type="number" min="1" data-field="qty"
+        value="${r.qty||1}" oninput="updateBudgetRow(${i},'qty',this.value)"></td>
+      <td><select class="inp-sm budget-inp" onchange="updateBudgetRow(${i},'unit',this.value)">
+        ${BUDGET_UNITS.map(u => `<option${u===r.unit?' selected':''}>${u}</option>`).join('')}
+      </select></td>
+      <td><input class="inp-sm budget-inp budget-num" type="number" min="0" data-field="price"
+        value="${r.price||0}" placeholder="0" oninput="updateBudgetRow(${i},'price',this.value)"></td>
+      <td class="budget-subtotal">Rp ${((r.qty||0)*(r.price||0)).toLocaleString('id-ID')}</td>
+      <td><button class="budget-del-btn" onclick="removeBudgetRow(${i})" title="Hapus baris">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button></td>
+    </tr>`).join('');
+  _updateBudgetTotal();
+}
+
+async function saveBudget() {
+  if (!_budgetContentId) return;
+  const idx = state.contents.findIndex(x => x.id === _budgetContentId);
+  if (idx === -1) return;
+  // Hapus baris kosong sebelum simpan
+  const clean = _budgetRows.filter(r => r.item.trim());
+  state.contents[idx].budget = clean;
+  state.contents[idx].updatedAt = new Date().toISOString();
+  try {
+    showFlagLoader(600);
+    state.shas.contents = await window.db.writeData('contents', state.contents, `Budget: ${state.contents[idx].title}`);
+    saveDataCache();
+    const total = clean.reduce((s, r) => s + r.qty * r.price, 0);
+    await logActivity(currentUser(), 'Update Budget', `${state.contents[idx].title} — Total Rp ${total.toLocaleString('id-ID')}`);
+    toast('💰 Budget disimpan', 'success');
+    closeBudgetModal();
+  } catch(e) { toast('Gagal simpan budget: ' + e.message, 'error'); }
+}
+
 function previewContent(url, title) {
   const modal = $('cntPreviewModal');
   const frame = $('cntPreviewFrame');
@@ -7258,6 +7368,12 @@ document.addEventListener('DOMContentLoaded', async () => {
   window.selectUrlAcct  = selectUrlAcct;
   window.renderPlanner       = renderPlanner;
   window.openPlannerWa       = openPlannerWa;
+  window.openBudgetModal     = openBudgetModal;
+  window.closeBudgetModal    = closeBudgetModal;
+  window.addBudgetRow        = addBudgetRow;
+  window.removeBudgetRow     = removeBudgetRow;
+  window.updateBudgetRow     = updateBudgetRow;
+  window.saveBudget          = saveBudget;
   window.onStatPeriodChange     = onStatPeriodChange;
   window.setStatViewMode        = setStatViewMode;
   window.copyStatNarrative      = copyStatNarrative;
