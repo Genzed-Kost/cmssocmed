@@ -6062,7 +6062,8 @@ function renderStatGoodBad(acctId) {
 
   // Resolve bulan aktif (per platform agar tidak cross-platform confusion)
   const months  = _getTop3MonthOptions(acctId, platId);
-  const selMonth = state.top3Month && months.includes(state.top3Month)
+  // Bulan aktif: pakai state.top3Month jika valid YYYY-MM, fallback ke bulan pertama/sekarang
+  const selMonth = (state.top3Month && /^\d{4}-\d{2}$/.test(state.top3Month))
     ? state.top3Month
     : months[0] || getCurrentYM();
   state.top3Month = selMonth;
