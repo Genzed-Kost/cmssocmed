@@ -1,5 +1,13 @@
 [
   {
+    "id": "mqp96kyarotel",
+    "user": "Admin",
+    "role": "Admin",
+    "action": "edit konten",
+    "target": "\"Hello World\"",
+    "timestamp": "2026-06-22T13:30:28.882Z"
+  },
+  {
     "id": "mqp9617ijomfy",
     "user": "Admin",
     "role": "Admin",
