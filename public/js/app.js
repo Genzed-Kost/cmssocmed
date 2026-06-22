@@ -1437,24 +1437,25 @@ async function openPlannerWa(id) {
   }
 }
 
-async function notifyCreatorAssigned(content, oldCreator) {
+async function notifyCreatorAssigned(content) {
   if (!content.creator) return;
   if (!getWaToken()) return;
   const users  = state.settings?.users || [];
-  const newArr = Array.isArray(content.creator) ? content.creator : [content.creator];
-  const oldArr = Array.isArray(oldCreator) ? oldCreator : (oldCreator ? [oldCreator] : []);
-  for (const creatorName of newArr) {
-    if (oldArr.includes(creatorName)) continue;   // sudah terdaftar sebelumnya
+  const crArr  = Array.isArray(content.creator) ? content.creator : [content.creator];
+  const status   = content.status || 'Plan';
+  const acctObj  = ACCOUNTS.find(a => a.id === content.account);
+  const acctName = acctObj?.name || content.account || '—';
+  const dateStr  = fmtDate(content.publishDate) || '—';
+  const cmsUrl   = `${window.location.origin}/loginuser`;
+  const sent = [];
+  for (const creatorName of crArr) {
     const userObj = users.find(u => getUserName(u) === creatorName);
     if (!userObj?.phone) continue;
-    const status   = content.status || 'Plan';
-    const acctObj  = ACCOUNTS.find(a => a.id === content.account);
-    const acctName = acctObj?.name || content.account || '—';
-    const dateStr  = fmtDate(content.publishDate) || '—';
-    const cmsUrl   = `${window.location.origin}/loginuser`;
     const msg = waStatusMsg(creatorName, content.title||'—', content.theme||'—', status, dateStr, acctName, cmsUrl);
-    await sendWaNotif(userObj.phone, msg);
+    const result = await sendWaNotif(userObj.phone, msg);
+    if (result.ok) sent.push(creatorName);
   }
+  if (sent.length) toast(`📲 WA terkirim ke ${sent.join(', ')}`, 'success');
 }
 
 /* ── Dashboard Ticker Reminder ──────────────────────────────────────────── */
@@ -2329,7 +2330,7 @@ async function updateContentField(id, field, value) {
     // Detailed log per field type
     if (field === 'creator') {
       await logActivity(currentUser(), 'ubah creator', `"${c.title}" dari ${oldVal||'(kosong)'} menjadi ${value||'(kosong)'}`);
-      await notifyCreatorAssigned(c, oldVal);
+      await notifyCreatorAssigned(c);
     } else if (field === 'status') {
       await logActivity(currentUser(), 'ubah status', `"${c.title}" menjadi ${value}`);
     } else {
@@ -3210,13 +3211,20 @@ async function savePost() {
     ? _getMultiCreators()           // baca dari chip UI
     : gv('postCreator');            // baca dari single-select
   const acctName = ACCOUNTS.find(a => a.id === acctId)?.name || acctId || '—';
+
+  // Auto-koreksi status: Plan hanya untuk besok ke depan; hari ini → Ongoing
+  const todayStr = new Date().toISOString().slice(0, 10);
+  const rawStatus = gv('postStatus');
+  const autoStatus = (rawStatus === 'Plan' && gv('postDate') <= todayStr) ? 'Ongoing' : rawStatus;
+  if (autoStatus !== rawStatus) sv('postStatus', autoStatus);
+
   const data = {
     title, platforms,
     publishDate: gv('postDate'),
     creator,
-    editor:      gv('postEditor') || '',   // hanya untuk Podcast/Liputan
+    editor:      gv('postEditor') || '',
     account:     acctId,
-    status:      gv('postStatus'),
+    status:      autoStatus,
     theme,
     format:      gv('postFormat'),
     script:      gv('postScript'),
@@ -3225,13 +3233,9 @@ async function savePost() {
     notes:       gv('postNotes')
   };
 
-  // Capture old creator before updating (for WA notification)
-  const oldCreator = id ? (state.contents.find(x => x.id === id)?.creator || null) : null;
-
   if (id) {
     const idx = state.contents.findIndex(x => x.id === id);
     if (idx !== -1) state.contents[idx] = { ...state.contents[idx], ...data, updatedAt: new Date().toISOString() };
-    // NOTE: platformLinks & createdBy intentionally NOT in data, so they're preserved from existing
   } else {
     state.contents.unshift({ id: uid(), ...data, platformLinks: {}, createdBy: currentUser(), createdAt: new Date().toISOString() });
   }
@@ -3239,14 +3243,13 @@ async function savePost() {
   try {
     state.shas.contents = await window.db.writeData('contents', state.contents, `${id?'Edit':'Tambah'}: ${title}`);
     saveDataCache();
-    // Detailed activity log
     const logDetail = id
       ? `"${title}"`
       : `berjudul "${title}" (tema: ${theme}) untuk akun ${acctName} dijadwalkan ${fmtDate(gv('postDate'))}`;
     await logActivity(currentUser(), id ? 'edit konten' : 'tambah konten', logDetail);
-    // WA notification if creator was assigned/changed
-    const savedContent = state.contents.find(x => x.title === title && x.creator === creator) || { ...data };
-    await notifyCreatorAssigned(savedContent, oldCreator);
+    // WA ke semua creator sesuai status yang disimpan
+    const savedContent = state.contents.find(x => x.title === title) || { ...data };
+    await notifyCreatorAssigned(savedContent);
     clearNewPostDraft();
     toast(`Konten berhasil ${id ? 'diperbarui' : 'disimpan'}`, 'success');
     navigate('planner');
