@@ -1,5 +1,13 @@
 [
   {
+    "id": "mqp97qgx5nxoo",
+    "user": "Admin",
+    "role": "Admin",
+    "action": "hapus konten",
+    "target": "pamscoapsmc",
+    "timestamp": "2026-06-22T13:31:22.689Z"
+  },
+  {
     "id": "mqp97o1vf2m6e",
     "user": "Admin",
     "role": "Admin",
