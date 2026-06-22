@@ -591,7 +591,8 @@ function clearSess()  { sessionStorage.removeItem(SESS_KEY); }
 
 function isFirstRun() { return !getAuth(); }
 function isLoggedIn() { return !!getSess(); }
-function isAdmin()    { return ['admin','administrator'].includes(getSess()?.role?.toLowerCase()); }
+function isAdmin()      { return ['admin','administrator'].includes(getSess()?.role?.toLowerCase()); }
+function isSuperAdmin() { return getSess()?.role?.toLowerCase() === 'admin'; }
 function currentUser(){ return getSess()?.name || 'Creator'; }
 
 function getPubUsers() {
@@ -654,9 +655,9 @@ function applyAuthState() {
     roleEl.classList.remove('hidden');
   }
 
-  // API Setup nav: only visible to admin
+  // API Setup nav: hanya admin (bukan Administrator)
   const apiNav = document.querySelector('.nav-item[data-page="apisetup"]');
-  if (apiNav) apiNav.style.display = admin ? '' : 'none';
+  if (apiNav) apiNav.style.display = isSuperAdmin() ? '' : 'none';
 
   // Sync/refresh button: visible to all logged-in users
   if ($('btnGitSync')) $('btnGitSync').style.display = sess ? '' : 'none';
@@ -1769,7 +1770,7 @@ function navigate(page) {
   if (!PAGE_TITLES[page]) page = 'dashboard';
 
   // Guard: API Setup — admin only
-  if (page === 'apisetup' && !isAdmin()) {
+  if (page === 'apisetup' && !isSuperAdmin()) {
     toast('Hanya admin yang dapat mengakses halaman ini', 'error');
     page = 'dashboard';
     history.replaceState(null, '', '#dashboard');
