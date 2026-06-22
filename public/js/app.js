@@ -1440,6 +1440,32 @@ async function openPlannerWa(id) {
   }
 }
 
+async function notifyAdministratorBudget(content) {
+  if (!getWaToken()) return;
+  const users = state.settings?.users || [];
+  const admins = users.filter(u => (u.role || '').toLowerCase() === 'administrator' && u.phone);
+  if (!admins.length) return;
+  const acctName = ACCOUNTS.find(a => a.id === content.account)?.name || content.account || '—';
+  const dateStr  = fmtDate(content.publishDate) || '—';
+  const cmsUrl   = `${window.location.origin}/loginuser`;
+  const crTxt    = Array.isArray(content.creator) ? content.creator.join(', ') : (content.creator || '—');
+  for (const adm of admins) {
+    const name = getUserName(adm);
+    const msg =
+      `Halo ${name}! 💰\n\n` +
+      `Konten *${content.format}* baru telah ditambahkan dan memerlukan input budget produksi.\n\n` +
+      `📝 Judul: *${content.title || '—'}*\n` +
+      `🎭 Tema: ${content.theme || '—'}\n` +
+      `👤 Creator: ${crTxt}\n` +
+      `📅 Jadwal: ${dateStr}\n` +
+      `📱 Akun: ${acctName}\n` +
+      `🔗 CMS: ${cmsUrl}\n\n` +
+      `Silakan buka menu Planner dan klik tombol 💰 untuk mengisi budget.\n\n` +
+      `_- Penjaga Harapan CMS_`;
+    await sendWaNotif(adm.phone, msg);
+  }
+}
+
 async function notifyCreatorAssigned(content) {
   if (!content.creator) return;
   if (!getWaToken()) return;
@@ -3262,6 +3288,10 @@ async function savePost() {
     // WA ke semua creator sesuai status yang disimpan
     const savedContent = state.contents.find(x => x.title === title) || { ...data };
     await notifyCreatorAssigned(savedContent);
+    // WA ke Administrator jika format Podcast/Liputan (perlu input budget)
+    if (FORMATS_DUAL_ROLE.includes(data.format)) {
+      await notifyAdministratorBudget(savedContent);
+    }
     clearNewPostDraft();
     toast(`Konten berhasil ${id ? 'diperbarui' : 'disimpan'}`, 'success');
     navigate('planner');
