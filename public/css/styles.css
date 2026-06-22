@@ -2571,7 +2571,7 @@ ul { list-style: none; }
   color: var(--muted); background: var(--bg); border-bottom: 1px solid var(--border);
   white-space: nowrap;
 }
-.budget-table thead th:first-child { border-radius: 10px 0 0 0; }
+.budget-table thead th:first-child { border-radius: 10px 0 0 0; width: 45%; min-width: 180px; }
 .budget-table thead th:last-child  { border-radius: 0 10px 0 0; }
 .budget-row td { padding: 6px 8px; border-bottom: 1px solid var(--border); vertical-align: middle; }
 .budget-row:last-child td { border-bottom: none; }
