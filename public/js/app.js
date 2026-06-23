@@ -6368,11 +6368,13 @@ function _renderBudgetView(c) {
   if (c.budgetFile?.url) {
     const { name, url } = c.budgetFile;
     const isImg = /\.(jpg|jpeg|png)$/i.test(name);
+    // Simpan URL untuk tombol unduh di footer
+    const dlBtn = $('budgetDownloadBtn');
+    if (dlBtn) { dlBtn.href = url; dlBtn.classList.remove('hidden'); }
+
     doc.innerHTML = isImg
-      ? `<img src="${url}" class="budget-file-img" alt="Budget">
-         <div style="margin-top:6px;text-align:center"><a href="${url}" target="_blank" class="btn-xs">⬇ Unduh</a></div>`
-      : `<iframe src="https://docs.google.com/viewer?url=${encodeURIComponent(url)}&embedded=true" class="budget-file-iframe" title="Budget PDF"></iframe>
-         <div style="margin-top:6px;text-align:center"><a href="${url}" target="_blank" class="btn-xs">⬇ Unduh PDF</a></div>`;
+      ? `<img src="${url}" class="budget-file-img" alt="Budget">`
+      : `<iframe src="https://docs.google.com/viewer?url=${encodeURIComponent(url)}&embedded=true" class="budget-file-iframe" title="Budget PDF"></iframe>`;
     return;
   }
 
@@ -6405,6 +6407,7 @@ function _renderBudgetView(c) {
 
 function closeBudgetModal() {
   $('budgetModal')?.classList.add('hidden');
+  $('budgetDownloadBtn')?.classList.add('hidden');
   _budgetContentId = null;
   _budgetRows = [];
 }
