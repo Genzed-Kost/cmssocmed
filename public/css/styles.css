@@ -88,6 +88,8 @@ ul { list-style: none; }
   box-shadow: 4px 0 24px rgba(0,0,0,.18);
 }
 .sidebar.collapsed { width: 60px; }
+.sidebar.hidden-desktop { width: 0; overflow: hidden; }
+.sidebar.hidden-desktop ~ .main-wrap { margin-left: 0; }
 .sidebar.collapsed .logo-text,
 .sidebar.collapsed .nav-item span,
 .sidebar.collapsed .sidebar-footer { display: none; }
