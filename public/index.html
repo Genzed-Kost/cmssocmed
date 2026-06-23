@@ -1401,25 +1401,46 @@
     <div class="modal-body budget-modal-body">
       <!-- Mode edit (Administrator) -->
       <div id="budgetEditArea">
-        <div class="budget-table-wrap">
-          <table class="budget-table">
-            <thead>
-              <tr>
-                <th>Item</th>
-                <th style="width:60px;text-align:center">Qty</th>
-                <th style="width:80px">Satuan</th>
-                <th style="width:120px;text-align:right">Harga/Unit</th>
-                <th style="width:120px;text-align:right">Subtotal</th>
-                <th style="width:36px"></th>
-              </tr>
-            </thead>
-            <tbody id="budgetTableBody"></tbody>
-          </table>
+        <!-- Tab switcher -->
+        <div class="budget-tabs">
+          <button id="budgetTabManual" class="budget-tab active" onclick="switchBudgetTab('manual')">✏️ Input Manual</button>
+          <button id="budgetTabUpload" class="budget-tab" onclick="switchBudgetTab('upload')">📎 Upload File</button>
         </div>
-        <button class="budget-add-btn" onclick="addBudgetRow()">
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-          Tambah Item
-        </button>
+        <!-- Panel: Input Manual -->
+        <div id="budgetPanelManual">
+          <div class="budget-table-wrap">
+            <table class="budget-table">
+              <thead>
+                <tr>
+                  <th>Item</th>
+                  <th style="width:60px;text-align:center">Qty</th>
+                  <th style="width:80px">Satuan</th>
+                  <th style="width:120px;text-align:right">Harga/Unit</th>
+                  <th style="width:120px;text-align:right">Subtotal</th>
+                  <th style="width:36px"></th>
+                </tr>
+              </thead>
+              <tbody id="budgetTableBody"></tbody>
+            </table>
+          </div>
+          <button class="budget-add-btn" onclick="addBudgetRow()">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            Tambah Item
+          </button>
+        </div>
+        <!-- Panel: Upload File -->
+        <div id="budgetPanelUpload" class="hidden">
+          <div id="budgetDropZone" class="budget-dropzone" onclick="$('budgetFileInput').click()"
+               ondragover="event.preventDefault();this.classList.add('drag-over')"
+               ondragleave="this.classList.remove('drag-over')"
+               ondrop="handleBudgetFileDrop(event)">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="color:var(--muted)"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+            <p style="margin:8px 0 4px;font-weight:500">Klik atau drag file ke sini</p>
+            <p style="font-size:.75rem;color:var(--muted)">PDF, JPG, PNG — maks. 5MB</p>
+          </div>
+          <input type="file" id="budgetFileInput" accept=".pdf,.jpg,.jpeg,.png" class="hidden" onchange="handleBudgetFileSelect(this)">
+          <div id="budgetFilePreview" class="budget-file-preview hidden"></div>
+        </div>
       </div>
       <!-- Mode view (semua user selain Administrator) -->
       <div id="budgetViewArea" class="hidden">

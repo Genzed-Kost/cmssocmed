@@ -173,6 +173,41 @@ class GitHubDB {
     return this.putFile(filePath, data, sha, msg);
   }
 
+  /* ── Binary file upload ─────────────────────────────────────── */
+
+  /** Upload file biner (base64) ke path GitHub. Digunakan untuk file budget. */
+  async uploadFile(path, base64Content, msg) {
+    const c = this.loadConfig();
+    const branch = c.branch || 'main';
+    // Cek apakah file sudah ada (untuk ambil SHA)
+    let sha;
+    try {
+      const existing = await this.getFile(path);
+      if (existing) sha = existing.sha;
+    } catch { /* file baru, tidak perlu SHA */ }
+
+    const body = { message: msg || `Upload ${path}`, content: base64Content, branch };
+    if (sha) body.sha = sha;
+
+    const res = await fetch(this._url(path), {
+      method: 'PUT',
+      headers: this._headers(),
+      body: JSON.stringify(body)
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.message || `HTTP ${res.status}`);
+    }
+    const json = await res.json();
+    this._cache[path] = json.content?.sha;
+    return json.content?.download_url || null;
+  }
+
+  getRepo() {
+    const c = this.loadConfig();
+    return c ? `${c.owner}/${c.repo}` : '';
+  }
+
   /* ── Append helpers ──────────────────────────────────────────── */
 
   async append(collection, item, msg) {

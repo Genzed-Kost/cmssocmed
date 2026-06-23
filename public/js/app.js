@@ -6240,11 +6240,16 @@ let _budgetRows      = [];
 
 const BUDGET_UNITS = ['Orang','Hari','Jam','Kali','Buah','Paket','Box','Porsi','Liter','Km'];
 
+let _budgetUploadFile = null;  // File object yang dipilih untuk upload
+let _budgetActiveTab  = 'manual';
+
 function openBudgetModal(contentId) {
   const c = state.contents.find(x => x.id === contentId);
   if (!c) return;
   _budgetContentId = contentId;
-  _budgetRows = (c.budget || []).map(r => ({ ...r }));
+  _budgetRows      = (c.budget || []).map(r => ({ ...r }));
+  _budgetUploadFile = null;
+  _budgetActiveTab  = 'manual';
 
   const sub = $('budgetModalSubtitle');
   if (sub) sub.textContent = `${c.title || '—'}  ·  ${c.format || ''}  ·  ${fmtDate(c.publishDate) || '—'}`;
@@ -6256,7 +6261,14 @@ function openBudgetModal(contentId) {
 
   if (editMode) {
     if (!_budgetRows.length) _budgetRows.push(_emptyBudgetRow());
+    // Jika ada file tersimpan, langsung buka tab upload
+    if (c.budgetFile) {
+      switchBudgetTab('upload');
+    } else {
+      switchBudgetTab('manual');
+    }
     _renderBudgetTable();
+    _renderBudgetFilePreview(c.budgetFile || null);
   } else {
     _renderBudgetView(c);
   }
@@ -6264,9 +6276,109 @@ function openBudgetModal(contentId) {
   $('budgetModal')?.classList.remove('hidden');
 }
 
+function switchBudgetTab(tab) {
+  _budgetActiveTab = tab;
+  $('budgetTabManual')?.classList.toggle('active', tab === 'manual');
+  $('budgetTabUpload')?.classList.toggle('active', tab === 'upload');
+  $('budgetPanelManual')?.classList.toggle('hidden', tab !== 'manual');
+  $('budgetPanelUpload')?.classList.toggle('hidden', tab !== 'upload');
+  // Total hanya relevan di tab manual
+  const totalWrap = document.querySelector('.budget-total-wrap');
+  if (totalWrap) totalWrap.style.visibility = tab === 'manual' ? '' : 'hidden';
+}
+
+function handleBudgetFileDrop(e) {
+  e.preventDefault();
+  $('budgetDropZone')?.classList.remove('drag-over');
+  const file = e.dataTransfer?.files?.[0];
+  if (file) _setBudgetFile(file);
+}
+
+function handleBudgetFileSelect(input) {
+  const file = input.files?.[0];
+  if (file) _setBudgetFile(file);
+  input.value = '';
+}
+
+function _setBudgetFile(file) {
+  const maxMB = 5;
+  if (file.size > maxMB * 1024 * 1024) {
+    toast(`File terlalu besar (maks. ${maxMB}MB)`, 'error'); return;
+  }
+  const allowed = ['application/pdf','image/jpeg','image/png'];
+  if (!allowed.includes(file.type)) {
+    toast('Format tidak didukung. Gunakan PDF, JPG, atau PNG.', 'error'); return;
+  }
+  _budgetUploadFile = file;
+  _renderBudgetFilePreview(null, file);
+}
+
+function _renderBudgetFilePreview(savedFile, newFile) {
+  const wrap = $('budgetFilePreview');
+  const zone = $('budgetDropZone');
+  if (!wrap) return;
+  if (!savedFile && !newFile) {
+    wrap.classList.add('hidden');
+    zone?.classList.remove('hidden');
+    return;
+  }
+  zone?.classList.add('hidden');
+  wrap.classList.remove('hidden');
+  if (newFile) {
+    const isImg = newFile.type.startsWith('image/');
+    const url   = URL.createObjectURL(newFile);
+    wrap.innerHTML = isImg
+      ? `<img src="${url}" class="budget-file-img" alt="Preview">
+         <div class="budget-file-info"><span>${esc(newFile.name)}</span>
+         <button class="btn-xs" onclick="_clearBudgetFile()">✕ Ganti</button></div>`
+      : `<div class="budget-file-pdf">
+           <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+           <span>${esc(newFile.name)}</span>
+         </div>
+         <div class="budget-file-info"><button class="btn-xs" onclick="_clearBudgetFile()">✕ Ganti</button></div>`;
+  } else {
+    // File sudah tersimpan di GitHub
+    const name = savedFile.name || 'budget-file';
+    const url  = savedFile.url  || '#';
+    const isImg = /\.(jpg|jpeg|png)$/i.test(name);
+    wrap.innerHTML = isImg
+      ? `<img src="${url}" class="budget-file-img" alt="Preview">
+         <div class="budget-file-info"><a href="${url}" target="_blank">${esc(name)}</a>
+         <button class="btn-xs" onclick="_clearBudgetFile()">✕ Ganti</button></div>`
+      : `<div class="budget-file-pdf">
+           <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+           <a href="${url}" target="_blank">${esc(name)}</a>
+         </div>
+         <div class="budget-file-info"><button class="btn-xs" onclick="_clearBudgetFile()">✕ Ganti</button></div>`;
+  }
+}
+
+function _clearBudgetFile() {
+  _budgetUploadFile = null;
+  const c = state.contents.find(x => x.id === _budgetContentId);
+  _renderBudgetFilePreview(null, null);
+  // Tandai file dihapus
+  if (c) c._budgetFileCleared = true;
+}
+
 function _renderBudgetView(c) {
   const doc = $('budgetViewDoc');
   if (!doc) return;
+
+  // Tampilkan file jika ada
+  if (c.budgetFile?.url) {
+    const { name, url } = c.budgetFile;
+    const isImg = /\.(jpg|jpeg|png)$/i.test(name);
+    doc.innerHTML = isImg
+      ? `<img src="${url}" class="budget-file-img" alt="Budget" style="max-width:100%;border-radius:8px">
+         <div style="margin-top:8px;text-align:center"><a href="${url}" target="_blank" class="btn-xs">⬇ Unduh File</a></div>`
+      : `<div class="budget-file-pdf" style="padding:24px 0;justify-content:center">
+           <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+           <a href="${url}" target="_blank" style="font-weight:500">${esc(name)}</a>
+         </div>`;
+    return;
+  }
+
   const rows = (c.budget || []);
   if (!rows.length) {
     doc.innerHTML = `<p class="budget-doc-empty">Belum ada data budget.</p>`;
@@ -6285,12 +6397,9 @@ function _renderBudgetView(c) {
     <table class="budget-view-table">
       <thead>
         <tr>
-          <th class="bv-no">No</th>
-          <th class="bv-item">Item</th>
-          <th class="bv-qty">Qty</th>
-          <th class="bv-unit">Satuan</th>
-          <th class="bv-price">Harga/Unit</th>
-          <th class="bv-sub">Subtotal</th>
+          <th class="bv-no">No</th><th class="bv-item">Item</th>
+          <th class="bv-qty">Qty</th><th class="bv-unit">Satuan</th>
+          <th class="bv-price">Harga/Unit</th><th class="bv-sub">Subtotal</th>
         </tr>
       </thead>
       <tbody>${rowsHtml}</tbody>
@@ -6360,19 +6469,46 @@ async function saveBudget() {
   if (!_budgetContentId) return;
   const idx = state.contents.findIndex(x => x.id === _budgetContentId);
   if (idx === -1) return;
-  // Hapus baris kosong sebelum simpan
-  const clean = _budgetRows.filter(r => r.item.trim());
-  state.contents[idx].budget = clean;
-  state.contents[idx].updatedAt = new Date().toISOString();
   try {
-    showFlagLoader(600);
+    showFlagLoader(800);
+    if (_budgetActiveTab === 'upload') {
+      // Simpan file ke GitHub jika ada file baru
+      if (_budgetUploadFile) {
+        const fname    = `budget_${_budgetContentId}_${Date.now()}.${_budgetUploadFile.name.split('.').pop()}`;
+        const b64      = await _fileToBase64(_budgetUploadFile);
+        const filePath = `data/budget-files/${fname}`;
+        await window.db.uploadFile(filePath, b64, `Budget file: ${state.contents[idx].title}`);
+        const rawUrl   = `https://raw.githubusercontent.com/${window.db.getRepo()}/main/${filePath}`;
+        state.contents[idx].budgetFile = { name: fname, url: rawUrl, path: filePath };
+      } else if (state.contents[idx]._budgetFileCleared) {
+        state.contents[idx].budgetFile = null;
+      }
+      delete state.contents[idx]._budgetFileCleared;
+      state.contents[idx].budget = [];  // kosongkan manual jika pakai file
+    } else {
+      // Simpan input manual
+      const clean = _budgetRows.filter(r => r.item.trim());
+      state.contents[idx].budget     = clean;
+      state.contents[idx].budgetFile = null;  // hapus file jika beralih ke manual
+    }
+    state.contents[idx].updatedAt = new Date().toISOString();
     state.shas.contents = await window.db.writeData('contents', state.contents, `Budget: ${state.contents[idx].title}`);
     saveDataCache();
-    const total = clean.reduce((s, r) => s + r.qty * r.price, 0);
-    await logActivity(currentUser(), 'Update Budget', `${state.contents[idx].title} — Total Rp ${total.toLocaleString('id-ID')}`);
+    const total = (state.contents[idx].budget || []).reduce((s, r) => s + (r.qty||0) * (r.price||0), 0);
+    await logActivity(currentUser(), 'Update Budget', `${state.contents[idx].title}${total ? ' — Total Rp ' + total.toLocaleString('id-ID') : ''}`);
     toast('💰 Budget disimpan', 'success');
     closeBudgetModal();
+    renderPlanner();
   } catch(e) { toast('Gagal simpan budget: ' + e.message, 'error'); }
+}
+
+function _fileToBase64(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload  = () => resolve(reader.result.split(',')[1]);
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
 }
 
 function previewContent(url, title) {

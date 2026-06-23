@@ -2606,6 +2606,31 @@ ul { list-style: none; }
 }
 .budget-planner-btn.has-budget { border-color: #86efac; color: #14532d; background: #f0fdf4; font-weight: 600; }
 
+/* Budget tabs */
+.budget-tabs { display: flex; gap: 0; margin-bottom: 12px; border-bottom: 1px solid var(--border); }
+.budget-tab {
+  padding: 7px 16px; font-size: .78rem; font-weight: 500; border: none;
+  border-bottom: 2px solid transparent; background: none; color: var(--muted);
+  cursor: pointer; border-radius: 6px 6px 0 0; transition: color .15s, border-color .15s;
+}
+.budget-tab:hover { color: var(--text); }
+.budget-tab.active { color: var(--accent); border-bottom-color: var(--accent); font-weight: 600; }
+
+/* Budget dropzone */
+.budget-dropzone {
+  border: 2px dashed var(--border); border-radius: 10px; padding: 36px 20px;
+  text-align: center; cursor: pointer; transition: border-color .15s, background .15s; margin-top: 4px;
+}
+.budget-dropzone:hover, .budget-dropzone.drag-over {
+  border-color: var(--accent); background: color-mix(in srgb, var(--accent) 6%, transparent);
+}
+
+/* Budget file preview */
+.budget-file-preview { display: flex; flex-direction: column; gap: 10px; align-items: center; padding: 12px 0; }
+.budget-file-img { max-width: 100%; max-height: 260px; border-radius: 8px; border: 1px solid var(--border); object-fit: contain; }
+.budget-file-pdf { display: flex; align-items: center; gap: 10px; padding: 14px 16px; background: var(--bg); border-radius: 8px; border: 1px solid var(--border); width: 100%; box-sizing: border-box; }
+.budget-file-info { display: flex; align-items: center; justify-content: flex-end; gap: 10px; font-size: .78rem; color: var(--muted); width: 100%; }
+
 /* Budget view dokumen (read-only) */
 .budget-doc { padding: 4px 0; }
 .budget-doc-empty { color: var(--muted); font-size: .82rem; text-align: center; padding: 24px 0; }
