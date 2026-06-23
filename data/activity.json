@@ -1,5 +1,13 @@
 [
   {
+    "id": "mqqob48k2jzk2",
+    "user": "Umar",
+    "role": "Publisher",
+    "action": "login",
+    "target": "masuk ke sistem sebagai Publisher",
+    "timestamp": "2026-06-23T13:21:40.916Z"
+  },
+  {
     "id": "mqqmyu3goyhn4",
     "user": "Wedy",
     "role": "Creator",
@@ -52,7 +60,7 @@
     "user": "Lisa",
     "role": "Administrator",
     "action": "Update Budget",
-    "target": "Podcsat Kepala KSP Pak Dudung Ã¢ÂÂ Total Rp 150.000",
+    "target": "Podcsat Kepala KSP Pak Dudung ÃÂ¢ÃÂÃÂ Total Rp 150.000",
     "timestamp": "2026-06-23T12:15:16.863Z"
   },
   {
