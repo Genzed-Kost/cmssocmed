@@ -73,16 +73,12 @@
     "platformLinks": {},
     "createdBy": "Admin",
     "createdAt": "2026-06-04T09:55:51.377Z",
-    "updatedAt": "2026-06-23T12:15:13.937Z",
-    "budget": [
-      {
-        "id": "mqqlx2rro2opd",
-        "item": "Makan",
-        "qty": 3,
-        "unit": "Orang",
-        "price": 50000
-      }
-    ],
-    "budgetFile": null
+    "updatedAt": "2026-06-23T12:16:02.588Z",
+    "budget": [],
+    "budgetFile": {
+      "name": "budget_mpzbl8ltdhxn4_1782216959771.pdf",
+      "url": "https://raw.githubusercontent.com/Genzed-Kost/cmssocmed/main/data/budget-files/budget_mpzbl8ltdhxn4_1782216959771.pdf",
+      "path": "data/budget-files/budget_mpzbl8ltdhxn4_1782216959771.pdf"
+    }
   }
 ]
