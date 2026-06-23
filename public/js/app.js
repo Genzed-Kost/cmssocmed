@@ -801,9 +801,9 @@ async function wizardCreateRepo() {
     sv('setupRepo',   info.name);
     sv('setupBranch', info.default_branch || 'main');
     btn.textContent = '✓ Repo Dibuat!';
-    toast(`Repo "${info.full_name}" berhasil dibuat 🎉`, 'success');
+    toast(`Storage "${info.full_name}" berhasil dibuat 🎉`, 'success');
   } catch (e) {
-    toast('Gagal buat repo: ' + e.message, 'error');
+    toast('Gagal inisialisasi storage: ' + e.message, 'error');
     btn.textContent = 'Buat Repo Otomatis'; btn.disabled = false;
   }
 }
@@ -3634,7 +3634,7 @@ async function triggerYouTubeSync() {
  * Gagal silently — key sudah aman di localStorage.
  */
 async function _saveApiKeysToSettings(updates) {
-  if (getSess()?.role !== 'admin') return;
+  if (!isAdmin()) return;
   try {
     const settings = { ...(state.settings || { kpi: {}, users: [], analyticsUrls: {} }) };
     for (const [k, v] of Object.entries(updates)) {
@@ -3645,8 +3645,7 @@ async function _saveApiKeysToSettings(updates) {
     state.shas.settings = await window.db.writeData('settings', settings, 'API keys: update');
     saveDataCache();
   } catch (e) {
-    console.warn('API keys: gagal simpan ke GitHub —', e.message);
-    // Tidak tampilkan error ke user — key sudah tersimpan di localStorage
+    // Gagal simpan ke cloud — key tetap aman di perangkat ini
   }
 }
 

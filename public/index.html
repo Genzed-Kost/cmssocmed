@@ -706,22 +706,22 @@
                 <input type="text" id="cfgOwner" class="form-inp" placeholder="username" />
               </div>
               <div class="form-group">
-                <label class="form-label">Repository Name</label>
-                <input type="text" id="cfgRepo" class="form-inp" placeholder="nama-repo" />
+                <label class="form-label">Nama Storage</label>
+                <input type="text" id="cfgRepo" class="form-inp" placeholder="nama-storage" />
               </div>
               <div class="form-group">
-                <label class="form-label">Branch</label>
+                <label class="form-label">Versi</label>
                 <input type="text" id="cfgBranch" class="form-inp" placeholder="main" value="main" />
               </div>
               <div class="form-group">
-                <label class="form-label">Personal Access Token (PAT)</label>
+                <label class="form-label">Kunci Akses</label>
                 <div class="inp-eye-wrap">
-                  <input type="password" id="cfgPat" class="form-inp" placeholder="ghp_…" />
+                  <input type="password" id="cfgPat" class="form-inp" placeholder="••••••••" />
                   <button type="button" class="eye-btn" id="btnTogglePat">
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
                   </button>
                 </div>
-                <p class="form-hint">Token hanya disimpan di browser lokal. Butuh scope: <code>repo</code></p>
+                <p class="form-hint">Kunci akses hanya tersimpan di perangkat ini.</p>
               </div>
               <div class="form-actions-row">
                 <button class="btn-sm" id="btnTestGithub">Test Koneksi</button>
@@ -1044,23 +1044,23 @@
           </div>
           <div class="form-row-2">
             <div class="form-group">
-              <label class="form-label">Repository Name</label>
-              <input type="text" id="connectRepo" class="form-inp" placeholder="nama-repo" />
+              <label class="form-label">Nama Storage</label>
+              <input type="text" id="connectRepo" class="form-inp" placeholder="nama-storage" />
             </div>
             <div class="form-group">
-              <label class="form-label">Branch</label>
+              <label class="form-label">Versi</label>
               <input type="text" id="connectBranch" class="form-inp" value="main" />
             </div>
           </div>
           <div class="form-group">
-            <label class="form-label">Personal Access Token (PAT)</label>
+            <label class="form-label">Kunci Akses</label>
             <div class="inp-eye-wrap">
-              <input type="password" id="connectPat" class="form-inp" placeholder="ghp_…" />
+              <input type="password" id="connectPat" class="form-inp" placeholder="••••••••" />
               <button type="button" class="eye-btn" id="btnToggleConnectPat">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
               </button>
             </div>
-            <p class="form-hint">PAT hanya tersimpan di browser lokal perangkat ini.</p>
+            <p class="form-hint">Kunci akses hanya tersimpan di perangkat ini.</p>
           </div>
         </div>
       </div>
@@ -1077,8 +1077,8 @@
     <!-- Step 2: Server -->
     <div class="wizard-step hidden" id="ws2">
       <div class="modal-body">
-        <div class="wizard-title">Hubungkan Server</div>
-        <div class="wizard-desc">Data konten tersimpan dengan aman di server yang Anda konfigurasi.</div>
+        <div class="wizard-title">Hubungkan Storage</div>
+        <div class="wizard-desc">Data konten tersimpan dengan aman di cloud storage yang Anda konfigurasi.</div>
 
         <details class="pat-guide">
           <summary>
@@ -1102,18 +1102,18 @@
           </div>
           <div class="form-row-2">
             <div class="form-group">
-              <label class="form-label">Nama Repository</label>
+              <label class="form-label">Nama Storage</label>
               <input type="text" id="setupRepo" class="form-inp" placeholder="cms-data" />
             </div>
             <div class="form-group">
-              <label class="form-label">Branch</label>
+              <label class="form-label">Versi</label>
               <input type="text" id="setupBranch" class="form-inp" value="main" />
             </div>
           </div>
           <div class="form-group">
-            <label class="form-label">Personal Access Token (PAT)</label>
+            <label class="form-label">Kunci Akses</label>
             <div class="inp-eye-wrap">
-              <input type="password" id="setupPat" class="form-inp" placeholder="ghp_…" />
+              <input type="password" id="setupPat" class="form-inp" placeholder="••••••••" />
               <button type="button" class="eye-btn" id="btnToggleSetupPat">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
               </button>
@@ -1122,9 +1122,9 @@
           <div class="repo-create-row">
             <button class="btn-sm" id="btnCreateRepo">
               <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
-              Buat Repo Otomatis
+              Inisialisasi Storage
             </button>
-            <span style="font-size:.72rem;color:var(--muted)">atau gunakan repo yang sudah ada</span>
+            <span style="font-size:.72rem;color:var(--muted)">atau gunakan storage yang sudah ada</span>
           </div>
         </div>
       </div>
