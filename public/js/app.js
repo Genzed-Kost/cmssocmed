@@ -6272,9 +6272,7 @@ function openBudgetModal(contentId) {
     _renderBudgetView(c);
   }
   _updateBudgetTotal();
-  const modal = $('budgetModal');
-  modal?.classList.remove('hidden');
-  modal?.querySelector('.modal')?.classList.add('fullscreen');
+  $('budgetModal')?.classList.remove('hidden');
 }
 
 function switchBudgetTab(tab) {
@@ -6377,8 +6375,11 @@ function _renderBudgetView(c) {
     doc.innerHTML = isImg
       ? `<img src="${url}" class="budget-file-img" alt="Budget">`
       : `<div class="budget-iframe-wrap">
-           <iframe src="https://docs.google.com/viewer?url=${encodeURIComponent(url)}&embedded=true" class="budget-file-iframe" title="Budget PDF"></iframe>
+           <iframe id="budgetPdfFrame" src="https://docs.google.com/viewer?url=${encodeURIComponent(url)}&embedded=true" class="budget-file-iframe" title="Budget PDF"></iframe>
            <div class="budget-iframe-cover"></div>
+           <button class="budget-fs-btn" onclick="toggleBudgetFullscreen()" title="Fullscreen">
+             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M8 3H5a2 2 0 00-2 2v3m18 0V5a2 2 0 00-2-2h-3m0 18h3a2 2 0 002-2v-3M3 16v3a2 2 0 002 2h3"/></svg>
+           </button>
          </div>`;
     return;
   }
@@ -6410,10 +6411,19 @@ function _renderBudgetView(c) {
     </table>`;
 }
 
+function toggleBudgetFullscreen() {
+  const wrap = document.querySelector('.budget-iframe-wrap');
+  if (!wrap) return;
+  if (!document.fullscreenElement) {
+    wrap.requestFullscreen().catch(() => {});
+  } else {
+    document.exitFullscreen().catch(() => {});
+  }
+}
+
 function closeBudgetModal() {
-  const bm = $('budgetModal');
-  bm?.classList.add('hidden');
-  bm?.querySelector('.modal')?.classList.remove('fullscreen');
+  if (document.fullscreenElement) document.exitFullscreen().catch(() => {});
+  $('budgetModal')?.classList.add('hidden');
   $('budgetDownloadBtn')?.classList.add('hidden');
   _budgetContentId = null;
   _budgetRows = [];
