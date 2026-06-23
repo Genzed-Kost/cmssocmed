@@ -1,5 +1,13 @@
 [
   {
+    "id": "mqqkayygjjfxd",
+    "user": "Wedy",
+    "role": "Creator",
+    "action": "login",
+    "target": "masuk ke sistem sebagai Creator",
+    "timestamp": "2026-06-23T11:29:35.608Z"
+  },
+  {
     "id": "mqqkashgt0ibq",
     "user": "Admin",
     "role": "Admin",
