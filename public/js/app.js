@@ -6372,7 +6372,7 @@ function _renderBudgetView(c) {
     doc.innerHTML = isImg
       ? `<img src="${url}" class="budget-file-img" alt="Budget">
          <div style="margin-top:6px;text-align:center"><a href="${url}" target="_blank" class="btn-xs">⬇ Unduh</a></div>`
-      : `<iframe src="${url}" class="budget-file-iframe" title="Budget PDF"></iframe>
+      : `<iframe src="https://docs.google.com/viewer?url=${encodeURIComponent(url)}&embedded=true" class="budget-file-iframe" title="Budget PDF"></iframe>
          <div style="margin-top:6px;text-align:center"><a href="${url}" target="_blank" class="btn-xs">⬇ Unduh PDF</a></div>`;
     return;
   }
