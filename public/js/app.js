@@ -1515,7 +1515,7 @@ function renderDashTicker() {
     const when     = daysLeft === 0 ? 'Hari ini' : daysLeft === 1 ? 'Besok' : fmtDate(c.publishDate);
     const icon     = c.format === 'Podcast' ? '🎙' : c.format === 'Monolog' ? '🎤' : c.format === 'Liputan' ? '📰' : '📱';
     const crTxt = Array.isArray(c.creator) ? c.creator.join(', ') : (c.creator || '');
-    items.push(`${icon} <strong>${esc(c.title || 'Konten')}</strong>${crTxt ? ` · ${esc(crTxt)}` : ''} [${esc(c.format)}] — ${when}`);
+    items.push(`${icon} <strong>${esc(c.title || 'Konten')}</strong>${crTxt ? ` · ${esc(crTxt)}` : ''} [${esc(c.format)}] — ${when}${c.publishTime ? ' ⏰ ' + esc(c.publishTime) : ''}`);
   });
 
   if (!items.length) {
@@ -2520,7 +2520,7 @@ function renderTodoList() {
       <span class="badge ${STATUS_CLASS[c.status] || 'badge-ide'} todo-status-badge">${esc(c.status || 'Plan')}</span>
       <span class="todo-planner-body">
         <span class="todo-planner-title">${formatIcon ? formatIcon + ' ' : ''}${esc(c.title || '(Tanpa Judul)')}${tagHtml}</span>
-        <span class="todo-planner-meta">${esc(c.format || '—')} · ${dateStr}</span>
+        <span class="todo-planner-meta">${esc(c.format || '—')} · ${dateStr}${c.publishTime ? ' · ⏰ ' + esc(c.publishTime) : ''}</span>
       </span>
       <span class="todo-planner-arrow">›</span>
     </li>`;
@@ -2900,6 +2900,8 @@ function onFormatChange(fmt) {
     if (multi) multi.classList.add('hidden');
     _setMultiCreators([]);
   }
+  // Tampilkan input jam hanya untuk Podcast/Liputan
+  $('postTime')?.classList.toggle('hidden', !isDual);
 }
 
 /* ── Link / Detail Modal ─────────────────────────────────────────────────── */
@@ -3123,6 +3125,7 @@ function renderNewPostForm(content) {
   if (content) {
     sv('editPostId',     content.id);
     sv('postDate',       content.publishDate || '');
+    sv('postTime',       content.publishTime || '');
     // creator handled after onFormatChange (may be array for Podcast/Liputan)
     sv('postCreator',    Array.isArray(content.creator) ? '' : (content.creator || ''));
     sv('postEditor',     content.editor      || '');
@@ -3260,6 +3263,7 @@ async function savePost() {
   const data = {
     title, platforms,
     publishDate: gv('postDate'),
+    publishTime: FORMATS_DUAL_ROLE.includes(gv('postFormat')) ? (gv('postTime') || '') : '',
     creator,
     editor:      gv('postEditor') || '',
     account:     acctId,
