@@ -1357,7 +1357,6 @@ async function sendWaNotif(phone, message) {
       return { ok: false, detail };
     }
 
-    console.log('WA sent to', target, '—', res);
     return { ok: true, detail: res.detail || 'Terkirim' };
 
   } catch (e) {
