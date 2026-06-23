@@ -7267,7 +7267,10 @@ function downloadPdf()   { downloadPlannerPdf(); }
 document.addEventListener('DOMContentLoaded', async () => {
 
   /* ── Sidebar toggle ─────────────────────────────────────────── */
-  $('sidebarToggle')?.addEventListener('click', () => $('sidebar').classList.toggle('collapsed'));
+  $('sidebarToggle')?.addEventListener('click', () => {
+    const s = $('sidebar');
+    window.innerWidth <= 680 ? s.classList.remove('mobile-open') : s.classList.toggle('collapsed');
+  });
   $('menuBtn')?.addEventListener('click', () => {
     const s = $('sidebar');
     window.innerWidth <= 680 ? s.classList.toggle('mobile-open') : s.classList.toggle('collapsed');
