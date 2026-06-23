@@ -2562,7 +2562,7 @@ ul { list-style: none; }
 /* ══════════════════════════════════════════════════════════════════
    BUDGET MODAL
    ══════════════════════════════════════════════════════════════════ */
-.budget-modal { width: min(780px, 96vw); max-height: 94vh; display: flex; flex-direction: column; }
+.budget-modal { width: 96vw; height: 96vh; max-height: 96vh; display: flex; flex-direction: column; }
 .budget-modal-body { flex: 1; overflow-y: auto; padding: 16px 20px 8px; display: flex; flex-direction: column; gap: 12px; min-height: 0; }
 
 /* Wrapper iframe + cover popout button */
