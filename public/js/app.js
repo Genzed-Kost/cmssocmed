@@ -7269,17 +7269,13 @@ document.addEventListener('DOMContentLoaded', async () => {
   /* ── Sidebar toggle ─────────────────────────────────────────── */
   $('sidebarToggle')?.addEventListener('click', () => {
     const s = $('sidebar');
-    window.innerWidth <= 680 ? s.classList.remove('mobile-open') : s.classList.add('hidden-desktop');
+    // X di dalam sidebar: mobile → tutup, desktop → collapse toggle
+    window.innerWidth <= 680 ? s.classList.remove('mobile-open') : s.classList.toggle('collapsed');
   });
   $('menuBtn')?.addEventListener('click', () => {
     const s = $('sidebar');
-    if (window.innerWidth <= 680) {
-      s.classList.toggle('mobile-open');
-    } else if (s.classList.contains('hidden-desktop')) {
-      s.classList.remove('hidden-desktop');
-    } else {
-      s.classList.toggle('collapsed');
-    }
+    // ☰ di topbar: mobile → buka/tutup overlay, desktop → collapse toggle
+    window.innerWidth <= 680 ? s.classList.toggle('mobile-open') : s.classList.toggle('collapsed');
   });
 
   /* ── Hash routing ───────────────────────────────────────────── */
