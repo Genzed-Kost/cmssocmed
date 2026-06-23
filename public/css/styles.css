@@ -2820,7 +2820,7 @@ ul { list-style: none; }
   gap: 0;
   font-size: .78rem;
   color: #92400e;
-  animation: ticker-scroll var(--ticker-dur, 30s) linear 1 forwards;
+  animation: ticker-scroll var(--ticker-dur, 30s) linear infinite;
 }
 .dash-ticker-track:hover .dash-ticker-inner { animation-play-state: paused; }
 
