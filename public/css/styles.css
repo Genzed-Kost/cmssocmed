@@ -2820,7 +2820,7 @@ ul { list-style: none; }
   gap: 0;
   font-size: .78rem;
   color: #92400e;
-  animation: ticker-scroll var(--ticker-dur, 30s) linear infinite;
+  animation: ticker-scroll var(--ticker-dur, 30s) linear 1;
 }
 .dash-ticker-track:hover .dash-ticker-inner { animation-play-state: paused; }
 
@@ -2837,8 +2837,8 @@ ul { list-style: none; }
 .dash-ticker-item .ticker-meta  { color: #a16207; font-size: .75rem; }
 
 @keyframes ticker-scroll {
-  from { transform: translateX(0); }
-  to   { transform: translateX(-50%); }
+  from { transform: translateX(100%); }
+  to   { transform: translateX(-100%); }
 }
 
 /* ══════════════════════════════════════════════════════════════════

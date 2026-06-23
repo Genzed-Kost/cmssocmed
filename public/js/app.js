@@ -1525,7 +1525,7 @@ function renderDashTicker() {
 
   // Sort by date (closest first) — crude but effective
   const separator = '&nbsp;&nbsp;&nbsp;·&nbsp;&nbsp;&nbsp;';
-  inner.innerHTML = items.join(separator) + separator + items.join(separator);
+  inner.innerHTML = items.join(separator);
   inner.style.animationDuration = `${Math.max(18, items.length * 7)}s`;
   ticker.classList.remove('hidden');
 }
@@ -7098,7 +7098,8 @@ function setCachedNews(text) { localStorage.setItem(NEWS_KEY, JSON.stringify({ t
 async function fetchNews() {
   $('newsContent').innerHTML = `<div class="news-loading"><div class="spinner"></div><span>Mengambil info terkini dari AI…</span></div>`;
   $('newsTimestamp').textContent = '';
-  const prompt = `Berikan tepat 5 berita atau informasi terbaru mengenai Presiden Republik Indonesia Prabowo Subianto dan kebijakan pemerintahan saat ini. Gunakan format persis seperti ini untuk setiap item (wajib diikuti):
+  const today = new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
+  const prompt = `Hari ini adalah ${today}. Berikan tepat 5 berita atau informasi terbaru (dalam 30 hari terakhir) mengenai Presiden Republik Indonesia Prabowo Subianto dan kebijakan pemerintahan. Jika tidak ada informasi terbaru yang kamu ketahui hingga tanggal ini, jelaskan apa yang terakhir kamu ketahui dengan menyebutkan perkiraan tanggalnya. Gunakan format persis seperti ini untuk setiap item (wajib diikuti):
 
 ITEM_1
 JUDUL: [tulis judul berita di sini]
