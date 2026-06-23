@@ -90,7 +90,8 @@ ul { list-style: none; }
 .sidebar.collapsed { width: 60px; }
 .sidebar.collapsed .logo-text,
 .sidebar.collapsed .nav-item span,
-.sidebar.collapsed .sidebar-footer { display: none; }
+.sidebar.collapsed .sidebar-footer,
+.sidebar.collapsed #sidebarToggle { display: none; }
 .sidebar.collapsed .nav-item { justify-content: center; padding: 10px 0; }
 .sidebar.collapsed .logo-mark { margin: 0 auto; }
 
