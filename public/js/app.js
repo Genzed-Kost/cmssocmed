@@ -6272,7 +6272,9 @@ function openBudgetModal(contentId) {
     _renderBudgetView(c);
   }
   _updateBudgetTotal();
-  $('budgetModal')?.classList.remove('hidden');
+  const modal = $('budgetModal');
+  modal?.classList.remove('hidden');
+  modal?.querySelector('.modal')?.classList.add('fullscreen');
 }
 
 function switchBudgetTab(tab) {
@@ -6406,7 +6408,9 @@ function _renderBudgetView(c) {
 }
 
 function closeBudgetModal() {
-  $('budgetModal')?.classList.add('hidden');
+  const bm = $('budgetModal');
+  bm?.classList.add('hidden');
+  bm?.querySelector('.modal')?.classList.remove('fullscreen');
   $('budgetDownloadBtn')?.classList.add('hidden');
   _budgetContentId = null;
   _budgetRows = [];
