@@ -6241,6 +6241,7 @@ const BUDGET_UNITS = ['Orang','Hari','Jam','Kali','Buah','Paket','Box','Porsi','
 
 let _budgetUploadFile = null;  // File object yang dipilih untuk upload
 let _budgetActiveTab  = 'manual';
+let _budgetFileRef    = null;  // { url, name } file tersimpan untuk download
 
 function openBudgetModal(contentId) {
   const c = state.contents.find(x => x.id === contentId);
@@ -6367,6 +6368,8 @@ function _renderBudgetView(c) {
   // Tampilkan file jika ada
   if (c.budgetFile?.url) {
     const { name, url } = c.budgetFile;
+    _budgetFileRef = { url, name };
+    $('budgetDlBtn')?.classList.remove('hidden');
     const isImg = /\.(jpg|jpeg|png)$/i.test(name);
     doc.innerHTML = isImg
       ? `<img src="${url}" class="budget-file-img" alt="Budget">`
@@ -6406,6 +6409,23 @@ function _renderBudgetView(c) {
     </table>`;
 }
 
+async function downloadBudgetFile() {
+  if (!_budgetFileRef?.url) return;
+  const btn = $('budgetDlBtn');
+  const orig = btn?.textContent;
+  if (btn) btn.textContent = 'Mengunduh…';
+  try {
+    const res  = await fetch(_budgetFileRef.url);
+    const blob = await res.blob();
+    const a    = document.createElement('a');
+    a.href     = URL.createObjectURL(blob);
+    a.download = _budgetFileRef.name;
+    a.click();
+    setTimeout(() => URL.revokeObjectURL(a.href), 5000);
+  } catch { toast('Gagal mengunduh file', 'error'); }
+  finally { if (btn) btn.textContent = orig; }
+}
+
 function toggleBudgetFullscreen() {
   const wrap = document.querySelector('.budget-iframe-wrap');
   if (!wrap) return;
@@ -6419,7 +6439,8 @@ function toggleBudgetFullscreen() {
 function closeBudgetModal() {
   if (document.fullscreenElement) document.exitFullscreen().catch(() => {});
   $('budgetModal')?.classList.add('hidden');
-  $('budgetDownloadBtn')?.classList.add('hidden');
+  $('budgetDlBtn')?.classList.add('hidden');
+  _budgetFileRef = null;
   _budgetContentId = null;
   _budgetRows = [];
 }
