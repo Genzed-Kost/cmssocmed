@@ -6368,19 +6368,31 @@ function _renderBudgetView(c) {
   if (c.budgetFile?.url) {
     const { name, url } = c.budgetFile;
     const isImg = /\.(jpg|jpeg|png)$/i.test(name);
-    // Simpan URL untuk tombol unduh di footer
-    const dlBtn = $('budgetDownloadBtn');
-    if (dlBtn) { dlBtn.href = url; dlBtn.classList.remove('hidden'); }
 
-    doc.innerHTML = isImg
-      ? `<img src="${url}" class="budget-file-img" alt="Budget">`
-      : `<div class="budget-iframe-wrap">
-           <iframe id="budgetPdfFrame" src="https://docs.google.com/viewer?url=${encodeURIComponent(url)}&embedded=true" class="budget-file-iframe" title="Budget PDF"></iframe>
-           <div class="budget-iframe-cover"></div>
-           <button class="budget-fs-btn" onclick="toggleBudgetFullscreen()" title="Fullscreen">
-             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M8 3H5a2 2 0 00-2 2v3m18 0V5a2 2 0 00-2-2h-3m0 18h3a2 2 0 002-2v-3M3 16v3a2 2 0 002 2h3"/></svg>
-           </button>
-         </div>`;
+    if (isImg) {
+      // Gambar: fetch sebagai blob agar URL GitHub tersembunyi
+      doc.innerHTML = `<div style="text-align:center;padding:24px;color:var(--muted)">Memuat gambar…</div>`;
+      fetch(url).then(r => r.blob()).then(blob => {
+        const blobUrl = URL.createObjectURL(blob);
+        doc.innerHTML = `<img src="${blobUrl}" class="budget-file-img" alt="Budget">`;
+        const dlBtn = $('budgetDownloadBtn');
+        if (dlBtn) { dlBtn.href = blobUrl; dlBtn.download = name; dlBtn.classList.remove('hidden'); }
+      }).catch(() => { doc.innerHTML = `<p class="budget-doc-empty">Gagal memuat file.</p>`; });
+    } else {
+      // PDF: fetch sebagai blob, render dengan native browser (URL GitHub tersembunyi)
+      doc.innerHTML = `<div style="text-align:center;padding:24px;color:var(--muted)">Memuat dokumen…</div>`;
+      fetch(url).then(r => r.blob()).then(blob => {
+        const blobUrl = URL.createObjectURL(blob);
+        doc.innerHTML = `<div class="budget-iframe-wrap">
+          <embed src="${blobUrl}" type="application/pdf" class="budget-file-iframe">
+          <button class="budget-fs-btn" onclick="toggleBudgetFullscreen()" title="Fullscreen">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M8 3H5a2 2 0 00-2 2v3m18 0V5a2 2 0 00-2-2h-3m0 18h3a2 2 0 002-2v-3M3 16v3a2 2 0 002 2h3"/></svg>
+          </button>
+        </div>`;
+        const dlBtn = $('budgetDownloadBtn');
+        if (dlBtn) { dlBtn.href = blobUrl; dlBtn.download = name; dlBtn.classList.remove('hidden'); }
+      }).catch(() => { doc.innerHTML = `<p class="budget-doc-empty">Gagal memuat dokumen.</p>`; });
+    }
     return;
   }
 
