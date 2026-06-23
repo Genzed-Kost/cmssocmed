@@ -1,5 +1,13 @@
 [
   {
+    "id": "mqqpdrfjprcl5",
+    "user": "Admin",
+    "role": "Admin",
+    "action": "login",
+    "target": "masuk ke sistem sebagai Admin",
+    "timestamp": "2026-06-23T13:51:43.903Z"
+  },
+  {
     "id": "mqqpdguk7zkwn",
     "user": "Umar",
     "role": "Publisher",
