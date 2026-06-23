@@ -6370,12 +6370,10 @@ function _renderBudgetView(c) {
     const { name, url } = c.budgetFile;
     const isImg = /\.(jpg|jpeg|png)$/i.test(name);
     doc.innerHTML = isImg
-      ? `<img src="${url}" class="budget-file-img" alt="Budget" style="max-width:100%;border-radius:8px">
-         <div style="margin-top:8px;text-align:center"><a href="${url}" target="_blank" class="btn-xs">⬇ Unduh File</a></div>`
-      : `<div class="budget-file-pdf" style="padding:24px 0;justify-content:center">
-           <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
-           <a href="${url}" target="_blank" style="font-weight:500">${esc(name)}</a>
-         </div>`;
+      ? `<img src="${url}" class="budget-file-img" alt="Budget">
+         <div style="margin-top:6px;text-align:center"><a href="${url}" target="_blank" class="btn-xs">⬇ Unduh</a></div>`
+      : `<iframe src="${url}" class="budget-file-iframe" title="Budget PDF"></iframe>
+         <div style="margin-top:6px;text-align:center"><a href="${url}" target="_blank" class="btn-xs">⬇ Unduh PDF</a></div>`;
     return;
   }
 
