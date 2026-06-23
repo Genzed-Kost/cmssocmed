@@ -2456,6 +2456,7 @@ function renderTodoList() {
     .filter(c => {
       if (DONE.includes(c.status)) return false;
       if (admin) return true;
+      if (PRIORITY_FORMATS.includes(c.format)) return true; // Podcast/Liputan tampil ke semua user
       const creators = Array.isArray(c.creator) ? c.creator : (c.creator ? [c.creator] : []);
       return creators.includes(me);
     })
