@@ -1399,25 +1399,32 @@
       </button>
     </div>
     <div class="modal-body budget-modal-body">
-      <div class="budget-table-wrap">
-        <table class="budget-table">
-          <thead>
-            <tr>
-              <th>Item</th>
-              <th style="width:60px;text-align:center">Qty</th>
-              <th style="width:80px">Satuan</th>
-              <th style="width:120px;text-align:right">Harga/Unit</th>
-              <th style="width:120px;text-align:right">Subtotal</th>
-              <th style="width:36px"></th>
-            </tr>
-          </thead>
-          <tbody id="budgetTableBody"></tbody>
-        </table>
+      <!-- Mode edit (Administrator) -->
+      <div id="budgetEditArea">
+        <div class="budget-table-wrap">
+          <table class="budget-table">
+            <thead>
+              <tr>
+                <th>Item</th>
+                <th style="width:60px;text-align:center">Qty</th>
+                <th style="width:80px">Satuan</th>
+                <th style="width:120px;text-align:right">Harga/Unit</th>
+                <th style="width:120px;text-align:right">Subtotal</th>
+                <th style="width:36px"></th>
+              </tr>
+            </thead>
+            <tbody id="budgetTableBody"></tbody>
+          </table>
+        </div>
+        <button class="budget-add-btn" onclick="addBudgetRow()">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          Tambah Item
+        </button>
       </div>
-      <button class="budget-add-btn" onclick="addBudgetRow()">
-        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-        Tambah Item
-      </button>
+      <!-- Mode view (semua user selain Administrator) -->
+      <div id="budgetViewArea" class="hidden">
+        <div id="budgetViewDoc" class="budget-doc"></div>
+      </div>
     </div>
     <div class="modal-foot" style="justify-content:space-between;align-items:center">
       <div class="budget-total-wrap">
@@ -1426,7 +1433,7 @@
       </div>
       <div style="display:flex;gap:8px">
         <button class="btn-md" onclick="closeBudgetModal()">Tutup</button>
-        <button class="btn-md blue" onclick="saveBudget()">💾 Simpan</button>
+        <button id="budgetSaveBtn" class="btn-md blue" onclick="saveBudget()">💾 Simpan</button>
       </div>
     </div>
   </div>

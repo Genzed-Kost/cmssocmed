@@ -2605,7 +2605,8 @@ function renderPlanner(page) {
       : '';
     const isDualFmt = FORMATS_DUAL_ROLE.includes(c.format);
     const budgetTotal = (c.budget||[]).reduce((s,r)=>s+(r.qty||0)*(r.price||0),0);
-    const budgetBtn = (isAdministrator() && isDualFmt)
+    // Tombol budget tampil untuk semua user jika format Podcast/Liputan
+    const budgetBtn = isDualFmt
       ? `<button class="btn-xs budget-planner-btn${budgetTotal>0?' has-budget':''}"
            onclick="openBudgetModal('${c.id}')" title="Budget Produksi">
            💰
@@ -6244,13 +6245,56 @@ function openBudgetModal(contentId) {
   if (!c) return;
   _budgetContentId = contentId;
   _budgetRows = (c.budget || []).map(r => ({ ...r }));
-  if (!_budgetRows.length) _budgetRows.push(_emptyBudgetRow());
 
   const sub = $('budgetModalSubtitle');
   if (sub) sub.textContent = `${c.title || '—'}  ·  ${c.format || ''}  ·  ${fmtDate(c.publishDate) || '—'}`;
 
-  _renderBudgetTable();
+  const editMode = isAdministrator();
+  $('budgetEditArea')?.classList.toggle('hidden', !editMode);
+  $('budgetViewArea')?.classList.toggle('hidden', editMode);
+  $('budgetSaveBtn')?.classList.toggle('hidden', !editMode);
+
+  if (editMode) {
+    if (!_budgetRows.length) _budgetRows.push(_emptyBudgetRow());
+    _renderBudgetTable();
+  } else {
+    _renderBudgetView(c);
+  }
+  _updateBudgetTotal();
   $('budgetModal')?.classList.remove('hidden');
+}
+
+function _renderBudgetView(c) {
+  const doc = $('budgetViewDoc');
+  if (!doc) return;
+  const rows = (c.budget || []);
+  if (!rows.length) {
+    doc.innerHTML = `<p class="budget-doc-empty">Belum ada data budget.</p>`;
+    return;
+  }
+  const rowsHtml = rows.map((r, i) => `
+    <tr>
+      <td class="bv-no">${i + 1}</td>
+      <td class="bv-item">${esc(r.item)}</td>
+      <td class="bv-qty">${r.qty || 0}</td>
+      <td class="bv-unit">${esc(r.unit || '')}</td>
+      <td class="bv-price">Rp ${(r.price || 0).toLocaleString('id-ID')}</td>
+      <td class="bv-sub">Rp ${((r.qty || 0) * (r.price || 0)).toLocaleString('id-ID')}</td>
+    </tr>`).join('');
+  doc.innerHTML = `
+    <table class="budget-view-table">
+      <thead>
+        <tr>
+          <th class="bv-no">No</th>
+          <th class="bv-item">Item</th>
+          <th class="bv-qty">Qty</th>
+          <th class="bv-unit">Satuan</th>
+          <th class="bv-price">Harga/Unit</th>
+          <th class="bv-sub">Subtotal</th>
+        </tr>
+      </thead>
+      <tbody>${rowsHtml}</tbody>
+    </table>`;
 }
 
 function closeBudgetModal() {

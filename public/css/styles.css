@@ -2605,6 +2605,24 @@ ul { list-style: none; }
   white-space: nowrap;
 }
 .budget-planner-btn.has-budget { border-color: #86efac; color: #14532d; background: #f0fdf4; font-weight: 600; }
+
+/* Budget view dokumen (read-only) */
+.budget-doc { padding: 4px 0; }
+.budget-doc-empty { color: var(--muted); font-size: .82rem; text-align: center; padding: 24px 0; }
+.budget-view-table { width: 100%; border-collapse: collapse; font-size: .82rem; }
+.budget-view-table thead th {
+  padding: 8px 10px; text-align: left; font-size: .72rem; font-weight: 600;
+  color: var(--muted); background: var(--bg); border-bottom: 2px solid var(--border);
+  white-space: nowrap;
+}
+.budget-view-table tbody tr td { padding: 8px 10px; border-bottom: 1px solid var(--border); vertical-align: middle; }
+.budget-view-table tbody tr:last-child td { border-bottom: none; }
+.budget-view-table tbody tr:hover td { background: var(--hover); }
+.bv-no   { width: 32px; color: var(--muted); text-align: center; }
+.bv-item { font-weight: 500; }
+.bv-qty, .bv-unit { width: 60px; text-align: center; color: var(--muted); }
+.bv-price, .bv-sub { width: 130px; text-align: right; white-space: nowrap; }
+.bv-sub  { font-weight: 600; color: var(--text); }
 .budget-planner-btn:hover { border-color: #f59e0b; background: #fef3c7; color: #78350f; }
 
 /* ══════════════════════════════════════════════════════════════════
