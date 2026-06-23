@@ -2563,8 +2563,14 @@ ul { list-style: none; }
    BUDGET MODAL
    ══════════════════════════════════════════════════════════════════ */
 .budget-modal { width: min(780px, 96vw); max-height: 94vh; display: flex; flex-direction: column; }
-.budget-modal.fullscreen { width: 95vw; max-width: 95vw; height: 95vh; max-height: 95vh; }
+.budget-modal.fullscreen { width: 100vw; max-width: 100vw; height: 100vh; max-height: 100vh; border-radius: 0; margin: 0; }
 .budget-modal-body { flex: 1; overflow-y: auto; padding: 16px 20px 8px; display: flex; flex-direction: column; gap: 12px; min-height: 0; }
+.budget-modal.fullscreen .budget-modal-body { padding: 0; overflow: hidden; }
+
+/* Wrapper iframe + cover popout button */
+.budget-iframe-wrap { position: relative; flex: 1; display: flex; flex-direction: column; min-height: 0; }
+.budget-file-iframe { width: 100%; flex: 1; height: calc(100vh - 120px); border: none; display: block; }
+.budget-iframe-cover { position: absolute; top: 0; right: 0; width: 56px; height: 52px; background: var(--card); z-index: 10; border-radius: 0 0 0 6px; }
 
 .budget-table-wrap { overflow-x: auto; border: 1px solid var(--border); border-radius: 10px; }
 .budget-table { width: 100%; border-collapse: collapse; font-size: .8rem; }
