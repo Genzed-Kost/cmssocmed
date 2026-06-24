@@ -364,7 +364,7 @@ ul { list-style: none; }
 
 .page-content { flex: 1; }
 
-.page-inner { padding: 24px 28px; }
+.page-inner { padding: 16px 20px; }
 .page-inner-narrow { padding: 24px; max-width: 720px; }
 
 /* ── Cards ────────────────────────────────────────────────────── */
@@ -399,7 +399,7 @@ ul { list-style: none; }
   border: 1px solid rgba(226,232,240,.7);
   border-radius: var(--radius);
   min-width: 0;  /* grid blowout prevention */
-  padding: 18px 20px;
+  padding: 12px 16px;
   box-shadow: var(--shadow);
   position: relative;
   overflow: hidden;
@@ -412,8 +412,8 @@ ul { list-style: none; }
   background: linear-gradient(90deg, var(--blue), var(--red));
   border-radius: var(--radius) var(--radius) 0 0;
 }
-.stat-label { font-size: .68rem; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: .08em; margin-bottom: 8px; }
-.stat-value { font-size: 2rem; font-weight: 900; line-height: 1; margin-bottom: 5px; letter-spacing: -.02em; }
+.stat-label { font-size: .68rem; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: .08em; margin-bottom: 4px; }
+.stat-value { font-size: 1.7rem; font-weight: 900; line-height: 1; margin-bottom: 3px; letter-spacing: -.02em; }
 .stat-value.green  { color: var(--green); }
 .stat-value.yellow { color: var(--yellow); }
 .stat-value.blue   { color: var(--blue); }
@@ -423,7 +423,7 @@ ul { list-style: none; }
   display: grid;
   min-width: 0;
   grid-template-columns: repeat(2, 1fr);
-  gap: 16px;
+  gap: 10px;
 }
 
 /* KPI List */
@@ -1291,10 +1291,10 @@ ul { list-style: none; }
 .stat-inp-card.open { display: block; }
 
 /* ── Dashboard Planner Sections ──────────────────────────────── */
-.dash-section { margin-top: 28px; }
+.dash-section { margin-top: 18px; }
 .dash-section-head {
   display: flex; align-items: center; justify-content: space-between;
-  margin-bottom: 14px;
+  margin-bottom: 10px;
 }
 .dash-section-title {
   font-size: .72rem; font-weight: 700;
@@ -1585,7 +1585,7 @@ ul { list-style: none; }
 /* ── Dashboard Period Filter Bar ─────────────────────────────── */
 .dash-month-bar {
   display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
-  margin-bottom: 14px; padding: 8px 14px;
+  margin-bottom: 10px; padding: 6px 10px;
   background: var(--surface); border: 1px solid rgba(226,232,240,.7);
   border-radius: var(--radius); width: 100%;
   box-shadow: var(--shadow);
