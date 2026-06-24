@@ -95,7 +95,7 @@ class GitHubDB {
     }
 
     const json = await res.json();
-    const content = atob(json.content.replace(/\s/g, ''));
+    const content = decodeURIComponent(escape(atob(json.content.replace(/\s/g, ''))));
     let data;
     try { data = JSON.parse(content); }
     catch { data = content; }
