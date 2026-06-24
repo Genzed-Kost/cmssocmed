@@ -25,10 +25,10 @@ const CLAUDE_MODELS = ['claude-3-haiku-20240307', 'claude-haiku-4-5', 'claude-3-
 // Model yang mendukung thinkingConfig (gemini-2.5+)
 const GEMINI_THINKING_MODELS = new Set(['gemini-2.5-flash', 'gemini-2.5-pro']);
 const GEMINI_MODELS = [
-  'gemini-2.5-flash',   // utama — thinking support
-  'gemini-2.0-flash',   // fallback stabil
+  'gemini-2.5-flash',      // utama — thinking support
+  'gemini-2.0-flash',      // fallback stabil
   'gemini-2.0-flash-lite', // fallback ringan
-  'gemini-1.5-flash-002', // fallback lama v2
+  'gemini-1.5-flash',      // fallback lama
 ];
 const NEWS_KEY        = 'cmsph_news_v1';
 const NEWS_TTL        = 60 * 60 * 1000;
