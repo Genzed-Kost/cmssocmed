@@ -1,5 +1,13 @@
 [
   {
+    "id": "mqtrco4dzo2h9",
+    "user": "Admin",
+    "role": "Admin",
+    "action": "edit user",
+    "target": "Umar → Umar (Publisher)",
+    "timestamp": "2026-06-25T17:10:10.717Z"
+  },
+  {
     "id": "mqtrca211vlyy",
     "user": "Admin",
     "role": "Admin",
