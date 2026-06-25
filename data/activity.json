@@ -1,5 +1,13 @@
 [
   {
+    "id": "mqtsfninzhjdl",
+    "user": "Admin",
+    "role": "Admin",
+    "action": "edit user",
+    "target": "Siska → Siska (Administrator)",
+    "timestamp": "2026-06-25T17:40:29.519Z"
+  },
+  {
     "id": "mqtsfierpnssz",
     "user": "Admin",
     "role": "Admin",
