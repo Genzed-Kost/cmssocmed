@@ -5215,7 +5215,7 @@ function renderStatChart() {
   const summaryDefs = SUMMARY_CARDS[platId] || SUMMARY_CARDS.youtube;
   const latestRow   = displayRows[displayRows.length - 1];
   const rangeLabel  = (fromM && toM)
-    ? `${fmtMonth(fromM)} – ${fmtMonth(toM)}`
+    ? (fromM === toM ? fmtMonth(fromM) : `${fmtMonth(fromM)} – ${fmtMonth(toM)}`)
     : `${displayRows.length} ${isWeekly?'minggu':'bulan'}`;
 
   // Periode sebelumnya untuk trend %
