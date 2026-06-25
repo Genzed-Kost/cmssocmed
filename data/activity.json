@@ -1,5 +1,13 @@
 [
   {
+    "id": "mqtrtdk9dheci",
+    "user": "Admin",
+    "role": "Admin",
+    "action": "reset password",
+    "target": "Wedy",
+    "timestamp": "2026-06-25T17:23:10.185Z"
+  },
+  {
     "id": "mqtrt0gvnoj5o",
     "user": "Admin",
     "role": "Admin",
