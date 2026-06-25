@@ -1,5 +1,13 @@
 [
   {
+    "id": "mqtre88jw60kp",
+    "user": "Admin",
+    "role": "Admin",
+    "action": "logout",
+    "target": "keluar dari sistem",
+    "timestamp": "2026-06-25T17:11:23.443Z"
+  },
+  {
     "id": "mqtrdtxfbqv87",
     "user": "Admin",
     "role": "Admin",
