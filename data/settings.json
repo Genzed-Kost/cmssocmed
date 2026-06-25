@@ -26,7 +26,8 @@
     {
       "name": "Luthfi",
       "role": "Creator",
-      "phone": "085289497329"
+      "phone": "085289497329",
+      "passwordHash": "e2c0d4325a5f2ffbb18dbae5cfd535548d0364b394a05f023b35d8ee025f7985"
     },
     {
       "name": "Dio",
