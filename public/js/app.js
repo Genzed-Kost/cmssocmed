@@ -5227,11 +5227,14 @@ function renderStatChart() {
         : prevRows.reduce((s, r) => s + (+r[card.key] || 0), 0);
       let trendHtml = '';
       if (prevVal > 0 && !isPt) {
-        const pct   = ((val - prevVal) / prevVal * 100);
-        const up    = pct >= 0;
-        const color = up ? '#16a34a' : '#dc2626';
-        const arrow = up ? '↑' : '↓';
-        trendHtml = `<span style="font-size:.65rem;color:${color};font-weight:700;margin-left:4px">${arrow}${Math.abs(pct).toFixed(1)}%</span>`;
+        const pct      = ((val - prevVal) / prevVal * 100);
+        const up       = pct >= 0;
+        const color    = up ? '#16a34a' : '#dc2626';
+        const arrow    = up ? '↑' : '↓';
+        const prevFrom = prevRows[0]?.[isWeekly?'week':'month'] || '';
+        const prevTo   = prevRows[prevRows.length-1]?.[isWeekly?'week':'month'] || '';
+        const prevLabel = prevFrom ? `vs ${fmtMonth(prevFrom)}${prevTo && prevTo!==prevFrom ? ' – '+fmtMonth(prevTo) : ''}` : 'vs periode sebelumnya';
+        trendHtml = `<span style="font-size:.65rem;color:${color};font-weight:700;margin-left:4px" title="${prevLabel}">${arrow}${Math.abs(pct).toFixed(1)}% <span style="font-weight:400;opacity:.75">(${prevLabel})</span></span>`;
       }
       const period = isPt
         ? `Bulan ${fmtMonth(latestRow?.month || '')}`
@@ -5426,6 +5429,44 @@ function renderStatChart() {
       maintainAspectRatio: true,
       aspectRatio: isMobile ? 1.8 : 2.5,
       interaction: { mode: 'index', intersect: false },
+      onClick: (e, elements) => {
+        if (!elements.length) {
+          // klik kosong → reset ke summary keseluruhan
+          renderStatChart();
+          return;
+        }
+        const idx   = elements[0].index;
+        const row   = displayRows[idx];
+        if (!row) return;
+        const mLabel = isWeekly ? (row.week||'') : fmtMonth(row.month||'');
+        // Render summary cards untuk bulan/minggu yang diklik
+        if (summaryWrap) summaryWrap.innerHTML = `<div class="stat-summary-row">
+          ${summaryDefs.map(card => {
+            const fDef = platM.fields.find(f => f.key === card.key) || { key: card.key, fmt: card.fmt||'num' };
+            const val  = +(row[card.key] || 0);
+            // Bandingkan dengan baris sebelumnya
+            const prevRow = displayRows[idx - 1];
+            const prevVal = prevRow ? +(prevRow[card.key] || 0) : 0;
+            let trendHtml = '';
+            if (prevVal > 0 && !card.eom) {
+              const pct   = ((val - prevVal) / prevVal * 100);
+              const up    = pct >= 0;
+              const color = up ? '#16a34a' : '#dc2626';
+              const prevLabel = `vs ${isWeekly ? (prevRow.week||'') : fmtMonth(prevRow.month||'')}`;
+              trendHtml = `<span style="font-size:.65rem;color:${color};font-weight:700;margin-left:4px" title="${prevLabel}">${up?'↑':'↓'}${Math.abs(pct).toFixed(1)}% <span style="font-weight:400;opacity:.75">(${prevLabel})</span></span>`;
+            }
+            const desc = STAT_FIELD_DESC[card.key] || '';
+            return `<div class="stat-summary-card" style="outline:2px solid ${platM.color}33">
+              <div class="stat-sum-label">${card.label}${desc ? `<span class="stat-info-wrap"><svg class="stat-info-icon" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg><span class="stat-info-tip">${esc(desc)}</span></span>` : ''}</div>
+              <div style="display:flex;align-items:baseline;gap:2px">
+                <div class="stat-sum-val" style="color:${platM.color}">${fmtStatVal(val, fDef.fmt||card.fmt||'num')}</div>
+                ${trendHtml}
+              </div>
+              <div class="stat-sum-period">${mLabel} <span style="font-size:.6rem;color:var(--muted)">(klik kosong untuk reset)</span></div>
+            </div>`;
+          }).join('')}
+        </div>`;
+      },
       plugins: {
         legend: { display: true, position: 'top',
           labels: { boxWidth: 12, font: { size: isMobile ? 9 : 11 } }
