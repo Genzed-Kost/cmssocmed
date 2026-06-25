@@ -1,5 +1,13 @@
 [
   {
+    "id": "mqtsfw8pvbhwt",
+    "user": "Admin",
+    "role": "Admin",
+    "action": "edit user",
+    "target": "Bethap → Bethap (Creator)",
+    "timestamp": "2026-06-25T17:40:40.825Z"
+  },
+  {
     "id": "mqtsfsmteb6cf",
     "user": "Admin",
     "role": "Admin",
