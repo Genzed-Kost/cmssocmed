@@ -5234,11 +5234,12 @@ function renderStatChart() {
         const prevFrom = prevRows[0]?.[isWeekly?'week':'month'] || '';
         const prevTo   = prevRows[prevRows.length-1]?.[isWeekly?'week':'month'] || '';
         const prevLabel = prevFrom ? `vs ${fmtMonth(prevFrom)}${prevTo && prevTo!==prevFrom ? ' – '+fmtMonth(prevTo) : ''}` : 'vs periode sebelumnya';
-        trendHtml = `<span style="font-size:.65rem;color:${color};font-weight:700;margin-left:4px" title="${prevLabel}">${arrow}${Math.abs(pct).toFixed(1)}% <span style="font-weight:400;opacity:.75">(${prevLabel})</span></span>`;
+        trendHtml = `<span style="font-size:.65rem;color:${color};font-weight:700;margin-left:4px;cursor:default" title="${prevLabel}">${arrow}${Math.abs(pct).toFixed(1)}%</span>`;
       }
       const period = isPt
         ? `Bulan ${fmtMonth(latestRow?.month || '')}`
         : `Total ${rangeLabel}`;
+      const exactNum = val.toLocaleString('id-ID');
       const desc = STAT_FIELD_DESC[card.key] || '';
       return `
         <div class="stat-summary-card">
@@ -5250,7 +5251,7 @@ function renderStatChart() {
             <div class="stat-sum-val" style="color:${platM.color}">${fmtStatVal(val, fDef.fmt || card.fmt || 'num')}</div>
             ${trendHtml}
           </div>
-          <div class="stat-sum-period">${period}</div>
+          <div class="stat-sum-period" title="${exactNum}" style="cursor:default">${period}</div>
         </div>`;
     }).join('')}
   </div>`;
