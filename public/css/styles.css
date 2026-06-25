@@ -2439,6 +2439,9 @@ ul { list-style: none; }
 .user-item:hover .user-edit { opacity: 1; }
 .user-edit:hover { color: var(--blue); }
 .user-del  { margin-left: 4px; }
+.user-reset-pw { background:none; border:none; padding:2px 4px; font-size:.85rem; color:var(--muted); cursor:pointer; opacity:0; transition:opacity .15s; }
+.user-item:hover .user-reset-pw { opacity:1; }
+.user-reset-pw:hover { color:var(--yellow); }
 
 /* ── Link button (inline text links) ───────────────────────────── */
 .link-btn {

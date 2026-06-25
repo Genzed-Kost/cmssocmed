@@ -4099,6 +4099,7 @@ function renderUserList() {
       </div>
       <button class="user-pw-btn ${hasPw ? 'has-pw' : 'no-pw'}" onclick="editUser('${esc(name)}')" title="${hasPw ? 'Password diatur, klik ubah' : 'Belum ada password, klik untuk set'}">${hasPw ? '🔒' : '🔓'}</button>
       ${roleBadge}
+      ${role?.toLowerCase() !== 'admin' ? `<button class="user-reset-pw" onclick="resetUserPassword('${esc(name)}')" title="Reset password">↺</button>` : ''}
       <button class="user-edit" onclick="editUser('${esc(name)}')" title="Edit">✏</button>
       <button class="user-del"  onclick="deleteUser('${esc(name)}')" title="Hapus">×</button>
     </li>`;
@@ -4135,6 +4136,24 @@ async function addUser() {
     await logActivity(currentUser(), 'tambah anggota', `${name} (${role})`);
     toast(`${name} (${role}) ditambahkan`, 'success');
   } catch (e) { toast('Gagal: ' + e.message, 'error'); }
+}
+
+async function resetUserPassword(name) {
+  showConfirm(`Reset password "${name}"? Password akan dikosongkan dan user tidak bisa login sampai Admin mengisi password baru.`, async () => {
+    const settings = state.settings;
+    const idx = (settings.users||[]).findIndex(u => getUserName(u) === name);
+    if (idx === -1) return;
+    settings.users[idx] = { ...settings.users[idx], passwordHash: '' };
+    state.settings = settings;
+    setPubUsers(settings.users);
+    renderUserList();
+    try {
+      state.shas.settings = await window.db.writeData('settings', settings, `Reset password: ${name}`);
+      saveDataCache();
+      await logActivity(currentUser(), 'reset password', name);
+      toast(`Password ${name} berhasil direset`, 'success');
+    } catch (e) { toast('Gagal: ' + e.message, 'error'); }
+  });
 }
 
 async function deleteUser(name) {
@@ -7689,7 +7708,8 @@ document.addEventListener('DOMContentLoaded', async () => {
   window.exportStatCSV          = exportStatCSV;
   window.importStatFromFile     = importStatFromFile;
   window.triggerYouTubeSync     = triggerYouTubeSync;
-  window.deleteUser     = deleteUser;
+  window.deleteUser          = deleteUser;
+  window.resetUserPassword   = resetUserPassword;
   window.switchStatAcct     = switchStatAcct;
   window.switchStatPlat     = switchStatPlat;
   window.openStatEdit       = openStatEdit;
