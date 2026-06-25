@@ -5172,14 +5172,14 @@ function renderStatChart() {
   // eom=true → tampilkan nilai bulan terakhir (point-in-time), bukan sum
   const SUMMARY_CARDS = {
     youtube:   [
-      { key:'jmlVideo',        label:'Total Video',         eom:false },
+      { key:'watchHours',      label:'Total Watch Hours',   eom:false },
       { key:'totalViews',      label:'Total Views',         eom:false },
       { key:'totalEngagement', label:'Total Engagement',    eom:false },
       { key:'subsEOM',         label:'Subscribers (EOM)',   eom:true  },
     ],
     tiktok:    [
-      { key:'jmlVideo',        label:'Total Video',         eom:false },
-      { key:'totalVideoViews', label:'Total Views',         eom:false },
+      { key:'profileViews',    label:'Total Profile Views', eom:false },
+      { key:'totalVideoViews', label:'Total Vid Views',     eom:false },
       { key:'totalEngagement', label:'Total Engagement',    eom:false },
       { key:'followersEOM',    label:'Followers (EOM)',     eom:true  },
     ],
