@@ -1,5 +1,13 @@
 [
   {
+    "id": "mqtsf8xv79835",
+    "user": "Admin",
+    "role": "Admin",
+    "action": "edit user",
+    "target": "Dio → Dio (Creator)",
+    "timestamp": "2026-06-25T17:40:10.627Z"
+  },
+  {
     "id": "mqtsf4i7fmu2e",
     "user": "Admin",
     "role": "Admin",
