@@ -1,19 +1,11 @@
 [
   {
-    "id": "mqtq9l3vb073o",
+    "id": "mqtq9wsqmav6f",
     "user": "Admin",
     "role": "Admin",
     "action": "logout",
     "target": "keluar dari sistem",
-    "timestamp": "2026-06-25T16:39:47.227Z"
-  },
-  {
-    "id": "mqtq6vmrn1gpy",
-    "user": "Admin",
-    "role": "Admin",
-    "action": "login",
-    "target": "masuk ke sistem sebagai Admin",
-    "timestamp": "2026-06-25T16:37:40.899Z"
+    "timestamp": "2026-06-25T16:40:02.378Z"
   },
   {
     "id": "mqtotpaqv99la",
