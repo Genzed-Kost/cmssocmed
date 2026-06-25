@@ -1,5 +1,13 @@
 [
   {
+    "id": "mqtt5o4irncwk",
+    "user": "Pak Arul",
+    "role": "TA Sesneg",
+    "action": "logout",
+    "target": "keluar dari sistem",
+    "timestamp": "2026-06-25T18:00:43.362Z"
+  },
+  {
     "id": "mqtt5d4y8bc1n",
     "user": "Pak Arul",
     "role": "TA Sesneg",
