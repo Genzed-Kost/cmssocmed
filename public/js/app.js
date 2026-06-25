@@ -501,13 +501,13 @@ function esc(str) {
 
 /* ── Toast ───────────────────────────────────────────────────────────────── */
 let toastTimer;
-function toast(msg, type = '') {
+function toast(msg, type = '', duration = 3400) {
   const el = $('toast');
   const icon = type === 'success' ? '✓ ' : type === 'error' ? '✕ ' : 'ℹ ';
   el.innerHTML = `<span class="toast-icon">${icon}</span>${msg}`;
   el.className = 'toast' + (type ? ' ' + type : '');
   clearTimeout(toastTimer);
-  toastTimer = setTimeout(() => { el.className = 'toast hidden'; }, 3400);
+  toastTimer = setTimeout(() => { el.className = 'toast hidden'; }, duration);
 }
 
 /* ── Loading helpers ─────────────────────────────────────────────────────── */
@@ -1009,6 +1009,11 @@ async function doLogin() {
 
       if (!userObj) {
         shakeAndToast('❌ Nama tidak ditemukan dalam daftar tim');
+        return;
+      }
+
+      if (!userObj.passwordHash) {
+        toast('🔒 Password belum diatur — mohon hubungi Admin terlebih dahulu.', 'error', 5000);
         return;
       }
 
