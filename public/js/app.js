@@ -929,7 +929,15 @@ async function showLogin() {
             window.db.saveConfig({ ...window.db.getConfig(), pat: decoded });
           }
         }
-        if (_s.users?.length) setPubUsers(_s.users);
+        if (_s.users?.length) {
+          // Merge: passwordHash dari state.settings (sudah termasuk reset lokal) lebih prioritas
+          const localUsers = state.settings?.users || [];
+          const merged = _s.users.map(u => {
+            const local = localUsers.find(l => getUserName(l) === getUserName(u));
+            return local ? { ...u, passwordHash: local.passwordHash ?? u.passwordHash } : u;
+          });
+          setPubUsers(merged);
+        }
       }
     } catch { /* gagal fetch — login tetap bisa dengan cache lokal */ }
   }
