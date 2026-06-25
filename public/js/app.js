@@ -5163,7 +5163,15 @@ function renderStatChart() {
       );
     }
   }
-  if (!displayRows.length) displayRows = rows;
+  if (!displayRows.length) {
+    // "Bulan Ini" tapi belum ada data → tampilkan bulan terbaru yang tersedia
+    const periodSel2 = $('statPeriodSel')?.value;
+    if (periodSel2 === '1' && rows.length) {
+      displayRows = [rows[rows.length - 1]];
+    } else {
+      displayRows = rows;
+    }
+  }
 
   /* ── Summary cards: 4 kartu tetap per platform ──────────────────
      Urutan: Followers/Subs Gained | Total Views | Total Engagement | Followers EOM
