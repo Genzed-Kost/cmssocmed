@@ -1,5 +1,13 @@
 [
   {
+    "id": "mqtsfierpnssz",
+    "user": "Admin",
+    "role": "Admin",
+    "action": "edit user",
+    "target": "Lydia → Lydia (Planner)",
+    "timestamp": "2026-06-25T17:40:22.899Z"
+  },
+  {
     "id": "mqtsfdqan4rpb",
     "user": "Admin",
     "role": "Admin",
