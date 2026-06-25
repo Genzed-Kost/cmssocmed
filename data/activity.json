@@ -1,5 +1,13 @@
 [
   {
+    "id": "mqtw00q3wmrfq",
+    "user": "Lisa",
+    "role": "Administrator",
+    "action": "logout",
+    "target": "keluar dari sistem",
+    "timestamp": "2026-06-25T19:20:18.603Z"
+  },
+  {
     "id": "mqtvztpax3nk8",
     "user": "Lisa",
     "role": "Administrator",
