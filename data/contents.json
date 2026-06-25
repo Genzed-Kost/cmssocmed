@@ -76,36 +76,5 @@
     "createdBy": "Idham",
     "createdAt": "2026-06-09T05:06:09.118Z",
     "updatedAt": "2026-06-23T13:57:20.786Z"
-  },
-  {
-    "id": "mpzbl8ltdhxn4",
-    "title": "Podcsat Kepala KSP Pak Dudung",
-    "platforms": [
-      "youtube"
-    ],
-    "publishDate": "2026-06-05",
-    "creator": [
-      "Idham",
-      "Umar"
-    ],
-    "editor": "Umar",
-    "account": "penjaga-harapan",
-    "status": "Published",
-    "theme": "Podcast",
-    "format": "Podcast",
-    "script": "",
-    "caption": "",
-    "outputLink": "https://instagram.com/penjaga_harapan",
-    "notes": "",
-    "platformLinks": {},
-    "createdBy": "Admin",
-    "createdAt": "2026-06-04T09:55:51.377Z",
-    "updatedAt": "2026-06-23T12:16:02.588Z",
-    "budget": [],
-    "budgetFile": {
-      "name": "budget_mpzbl8ltdhxn4_1782216959771.pdf",
-      "url": "https://raw.githubusercontent.com/Genzed-Kost/cmssocmed/main/data/budget-files/budget_mpzbl8ltdhxn4_1782216959771.pdf",
-      "path": "data/budget-files/budget_mpzbl8ltdhxn4_1782216959771.pdf"
-    }
   }
 ]
