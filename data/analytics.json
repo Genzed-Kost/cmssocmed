@@ -1147,7 +1147,7 @@
         "updatedBy": "Admin"
       },
       "facebook": {
-        "updatedAt": "2026-06-25T13:10:31.866Z",
+        "updatedAt": "2026-06-25T13:11:53.265Z",
         "updatedBy": "Admin"
       }
     },
@@ -1370,6 +1370,8 @@
     "facebook_w": [
       {
         "week": "2026-W23",
+        "followersGained": 23,
+        "totalPost": 26,
         "totalViews": 88985,
         "totalEngagement": 592
       }
