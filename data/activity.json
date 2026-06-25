@@ -1,5 +1,13 @@
 [
   {
+    "id": "mqtseps9wd0ua",
+    "user": "Admin",
+    "role": "Admin",
+    "action": "edit user",
+    "target": "Wedy → Wedy (Creator)",
+    "timestamp": "2026-06-25T17:39:45.801Z"
+  },
+  {
     "id": "mqtrtf0sxnk5x",
     "user": "Admin",
     "role": "Admin",
