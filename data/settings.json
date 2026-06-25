@@ -20,7 +20,8 @@
     {
       "name": "Junaidi",
       "role": "Creator",
-      "phone": "08129906249"
+      "phone": "08129906249",
+      "passwordHash": "e2c0d4325a5f2ffbb18dbae5cfd535548d0364b394a05f023b35d8ee025f7985"
     },
     {
       "name": "Luthfi",
