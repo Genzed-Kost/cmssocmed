@@ -1027,7 +1027,6 @@ async function doLogin() {
           return;
         }
       }
-      // Tidak ada passwordHash = izinkan masuk (backward compat)
       _resetLoginAttempts();
       // Simpan role asli dari settings (administrator, supervisor, creator, dll)
       const userRole = (userObj.role || 'creator').toLowerCase();
