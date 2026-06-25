@@ -953,7 +953,6 @@ async function doLogin() {
   const btn        = $('btnDoLogin');
 
   if (!typedName) { toast('Masukkan nama', 'error'); inp?.focus(); return; }
-  if (!pw)        { toast('Masukkan password', 'error'); return; }
 
   // ── Cek lockout percobaan login ─────────────────────────────
   const lockMsg = _checkLoginLockout();
@@ -978,6 +977,7 @@ async function doLogin() {
     };
 
     if (isAdm) {
+      if (!pw) { toast('Masukkan password', 'error'); return; }
       const hash = await hashPw(pw);
       if (hash !== auth?.adminHash) {
         const a = _recordFailedAttempt();
@@ -1016,6 +1016,8 @@ async function doLogin() {
         toast('🔒 Password belum diatur — mohon hubungi Admin terlebih dahulu.', 'error', 5000);
         return;
       }
+
+      if (!pw) { toast('Masukkan password', 'error'); return; }
 
       if (userObj.passwordHash) {
         const hash = await hashPw(pw);
