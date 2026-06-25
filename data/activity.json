@@ -1,5 +1,13 @@
 [
   {
+    "id": "mqtajf9qhdlhw",
+    "user": "Admin",
+    "role": "Admin",
+    "action": "hapus konten",
+    "target": "Makam Pangeran Tubagus Angke",
+    "timestamp": "2026-06-25T09:19:32.366Z"
+  },
+  {
     "id": "mqtajdoacs3pj",
     "user": "Admin",
     "role": "Admin",
