@@ -5168,6 +5168,8 @@ function renderStatChart() {
     const periodSel2 = $('statPeriodSel')?.value;
     if (periodSel2 === '1' && rows.length) {
       displayRows = [rows[rows.length - 1]];
+      // Sync fromM/toM ke bulan data aktual agar rangeLabel benar
+      fromM = toM = displayRows[0].month || '';
     } else {
       displayRows = rows;
     }
