@@ -1,5 +1,13 @@
 [
   {
+    "id": "mqtwhehnly6p4",
+    "user": "Umar",
+    "role": "Publisher",
+    "action": "login",
+    "target": "masuk ke sistem sebagai Publisher",
+    "timestamp": "2026-06-25T19:33:49.595Z"
+  },
+  {
     "id": "mqtw09surty31",
     "user": "Admin",
     "role": "Admin",
