@@ -1147,7 +1147,7 @@
         "updatedBy": "Admin"
       },
       "facebook": {
-        "updatedAt": "2026-06-25T12:45:44.041Z",
+        "updatedAt": "2026-06-25T12:47:31.789Z",
         "updatedBy": "Admin"
       }
     },
@@ -1302,6 +1302,14 @@
         "totalPost": 81,
         "totalViews": 41877,
         "totalEngagement": 8622
+      },
+      {
+        "month": "2025-10",
+        "pageFollowers": 184,
+        "followersGained": 53,
+        "totalPost": 61,
+        "totalViews": 88043,
+        "totalEngagement": 6503
       }
     ]
   },
