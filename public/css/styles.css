@@ -1001,7 +1001,7 @@ ul { list-style: none; }
   padding: 10px 20px; border-radius: 10px;
   font-size: .82rem; font-weight: 500;
   box-shadow: var(--shadow-lg);
-  z-index: 500;
+  z-index: 99999;
   animation: toast-in .2s ease;
   white-space: nowrap;
 }
