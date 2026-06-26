@@ -88,6 +88,12 @@
       "role": "TA Sesneg",
       "phone": "0881081818872",
       "passwordHash": "e2c0d4325a5f2ffbb18dbae5cfd535548d0364b394a05f023b35d8ee025f7985"
+    },
+    {
+      "name": "Pak Ato",
+      "role": "TA Sesneg",
+      "phone": "082281878389",
+      "passwordHash": "e2c0d4325a5f2ffbb18dbae5cfd535548d0364b394a05f023b35d8ee025f7985"
     }
   ],
   "analyticsUrls": {
