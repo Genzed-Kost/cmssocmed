@@ -4354,6 +4354,9 @@ function setStatViewMode(mode) {
         <option value="4w">4 Minggu Terakhir</option>
         <option value="allw">Semua Data</option>
         <option value="customw">⚙ Kustom…</option>`;
+      // Ganti input ke type="week"
+      const fi = $('statFromMonth'); if (fi) { fi.type = 'week'; fi.title = 'Dari minggu'; fi.value = ''; }
+      const ti = $('statToMonth');   if (ti) { ti.type = 'week'; ti.title = 'Sampai minggu'; ti.value = ''; }
       onStatPeriodChange('12w');
     } else {
       sel.innerHTML = `
@@ -4364,6 +4367,9 @@ function setStatViewMode(mode) {
         <option value="year">Tahun Ini</option>
         <option value="all">Semua Data</option>
         <option value="custom">⚙ Kustom…</option>`;
+      // Reset input ke type="month"
+      const fi = $('statFromMonth'); if (fi) { fi.type = 'month'; fi.title = 'Dari bulan'; fi.value = ''; }
+      const ti = $('statToMonth');   if (ti) { ti.type = 'month'; ti.title = 'Sampai bulan'; ti.value = ''; }
       onStatPeriodChange('12');
     }
   }
