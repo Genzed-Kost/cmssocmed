@@ -612,6 +612,14 @@
         "totalPost": 178,
         "totalViews": 4185957,
         "totalEngagement": 100481
+      },
+      {
+        "month": "2026-06",
+        "pageFollowers": 160156,
+        "followersGained": 4235,
+        "totalPost": 192,
+        "totalViews": 3672605,
+        "totalEngagement": 124713
       }
     ],
     "instagram": [
@@ -879,7 +887,7 @@
         "updatedBy": "Admin"
       },
       "facebook": {
-        "updatedAt": "2026-06-22T12:42:12.706Z",
+        "updatedAt": "2026-06-28T17:50:12.618Z",
         "updatedBy": "Admin"
       },
       "youtube": {
