@@ -863,11 +863,19 @@
         "totalReach": 835833,
         "followersGained": 1132,
         "totalEngagement": 77483
+      },
+      {
+        "month": "2026-06",
+        "followersEOM": 59003,
+        "totalViews": 1300186,
+        "totalReach": 412426,
+        "followersGained": 2632,
+        "totalEngagement": 87344
       }
     ],
     "_meta": {
       "instagram": {
-        "updatedAt": "2026-06-22T10:17:06.340Z",
+        "updatedAt": "2026-06-28T17:48:48.344Z",
         "updatedBy": "Admin"
       },
       "facebook": {
