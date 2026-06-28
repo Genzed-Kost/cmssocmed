@@ -270,6 +270,7 @@
       },
       {
         "month": "2025-08",
+        "jmlVideo": 254,
         "totalVideoViews": 2041908,
         "profileViews": 6711,
         "followersEOM": 21420,
@@ -866,7 +867,7 @@
         "updatedBy": "Admin"
       },
       "tiktok": {
-        "updatedAt": "2026-06-28T14:02:45.327Z",
+        "updatedAt": "2026-06-28T14:11:41.771Z",
         "updatedBy": "Admin"
       }
     },
