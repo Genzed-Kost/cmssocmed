@@ -5276,7 +5276,8 @@ function renderStatChart() {
         const arrow    = up ? '↑' : '↓';
         const prevFrom = prevRows[0]?.[isWeekly?'week':'month'] || '';
         const prevTo   = prevRows[prevRows.length-1]?.[isWeekly?'week':'month'] || '';
-        const prevLabel = prevFrom ? `vs ${fmtMonth(prevFrom)}${prevTo && prevTo!==prevFrom ? ' – '+fmtMonth(prevTo) : ''}` : 'vs periode sebelumnya';
+        const fmt      = v => isWeekly ? fmtWeek(v) : fmtMonth(v);
+        const prevLabel = prevFrom ? `vs ${fmt(prevFrom)}${prevTo && prevTo!==prevFrom ? ' – '+fmt(prevTo) : ''}` : 'vs periode sebelumnya';
         trendHtml = `<span style="font-size:.65rem;color:${color};font-weight:700;margin-left:4px;cursor:default" title="${prevLabel}">${arrow}${Math.abs(pct).toFixed(1)}%</span>`;
       }
       const period = isPt
