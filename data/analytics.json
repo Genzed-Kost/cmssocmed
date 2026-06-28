@@ -426,6 +426,15 @@
         "newViewers": 379257,
         "returningViewers": 663400,
         "totalEngagement": 36553
+      },
+      {
+        "month": "2026-06",
+        "jmlVideo": 195,
+        "totalVideoViews": 6136851,
+        "profileViews": 20146,
+        "followersEOM": 38176,
+        "followersGained": 3785,
+        "totalEngagement": 475949
       }
     ],
     "facebook": [
@@ -896,7 +905,7 @@
         "updatedBy": "Admin"
       },
       "tiktok": {
-        "updatedAt": "2026-06-28T14:14:34.323Z",
+        "updatedAt": "2026-06-28T17:56:50.684Z",
         "updatedBy": "Admin"
       }
     },
