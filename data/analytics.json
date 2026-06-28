@@ -222,6 +222,7 @@
     "tiktok": [
       {
         "month": "2025-05",
+        "jmlVideo": 38,
         "totalVideoViews": 558467,
         "profileViews": 2762,
         "followersEOM": 34016,
@@ -863,7 +864,7 @@
         "updatedBy": "Admin"
       },
       "tiktok": {
-        "updatedAt": "2026-06-22T10:21:34.841Z",
+        "updatedAt": "2026-06-28T13:56:19.670Z",
         "updatedBy": "Admin"
       }
     },
