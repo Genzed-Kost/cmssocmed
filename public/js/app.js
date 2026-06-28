@@ -4352,7 +4352,8 @@ function setStatViewMode(mode) {
         <option value="12w">12 Minggu Terakhir</option>
         <option value="8w">8 Minggu Terakhir</option>
         <option value="4w">4 Minggu Terakhir</option>
-        <option value="allw">Semua Data</option>`;
+        <option value="allw">Semua Data</option>
+        <option value="customw">⚙ Kustom…</option>`;
       onStatPeriodChange('12w');
     } else {
       sel.innerHTML = `
@@ -4435,30 +4436,38 @@ function onStatPeriodChange(val) {
   const fromInp = $('statFromMonth');
   const toInp   = $('statToMonth');
   const sep     = $('statRangeSep');
-  const isCustom = val === 'custom';
+  const isCustom  = val === 'custom' || val === 'customw';
+  const isWeekly  = state.statViewMode === 'weekly';
   if (fromInp) fromInp.classList.toggle('hidden', !isCustom);
   if (toInp)   toInp.classList.toggle('hidden', !isCustom);
   if (sep)     sep.classList.toggle('hidden', !isCustom);
-  if (isCustom) return; // month inputs drive the filter directly
+  if (isCustom) { if (fromInp) fromInp.value = ''; if (toInp) toInp.value = ''; return; }
 
   const now = new Date();
   const padM = m => String(m + 1).padStart(2, '0');
   const ym = (y, m) => `${y}-${padM(m)}`;
 
   let from = '', to = '';
-  if (val === '1') {
-    from = to = ym(now.getFullYear(), now.getMonth());
-  } else if (val === 'year') {
-    from = `${now.getFullYear()}-01`;
-    to   = ym(now.getFullYear(), now.getMonth());
-  } else if (val === 'all') {
-    from = ''; to = '';
+  if (isWeekly) {
+    const nWeeks = val === 'allw' ? 0 : parseInt(val, 10);
+    if (nWeeks > 0) {
+      from = dateToISOWeek(new Date(now.getTime() - (nWeeks - 1) * 7 * 86400000));
+      to   = dateToISOWeek(now);
+    }
   } else {
-    // numeric = N months back
-    const n  = parseInt(val, 10);
-    const d0 = new Date(now.getFullYear(), now.getMonth() - n + 1, 1);
-    from = ym(d0.getFullYear(), d0.getMonth());
-    to   = ym(now.getFullYear(), now.getMonth());
+    if (val === '1') {
+      from = to = ym(now.getFullYear(), now.getMonth());
+    } else if (val === 'year') {
+      from = `${now.getFullYear()}-01`;
+      to   = ym(now.getFullYear(), now.getMonth());
+    } else if (val === 'all') {
+      from = ''; to = '';
+    } else {
+      const n  = parseInt(val, 10);
+      const d0 = new Date(now.getFullYear(), now.getMonth() - n + 1, 1);
+      from = ym(d0.getFullYear(), d0.getMonth());
+      to   = ym(now.getFullYear(), now.getMonth());
+    }
   }
   if (fromInp) fromInp.value = from;
   if (toInp)   toInp.value   = to;
@@ -5179,29 +5188,19 @@ function renderStatChart() {
   const periodSel = $('statPeriodSel')?.value || (isWeekly ? '12w' : '12');
   let displayRows = rows;
 
-  let fromM = '', toM = '';
-  if (isWeekly) {
-    const now    = new Date();
-    const nWeeks = periodSel === 'allw' ? 0 : parseInt(periodSel, 10);
-    if (nWeeks > 0) {
-      const cutoff = dateToISOWeek(new Date(now.getTime() - nWeeks * 7 * 86400000));
-      displayRows  = rows.filter(r => (r.week||'') >= cutoff);
-    }
-  } else {
-    fromM = $('statFromMonth')?.value || '';
-    toM   = $('statToMonth')?.value   || '';
-    if (fromM || toM) {
-      displayRows = rows.filter(r =>
-        (!fromM || r.month >= fromM) && (!toM || r.month <= toM)
-      );
-    }
+  let fromM = $('statFromMonth')?.value || '';
+  let toM   = $('statToMonth')?.value   || '';
+  const filterKey = isWeekly ? 'week' : 'month';
+  if (fromM || toM) {
+    displayRows = rows.filter(r =>
+      (!fromM || (r[filterKey]||'') >= fromM) && (!toM || (r[filterKey]||'') <= toM)
+    );
   }
   if (!displayRows.length) {
-    // "Bulan Ini" tapi belum ada data → tampilkan bulan terbaru yang tersedia
     const periodSel2 = $('statPeriodSel')?.value;
-    if (periodSel2 === '1' && rows.length) {
+    if (!isWeekly && periodSel2 === '1' && rows.length) {
+      // "Bulan Ini" tapi belum ada data → tampilkan bulan terbaru
       displayRows = [rows[rows.length - 1]];
-      // Sync fromM/toM ke bulan data aktual agar rangeLabel benar
       fromM = toM = displayRows[0].month || '';
     } else {
       displayRows = rows;
@@ -5247,8 +5246,9 @@ function renderStatChart() {
   };
   const summaryDefs = SUMMARY_CARDS[platId] || SUMMARY_CARDS.youtube;
   const latestRow   = displayRows[displayRows.length - 1];
+  const fmtPeriod   = v => isWeekly ? fmtWeek(v) : fmtMonth(v);
   const rangeLabel  = (fromM && toM)
-    ? (fromM === toM ? fmtMonth(fromM) : `${fmtMonth(fromM)} – ${fmtMonth(toM)}`)
+    ? (fromM === toM ? fmtPeriod(fromM) : `${fmtPeriod(fromM)} – ${fmtPeriod(toM)}`)
     : `${displayRows.length} ${isWeekly?'minggu':'bulan'}`;
 
   // Periode sebelumnya untuk trend %
@@ -5281,7 +5281,7 @@ function renderStatChart() {
         trendHtml = `<span style="font-size:.65rem;color:${color};font-weight:700;margin-left:4px;cursor:default" title="${prevLabel}">${arrow}${Math.abs(pct).toFixed(1)}%</span>`;
       }
       const period = isPt
-        ? `Bulan ${fmtMonth(latestRow?.month || '')}`
+        ? `${isWeekly ? 'Minggu' : 'Bulan'} ${fmtPeriod(latestRow?.[isWeekly?'week':'month'] || '')}`
         : `Total ${rangeLabel}`;
       const exactNum = val.toLocaleString('id-ID');
       const desc = STAT_FIELD_DESC[card.key] || '';
