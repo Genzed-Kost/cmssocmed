@@ -1952,8 +1952,8 @@ ul { list-style: none; }
   .stat-month-inp { min-width: 90px; }
   /* Summary row: satu baris scroll horizontal */
   .stat-header-row--summary { overflow-x: auto; -webkit-overflow-scrolling: touch; padding: 6px 0 2px; }
-  .stat-summary-row { flex-wrap: nowrap; min-width: max-content; width: 100%; }
-  .stat-summary-card { min-width: 90px; padding: 6px 10px; }
+  .stat-summary-row { display: flex; flex-wrap: nowrap; min-width: max-content; width: 100%; }
+  .stat-summary-card { min-width: 110px; padding: 6px 10px; }
   .stat-sum-val { font-size: 1rem; }
   .stat-sum-label { font-size: .58rem; }
   .stat-sum-period { font-size: .6rem; }
@@ -1962,8 +1962,6 @@ ul { list-style: none; }
   .stat-inp-plat { grid-column: 1 / -1; }
   /* Stat chart: responsive on mobile, no fixed max-height */
   .stat-chart-wrap canvas { max-height: none; }
-  /* Stat summary: 2-col grid */
-  .stat-summary-row { grid-template-columns: repeat(2, 1fr); }
   /* Stat plat actions: full width */
   .stat-plat-actions { width: 100%; justify-content: flex-start; }
   .stat-dl-wrap { flex-wrap: wrap; }
