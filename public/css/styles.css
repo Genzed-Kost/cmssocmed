@@ -1652,12 +1652,13 @@ ul { list-style: none; }
 }
 /* Summary row — sekarang inline di dalam header card */
 .stat-header-row--summary { padding: 10px 0 4px; }
+#statSummaryWrap { width: 100%; }
 .stat-summary-row {
-  display: flex; flex-wrap: wrap; gap: 0;
+  display: flex; flex-wrap: nowrap; gap: 0; width: 100%;
   margin-bottom: 0;
 }
 .stat-summary-card {
-  flex: 1 1 0; min-width: 110px;
+  flex: 1 1 0; min-width: 0;
   padding: 8px 14px;
   border-right: 1px solid var(--bd);
   background: transparent;

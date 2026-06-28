@@ -5242,7 +5242,7 @@ function renderStatChart() {
       { key:'subsEOM',         label:'Subscribers (EOM)',   eom:true  },
     ],
     tiktok:    [
-      { key:'profileViews',    label:'Total Profile Views', eom:false },
+      { key:'profileViews',    label:'Total Video',         eom:false },
       { key:'totalVideoViews', label:'Total Vid Views',     eom:false },
       { key:'totalEngagement', label:'Total Engagement',    eom:false },
       { key:'followersEOM',    label:'Followers (EOM)',     eom:true  },
