@@ -4316,19 +4316,35 @@ function fmtMonth(ym) {
   return `${names[+m - 1]} ${y}`;
 }
 
-/* Format ISO week: "2025-W43" → "W43 Okt '25" */
+/* Format ISO week: "2025-W43" → "20-26 Okt '25" */
 function fmtWeek(yw) {
   if (!yw) return '';
   const [y, w] = yw.split('-W');
-  // Hitung tanggal Senin minggu ke-W
   const jan4 = new Date(+y, 0, 4);
   const mon  = new Date(jan4.getTime() + (parseInt(w,10) - 1) * 7 * 86400000
     - (jan4.getDay() || 7 - 1) * 86400000);
+  const sun  = new Date(mon.getTime() + 6 * 86400000);
   const MNAMES = ['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agt','Sep','Okt','Nov','Des'];
-  return `W${w} ${MNAMES[mon.getMonth()]} '${String(y).slice(-2)}`;
+  const fromD = mon.getDate();
+  const toD   = sun.getDate();
+  const toM   = MNAMES[sun.getMonth()];
+  const toY   = String(sun.getFullYear()).slice(-2);
+  if (mon.getMonth() === sun.getMonth()) {
+    return `${fromD}-${toD} ${toM} '${toY}`;
+  }
+  return `${fromD} ${MNAMES[mon.getMonth()]}-${toD} ${toM} '${toY}`;
 }
 
 /* Dapatkan ISO week string dari Date */
+// Konversi "YYYY-Www" ke bulan "YYYY-MM" (menggunakan hari Senin minggu tersebut)
+function isoWeekToMonth(yw) {
+  if (!yw) return '';
+  const [y, w] = yw.split('-W').map(Number);
+  const jan4 = new Date(y, 0, 4);
+  const monday = new Date(jan4.getTime() + ((w - 1) * 7 - (jan4.getDay() + 6) % 7) * 86400000);
+  return `${monday.getFullYear()}-${String(monday.getMonth()+1).padStart(2,'0')}`;
+}
+
 function dateToISOWeek(date) {
   const d = new Date(date);
   d.setHours(0,0,0,0);
@@ -4354,7 +4370,6 @@ function setStatViewMode(mode) {
         <option value="4w">4 Minggu Terakhir</option>
         <option value="allw">Semua Data</option>
         <option value="customw">⚙ Kustom…</option>`;
-      // Ganti input ke type="week"
       const fi = $('statFromMonth'); if (fi) { fi.type = 'week'; fi.title = 'Dari minggu'; fi.value = ''; }
       const ti = $('statToMonth');   if (ti) { ti.type = 'week'; ti.title = 'Sampai minggu'; ti.value = ''; }
       onStatPeriodChange('12w');
@@ -4367,7 +4382,6 @@ function setStatViewMode(mode) {
         <option value="year">Tahun Ini</option>
         <option value="all">Semua Data</option>
         <option value="custom">⚙ Kustom…</option>`;
-      // Reset input ke type="month"
       const fi = $('statFromMonth'); if (fi) { fi.type = 'month'; fi.title = 'Dari bulan'; fi.value = ''; }
       const ti = $('statToMonth');   if (ti) { ti.type = 'month'; ti.title = 'Sampai bulan'; ti.value = ''; }
       onStatPeriodChange('12');
@@ -4441,12 +4455,10 @@ const STAT_FIELD_DESC = {
 function onStatPeriodChange(val) {
   const fromInp = $('statFromMonth');
   const toInp   = $('statToMonth');
-  const sep     = $('statRangeSep');
+  const rangeRow = $('statCustomRangeRow');
   const isCustom  = val === 'custom' || val === 'customw';
   const isWeekly  = state.statViewMode === 'weekly';
-  if (fromInp) fromInp.classList.toggle('hidden', !isCustom);
-  if (toInp)   toInp.classList.toggle('hidden', !isCustom);
-  if (sep)     sep.classList.toggle('hidden', !isCustom);
+  if (rangeRow) rangeRow.classList.toggle('hidden', !isCustom);
   if (isCustom) { if (fromInp) fromInp.value = ''; if (toInp) toInp.value = ''; return; }
 
   const now = new Date();
@@ -5196,11 +5208,15 @@ function renderStatChart() {
 
   let fromM = $('statFromMonth')?.value || '';
   let toM   = $('statToMonth')?.value   || '';
-  const filterKey = isWeekly ? 'week' : 'month';
   if (fromM || toM) {
-    displayRows = rows.filter(r =>
-      (!fromM || (r[filterKey]||'') >= fromM) && (!toM || (r[filterKey]||'') <= toM)
-    );
+    const periodVal = $('statPeriodSel')?.value || '';
+    const isWeeklyCustom = periodVal === 'customw';
+    displayRows = rows.filter(r => {
+      const key = isWeekly
+        ? (isWeeklyCustom ? (r.week||'') : isoWeekToMonth(r.week||''))
+        : (r.month||'');
+      return (!fromM || key >= fromM) && (!toM || key <= toM);
+    });
   }
   if (!displayRows.length) {
     const periodSel2 = $('statPeriodSel')?.value;
@@ -5365,9 +5381,8 @@ function renderStatChart() {
   infoBanner.innerHTML = `
     <div style="font-size:.72rem;color:var(--muted);background:${bgColor};border:1px solid ${border};
       border-radius:8px;padding:7px 12px;margin-bottom:8px;line-height:1.55;
-      display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+      display:flex;flex-direction:column;gap:4px">
       <span style="flex-shrink:0">${updateHtml.replace(/^<div[^>]*>/, '').replace(/<\/div>$/, '')}</span>
-      <span style="width:1px;height:14px;background:var(--border,#e2e8f0);flex-shrink:0;align-self:center"></span>
       ${narrativeHtml}
     </div>`;
   infoBanner.style.display = '';

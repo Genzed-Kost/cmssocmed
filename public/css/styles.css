@@ -1219,7 +1219,12 @@ ul { list-style: none; }
 
 /* Range group: calendar icon + month inputs */
 .stat-range-group {
-  display: flex; align-items: center; gap: 6px; flex-wrap: wrap;
+  display: flex; align-items: center; gap: 6px; flex-wrap: nowrap;
+}
+.stat-custom-range-row {
+  padding: 6px 16px 8px;
+  border-top: 1px solid var(--bd);
+  gap: 6px;
 }
 .stat-month-inp { min-width: 108px; }
 
