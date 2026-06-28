@@ -1951,11 +1951,11 @@ ul { list-style: none; }
   .stat-ai-btn { padding: 5px 8px !important; font-size: .7rem !important; }
   .stat-month-inp { min-width: 90px; }
   /* Summary row: satu baris scroll horizontal */
-  .stat-header-card { overflow: visible; }
-  .stat-header-row--summary { overflow-x: auto; overflow-y: visible; -webkit-overflow-scrolling: touch; padding: 6px 0 2px; scrollbar-width: none; }
-  .stat-header-row--summary::-webkit-scrollbar { display: none; }
+  .stat-header-row--summary { padding: 6px 0 2px; }
+  #statSummaryWrap { overflow-x: auto; -webkit-overflow-scrolling: touch; scrollbar-width: none; }
+  #statSummaryWrap::-webkit-scrollbar { display: none; }
   .stat-summary-row { display: flex; flex-wrap: nowrap; width: max-content; }
-  .stat-summary-card { min-width: 120px; max-width: 150px; padding: 6px 10px; }
+  .stat-summary-card { min-width: 130px; flex-shrink: 0; padding: 6px 10px; }
   .stat-sum-val { font-size: 1rem; }
   .stat-sum-label { font-size: .58rem; }
   .stat-sum-period { font-size: .6rem; }
