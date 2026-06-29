@@ -1195,7 +1195,7 @@
         "updatedBy": "Admin"
       },
       "tiktok": {
-        "updatedAt": "2026-06-25T13:30:09.943Z",
+        "updatedAt": "2026-06-29T04:16:26.061Z",
         "updatedBy": "Admin"
       },
       "facebook": {
@@ -1331,6 +1331,13 @@
         "followersEOM": 7593,
         "followersGained": 12,
         "totalEngagement": 8615
+      },
+      {
+        "month": "2026-06",
+        "totalVideoViews": 116914,
+        "profileViews": 308,
+        "followersEOM": 7593,
+        "totalEngagement": 2583
       }
     ],
     "tiktok_w": [
