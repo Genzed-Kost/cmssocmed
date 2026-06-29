@@ -1,5 +1,13 @@
 [
   {
+    "id": "mqyyiytaj5jef",
+    "user": "Admin",
+    "role": "Admin",
+    "action": "hapus konten",
+    "target": "Published Liputan CKG Pemalang",
+    "timestamp": "2026-06-29T08:29:52.702Z"
+  },
+  {
     "id": "mqyv01r190072",
     "user": "Admin",
     "role": "Admin",
