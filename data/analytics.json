@@ -1177,11 +1177,21 @@
         "totalEngagement": 220892,
         "erPct": 0,
         "imageViews": 0
+      },
+      {
+        "month": "2026-06",
+        "followersEOM": 13848,
+        "jmlPost": 54,
+        "totalViews": 362165,
+        "totalReach": 242731,
+        "followersGained": 185,
+        "totalEngagement": 22388,
+        "imageViews": 0
       }
     ],
     "_meta": {
       "instagram": {
-        "updatedAt": "2026-06-25T13:19:26.639Z",
+        "updatedAt": "2026-06-29T03:59:46.652Z",
         "updatedBy": "Admin"
       },
       "tiktok": {
