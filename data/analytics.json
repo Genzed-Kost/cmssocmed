@@ -905,7 +905,7 @@
         "updatedBy": "Admin"
       },
       "tiktok": {
-        "updatedAt": "2026-06-29T06:50:30.191Z",
+        "updatedAt": "2026-06-29T06:51:09.830Z",
         "updatedBy": "Admin"
       }
     },
@@ -1060,6 +1060,8 @@
         "week": "2026-W25",
         "totalVideoViews": 1640055,
         "profileViews": 4901,
+        "followersEOM": 37051,
+        "followersGained": 1200,
         "totalLikes": 97782,
         "totalComments": 2264,
         "totalShares": 6110,
