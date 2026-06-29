@@ -1,5 +1,13 @@
 [
   {
+    "id": "mqypufk4rloqu",
+    "user": "Admin",
+    "role": "Admin",
+    "action": "logout",
+    "target": "keluar dari sistem",
+    "timestamp": "2026-06-29T04:26:51.076Z"
+  },
+  {
     "id": "mqyph2d8mwbv4",
     "user": "Admin",
     "role": "Admin",
