@@ -1537,6 +1537,20 @@ function renderDashTicker() {
     items.push(`${icon} <strong>${esc(c.title || 'Konten')}</strong>${crTxt ? ` · ${esc(crTxt)}` : ''} [${esc(c.format)}] — ${when}${c.publishTime ? ' ⏰ ' + esc(c.publishTime) : ''}`);
   });
 
+  // 3. Stock Contents: yang ada tanggal tayang (terdekat ke terjauh)
+  const todayStr2 = new Date().toISOString().slice(0, 10);
+  const scIcon = { 'Podcast PH':'🎙','Podcast JA':'🎙','Podcast Hangout':'🎙','Situation Room':'📡','Liputan PH':'📰','Liputan JA':'📰' };
+  [...(state.stockContents||[])].sort((a,b)=>{
+    if(!a.airDate&&!b.airDate)return 0; if(!a.airDate)return 1; if(!b.airDate)return -1;
+    return new Date(a.airDate)-new Date(b.airDate);
+  }).forEach(sc => {
+    if (!sc.title) return;
+    const icon  = scIcon[sc.category] || '📋';
+    const when  = sc.airDate ? (sc.airDate < todayStr2 ? null : fmtDate(sc.airDate)) : null;
+    if (sc.airDate && sc.airDate < todayStr2) return; // skip yang sudah lewat
+    items.push(`${icon} <strong>${esc(sc.title)}</strong>${sc.category ? ` [${esc(sc.category)}]` : ''}${when ? ` — ${when}` : ''}`);
+  });
+
   if (!items.length) {
     ticker.classList.add('hidden');
     return;
@@ -3327,6 +3341,8 @@ async function savePost() {
    STOCK CONTENTS
    ══════════════════════════════════════════════════════════════════════════ */
 
+const SC_CATEGORIES = ['Podcast PH','Podcast JA','Podcast Hangout','Situation Room','Liputan PH','Liputan JA'];
+
 function renderStockContents() {
   const canEdit = isAdmin();
   const users   = state.settings?.users || [];
@@ -3353,27 +3369,41 @@ function renderStockContents() {
   setTxt('scCount', items.length);
   setTxt('scCountFoot', items.length ? `${items.length} item tersimpan` : '');
 
-  // Urutkan: yang ada tanggal tayang terdekat dahulu, tanpa tanggal di bawah
+  // Urutkan per kelompok lalu tanggal tayang terdekat
+  const catOrder = cat => { const i = SC_CATEGORIES.indexOf(cat); return i === -1 ? 99 : i; };
   const sorted = [...items].sort((a, b) => {
+    const cd = catOrder(a.category) - catOrder(b.category);
+    if (cd !== 0) return cd;
     if (!a.airDate && !b.airDate) return 0;
-    if (!a.airDate) return 1;
-    if (!b.airDate) return -1;
+    if (!a.airDate) return 1; if (!b.airDate) return -1;
     return new Date(a.airDate) - new Date(b.airDate);
   });
 
-  const fmt = d => d ? new Date(d).toLocaleDateString('id-ID',{day:'2-digit',month:'short',year:'numeric'}) : '—';
+  const fmt     = d => d ? new Date(d).toLocaleDateString('id-ID',{day:'2-digit',month:'short',year:'numeric'}) : '—';
+  const catOpts = (sel='') => ['', ...SC_CATEGORIES].map(c =>
+    `<option value="${esc(c)}" ${c===sel?'selected':''}>${c||'— Pilih Kelompok —'}</option>`).join('');
 
   if (items.length === 0) {
-    body.innerHTML = `<tr><td colspan="4" class="empty-cell">${canEdit ? 'Belum ada data. Klik "+ Tambah" untuk memulai.' : 'Belum ada data.'}</td></tr>`;
+    body.innerHTML = `<tr><td colspan="6" class="empty-cell">${canEdit ? 'Belum ada data. Klik "+ Tambah" untuk memulai.' : 'Belum ada data.'}</td></tr>`;
     return;
   }
 
-  body.innerHTML = sorted.map((it, i) => {
+  // Render dengan pemisah kelompok
+  const rows = [];
+  let lastCat = null;
+  sorted.forEach((it, i) => {
+    const cat = it.category || '';
+    if (cat !== lastCat) {
+      lastCat = cat;
+      const label = cat || 'Tanpa Kelompok';
+      rows.push(`<tr class="sc-group-row"><td colspan="6" style="background:var(--surface);font-size:.7rem;font-weight:700;color:var(--muted-lt);text-transform:uppercase;letter-spacing:.06em;padding:6px 12px">${esc(label)}</td></tr>`);
+    }
     if (canEdit) {
-      return `<tr data-id="${it.id}">
+      rows.push(`<tr data-id="${it.id}">
         <td style="text-align:center;color:var(--muted)">${i+1}</td>
+        <td><select class="bk-sel sc-inp" data-id="${it.id}" data-field="category">${catOpts(it.category||'')}</select></td>
         <td><input type="text" class="bk-inp sc-inp" data-id="${it.id}" data-field="title"
-          value="${esc(it.title||'')}" placeholder="Judul liputan / podcast…" /></td>
+          value="${esc(it.title||'')}" placeholder="Judul…" /></td>
         <td><input type="date" class="bk-inp sc-inp" data-id="${it.id}" data-field="prodDate"
           value="${esc(it.prodDate||'')}" /></td>
         <td><input type="date" class="bk-inp sc-inp" data-id="${it.id}" data-field="airDate"
@@ -3386,15 +3416,18 @@ function renderStockContents() {
             <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6M14 11v6M9 6V4h6v2"/></svg>
           </button>
         </td>
-      </tr>`;
+      </tr>`);
+    } else {
+      rows.push(`<tr>
+        <td style="text-align:center;color:var(--muted)">${i+1}</td>
+        <td style="color:var(--muted);font-size:.8rem">${esc(it.category||'—')}</td>
+        <td>${esc(it.title||'—')}</td>
+        <td style="color:var(--muted)">${fmt(it.prodDate)}</td>
+        <td style="color:var(--muted)">${fmt(it.airDate)}</td>
+      </tr>`);
     }
-    return `<tr>
-      <td style="text-align:center;color:var(--muted)">${i+1}</td>
-      <td>${esc(it.title||'—')}</td>
-      <td style="color:var(--muted)">${fmt(it.prodDate)}</td>
-      <td style="color:var(--muted)">${fmt(it.airDate)}</td>
-    </tr>`;
-  }).join('');
+  });
+  body.innerHTML = rows.join('');
 
   if (!canEdit) return;
 
@@ -3406,7 +3439,7 @@ function renderStockContents() {
       const get = f => row.querySelector(`[data-field="${f}"]`)?.value.trim() || '';
       const idx = state.stockContents.findIndex(x => x.id === id);
       if (idx === -1) return;
-      state.stockContents[idx] = { ...state.stockContents[idx], title: get('title'), prodDate: get('prodDate'), airDate: get('airDate') };
+      state.stockContents[idx] = { ...state.stockContents[idx], category: get('category'), title: get('title'), prodDate: get('prodDate'), airDate: get('airDate') };
       btn.disabled = true;
       try {
         state.shas.stockContents = await window.db.writeData('stockContents', state.stockContents, 'Stock: update item');
@@ -3433,7 +3466,7 @@ function renderStockContents() {
 
 function scAddRow() {
   if (!isAdmin()) return;
-  state.stockContents.unshift({ id: 'sc_' + Date.now(), title: '', prodDate: '', airDate: '' });
+  state.stockContents.unshift({ id: 'sc_' + Date.now(), category: '', title: '', prodDate: '', airDate: '' });
   renderStockContents();
   $('scBody')?.querySelector('.sc-inp')?.focus();
 }
