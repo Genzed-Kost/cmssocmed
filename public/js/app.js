@@ -7469,6 +7469,7 @@ function renderNewsContent(text, ts) {
     if (cur) items.push(cur);
   }
 
+  const newsLink = title => `https://www.google.com/search?q=${encodeURIComponent(title)}&tbm=nws`;
   $('newsContent').innerHTML = items.length
     ? items.map(it => `
       <div class="news-item">
@@ -7476,6 +7477,7 @@ function renderNewsContent(text, ts) {
         <div class="news-item-content">
           <div class="news-item-title">${esc(it.title)}</div>
           ${it.body ? `<div class="news-item-body">${esc(it.body)}</div>` : ''}
+          <a class="news-item-link" href="${newsLink(it.title)}" target="_blank" rel="noopener">🔍 Cari di Google News</a>
         </div>
       </div>`).join('')
     : `<div class="news-item"><div class="news-item-content"><div class="news-item-body">${esc(text)}</div></div></div>`;
