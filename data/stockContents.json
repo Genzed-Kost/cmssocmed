@@ -1,5 +1,12 @@
 [
   {
+    "id": "sc_1783061324717",
+    "category": "",
+    "title": "",
+    "prodDate": "",
+    "airDate": ""
+  },
+  {
     "id": "sc_1783060429044",
     "title": "Liputan PH SMA Taruna Nusantara - Cimahi",
     "prodDate": "2026-06-11",
@@ -8,7 +15,7 @@
   },
   {
     "id": "sc_1783060378673",
-    "title": "Liputan PH PKH Pekalongan",
+    "title": "PKH Pekalongan",
     "prodDate": "2026-06-17",
     "airDate": "2026-08-13",
     "category": "Liputan PH"
