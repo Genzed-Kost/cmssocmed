@@ -2274,6 +2274,7 @@ ul { list-style: none; }
 .news-item-body  { font-size: .78rem; color: var(--muted); line-height: 1.5; }
 .news-item-link  { color: var(--accent); text-decoration: none; }
 .news-item-link:hover { text-decoration: underline; }
+.news-item-date  { font-size: .72rem; color: var(--muted); margin: 2px 0 4px; }
 
 /* ── AI limit warning ────────────────────────────────────────── */
 .btn-limit-warn { opacity: .45 !important; cursor: not-allowed !important; }

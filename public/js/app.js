@@ -7393,8 +7393,15 @@ function openNewsPanel() {
   $('newsPanel').classList.add('open');
   $('newsOverlay').classList.add('active');
   const cache = getCachedNews();
-  if (cache) renderNewsContent(cache.text, cache.ts);
-  else fetchNews();
+  if (cache) {
+    try {
+      const items = JSON.parse(cache.text);
+      if (Array.isArray(items)) { renderNewsItems(items, cache.ts); return; }
+    } catch {}
+    renderNewsContent(cache.text, cache.ts); // fallback format lama
+  } else {
+    fetchNews();
+  }
 }
 function closeNewsPanel() {
   $('newsPanel').classList.remove('open');
@@ -7407,41 +7414,18 @@ function getCachedNews() {
 function setCachedNews(text) { localStorage.setItem(NEWS_KEY, JSON.stringify({ text, ts: Date.now() })); }
 
 async function fetchNews() {
-  $('newsContent').innerHTML = `<div class="news-loading"><div class="spinner"></div><span>Mengambil info terkini dari AI…</span></div>`;
+  $('newsContent').innerHTML = `<div class="news-loading"><div class="spinner"></div><span>Mengambil berita terkini dari Google News…</span></div>`;
   $('newsTimestamp').textContent = '';
-  const today = new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
-  const prompt = `Hari ini adalah ${today}. Berikan tepat 5 berita atau informasi terbaru (dalam 30 hari terakhir) mengenai Presiden Republik Indonesia Prabowo Subianto dan kebijakan pemerintahan. Gunakan format persis seperti ini untuk setiap item (wajib diikuti):
-
-ITEM_1
-JUDUL: [tulis judul berita di sini]
-LINK: [URL sumber berita asli, contoh: https://www.kompas.com/... atau https://nasional.tempo.co/...]
-ISI: [deskripsikan 2-3 kalimat dalam bahasa Indonesia yang jelas dan informatif]
-
-ITEM_2
-JUDUL: [tulis judul berita di sini]
-LINK: [URL sumber berita asli]
-ISI: [deskripsikan 2-3 kalimat dalam bahasa Indonesia yang jelas dan informatif]
-
-ITEM_3
-JUDUL: [tulis judul berita di sini]
-LINK: [URL sumber berita asli]
-ISI: [deskripsikan 2-3 kalimat dalam bahasa Indonesia yang jelas dan informatif]
-
-ITEM_4
-JUDUL: [tulis judul berita di sini]
-LINK: [URL sumber berita asli]
-ISI: [deskripsikan 2-3 kalimat dalam bahasa Indonesia yang jelas dan informatif]
-
-ITEM_5
-JUDUL: [tulis judul berita di sini]
-LINK: [URL sumber berita asli]
-ISI: [deskripsikan 2-3 kalimat dalam bahasa Indonesia yang jelas dan informatif]
-
-Langsung mulai dari ITEM_1 tanpa pengantar.`;
   try {
-    const text = await callGemini(prompt);
-    setCachedNews(text);
-    renderNewsContent(text, Date.now());
+    const base = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+      ? 'http://localhost:8888'
+      : '';
+    const res = await fetch(`${base}/.netlify/functions/news-proxy?q=Prabowo+Subianto+kebijakan+pemerintah`);
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const json = await res.json();
+    if (json.error) throw new Error(json.error);
+    setCachedNews(JSON.stringify(json.items));
+    renderNewsItems(json.items, Date.now());
   } catch (e) {
     $('newsContent').innerHTML = `<div style="color:var(--red);font-size:.82rem;padding:12px 0">Gagal memuat: ${esc(e.message)}</div>`;
   }
@@ -7490,6 +7474,31 @@ function renderNewsContent(text, ts) {
       </div>`;
       }).join('')
     : `<div class="news-item"><div class="news-item-content"><div class="news-item-body">${esc(text)}</div></div></div>`;
+
+  if (ts) {
+    const d = new Date(ts);
+    $('newsTimestamp').textContent = `Update: ${d.toLocaleString('id-ID',{hour:'2-digit',minute:'2-digit',day:'2-digit',month:'short'})}`;
+  }
+}
+
+function renderNewsItems(items, ts) {
+  const fmtDate = d => {
+    if (!d) return '';
+    const dt = new Date(d);
+    if (isNaN(dt)) return d;
+    return dt.toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' });
+  };
+  $('newsContent').innerHTML = items.length
+    ? items.map((it, i) => `
+      <div class="news-item">
+        <div class="news-item-num">${i + 1}</div>
+        <div class="news-item-content">
+          <a class="news-item-title news-item-link" href="${esc(it.link)}" target="_blank" rel="noopener">${esc(it.title)}</a>
+          ${it.pubDate ? `<div class="news-item-date">${fmtDate(it.pubDate)}${it.source ? ` · ${esc(it.source)}` : ''}</div>` : ''}
+          ${it.desc ? `<div class="news-item-body">${esc(it.desc)}</div>` : ''}
+        </div>
+      </div>`).join('')
+    : `<div style="color:var(--muted);font-size:.82rem;padding:12px 0">Tidak ada berita ditemukan.</div>`;
 
   if (ts) {
     const d = new Date(ts);
