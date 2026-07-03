@@ -195,9 +195,10 @@ const PAGE_TITLES = {
   activity:    'Activity Log',
   contents:    'New Contents',
   newpost:     'New Post',
-  statistics:  'Statistik',
-  apisetup:    'API Setup',
-  assets:      'Aset & Drive'
+  statistics:     'Statistik',
+  stockcontents:  'Stock Contents',
+  apisetup:       'API Setup',
+  assets:         'Aset & Drive'
 };
 
 const chartInstances = {};   // canvasId → Chart instance
@@ -444,6 +445,7 @@ let state = {
   activity:       [],
   todos:          [],
   bankKonten:     [],
+  stockContents:  [],
   assets:         [],
   settings:       { kpi: {}, users: [], analyticsUrls: {} },
   analytics:      {},
@@ -1215,32 +1217,35 @@ async function loadAllData(force = false) {
   const syncIcon = $('btnGitSync');
   if (syncIcon) syncIcon.classList.add('spinning');
   try {
-    const [cR, aR, tR, sR, anlR, bkR, asR] = await Promise.all([
+    const [cR, aR, tR, sR, anlR, bkR, asR, scR] = await Promise.all([
       window.db.read('contents'),
       window.db.read('activity'),
       window.db.read('todos'),
       window.db.read('settings'),
       window.db.read('analytics'),
       window.db.read('contentBank'),
-      window.db.read('assets')
+      window.db.read('assets'),
+      window.db.read('stockContents')
     ]);
-    state.contents   = Array.isArray(cR?.data)  ? cR.data  : [];
-    state.activity   = Array.isArray(aR?.data)  ? aR.data  : [];
-    state.todos      = Array.isArray(tR?.data)  ? tR.data  : [];
-    state.bankKonten = Array.isArray(bkR?.data) ? bkR.data : [];
-    state.assets     = Array.isArray(asR?.data) ? asR.data : [];
-    state.settings   = sR?.data   || { kpi: {}, users: [], analyticsUrls: {} };
+    state.contents      = Array.isArray(cR?.data)  ? cR.data  : [];
+    state.activity      = Array.isArray(aR?.data)  ? aR.data  : [];
+    state.todos         = Array.isArray(tR?.data)  ? tR.data  : [];
+    state.bankKonten    = Array.isArray(bkR?.data) ? bkR.data : [];
+    state.assets        = Array.isArray(asR?.data) ? asR.data : [];
+    state.stockContents = Array.isArray(scR?.data) ? scR.data : [];
+    state.settings      = sR?.data   || { kpi: {}, users: [], analyticsUrls: {} };
     _applyTopContentDefaults();
     _syncApiKeysFromSettings();   // sync API keys dari GitHub settings → localStorage
     state.analytics = anlR?.data || {};
     state.shas = {
-      contents:    cR?.sha,
-      activity:    aR?.sha,
-      todos:       tR?.sha,
-      settings:    sR?.sha,
-      analytics:   anlR?.sha,
-      bankKonten:  bkR?.sha,
-      assets:      asR?.sha
+      contents:      cR?.sha,
+      activity:      aR?.sha,
+      todos:         tR?.sha,
+      settings:      sR?.sha,
+      analytics:     anlR?.sha,
+      bankKonten:    bkR?.sha,
+      assets:        asR?.sha,
+      stockContents: scR?.sha
     };
     // Check Bank Konten reminders after data loaded (jam 8 pagi on publish date)
     checkBankKontenReminders();
@@ -1833,9 +1838,10 @@ function renderCurrentPage() {
     case 'activity':    loadAndRenderActivity(); break;
     case 'contents':    renderContents();     break;
     case 'newpost':     renderNewPostForm();  break;
-    case 'statistics':  renderStatistics();   break;
-    case 'apisetup':    renderApiSetup();     break;
-    case 'assets':      renderAssets();       break;
+    case 'statistics':    renderStatistics();     break;
+    case 'stockcontents': renderStockContents(); break;
+    case 'apisetup':      renderApiSetup();       break;
+    case 'assets':        renderAssets();         break;
   }
 }
 
@@ -3315,6 +3321,106 @@ async function savePost() {
     toast(`Konten berhasil ${id ? 'diperbarui' : 'disimpan'}`, 'success');
     navigate('planner');
   } catch (e) { toast('Gagal simpan: ' + e.message, 'error'); }
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   STOCK CONTENTS
+   ══════════════════════════════════════════════════════════════════════════ */
+
+function renderStockContents() {
+  const canEdit = isAdmin();
+  const q       = ($('scSearch')?.value || '').toLowerCase().trim();
+  const items   = (state.stockContents || []).filter(it =>
+    !q || (it.title || '').toLowerCase().includes(q)
+  );
+  const body = $('scBody');
+  if (!body) return;
+
+  // Sembunyikan kolom aksi untuk non-admin
+  const actHead = $('scActHead');
+  const tools   = $('scAdminTools');
+  if (actHead) actHead.style.display = canEdit ? '' : 'none';
+  if (tools)   tools.style.display   = canEdit ? '' : 'none';
+
+  setTxt('scCount', items.length);
+  setTxt('scCountFoot', items.length ? `${items.length} item tersimpan` : '');
+
+  if (items.length === 0) {
+    body.innerHTML = `<tr><td colspan="5" class="empty-cell">${q ? 'Tidak ada hasil.' : canEdit ? 'Belum ada data. Klik "+ Tambah" untuk memulai.' : 'Belum ada data.'}</td></tr>`;
+    return;
+  }
+
+  body.innerHTML = items.map((it, i) => {
+    if (canEdit) {
+      return `<tr data-id="${it.id}">
+        <td style="text-align:center;color:var(--muted)">${i+1}</td>
+        <td><input type="text" class="bk-inp sc-inp" data-id="${it.id}" data-field="title"
+          value="${esc(it.title||'')}" placeholder="Judul liputan / podcast…" /></td>
+        <td><input type="date" class="bk-inp sc-inp" data-id="${it.id}" data-field="prodDate"
+          value="${esc(it.prodDate||'')}" /></td>
+        <td><input type="date" class="bk-inp sc-inp" data-id="${it.id}" data-field="airDate"
+          value="${esc(it.airDate||'')}" /></td>
+        <td style="text-align:center;white-space:nowrap">
+          <button type="button" class="icon-btn sc-save-btn" data-id="${it.id}" title="Simpan">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+          </button>
+          <button type="button" class="icon-btn sc-del-btn" data-id="${it.id}" title="Hapus">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6M14 11v6M9 6V4h6v2"/></svg>
+          </button>
+        </td>
+      </tr>`;
+    }
+    const fmt = d => d ? new Date(d).toLocaleDateString('id-ID',{day:'2-digit',month:'short',year:'numeric'}) : '—';
+    return `<tr>
+      <td style="text-align:center;color:var(--muted)">${i+1}</td>
+      <td>${esc(it.title||'—')}</td>
+      <td style="color:var(--muted)">${fmt(it.prodDate)}</td>
+      <td style="color:var(--muted)">${fmt(it.airDate)}</td>
+    </tr>`;
+  }).join('');
+
+  if (!canEdit) return;
+
+  // Event listeners simpan
+  body.querySelectorAll('.sc-save-btn').forEach(btn => {
+    btn.onclick = async () => {
+      const id  = btn.dataset.id;
+      const row = body.querySelector(`tr[data-id="${id}"]`);
+      const get = f => row.querySelector(`[data-field="${f}"]`)?.value.trim() || '';
+      const idx = state.stockContents.findIndex(x => x.id === id);
+      if (idx === -1) return;
+      state.stockContents[idx] = { ...state.stockContents[idx], title: get('title'), prodDate: get('prodDate'), airDate: get('airDate') };
+      btn.disabled = true;
+      try {
+        state.shas.stockContents = await window.db.writeData('stockContents', state.stockContents, 'Stock: update item');
+        toast('Tersimpan ✓', 'success');
+      } catch(e) { toast('Gagal simpan: ' + e.message, 'error'); }
+      btn.disabled = false;
+    };
+  });
+
+  // Event listeners hapus
+  body.querySelectorAll('.sc-del-btn').forEach(btn => {
+    btn.onclick = async () => {
+      if (!confirm('Hapus item ini?')) return;
+      const id = btn.dataset.id;
+      state.stockContents = state.stockContents.filter(x => x.id !== id);
+      try {
+        state.shas.stockContents = await window.db.writeData('stockContents', state.stockContents, 'Stock: delete item');
+        toast('Dihapus', 'success');
+        renderStockContents();
+      } catch(e) { toast('Gagal hapus: ' + e.message, 'error'); }
+    };
+  });
+}
+
+function scAddRow() {
+  if (!isAdmin()) return;
+  const newItem = { id: 'sc_' + Date.now(), title: '', prodDate: '', airDate: '' };
+  state.stockContents.unshift(newItem);
+  renderStockContents();
+  // Fokus ke input pertama
+  $('scBody')?.querySelector('.sc-inp')?.focus();
 }
 
 /* ══════════════════════════════════════════════════════════════════════════
@@ -7739,6 +7845,8 @@ document.addEventListener('DOMContentLoaded', async () => {
   window.saveBudget          = saveBudget;
   window.onStatPeriodChange     = onStatPeriodChange;
   window.setStatViewMode        = setStatViewMode;
+  window.renderStockContents    = renderStockContents;
+  window.scAddRow               = scAddRow;
   window.copyStatNarrative      = copyStatNarrative;
   window.copyStatTable          = copyStatTable;
   window.exportStatCSV          = exportStatCSV;

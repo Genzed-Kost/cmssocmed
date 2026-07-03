@@ -295,8 +295,9 @@ class GitHubDB {
       'contents.json':    [],
       'activity.json':    [],
       'todos.json':       [],
-      'contentBank.json': [],
-      'assets.json':      [],
+      'contentBank.json':    [],
+      'assets.json':         [],
+      'stockContents.json':  [],
       'settings.json': {
         kpi:   { 'penjaga-harapan': 5, '33-official': 2, 'jaga-asa': 1 },
         users: [],
