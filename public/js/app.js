@@ -1100,8 +1100,9 @@ function saveDataCache() {
       todos:      state.todos,
       settings:   state.settings,
       analytics:  state.analytics,
-      bankKonten: state.bankKonten,
-      assets:     state.assets
+      bankKonten:    state.bankKonten,
+      assets:        state.assets,
+      stockContents: state.stockContents
     }));
   } catch { /* storage full — ignore */ }
 }
@@ -1197,8 +1198,9 @@ async function loadAllData(force = false) {
         state.todos      = Array.isArray(cached.todos)     ? cached.todos     : [];
         state.settings   = cached.settings   || { kpi:{}, users:[], analyticsUrls:{} };
         state.analytics  = cached.analytics  || {};
-        state.bankKonten = cached.bankKonten || [];
-        state.assets     = Array.isArray(cached.assets) ? cached.assets : [];
+        state.bankKonten    = cached.bankKonten || [];
+        state.assets        = Array.isArray(cached.assets)        ? cached.assets        : [];
+        state.stockContents = Array.isArray(cached.stockContents) ? cached.stockContents : [];
         // SHAs sengaja tidak di-cache — db.writeData() akan auto-fetch SHA saat write
         state.shas = {};
         _applyTopContentDefaults();
