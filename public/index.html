@@ -700,11 +700,23 @@
           <div class="toolbar-left">
             <span style="font-size:.8rem;color:var(--muted)">Total: <strong id="scCount">0</strong> item</span>
           </div>
-          <div class="toolbar-right" id="scAdminTools">
-            <button class="btn-sm blue" onclick="scAddRow()">
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-              Tambah
-            </button>
+          <div class="toolbar-right">
+            <!-- WA kirim semua stok -->
+            <div style="display:flex;align-items:center;gap:6px">
+              <select id="scWaUser" class="inp-sm" style="min-width:130px">
+                <option value="">— Pilih User —</option>
+              </select>
+              <button class="btn-sm" style="background:#25d366;color:#fff;border-color:#25d366" onclick="scSendWa()" title="Kirim semua stok ke WA">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.136.564 4.14 1.544 5.876L0 24l6.336-1.524A11.94 11.94 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.818a9.818 9.818 0 01-5.028-1.384l-.36-.214-3.732.898.938-3.63-.235-.373A9.818 9.818 0 0112 2.182c5.424 0 9.818 4.394 9.818 9.818 0 5.424-4.394 9.818-9.818 9.818z"/></svg>
+                Kirim WA
+              </button>
+            </div>
+            <div id="scAdminTools" style="display:flex;gap:6px">
+              <button class="btn-sm blue" onclick="scAddRow()">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                Tambah
+              </button>
+            </div>
           </div>
         </div>
         <div class="table-wrap">
@@ -715,12 +727,11 @@
                 <th>JUDUL LIPUTAN / PODCAST</th>
                 <th style="width:150px">TGL PRODUKSI</th>
                 <th style="width:150px">TGL TAYANG</th>
-                <th style="width:160px">USER</th>
                 <th style="width:80px;text-align:center" id="scActHead">AKSI</th>
               </tr>
             </thead>
             <tbody id="scBody">
-              <tr><td colspan="5" class="empty-cell">Belum ada data.</td></tr>
+              <tr><td colspan="4" class="empty-cell">Belum ada data.</td></tr>
             </tbody>
           </table>
         </div>
