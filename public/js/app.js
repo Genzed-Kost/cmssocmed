@@ -3329,14 +3329,11 @@ async function savePost() {
 
 function renderStockContents() {
   const canEdit = isAdmin();
-  const q       = ($('scSearch')?.value || '').toLowerCase().trim();
-  const items   = (state.stockContents || []).filter(it =>
-    !q || (it.title || '').toLowerCase().includes(q)
-  );
-  const body = $('scBody');
+  const users   = state.settings?.users || [];
+  const items   = state.stockContents || [];
+  const body    = $('scBody');
   if (!body) return;
 
-  // Sembunyikan kolom aksi untuk non-admin
   const actHead = $('scActHead');
   const tools   = $('scAdminTools');
   if (actHead) actHead.style.display = canEdit ? '' : 'none';
@@ -3345,12 +3342,21 @@ function renderStockContents() {
   setTxt('scCount', items.length);
   setTxt('scCountFoot', items.length ? `${items.length} item tersimpan` : '');
 
+  const fmt = d => d ? new Date(d).toLocaleDateString('id-ID',{day:'2-digit',month:'short',year:'numeric'}) : '—';
+  const userOpts = (sel='') => ['', ...users.map(u => getUserName(u))].map(n =>
+    `<option value="${esc(n)}" ${n===sel?'selected':''}>${n||'— Pilih User —'}</option>`).join('');
+
   if (items.length === 0) {
-    body.innerHTML = `<tr><td colspan="5" class="empty-cell">${q ? 'Tidak ada hasil.' : canEdit ? 'Belum ada data. Klik "+ Tambah" untuk memulai.' : 'Belum ada data.'}</td></tr>`;
+    body.innerHTML = `<tr><td colspan="6" class="empty-cell">${canEdit ? 'Belum ada data. Klik "+ Tambah" untuk memulai.' : 'Belum ada data.'}</td></tr>`;
     return;
   }
 
   body.innerHTML = items.map((it, i) => {
+    const userObj = users.find(u => getUserName(u) === it.user);
+    const canWa   = !!(it.user && userObj?.phone);
+    const waBtn   = `<button type="button" class="bk-wa-btn${canWa?'':' bk-wa-btn--disabled'}" data-id="${it.id}"
+      title="${canWa ? `Kirim WA ke ${esc(it.user)}` : 'Pilih user yang punya no. WA'}">${WA_SVG}</button>`;
+
     if (canEdit) {
       return `<tr data-id="${it.id}">
         <td style="text-align:center;color:var(--muted)">${i+1}</td>
@@ -3360,6 +3366,12 @@ function renderStockContents() {
           value="${esc(it.prodDate||'')}" /></td>
         <td><input type="date" class="bk-inp sc-inp" data-id="${it.id}" data-field="airDate"
           value="${esc(it.airDate||'')}" /></td>
+        <td>
+          <div class="bk-creator-wrap">
+            <select class="bk-sel sc-inp" data-id="${it.id}" data-field="user">${userOpts(it.user||'')}</select>
+            ${waBtn}
+          </div>
+        </td>
         <td style="text-align:center;white-space:nowrap">
           <button type="button" class="icon-btn sc-save-btn" data-id="${it.id}" title="Simpan">
             <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
@@ -3370,18 +3382,39 @@ function renderStockContents() {
         </td>
       </tr>`;
     }
-    const fmt = d => d ? new Date(d).toLocaleDateString('id-ID',{day:'2-digit',month:'short',year:'numeric'}) : '—';
     return `<tr>
       <td style="text-align:center;color:var(--muted)">${i+1}</td>
       <td>${esc(it.title||'—')}</td>
       <td style="color:var(--muted)">${fmt(it.prodDate)}</td>
       <td style="color:var(--muted)">${fmt(it.airDate)}</td>
+      <td>
+        <div class="bk-creator-wrap">
+          <span style="font-size:.82rem">${esc(it.user||'—')}</span>
+          ${waBtn}
+        </div>
+      </td>
     </tr>`;
   }).join('');
 
+  // WA buttons
+  body.querySelectorAll('.bk-wa-btn:not(.bk-wa-btn--disabled)').forEach(btn => {
+    btn.onclick = () => {
+      const id  = btn.dataset.id;
+      const it  = state.stockContents.find(x => x.id === id);
+      if (!it) return;
+      const row = body.querySelector(`tr[data-id="${id}"]`);
+      const title = canEdit ? row?.querySelector('[data-field="title"]')?.value || it.title : it.title;
+      const uName = canEdit ? row?.querySelector('[data-field="user"]')?.value || it.user : it.user;
+      const uObj  = users.find(u => getUserName(u) === uName);
+      if (!uObj?.phone) return;
+      const msg = encodeURIComponent(`Halo ${uName}, konfirmasi stock konten:\n"${title}"`);
+      window.open(`https://wa.me/${uObj.phone.replace(/\D/g,'')}?text=${msg}`, '_blank');
+    };
+  });
+
   if (!canEdit) return;
 
-  // Event listeners simpan
+  // Simpan
   body.querySelectorAll('.sc-save-btn').forEach(btn => {
     btn.onclick = async () => {
       const id  = btn.dataset.id;
@@ -3389,22 +3422,22 @@ function renderStockContents() {
       const get = f => row.querySelector(`[data-field="${f}"]`)?.value.trim() || '';
       const idx = state.stockContents.findIndex(x => x.id === id);
       if (idx === -1) return;
-      state.stockContents[idx] = { ...state.stockContents[idx], title: get('title'), prodDate: get('prodDate'), airDate: get('airDate') };
+      state.stockContents[idx] = { ...state.stockContents[idx], title: get('title'), prodDate: get('prodDate'), airDate: get('airDate'), user: get('user') };
       btn.disabled = true;
       try {
         state.shas.stockContents = await window.db.writeData('stockContents', state.stockContents, 'Stock: update item');
         toast('Tersimpan ✓', 'success');
+        renderStockContents();
       } catch(e) { toast('Gagal simpan: ' + e.message, 'error'); }
       btn.disabled = false;
     };
   });
 
-  // Event listeners hapus
+  // Hapus
   body.querySelectorAll('.sc-del-btn').forEach(btn => {
     btn.onclick = async () => {
       if (!confirm('Hapus item ini?')) return;
-      const id = btn.dataset.id;
-      state.stockContents = state.stockContents.filter(x => x.id !== id);
+      state.stockContents = state.stockContents.filter(x => x.id !== btn.dataset.id);
       try {
         state.shas.stockContents = await window.db.writeData('stockContents', state.stockContents, 'Stock: delete item');
         toast('Dihapus', 'success');
@@ -3416,10 +3449,8 @@ function renderStockContents() {
 
 function scAddRow() {
   if (!isAdmin()) return;
-  const newItem = { id: 'sc_' + Date.now(), title: '', prodDate: '', airDate: '' };
-  state.stockContents.unshift(newItem);
+  state.stockContents.unshift({ id: 'sc_' + Date.now(), title: '', prodDate: '', airDate: '', user: '' });
   renderStockContents();
-  // Fokus ke input pertama
   $('scBody')?.querySelector('.sc-inp')?.focus();
 }
 
