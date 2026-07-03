@@ -1,5 +1,13 @@
 [
   {
+    "id": "mr4jyb4y533oz",
+    "user": "Umar",
+    "role": "Publisher",
+    "action": "logout",
+    "target": "keluar dari sistem",
+    "timestamp": "2026-07-03T06:28:31.330Z"
+  },
+  {
     "id": "mr4jxvwjij82b",
     "user": "Umar",
     "role": "Publisher",
