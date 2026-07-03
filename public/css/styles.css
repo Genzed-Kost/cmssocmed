@@ -2272,7 +2272,7 @@ ul { list-style: none; }
 .news-item-content { flex: 1; }
 .news-item-title { font-size: .83rem; font-weight: 700; color: var(--text); margin-bottom: 4px; line-height: 1.35; }
 .news-item-body  { font-size: .78rem; color: var(--muted); line-height: 1.5; }
-.news-item-link  { display: inline-block; margin-top: 6px; font-size: .74rem; color: var(--accent); text-decoration: none; }
+.news-item-link  { color: var(--accent); text-decoration: none; }
 .news-item-link:hover { text-decoration: underline; }
 
 /* ── AI limit warning ────────────────────────────────────────── */

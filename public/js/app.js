@@ -7410,26 +7410,31 @@ async function fetchNews() {
   $('newsContent').innerHTML = `<div class="news-loading"><div class="spinner"></div><span>Mengambil info terkini dari AI…</span></div>`;
   $('newsTimestamp').textContent = '';
   const today = new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
-  const prompt = `Hari ini adalah ${today}. Berikan tepat 5 berita atau informasi terbaru (dalam 30 hari terakhir) mengenai Presiden Republik Indonesia Prabowo Subianto dan kebijakan pemerintahan. Jika tidak ada informasi terbaru yang kamu ketahui hingga tanggal ini, jelaskan apa yang terakhir kamu ketahui dengan menyebutkan perkiraan tanggalnya. Gunakan format persis seperti ini untuk setiap item (wajib diikuti):
+  const prompt = `Hari ini adalah ${today}. Berikan tepat 5 berita atau informasi terbaru (dalam 30 hari terakhir) mengenai Presiden Republik Indonesia Prabowo Subianto dan kebijakan pemerintahan. Gunakan format persis seperti ini untuk setiap item (wajib diikuti):
 
 ITEM_1
 JUDUL: [tulis judul berita di sini]
+LINK: [URL sumber berita asli, contoh: https://www.kompas.com/... atau https://nasional.tempo.co/...]
 ISI: [deskripsikan 2-3 kalimat dalam bahasa Indonesia yang jelas dan informatif]
 
 ITEM_2
 JUDUL: [tulis judul berita di sini]
+LINK: [URL sumber berita asli]
 ISI: [deskripsikan 2-3 kalimat dalam bahasa Indonesia yang jelas dan informatif]
 
 ITEM_3
 JUDUL: [tulis judul berita di sini]
+LINK: [URL sumber berita asli]
 ISI: [deskripsikan 2-3 kalimat dalam bahasa Indonesia yang jelas dan informatif]
 
 ITEM_4
 JUDUL: [tulis judul berita di sini]
+LINK: [URL sumber berita asli]
 ISI: [deskripsikan 2-3 kalimat dalam bahasa Indonesia yang jelas dan informatif]
 
 ITEM_5
 JUDUL: [tulis judul berita di sini]
+LINK: [URL sumber berita asli]
 ISI: [deskripsikan 2-3 kalimat dalam bahasa Indonesia yang jelas dan informatif]
 
 Langsung mulai dari ITEM_1 tanpa pengantar.`;
@@ -7448,11 +7453,13 @@ function renderNewsContent(text, ts) {
   const blocks = text.split(/ITEM_\d+/i).filter(b => b.trim());
   blocks.forEach((block, i) => {
     const judulM = block.match(/JUDUL:\s*(.+)/i);
+    const linkM  = block.match(/LINK:\s*(\S+)/i);
     const isiM   = block.match(/ISI:\s*([\s\S]+?)(?=\n*$)/i);
     if (judulM) {
       items.push({
         num:   i + 1,
         title: judulM[1].trim(),
+        link:  linkM ? linkM[1].trim() : '',
         body:  isiM ? isiM[1].trim().replace(/\n+/g,' ') : ''
       });
     }
@@ -7469,17 +7476,19 @@ function renderNewsContent(text, ts) {
     if (cur) items.push(cur);
   }
 
-  const newsLink = title => `https://www.google.com/search?q=${encodeURIComponent(title)}&tbm=nws`;
+  const fallbackLink = title => `https://www.google.com/search?q=${encodeURIComponent(title)}&tbm=nws`;
   $('newsContent').innerHTML = items.length
-    ? items.map(it => `
+    ? items.map(it => {
+        const href = (it.link && it.link.startsWith('http')) ? it.link : fallbackLink(it.title);
+        return `
       <div class="news-item">
         <div class="news-item-num">${it.num}</div>
         <div class="news-item-content">
-          <div class="news-item-title">${esc(it.title)}</div>
+          <a class="news-item-title news-item-link" href="${esc(href)}" target="_blank" rel="noopener">${esc(it.title)}</a>
           ${it.body ? `<div class="news-item-body">${esc(it.body)}</div>` : ''}
-          <a class="news-item-link" href="${newsLink(it.title)}" target="_blank" rel="noopener">🔍 Cari di Google News</a>
         </div>
-      </div>`).join('')
+      </div>`;
+      }).join('')
     : `<div class="news-item"><div class="news-item-content"><div class="news-item-body">${esc(text)}</div></div></div>`;
 
   if (ts) {
