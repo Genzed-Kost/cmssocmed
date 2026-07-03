@@ -3438,7 +3438,7 @@ function scAddRow() {
   $('scBody')?.querySelector('.sc-inp')?.focus();
 }
 
-function scSendWa() {
+async function scSendWa() {
   const users  = state.settings?.users || [];
   const uName  = $('scWaUser')?.value;
   if (!uName) { toast('Pilih user terlebih dahulu', 'error'); return; }
@@ -3447,11 +3447,25 @@ function scSendWa() {
   const items  = state.stockContents || [];
   if (!items.length) { toast('Belum ada stok konten', 'error'); return; }
   const fmt    = d => d ? new Date(d).toLocaleDateString('id-ID',{day:'2-digit',month:'short',year:'numeric'}) : '—';
-  const list   = items.map((it, i) =>
-    `${i+1}. ${it.title||'(tanpa judul)'}\n   Produksi: ${fmt(it.prodDate)} | Tayang: ${fmt(it.airDate)}`
+  const sorted = [...items].sort((a,b) => {
+    if (!a.airDate && !b.airDate) return 0;
+    if (!a.airDate) return 1; if (!b.airDate) return -1;
+    return new Date(a.airDate) - new Date(b.airDate);
+  });
+  const list = sorted.map((it, i) =>
+    `${i+1}. ${it.title||'(tanpa judul)'}\n   📅 Tayang: ${fmt(it.airDate)}`
   ).join('\n');
-  const msg = encodeURIComponent(`Halo ${uName}, berikut daftar Stock Contents:\n\n${list}\n\nTotal: ${items.length} item`);
-  window.open(`https://wa.me/${uObj.phone.replace(/\D/g,'')}?text=${msg}`, '_blank');
+  const msg = `Halo ${uName}! 📋\n\nBerikut daftar *Stock Contents* (${items.length} item):\n\n${list}\n\n_- Penjaga Harapan CMS_`;
+
+  if (getWaToken()) {
+    const result = await sendWaNotif(uObj.phone, msg);
+    if (result.ok) toast(`✅ Pesan terkirim ke ${uName}`, 'success');
+  } else {
+    const clean = uObj.phone.replace(/\D/g, '');
+    const num   = clean.startsWith('0') ? '62' + clean.slice(1) : clean;
+    window.open(`https://wa.me/${num}?text=${encodeURIComponent(msg)}`, '_blank');
+  }
+  await logActivity(currentUser(), 'Kirim WA Stock Contents', `ke ${uName} — ${items.length} item`);
 }
 
 /* ══════════════════════════════════════════════════════════════════════════
