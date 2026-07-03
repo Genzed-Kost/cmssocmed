@@ -3353,6 +3353,46 @@ function renderStockContents() {
   setTxt('scCount', items.length);
   setTxt('scCountFoot', items.length ? `${items.length} item tersimpan` : '');
 
+  // ── Shortlist: tayang terdekat dari hari ini ──────────────────────────
+  const scShortlist = $('scShortlist');
+  if (scShortlist) {
+    const today = new Date(); today.setHours(0,0,0,0);
+    const upcoming = items
+      .filter(it => it.airDate)
+      .map(it => ({ ...it, _d: new Date(it.airDate) }))
+      .filter(it => it._d >= today)
+      .sort((a, b) => a._d - b._d)
+      .slice(0, 5);
+    if (upcoming.length) {
+      const fmtShort = d => d.toLocaleDateString('id-ID',{day:'2-digit',month:'short',year:'numeric'});
+      const diffDays = d => Math.round((d - today) / 86400000);
+      scShortlist.innerHTML = `
+        <div style="background:var(--surface);border:1px solid var(--bd);border-radius:var(--radius);padding:10px 14px;margin-bottom:12px">
+          <div style="font-size:.7rem;font-weight:700;color:var(--muted-lt);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px">
+            📅 Shortlist — Tayang Terdekat
+          </div>
+          <div style="display:flex;flex-direction:column;gap:5px">
+            ${upcoming.map(it => {
+              const d = diffDays(it._d);
+              const badge = d === 0
+                ? `<span style="background:#ef4444;color:#fff;font-size:.65rem;font-weight:700;padding:1px 7px;border-radius:99px">Hari ini</span>`
+                : d === 1
+                ? `<span style="background:#f59e0b;color:#fff;font-size:.65rem;font-weight:700;padding:1px 7px;border-radius:99px">Besok</span>`
+                : `<span style="background:var(--blue);color:#fff;font-size:.65rem;font-weight:700;padding:1px 7px;border-radius:99px">${d} hari lagi</span>`;
+              return `<div style="display:flex;align-items:center;gap:8px;font-size:.82rem">
+                ${badge}
+                <span style="font-weight:600;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(it.title||'(tanpa judul)')}</span>
+                <span style="color:var(--muted);flex-shrink:0">${fmtShort(it._d)}</span>
+              </div>`;
+            }).join('')}
+          </div>
+        </div>`;
+      scShortlist.classList.remove('hidden');
+    } else {
+      scShortlist.classList.add('hidden');
+    }
+  }
+
   const fmt = d => d ? new Date(d).toLocaleDateString('id-ID',{day:'2-digit',month:'short',year:'numeric'}) : '—';
 
   if (items.length === 0) {
