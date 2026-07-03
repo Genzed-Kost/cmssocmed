@@ -220,13 +220,13 @@
       },
       {
         "month": "2026-06",
-        "jmlVideo": 168,
-        "totalViews": 1023002,
-        "subsEOM": 70458,
-        "subsGained": 4258,
-        "totalLikes": 6003,
-        "totalComments": 936,
-        "totalEngagement": 11569,
+        "jmlVideo": 182,
+        "totalViews": 1073459,
+        "subsEOM": 70731,
+        "subsGained": 4562,
+        "totalLikes": 6525,
+        "totalComments": 1136,
+        "totalEngagement": 8696,
         "watchHours": 18183
       }
     ],
@@ -901,7 +901,7 @@
         "updatedBy": "Admin"
       },
       "youtube": {
-        "updatedAt": "2026-06-29T06:45:23.858Z",
+        "updatedAt": "2026-07-03T07:48:34.895Z",
         "updatedBy": "Admin"
       },
       "tiktok": {
