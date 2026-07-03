@@ -627,11 +627,11 @@
       },
       {
         "month": "2026-06",
-        "pageFollowers": 160156,
-        "followersGained": 4235,
-        "totalPost": 192,
-        "totalViews": 3672605,
-        "totalEngagement": 124713
+        "pageFollowers": 160456,
+        "followersGained": 4324,
+        "totalPost": 196,
+        "totalViews": 3761227,
+        "totalEngagement": 128230
       }
     ],
     "instagram": [
@@ -900,7 +900,7 @@
         "updatedBy": "Admin"
       },
       "facebook": {
-        "updatedAt": "2026-06-29T06:41:53.933Z",
+        "updatedAt": "2026-07-03T07:55:18.029Z",
         "updatedBy": "Admin"
       },
       "youtube": {
