@@ -912,7 +912,7 @@
         "updatedBy": "Admin"
       },
       "youtube": {
-        "updatedAt": "2026-07-06T06:57:56.635Z",
+        "updatedAt": "2026-07-06T06:58:27.700Z",
         "updatedBy": "Admin"
       },
       "tiktok": {
@@ -1062,6 +1062,7 @@
         "week": "2026-W27",
         "jmlVideo": 29,
         "totalViews": 211183,
+        "subsEOM": 71729,
         "subsGained": 1094,
         "totalLikes": 1045,
         "totalComments": 138,
