@@ -5848,6 +5848,36 @@ function renderStatDataTable(acctId, platId, rows) {
     </tr>`;
   }).join('');
 
+  // Baris TOTAL di bawah tabel
+  const eomKeys  = new Set(['subsEOM','followersEOM','pageFollowers','followers']);
+  const avgKeys  = new Set(['avgViewsPerVideo','avgViewsPerPost','avgEngPerPost','avgViews','avgEng']);
+  const maxKeys  = new Set(['peakViews','maxViewsSingle']);
+  const latest   = sorted[0]; // sorted descending → [0] = terbaru
+  const totCells = platM.fields.map(f => {
+    const vals = sorted.map(r => +(r[f.key] ?? 0)).filter(v => !isNaN(v));
+    if (!vals.length) return `<td style="text-align:right;color:var(--muted-lt)">—</td>`;
+    let agg, hint;
+    if (eomKeys.has(f.key)) {
+      agg  = +(latest?.[f.key] ?? 0);
+      hint = 'Terbaru';
+    } else if (f.fmt === 'pct' || avgKeys.has(f.key)) {
+      agg  = vals.reduce((s, v) => s + v, 0) / vals.length;
+      hint = 'Rata-rata';
+    } else if (maxKeys.has(f.key)) {
+      agg  = Math.max(...vals);
+      hint = 'Tertinggi';
+    } else {
+      agg  = vals.reduce((s, v) => s + v, 0);
+      hint = 'Total';
+    }
+    return `<td style="text-align:right;font-weight:600" title="${hint}">${fmtStatVal(agg, f.fmt)}</td>`;
+  }).join('');
+  const totalRow = `<tr style="background:var(--bg2);border-top:2px solid var(--bd)">
+    <td style="white-space:nowrap;font-weight:700;font-size:.75rem;color:var(--muted)">TOTAL / RATA²</td>
+    ${totCells}
+    <td></td>
+  </tr>`;
+
   wrap.innerHTML = `
     <div class="card" style="margin-top:16px">
       <div class="card-head">
@@ -5870,6 +5900,7 @@ function renderStatDataTable(acctId, platId, rows) {
             </tr>
           </thead>
           <tbody>${bodyRows}</tbody>
+          <tfoot>${totalRow}</tfoot>
         </table>
       </div>
       <div style="padding:10px 0 0;display:flex;gap:8px;flex-wrap:wrap">
