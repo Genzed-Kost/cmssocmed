@@ -1,5 +1,13 @@
 [
   {
+    "id": "mrf8gzf63x34j",
+    "user": "Umar",
+    "role": "Publisher",
+    "action": "login",
+    "target": "masuk ke sistem sebagai Publisher",
+    "timestamp": "2026-07-10T17:52:35.154Z"
+  },
+  {
     "id": "mrf8gkynmk4ib",
     "user": "Admin",
     "role": "Admin",
