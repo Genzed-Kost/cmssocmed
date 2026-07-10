@@ -3381,7 +3381,16 @@ function renderStockContents() {
     return new Date(a.airDate) - new Date(b.airDate);
   });
 
-  const fmt     = d => d ? new Date(d).toLocaleDateString('id-ID',{day:'2-digit',month:'short',year:'numeric'}) : '—';
+  const fmtD    = d => d ? new Date(d).toLocaleDateString('id-ID',{day:'2-digit',month:'short',year:'numeric'}) : '—';
+  const fmtRange = (s, e) => {
+    if (!s && !e) return '—';
+    if (!e) return fmtD(s);
+    const ds = new Date(s), de = new Date(e);
+    const MNAMES = ['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agt','Sep','Okt','Nov','Des'];
+    if (ds.getMonth() === de.getMonth() && ds.getFullYear() === de.getFullYear())
+      return `${ds.getDate()}–${de.getDate()} ${MNAMES[de.getMonth()]} '${String(de.getFullYear()).slice(-2)}`;
+    return `${ds.getDate()} ${MNAMES[ds.getMonth()]}–${de.getDate()} ${MNAMES[de.getMonth()]} '${String(de.getFullYear()).slice(-2)}`;
+  };
   const catOpts = (sel='') => ['', ...SC_CATEGORIES].map(c =>
     `<option value="${esc(c)}" ${c===sel?'selected':''}>${c||'— Pilih Kelompok —'}</option>`).join('');
 
@@ -3406,8 +3415,12 @@ function renderStockContents() {
         <td><select class="bk-sel sc-inp" data-id="${it.id}" data-field="category">${catOpts(it.category||'')}</select></td>
         <td><input type="text" class="bk-inp sc-inp" data-id="${it.id}" data-field="title"
           value="${esc(it.title||'')}" placeholder="Judul…" /></td>
-        <td><input type="date" class="bk-inp sc-inp" data-id="${it.id}" data-field="prodDate"
-          value="${esc(it.prodDate||'')}" /></td>
+        <td style="white-space:nowrap">
+          <input type="date" class="bk-inp sc-inp" data-id="${it.id}" data-field="prodDate"
+            value="${esc(it.prodDate||'')}" style="margin-bottom:2px" />
+          <input type="date" class="bk-inp sc-inp" data-id="${it.id}" data-field="prodDateEnd"
+            value="${esc(it.prodDateEnd||'')}" />
+        </td>
         <td><input type="date" class="bk-inp sc-inp" data-id="${it.id}" data-field="airDate"
           value="${esc(it.airDate||'')}" /></td>
         <td style="text-align:center;white-space:nowrap">
@@ -3424,8 +3437,8 @@ function renderStockContents() {
         <td style="text-align:center;color:var(--muted)">${i+1}</td>
         <td style="color:var(--muted);font-size:.8rem">${esc(it.category||'—')}</td>
         <td>${esc(it.title||'—')}</td>
-        <td style="color:var(--muted)">${fmt(it.prodDate)}</td>
-        <td style="color:var(--muted)">${fmt(it.airDate)}</td>
+        <td style="color:var(--muted)">${fmtRange(it.prodDate, it.prodDateEnd)}</td>
+        <td style="color:var(--muted)">${fmtD(it.airDate)}</td>
       </tr>`);
     }
   });
@@ -3441,7 +3454,7 @@ function renderStockContents() {
       const get = f => row.querySelector(`[data-field="${f}"]`)?.value.trim() || '';
       const idx = state.stockContents.findIndex(x => x.id === id);
       if (idx === -1) return;
-      state.stockContents[idx] = { ...state.stockContents[idx], category: get('category'), title: get('title'), prodDate: get('prodDate'), airDate: get('airDate') };
+      state.stockContents[idx] = { ...state.stockContents[idx], category: get('category'), title: get('title'), prodDate: get('prodDate'), prodDateEnd: get('prodDateEnd'), airDate: get('airDate') };
       btn.disabled = true;
       try {
         state.shas.stockContents = await window.db.writeData('stockContents', state.stockContents, 'Stock: update item');
@@ -3468,7 +3481,7 @@ function renderStockContents() {
 
 function scAddRow() {
   if (!isAdmin()) return;
-  state.stockContents.unshift({ id: 'sc_' + Date.now(), category: '', title: '', prodDate: '', airDate: '' });
+  state.stockContents.unshift({ id: 'sc_' + Date.now(), category: '', title: '', prodDate: '', prodDateEnd: '', airDate: '' });
   renderStockContents();
   $('scBody')?.querySelector('.sc-inp')?.focus();
 }
@@ -3483,6 +3496,15 @@ async function scSendWa() {
   if (!items.length) { toast('Belum ada stok konten', 'error'); return; }
 
   const fmtD     = d => d ? new Date(d).toLocaleDateString('id-ID',{day:'2-digit',month:'short',year:'numeric'}) : '—';
+  const fmtRange = (s, e) => {
+    if (!s && !e) return '—';
+    if (!e) return fmtD(s);
+    const ds = new Date(s), de = new Date(e);
+    const MN = ['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agt','Sep','Okt','Nov','Des'];
+    if (ds.getMonth() === de.getMonth() && ds.getFullYear() === de.getFullYear())
+      return `${ds.getDate()}–${de.getDate()} ${MN[de.getMonth()]} '${String(de.getFullYear()).slice(-2)}`;
+    return `${ds.getDate()} ${MN[ds.getMonth()]}–${de.getDate()} ${MN[de.getMonth()]} '${String(de.getFullYear()).slice(-2)}`;
+  };
   const todayStr = new Date().toISOString().slice(0, 10);
   const catOrder = cat => { const i = SC_CATEGORIES.indexOf(cat); return i === -1 ? 99 : i; };
 
@@ -3493,9 +3515,13 @@ async function scSendWa() {
     return new Date(a.airDate) - new Date(b.airDate);
   };
 
-  // Pisahkan: sudah produksi (prodDate lewat/hari ini) vs belum produksi
-  const sudahProd = [...items].filter(it => it.prodDate && it.prodDate <= todayStr).sort(sortFn);
-  const belumProd = [...items].filter(it => !it.prodDate || it.prodDate > todayStr).sort(sortFn);
+  // Sudah produksi = tanggal akhir produksi (atau mulai jika tidak ada akhir) sudah lewat/hari ini
+  const prodDone = it => {
+    const endKey = it.prodDateEnd || it.prodDate;
+    return endKey && endKey <= todayStr;
+  };
+  const sudahProd = [...items].filter(it => prodDone(it)).sort(sortFn);
+  const belumProd = [...items].filter(it => !prodDone(it)).sort(sortFn);
 
   const buildGroupBlock = (list, showProd) => {
     const groups = {};
@@ -3508,7 +3534,8 @@ async function scSendWa() {
     return Object.entries(groups).map(([cat, its]) => {
       const rows = its.map(it => {
         let line = `  ${no++}. ${it.title||'(tanpa judul)'}`;
-        if (showProd && it.prodDate && it.prodDate > todayStr) line += ` 🎬 Prod: ${fmtD(it.prodDate)}`;
+        if (showProd && (it.prodDate || it.prodDateEnd))
+          line += ` 🎬 Prod: ${fmtRange(it.prodDate, it.prodDateEnd)}`;
         line += ` — 📅 Tayang: ${fmtD(it.airDate)}`;
         return line;
       }).join('\n');
