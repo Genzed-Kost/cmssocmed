@@ -3416,10 +3416,15 @@ function renderStockContents() {
         <td><input type="text" class="bk-inp sc-inp" data-id="${it.id}" data-field="title"
           value="${esc(it.title||'')}" placeholder="Judul…" /></td>
         <td style="white-space:nowrap">
-          <input type="date" class="bk-inp sc-inp" data-id="${it.id}" data-field="prodDate"
-            value="${esc(it.prodDate||'')}" style="margin-bottom:2px" />
-          <input type="date" class="bk-inp sc-inp" data-id="${it.id}" data-field="prodDateEnd"
-            value="${esc(it.prodDateEnd||'')}" />
+          <div style="display:flex;align-items:center;gap:3px">
+            <input type="date" class="bk-inp sc-inp" data-id="${it.id}" data-field="prodDate"
+              value="${esc(it.prodDate||'')}" style="width:120px" />
+            <span class="sc-range-sep" data-id="${it.id}" title="Tambah tanggal akhir produksi"
+              style="cursor:pointer;color:var(--accent);font-size:.7rem;padding:0 2px;user-select:none"
+              onclick="scToggleEndDate('${it.id}')">s/d</span>
+            <input type="date" class="bk-inp sc-inp sc-end-date" data-id="${it.id}" data-field="prodDateEnd"
+              value="${esc(it.prodDateEnd||'')}" style="width:120px;${it.prodDateEnd?'':'display:none'}" />
+          </div>
         </td>
         <td><input type="date" class="bk-inp sc-inp" data-id="${it.id}" data-field="airDate"
           value="${esc(it.airDate||'')}" /></td>
@@ -3477,6 +3482,14 @@ function renderStockContents() {
       } catch(e) { toast('Gagal hapus: ' + e.message, 'error'); }
     };
   });
+}
+
+function scToggleEndDate(id) {
+  const inp = document.querySelector(`.sc-end-date[data-id="${id}"]`);
+  if (!inp) return;
+  const visible = inp.style.display !== 'none';
+  if (visible) { inp.value = ''; inp.style.display = 'none'; }
+  else { inp.style.display = ''; inp.focus(); }
 }
 
 function scAddRow() {
@@ -8035,6 +8048,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   window.setStatViewMode        = setStatViewMode;
   window.renderStockContents    = renderStockContents;
   window.scAddRow               = scAddRow;
+  window.scToggleEndDate        = scToggleEndDate;
   window.scSendWa               = scSendWa;
   window.copyStatNarrative      = copyStatNarrative;
   window.copyStatTable          = copyStatTable;
