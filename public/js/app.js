@@ -3481,29 +3481,46 @@ async function scSendWa() {
   if (!uObj?.phone) { toast('User tidak memiliki nomor WA', 'error'); return; }
   const items  = state.stockContents || [];
   if (!items.length) { toast('Belum ada stok konten', 'error'); return; }
-  const fmt    = d => d ? new Date(d).toLocaleDateString('id-ID',{day:'2-digit',month:'short',year:'numeric'}) : '—';
+
+  const fmtD     = d => d ? new Date(d).toLocaleDateString('id-ID',{day:'2-digit',month:'short',year:'numeric'}) : '—';
+  const todayStr = new Date().toISOString().slice(0, 10);
   const catOrder = cat => { const i = SC_CATEGORIES.indexOf(cat); return i === -1 ? 99 : i; };
-  const sorted = [...items].sort((a,b) => {
+
+  const sortFn = (a, b) => {
     const cd = catOrder(a.category) - catOrder(b.category); if (cd !== 0) return cd;
     if (!a.airDate && !b.airDate) return 0;
     if (!a.airDate) return 1; if (!b.airDate) return -1;
     return new Date(a.airDate) - new Date(b.airDate);
-  });
+  };
 
-  // Kelompokkan per kategori
-  const groups = {};
-  sorted.forEach(it => {
-    const cat = it.category || 'Lainnya';
-    if (!groups[cat]) groups[cat] = [];
-    groups[cat].push(it);
-  });
-  let no = 1;
-  const groupBlocks = Object.entries(groups).map(([cat, its]) => {
-    const rows = its.map(it => `  ${no++}. ${it.title||'(tanpa judul)'} — 📅 ${fmt(it.airDate)}`).join('\n');
-    return `*${cat}*\n${rows}`;
-  }).join('\n\n');
+  // Pisahkan: sudah produksi (prodDate lewat/hari ini) vs belum produksi
+  const sudahProd = [...items].filter(it => it.prodDate && it.prodDate <= todayStr).sort(sortFn);
+  const belumProd = [...items].filter(it => !it.prodDate || it.prodDate > todayStr).sort(sortFn);
 
-  const msg = `Halo ${uName}! 📋\n\nBerikut daftar *Stock Contents* (${items.length} item):\n\n${groupBlocks}\n\n_- Penjaga Harapan CMS_`;
+  const buildGroupBlock = (list, showProd) => {
+    const groups = {};
+    list.forEach(it => {
+      const cat = it.category || 'Lainnya';
+      if (!groups[cat]) groups[cat] = [];
+      groups[cat].push(it);
+    });
+    let no = 1;
+    return Object.entries(groups).map(([cat, its]) => {
+      const rows = its.map(it => {
+        let line = `  ${no++}. ${it.title||'(tanpa judul)'}`;
+        if (showProd && it.prodDate && it.prodDate > todayStr) line += ` 🎬 Prod: ${fmtD(it.prodDate)}`;
+        line += ` — 📅 Tayang: ${fmtD(it.airDate)}`;
+        return line;
+      }).join('\n');
+      return `*${cat}*\n${rows}`;
+    }).join('\n\n');
+  };
+
+  const parts = [];
+  if (sudahProd.length) parts.push(`✅ *Tinggal Menunggu Tayang* (${sudahProd.length} item)\n\n${buildGroupBlock(sudahProd, false)}`);
+  if (belumProd.length) parts.push(`🎬 *Belum Produksi* (${belumProd.length} item)\n\n${buildGroupBlock(belumProd, true)}`);
+
+  const msg = `Halo ${uName}! 📋\n\nBerikut daftar *Stock Contents* (${items.length} item):\n\n${parts.join('\n\n━━━━━━━━━━\n\n')}\n\n_- Penjaga Harapan CMS_`;
 
   if (getWaToken()) {
     const result = await sendWaNotif(uObj.phone, msg);
