@@ -930,11 +930,20 @@
         "totalReach": 439514,
         "followersGained": 3365,
         "totalEngagement": 95781
+      },
+      {
+        "month": "2026-07",
+        "followersEOM": 59649,
+        "jmlPost": 90,
+        "totalViews": 920948,
+        "totalReach": 213455,
+        "followersGained": 1012,
+        "totalEngagement": 41107
       }
     ],
     "_meta": {
       "instagram": {
-        "updatedAt": "2026-07-13T05:53:24.317Z",
+        "updatedAt": "2026-07-13T06:02:31.552Z",
         "updatedBy": "Admin"
       },
       "facebook": {
