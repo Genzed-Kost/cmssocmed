@@ -918,7 +918,7 @@
         "updatedBy": "Admin"
       },
       "facebook": {
-        "updatedAt": "2026-07-06T06:52:53.759Z",
+        "updatedAt": "2026-07-13T05:50:54.641Z",
         "updatedBy": "Admin"
       },
       "youtube": {
@@ -1018,6 +1018,14 @@
         "totalPost": 41,
         "totalViews": 629482,
         "totalEngagement": 22707
+      },
+      {
+        "week": "2026-W28",
+        "pageFollowers": 161411,
+        "followersGained": 893,
+        "totalPost": 42,
+        "totalViews": 736255,
+        "totalEngagement": 32146
       }
     ],
     "youtube_w": [
