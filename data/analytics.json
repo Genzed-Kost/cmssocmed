@@ -228,6 +228,16 @@
         "totalComments": 1136,
         "totalEngagement": 8696,
         "watchHours": 18183
+      },
+      {
+        "month": "2026-07",
+        "jmlVideo": 60,
+        "totalViews": 2249151,
+        "subsEOM": 72855,
+        "subsGained": 2314,
+        "totalLikes": 16932,
+        "totalComments": 1191,
+        "totalEngagement": 18521
       }
     ],
     "tiktok": [
@@ -912,7 +922,7 @@
         "updatedBy": "Admin"
       },
       "youtube": {
-        "updatedAt": "2026-07-06T06:58:27.700Z",
+        "updatedAt": "2026-07-13T05:22:30.433Z",
         "updatedBy": "Admin"
       },
       "tiktok": {
