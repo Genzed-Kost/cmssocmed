@@ -456,6 +456,18 @@
         "totalComments": 13822,
         "totalShares": 28631,
         "totalEngagement": 475949
+      },
+      {
+        "month": "2026-07",
+        "jmlVideo": 30,
+        "totalVideoViews": 771891,
+        "profileViews": 3629,
+        "followersEOM": 39209,
+        "followersGained": 646,
+        "totalLikes": 40685,
+        "totalComments": 1560,
+        "totalShares": 1901,
+        "totalEngagement": 44164
       }
     ],
     "facebook": [
@@ -926,7 +938,7 @@
         "updatedBy": "Admin"
       },
       "tiktok": {
-        "updatedAt": "2026-07-13T05:48:41.182Z",
+        "updatedAt": "2026-07-13T05:56:36.662Z",
         "updatedBy": "Admin"
       }
     },
