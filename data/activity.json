@@ -1,5 +1,13 @@
 [
   {
+    "id": "mrlmee970egmm",
+    "user": "Luthfi",
+    "role": "Creator",
+    "action": "login",
+    "target": "masuk ke sistem sebagai Creator",
+    "timestamp": "2026-07-15T05:09:06.091Z"
+  },
+  {
     "id": "mritffdxwlk65",
     "user": "Admin",
     "role": "Admin",
