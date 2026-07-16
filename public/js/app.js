@@ -1528,7 +1528,7 @@ function renderDashTicker() {
   // 1. Bank of Contents: semua item yang belum lewat atau hari ini
   (state.bankKonten || []).forEach(b => {
     if (!b.publishDate || b.publishDate < todayStr) return;
-    const acctLabel = BK_getAccounts().find(a => a.id === b.account)?.name || b.account || '';
+    const acctLabel = getAccounts().find(a => a.id === b.account)?.name || b.account || '';
     const daysLeft  = Math.round((new Date(b.publishDate) - new Date(todayStr)) / 86400000);
     const when      = daysLeft === 0 ? 'Hari ini' : daysLeft === 1 ? 'Besok' : fmtDate(b.publishDate);
     items.push(`📋 <strong>${esc(b.title || 'Bank Konten')}</strong>${b.creator ? ` · ${esc(b.creator)}` : ''}${acctLabel ? ` · ${esc(acctLabel)}` : ''} — ${when}`);
@@ -1601,7 +1601,7 @@ function renderBankKonten() {
     ).join('');
 
   const acctOpts = (selected = '') =>
-    BK_getAccounts().map(a =>
+    getAccounts().map(a =>
       `<option value="${a.id}" ${a.id === selected ? 'selected' : ''}>${a.name}</option>`
     ).join('');
 
