@@ -94,12 +94,6 @@
       "role": "TA Sesneg",
       "phone": "082281878389",
       "passwordHash": "e2c0d4325a5f2ffbb18dbae5cfd535548d0364b394a05f023b35d8ee025f7985"
-    },
-    {
-      "name": "Om Yudi",
-      "role": "Kontraktor",
-      "phone": "",
-      "passwordHash": ""
     }
   ],
   "analyticsUrls": {
@@ -622,6 +616,96 @@
       }
     },
     "jaga-asa": {
+      "good": [
+        {
+          "title": "",
+          "link": ""
+        },
+        {
+          "title": "",
+          "link": ""
+        },
+        {
+          "title": "",
+          "link": ""
+        }
+      ],
+      "bad": [
+        {
+          "title": "",
+          "link": ""
+        },
+        {
+          "title": "",
+          "link": ""
+        },
+        {
+          "title": "",
+          "link": ""
+        }
+      ]
+    },
+    "warga-negara": {
+      "good": [
+        {
+          "title": "",
+          "link": ""
+        },
+        {
+          "title": "",
+          "link": ""
+        },
+        {
+          "title": "",
+          "link": ""
+        }
+      ],
+      "bad": [
+        {
+          "title": "",
+          "link": ""
+        },
+        {
+          "title": "",
+          "link": ""
+        },
+        {
+          "title": "",
+          "link": ""
+        }
+      ]
+    },
+    "republik-receh": {
+      "good": [
+        {
+          "title": "",
+          "link": ""
+        },
+        {
+          "title": "",
+          "link": ""
+        },
+        {
+          "title": "",
+          "link": ""
+        }
+      ],
+      "bad": [
+        {
+          "title": "",
+          "link": ""
+        },
+        {
+          "title": "",
+          "link": ""
+        },
+        {
+          "title": "",
+          "link": ""
+        }
+      ]
+    },
+    "jejak-data": {
       "good": [
         {
           "title": "",
