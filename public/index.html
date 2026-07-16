@@ -963,21 +963,25 @@
               <span class="card-title">Target KPI Bulanan</span>
             </div>
             <div class="kpi-target-list" id="kpiTargetList">
-              <div class="form-group">
-                <label class="form-label">Penjaga Harapan</label>
-                <input type="number" id="kpiPH" class="form-inp" min="0" placeholder="5" />
-              </div>
-              <div class="form-group">
-                <label class="form-label">33 Official</label>
-                <input type="number" id="kpi33" class="form-inp" min="0" placeholder="2" />
-              </div>
-              <div class="form-group">
-                <label class="form-label">Jaga Asa</label>
-                <input type="number" id="kpiJA" class="form-inp" min="0" placeholder="1" />
-              </div>
+              <!-- diisi dinamis oleh renderKpiInputs() -->
             </div>
             <div class="form-actions-row" style="margin-top:12px">
               <button class="btn-sm blue" id="btnSaveKpi">Simpan KPI</button>
+            </div>
+          </div>
+
+          <!-- Manajemen Akun -->
+          <div class="card setup-card">
+            <div class="card-head">
+              <span class="card-title">Manajemen Akun</span>
+            </div>
+            <p style="font-size:.75rem;color:var(--muted);margin:0 0 10px">Akun bawaan: Penjaga Harapan, 33 Official, Jaga Asa, Warga Negara, Republik Receh, Jejak Data.</p>
+            <div id="customAccountsList" style="display:flex;flex-direction:column;gap:6px;margin-bottom:12px">
+              <!-- diisi dinamis -->
+            </div>
+            <div style="display:flex;gap:6px;align-items:center">
+              <input type="text" id="newAcctName" class="form-inp" placeholder="Nama akun baru…" style="flex:1" />
+              <button class="btn-sm blue" onclick="addCustomAccount()">+ Tambah</button>
             </div>
           </div>
 

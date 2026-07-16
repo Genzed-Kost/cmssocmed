@@ -160,11 +160,20 @@ const PLAT_ICON_SVG = {
   youtube:   `<svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M23.495 6.205a3.007 3.007 0 00-2.088-2.088c-1.87-.501-9.396-.501-9.396-.501s-7.507-.01-9.396.501A3.007 3.007 0 00.527 6.205a31.247 31.247 0 00-.522 5.805 31.247 31.247 0 00.522 5.783 3.007 3.007 0 002.088 2.088c1.868.502 9.396.502 9.396.502s7.506 0 9.396-.502a3.007 3.007 0 002.088-2.088 31.247 31.247 0 00.5-5.783 31.247 31.247 0 00-.5-5.805zM9.609 15.601V8.408l6.264 3.602z"/></svg>`
 };
 
-const ACCOUNTS = [
+const BASE_ACCOUNTS = [
   { id: 'penjaga-harapan', name: 'Penjaga Harapan', color: '#7c3aed' },
   { id: '33-official',     name: '33 Official',     color: '#16a34a' },
-  { id: 'jaga-asa',        name: 'Jaga Asa',        color: '#ea580c' }
+  { id: 'jaga-asa',        name: 'Jaga Asa',        color: '#ea580c' },
+  { id: 'warga-negara',    name: 'Warga Negara',    color: '#0284c7' },
+  { id: 'republik-receh',  name: 'Republik Receh',  color: '#db2777' },
+  { id: 'jejak-data',      name: 'Jejak Data',      color: '#d97706' },
 ];
+function getAccounts() {
+  const custom = (state.settings?.customAccounts || []).map(a => ({
+    id: a.id, name: a.name, color: a.color || '#6b7280'
+  }));
+  return [...BASE_ACCOUNTS, ...custom];
+}
 
 /* ── Role colour map (used in sidebar badge + user list) ─────────────────── */
 const ROLE_COLORS = {
@@ -492,7 +501,7 @@ function relTime(iso) {
   return `${Math.floor(h / 24)} hari lalu`;
 }
 function getAcctName(id) {
-  return ACCOUNTS.find(x => x.id === id)?.name || id;
+  return getAccounts().find(x => x.id === id)?.name || id;
 }
 function esc(str) {
   if (str === null || str === undefined) return '';
@@ -1175,7 +1184,7 @@ async function _persistApiKey(_keyName, _value) {
 
 function _applyTopContentDefaults() {
   if (!state.settings.topContent) state.settings.topContent = {};
-  ACCOUNTS.forEach(a => {
+  getAccounts().forEach(a => {
     if (!state.settings.topContent[a.id]) {
       state.settings.topContent[a.id] = {
         good: [{title:'',link:''},{title:'',link:''},{title:'',link:''}],
@@ -1423,7 +1432,7 @@ async function openPlannerWa(id) {
   if (!c) return;
   const users = state.settings?.users || [];
   const crArr = Array.isArray(c.creator) ? c.creator : (c.creator ? [c.creator] : []);
-  const acctObj = ACCOUNTS.find(a => a.id === c.account);
+  const acctObj = getAccounts().find(a => a.id === c.account);
 
   // Kumpulkan semua creator yang punya nomor WA
   const targets = crArr
@@ -1465,7 +1474,7 @@ async function notifyAdministratorBudget(content) {
   const users = state.settings?.users || [];
   const admins = users.filter(u => (u.role || '').toLowerCase() === 'administrator' && u.phone);
   if (!admins.length) return;
-  const acctName = ACCOUNTS.find(a => a.id === content.account)?.name || content.account || '—';
+  const acctName = getAccounts().find(a => a.id === content.account)?.name || content.account || '—';
   const dateStr  = fmtDate(content.publishDate) || '—';
   const cmsUrl   = `${window.location.origin}/loginuser`;
   const crTxt    = Array.isArray(content.creator) ? content.creator.join(', ') : (content.creator || '—');
@@ -1492,7 +1501,7 @@ async function notifyCreatorAssigned(content) {
   const users  = state.settings?.users || [];
   const crArr  = Array.isArray(content.creator) ? content.creator : [content.creator];
   const status   = content.status || 'Plan';
-  const acctObj  = ACCOUNTS.find(a => a.id === content.account);
+  const acctObj  = getAccounts().find(a => a.id === content.account);
   const acctName = acctObj?.name || content.account || '—';
   const dateStr  = fmtDate(content.publishDate) || '—';
   const cmsUrl   = `${window.location.origin}/loginuser`;
@@ -1519,7 +1528,7 @@ function renderDashTicker() {
   // 1. Bank of Contents: semua item yang belum lewat atau hari ini
   (state.bankKonten || []).forEach(b => {
     if (!b.publishDate || b.publishDate < todayStr) return;
-    const acctLabel = BK_ACCOUNTS.find(a => a.id === b.account)?.name || b.account || '';
+    const acctLabel = BK_getAccounts().find(a => a.id === b.account)?.name || b.account || '';
     const daysLeft  = Math.round((new Date(b.publishDate) - new Date(todayStr)) / 86400000);
     const when      = daysLeft === 0 ? 'Hari ini' : daysLeft === 1 ? 'Besok' : fmtDate(b.publishDate);
     items.push(`📋 <strong>${esc(b.title || 'Bank Konten')}</strong>${b.creator ? ` · ${esc(b.creator)}` : ''}${acctLabel ? ` · ${esc(acctLabel)}` : ''} — ${when}`);
@@ -1569,11 +1578,6 @@ function renderDashTicker() {
    BANK KONTEN
    ══════════════════════════════════════════════════════════════════════════ */
 
-const BK_ACCOUNTS = [
-  { id: 'penjaga-harapan', name: 'Penjaga Harapan' },
-  { id: '33-official',     name: '33 Official'      },   // harus sama dengan ACCOUNTS
-  { id: 'jaga-asa',        name: 'Jaga Asa'         }
-];
 
 const WA_SVG = `<svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/></svg>`;
 
@@ -1597,7 +1601,7 @@ function renderBankKonten() {
     ).join('');
 
   const acctOpts = (selected = '') =>
-    BK_ACCOUNTS.map(a =>
+    BK_getAccounts().map(a =>
       `<option value="${a.id}" ${a.id === selected ? 'selected' : ''}>${a.name}</option>`
     ).join('');
 
@@ -2002,7 +2006,7 @@ function renderKpiList(monthContents) {
   const kpi  = state.settings?.kpi || {};
   const list = $('kpiList');
   if (!list) return;
-  const rows = ACCOUNTS.map(acct => {
+  const rows = getAccounts().map(acct => {
     const target = +(kpi[acct.id] || 0);
     const actual = monthContents.filter(c => c.account === acct.id && c.status === 'Published').length;
     const pct    = target ? Math.min(100, Math.round(actual / target * 100)) : 0;
@@ -2180,7 +2184,7 @@ function buildAnlAcctSel() {
   const sel = $('anlpAcctSel');
   if (!sel || sel.options.length) return;
   const abbr = { 'penjaga-harapan':'AKUN PH', '33-official':'AKUN 33', 'jaga-asa':'AKUN JA' };
-  ACCOUNTS.forEach(a => {
+  getAccounts().forEach(a => {
     const opt = document.createElement('option');
     opt.value = a.id; opt.textContent = abbr[a.id] || a.name;
     if (a.id === state.anlActiveAcct) opt.selected = true;
@@ -2274,7 +2278,7 @@ function dashContentCard(c, mode = 'upcoming') {
     return `<span class="dcc-plat-icon" style="color:${meta.color}" title="${meta.name}">${platIconMap[p]||p}</span>`;
   }).join('');
 
-  const acct     = ACCOUNTS.find(a => a.id === c.account);
+  const acct     = getAccounts().find(a => a.id === c.account);
   const users    = (state.settings?.users || []);
   const statuses = STATUSES;
 
@@ -2633,7 +2637,7 @@ function renderPlanner(page) {
   const users  = state.settings?.users || [];
   tbody.innerHTML = slice.length ? slice.map(c => {
     const plats = (c.platforms||[]).map(p => `<span class="plat-pill plat-${p}">${p.charAt(0).toUpperCase()}</span>`).join('');
-    const acct  = ACCOUNTS.find(a => a.id === c.account);
+    const acct  = getAccounts().find(a => a.id === c.account);
     const crArr = Array.isArray(c.creator) ? c.creator : (c.creator ? [c.creator] : []);
     const hasPhone = crArr.some(cr => users.find(u => getUserName(u) === cr)?.phone);
     const waBtn = hasPhone
@@ -2948,7 +2952,7 @@ function openLinkModal(contentId, mode, platform) {
   if (!modal) return;
 
   /* ── Shared helpers ── */
-  const acct       = ACCOUNTS.find(a => a.id === c.account);
+  const acct       = getAccounts().find(a => a.id === c.account);
   const creatorTxt = Array.isArray(c.creator) ? c.creator.join(', ') : (c.creator || '—');
   const editorTxt  = (c.editor && FORMATS_DUAL_ROLE.includes(c.format)) ? c.editor : null;
   const extSvg     = `<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>`;
@@ -3288,7 +3292,7 @@ async function savePost() {
   const creator = isDualRoleFmt
     ? _getMultiCreators()           // baca dari chip UI
     : gv('postCreator');            // baca dari single-select
-  const acctName = ACCOUNTS.find(a => a.id === acctId)?.name || acctId || '—';
+  const acctName = getAccounts().find(a => a.id === acctId)?.name || acctId || '—';
 
   // Auto-koreksi status: Plan hanya untuk besok ke depan; hari ini → Ongoing
   const todayStr = new Date().toISOString().slice(0, 10);
@@ -3815,10 +3819,8 @@ function renderApiSetup() {
   const el = $('githubConnStatus');
   if (el) { el.textContent = connected ? 'Tersambung' : 'Belum tersambung'; el.className = 'badge-status' + (connected ? ' ok' : ''); }
 
-  const kpi = state.settings?.kpi || {};
-  sv('kpiPH', kpi['penjaga-harapan'] || '');
-  sv('kpi33', kpi['33-official']     || '');
-  sv('kpiJA', kpi['jaga-asa']        || '');
+  renderKpiInputs();
+  renderCustomAccountsAdmin();
 
   // Gemini key
   sv('cfgGeminiKey', getGeminiKey());
@@ -4299,7 +4301,7 @@ async function saveAndInitGithub() {
 function renderUrlAcctBar() {
   const bar = $('urlAcctBar');
   if (!bar) return;
-  bar.innerHTML = ACCOUNTS.map(acct =>
+  bar.innerHTML = getAccounts().map(acct =>
     `<button class="url-acct-tab ${acct.id===state.urlActiveAcct?'active':''}"
        onclick="selectUrlAcct('${acct.id}')">${acct.name}</button>`
   ).join('');
@@ -4523,19 +4525,90 @@ async function saveEditUser() {
 }
 
 /* KPI */
+function renderKpiInputs() {
+  const list = $('kpiTargetList');
+  if (!list) return;
+  const kpi = state.settings?.kpi || {};
+  list.innerHTML = getAccounts().map(a => `
+    <div class="form-group">
+      <label class="form-label">${esc(a.name)}</label>
+      <input type="number" class="form-inp kpi-acct-inp" data-acct="${esc(a.id)}"
+        min="0" placeholder="0" value="${kpi[a.id] || ''}" />
+    </div>`).join('');
+}
+
 async function saveKpi() {
   const settings = state.settings || { kpi:{}, users:[], analyticsUrls:{} };
-  settings.kpi = {
-    'penjaga-harapan': +gv('kpiPH') || 0,
-    '33-official':     +gv('kpi33') || 0,
-    'jaga-asa':        +gv('kpiJA') || 0
-  };
+  settings.kpi = {};
+  document.querySelectorAll('.kpi-acct-inp').forEach(inp => {
+    settings.kpi[inp.dataset.acct] = +inp.value || 0;
+  });
   state.settings = settings;
   try {
     state.shas.settings = await window.db.writeData('settings', settings, 'Update KPI targets');
     toast('Target KPI disimpan', 'success');
     if (state.currentPage === 'dashboard') renderDashboard();
   } catch (e) { toast('Gagal: ' + e.message, 'error'); }
+}
+
+/* Manajemen Akun Custom */
+function renderCustomAccountsAdmin() {
+  const wrap = $('customAccountsList');
+  if (!wrap) return;
+  const customs = state.settings?.customAccounts || [];
+  wrap.innerHTML = customs.length
+    ? customs.map(a => `
+      <div class="form-group" style="display:flex;align-items:center;gap:6px">
+        <span style="flex:1;font-size:.82rem">${esc(a.name)}</span>
+        <input type="color" value="${esc(a.color||'#6b7280')}" style="width:28px;height:28px;border:none;padding:0;cursor:pointer;background:none"
+          onchange="updateCustomAcctColor('${esc(a.id)}',this.value)" />
+        <button class="btn-xs" style="color:var(--red)" onclick="deleteCustomAccount('${esc(a.id)}')">Hapus</button>
+      </div>`).join('')
+    : `<p style="font-size:.78rem;color:var(--muted);margin:0">Belum ada akun tambahan.</p>`;
+}
+
+async function addCustomAccount() {
+  const nameInp = $('newAcctName');
+  const name = nameInp?.value.trim();
+  if (!name) { toast('Masukkan nama akun', 'error'); return; }
+  const id = name.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');
+  const settings = state.settings || { kpi:{}, users:[], analyticsUrls:{} };
+  if (!settings.customAccounts) settings.customAccounts = [];
+  if ([...BASE_ACCOUNTS, ...settings.customAccounts].some(a => a.id === id)) {
+    toast('Akun dengan nama serupa sudah ada', 'error'); return;
+  }
+  settings.customAccounts.push({ id, name, color: '#6b7280' });
+  state.settings = settings;
+  try {
+    state.shas.settings = await window.db.writeData('settings', settings, `Tambah akun: ${name}`);
+    nameInp.value = '';
+    toast(`Akun "${name}" ditambahkan ✓`, 'success');
+    renderCustomAccountsAdmin();
+    renderKpiInputs();
+  } catch(e) { toast('Gagal: ' + e.message, 'error'); }
+}
+
+async function updateCustomAcctColor(id, color) {
+  const settings = state.settings || {};
+  const a = (settings.customAccounts||[]).find(x => x.id === id);
+  if (!a) return;
+  a.color = color;
+  try {
+    state.shas.settings = await window.db.writeData('settings', settings, `Update warna akun ${id}`);
+  } catch(e) { toast('Gagal simpan warna: ' + e.message, 'error'); }
+}
+
+async function deleteCustomAccount(id) {
+  if (!confirm('Hapus akun ini? Data statistik yang sudah tersimpan tidak ikut terhapus.')) return;
+  const settings = state.settings || {};
+  settings.customAccounts = (settings.customAccounts||[]).filter(a => a.id !== id);
+  state.settings = settings;
+  try {
+    state.shas.settings = await window.db.writeData('settings', settings, `Hapus akun: ${id}`);
+    toast('Akun dihapus', 'success');
+    renderCustomAccountsAdmin();
+    renderKpiInputs();
+  } catch(e) { toast('Gagal: ' + e.message, 'error'); }
 }
 
 /* ══════════════════════════════════════════════════════════════════════════
@@ -5105,7 +5178,7 @@ async function importStatFromFile(input) {
 /* ── Import Preview Modal ────────────────────────────────────────────────── */
 function showImportPreview(rows, platId, acctId) {
   const platM    = PLATFORM_FIELDS[platId];
-  const acctName = ACCOUNTS.find(a => a.id === acctId)?.name || acctId;
+  const acctName = getAccounts().find(a => a.id === acctId)?.name || acctId;
   const rowKey   = rows[0]?.week ? 'week' : 'month';
   const isWeekly = rowKey === 'week';
 
@@ -5368,7 +5441,7 @@ function renderStatAcctBar() {
   const bar = $('statAcctBar');
   if (!bar) return;
   const active = state.statActiveAcct;
-  bar.innerHTML = ACCOUNTS.map(a => {
+  bar.innerHTML = getAccounts().map(a => {
     const isAct = a.id === active;
     const style = isAct
       ? `background:${a.color};border-color:${a.color};color:#fff;box-shadow:0 2px 10px ${a.color}44`
@@ -6146,7 +6219,7 @@ function downloadStatJpg() {
   const acctId  = state.statActiveAcct;
   const platId  = state.statActivePlat || 'youtube';
   const platM   = PLATFORM_FIELDS[platId];
-  const acctObj = ACCOUNTS.find(a => a.id === acctId);
+  const acctObj = getAccounts().find(a => a.id === acctId);
   const fromM   = $('statFromMonth')?.value || '';
   const toM     = $('statToMonth')?.value   || getCurrentYM();
   const fileTag = fromM ? `${fromM}_${toM}` : toM;
@@ -6246,7 +6319,7 @@ function downloadStatTableJpg() {
     : allRows;
   const dlRows  = rows.length ? rows : allRows;
   const fileTag = fromM ? `${fromM}_${toM}` : (toM || new Date().toISOString().slice(0,7));
-  const acctObj = ACCOUNTS.find(a => a.id === acctId);
+  const acctObj = getAccounts().find(a => a.id === acctId);
 
   // 4 kolom ringkas: Bulan · Total Views · Subscribers/Followers EOM · Total Engagement
   const viewF  = platM.fields.find(f => f.key === platM.viewKey)      || platM.fields[0];
@@ -6494,7 +6567,7 @@ function pickTop3Month(ym) {
 function renderStatGoodBad(acctId) {
   const wrap = $('statGoodBadWrap');
   if (!wrap) return;
-  const acct   = ACCOUNTS.find(a => a.id === acctId);
+  const acct   = getAccounts().find(a => a.id === acctId);
   const platId = state.statActivePlat || 'youtube';
 
   // Label platform untuk ditampilkan
@@ -7261,7 +7334,7 @@ async function callAI(prompt, image = null) {
 
 function buildAnalysisPrompt(acctId, platId) {
   const platM   = PLATFORM_FIELDS[platId];
-  const acctObj = ACCOUNTS.find(a => a.id === acctId);
+  const acctObj = getAccounts().find(a => a.id === acctId);
   const acctName = acctObj?.name || acctId;
   const platName = platM?.label || platId;
 
@@ -7340,7 +7413,7 @@ async function analyzeContentWithAI() {
 
 function showAiAnalysisModal(text, acctId, platId) {
   const platM   = PLATFORM_FIELDS[platId];
-  const acctObj = ACCOUNTS.find(a => a.id === acctId);
+  const acctObj = getAccounts().find(a => a.id === acctId);
   const color   = platM?.color || '#6366f1';
 
   // Convert simple markdown to HTML
@@ -8085,7 +8158,10 @@ document.addEventListener('DOMContentLoaded', async () => {
   window.deleteAssetLink      = deleteAssetLink;
   window.copyAssetLink        = copyAssetLink;
   window.updateContentField = updateContentField;
-  window.setKpiPeriod       = setKpiPeriod;
+  window.setKpiPeriod           = setKpiPeriod;
+  window.addCustomAccount       = addCustomAccount;
+  window.deleteCustomAccount    = deleteCustomAccount;
+  window.updateCustomAcctColor  = updateCustomAcctColor;
   window.previewContent     = previewContent;
   window.closeCntPreview    = closeCntPreview;
   window.renderActivity       = renderActivity;
