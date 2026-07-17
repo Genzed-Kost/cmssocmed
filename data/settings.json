@@ -764,6 +764,36 @@
           "link": ""
         }
       ]
+    },
+    "nyniyir-mulu-loe": {
+      "good": [
+        {
+          "title": "",
+          "link": ""
+        },
+        {
+          "title": "",
+          "link": ""
+        },
+        {
+          "title": "",
+          "link": ""
+        }
+      ],
+      "bad": [
+        {
+          "title": "",
+          "link": ""
+        },
+        {
+          "title": "",
+          "link": ""
+        },
+        {
+          "title": "",
+          "link": ""
+        }
+      ]
     }
   },
   "adminName": "Admin",
@@ -771,11 +801,5 @@
   "teamToken": "040407181d3d2f183e466f03051c3d22503c4521580b1221185e637b4208491b04322b2759064319075a465f786b2e2027022602596c02180d48786872351d0a375b231358333901386a52680607335c31373c3331111c5c1064647671",
   "fonnte": "1028251f0b381226357342030d1a3c11323d2003",
   "geminiKey": "223c5d310a67222669794a7d77301313223d123e370a3b076b7f6a4a4c6a361b22231d46583a22193a51627f406b20250023371729",
-  "customAccounts": [
-    {
-      "id": "nyniyir-mulu-loe",
-      "name": "Nyniyir Mulu Loe",
-      "color": "#6b7280"
-    }
-  ]
+  "customAccounts": []
 }
