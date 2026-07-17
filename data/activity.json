@@ -1,5 +1,13 @@
 [
   {
+    "id": "mrocw5uemzil2",
+    "user": "Admin",
+    "role": "Admin",
+    "action": "Hapus Bank Konten",
+    "target": "\"tanpa judul\"",
+    "timestamp": "2026-07-17T03:06:17.366Z"
+  },
+  {
     "id": "mrocw2jiawca8",
     "user": "Admin",
     "role": "Admin",
