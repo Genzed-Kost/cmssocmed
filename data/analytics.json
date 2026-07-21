@@ -1400,7 +1400,7 @@
         "updatedBy": "Admin"
       },
       "tiktok": {
-        "updatedAt": "2026-07-06T07:11:50.720Z",
+        "updatedAt": "2026-07-21T02:13:11.210Z",
         "updatedBy": "Admin"
       },
       "facebook": {
@@ -1593,6 +1593,18 @@
         "totalComments": 22,
         "totalShares": 72,
         "totalEngagement": 749
+      },
+      {
+        "week": "2026-W29",
+        "jmlVideo": 10,
+        "totalVideoViews": 55528,
+        "profileViews": 125,
+        "followersEOM": 7598,
+        "followersGained": 1,
+        "totalLikes": 1008,
+        "totalComments": 28,
+        "totalShares": 226,
+        "totalEngagement": 1262
       }
     ],
     "facebook": [
