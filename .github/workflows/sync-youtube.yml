@@ -2,11 +2,16 @@ name: Sync YouTube Analytics
 
 on:
   schedule:
-    - cron: '0 1 1 * *'   # Tiap tanggal 1 bulan baru jam 01:00 UTC
+    - cron: '0 1 1 * *'    # Bulanan — tanggal 1 jam 01:00 UTC
+    - cron: '0 1 * * 1'    # Mingguan — setiap Senin jam 01:00 UTC
   workflow_dispatch:
     inputs:
-      month:
-        description: 'Override bulan target (format YYYY-MM, kosongkan = bulan lalu)'
+      mode:
+        description: 'Mode sync (monthly / weekly)'
+        required: false
+        default: 'monthly'
+      period:
+        description: 'Override periode (YYYY-MM untuk bulanan, YYYY-Www untuk mingguan)'
         required: false
         default: ''
 
@@ -27,17 +32,28 @@ jobs:
         with:
           node-version: '20'
 
+      - name: Tentukan mode (schedule vs dispatch)
+        id: mode
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            echo "SYNC_MODE=${{ inputs.mode }}" >> $GITHUB_ENV
+            echo "OVERRIDE_PERIOD=${{ inputs.period }}" >> $GITHUB_ENV
+          elif [ "$(date +%d)" = "01" ]; then
+            echo "SYNC_MODE=monthly" >> $GITHUB_ENV
+          else
+            echo "SYNC_MODE=weekly" >> $GITHUB_ENV
+          fi
+
       - name: Sync YouTube Stats
         run: node .github/scripts/sync-youtube.js
         env:
           YOUTUBE_API_KEY:    ${{ secrets.YOUTUBE_API_KEY }}
           YOUTUBE_CHANNEL_ID: ${{ secrets.YOUTUBE_CHANNEL_ID }}
-          OVERRIDE_MONTH:     ${{ inputs.month }}
 
       - name: Commit & push jika ada perubahan
         run: |
           git config user.name  "youtube-sync[bot]"
           git config user.email "youtube-sync@penjagaharapan.cms"
           git add data/analytics.json
-          git diff --staged --quiet || git commit -m "chore: auto-sync YouTube stats $(date +'%Y-%m')"
+          git diff --staged --quiet || git commit -m "chore: auto-sync YouTube ${SYNC_MODE} $(date +'%Y-%m-%d')"
           git push

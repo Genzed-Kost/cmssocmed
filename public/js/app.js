@@ -3821,6 +3821,7 @@ function renderApiSetup() {
 
   renderKpiInputs();
   renderCustomAccountsAdmin();
+  renderAutoSyncConfig();
 
   // Gemini key
   sv('cfgGeminiKey', getGeminiKey());
@@ -3872,6 +3873,50 @@ function saveWaTokenFromForm() {
 }
 
 /* ── YouTube Auto-Sync: trigger GitHub Actions workflow_dispatch ─────────── */
+/* ── Auto-Sync Config UI ─────────────────────────────────────────────────── */
+function renderAutoSyncConfig() {
+  const wrap = $('autoSyncList');
+  if (!wrap) return;
+  const autoSync = state.settings?.autoSync || {};
+  wrap.innerHTML = getAccounts().map(a => {
+    const chId    = autoSync[a.id]?.youtube?.channelId || '';
+    const lastSync = autoSync[a.id]?.youtube?.lastSync  || '';
+    const lastLabel = lastSync
+      ? `Terakhir sync: ${new Date(lastSync).toLocaleString('id-ID',{day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'})}`
+      : 'Belum pernah sync';
+    return `
+    <div style="display:grid;grid-template-columns:160px 1fr auto;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid var(--bd)">
+      <span style="font-size:.82rem;font-weight:600">${esc(a.name)}</span>
+      <div>
+        <input type="text" class="form-inp autosync-inp" data-acct="${esc(a.id)}"
+          placeholder="Channel ID (UCxxxxxxxx…)" value="${esc(chId)}"
+          style="font-size:.78rem;font-family:monospace" />
+        <div style="font-size:.68rem;color:var(--muted);margin-top:3px">${lastLabel}</div>
+      </div>
+      <a href="https://www.youtube.com/@${esc(a.name.toLowerCase().replace(/\s+/g,''))}" target="_blank"
+        style="font-size:.72rem;color:var(--accent);white-space:nowrap" rel="noopener">Cari Channel</a>
+    </div>`;
+  }).join('');
+}
+
+async function saveAutoSyncConfig() {
+  const settings = state.settings || { kpi:{}, users:[], analyticsUrls:{} };
+  if (!settings.autoSync) settings.autoSync = {};
+  document.querySelectorAll('.autosync-inp').forEach(inp => {
+    const acct = inp.dataset.acct;
+    const chId = inp.value.trim();
+    if (!settings.autoSync[acct]) settings.autoSync[acct] = {};
+    if (!settings.autoSync[acct].youtube) settings.autoSync[acct].youtube = {};
+    settings.autoSync[acct].youtube.channelId = chId;
+  });
+  state.settings = settings;
+  try {
+    state.shas.settings = await window.db.writeData('settings', settings, 'Auto-sync: update channel IDs');
+    saveDataCache();
+    toast('✅ Konfigurasi auto-sync disimpan', 'success');
+  } catch(e) { toast('Gagal simpan: ' + e.message, 'error'); }
+}
+
 async function triggerYouTubeSync() {
   const cfg = window.db.getConfig();
   if (!cfg?.pat) { toast('Konfigurasi token akses di API Setup terlebih dahulu', 'error'); return; }
@@ -3889,7 +3934,7 @@ async function triggerYouTubeSync() {
           'Content-Type': 'application/json',
           'X-GitHub-Api-Version': '2022-11-28'
         },
-        body: JSON.stringify({ ref: cfg.branch || 'main' })
+        body: JSON.stringify({ ref: cfg.branch || 'main', inputs: { mode: 'monthly', period: '' } })
       }
     );
     if (resp.status === 204) {
@@ -8162,6 +8207,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   window.addCustomAccount       = addCustomAccount;
   window.deleteCustomAccount    = deleteCustomAccount;
   window.updateCustomAcctColor  = updateCustomAcctColor;
+  window.saveAutoSyncConfig     = saveAutoSyncConfig;
   window.previewContent     = previewContent;
   window.closeCntPreview    = closeCntPreview;
   window.renderActivity       = renderActivity;
