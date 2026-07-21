@@ -1396,7 +1396,7 @@
     ],
     "_meta": {
       "instagram": {
-        "updatedAt": "2026-07-21T02:25:40.163Z",
+        "updatedAt": "2026-07-21T02:26:48.987Z",
         "updatedBy": "Admin"
       },
       "tiktok": {
@@ -1467,6 +1467,16 @@
         "totalReach": 48319,
         "followersGained": 63,
         "totalEngagement": 4468,
+        "imageViews": 0
+      },
+      {
+        "week": "2026-W29",
+        "followersEOM": 13925,
+        "jmlPost": 20,
+        "totalViews": 492887,
+        "totalReach": 41909,
+        "followersGained": 81,
+        "totalEngagement": 4464,
         "imageViews": 0
       }
     ],
