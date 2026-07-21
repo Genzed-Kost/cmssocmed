@@ -3872,47 +3872,143 @@ function saveWaTokenFromForm() {
   toast(t ? 'Token WA disimpan ✓' : 'Token WA dihapus', t ? 'success' : 'warn');
 }
 
-/* ── YouTube Auto-Sync: trigger GitHub Actions workflow_dispatch ─────────── */
 /* ── Auto-Sync Config UI ─────────────────────────────────────────────────── */
+
+// Definisi field per platform untuk auto-sync
+const AUTOSYNC_PLATFORMS = [
+  {
+    id: 'youtube', label: 'YouTube', color: '#ff0000', icon: '▶',
+    fields: [
+      { key: 'channelId', label: 'Channel ID', placeholder: 'UCxxxxxxxxxxxxxxxxxx', mono: true,
+        help: 'Buka YouTube Studio → Setelan → Info channel → ID Channel' }
+    ],
+    apiKeyName: 'youtubeApiKey', apiKeyLabel: 'YouTube API Key',
+    apiKeyPlaceholder: 'AIzaSy…', apiKeyHelp: 'Google Cloud Console → Credentials → API Key (aktifkan YouTube Data API v3)'
+  },
+  {
+    id: 'instagram', label: 'Instagram', color: '#e1306c', icon: '📸',
+    fields: [
+      { key: 'userId',      label: 'Instagram User ID', placeholder: '17841400…', mono: true,
+        help: 'GET https://graph.facebook.com/me?fields=id&access_token=TOKEN' },
+      { key: 'accessToken', label: 'Access Token', placeholder: 'EAA…', mono: true,
+        help: 'Meta Business Suite → Pengaturan → Token akses halaman (Long-lived token)' }
+    ]
+  },
+  {
+    id: 'facebook', label: 'Facebook', color: '#1877f2', icon: '🔵',
+    fields: [
+      { key: 'pageId',      label: 'Page ID', placeholder: '123456789…', mono: true,
+        help: 'Buka halaman Facebook → Tentang → ID Halaman' },
+      { key: 'accessToken', label: 'Page Access Token', placeholder: 'EAA…', mono: true,
+        help: 'Meta Business Suite → Pengaturan → Token akses halaman' }
+    ]
+  },
+  {
+    id: 'tiktok', label: 'TikTok', color: '#010101', icon: '🎵',
+    fields: [
+      { key: 'username', label: 'Username', placeholder: '@namaakun', mono: false,
+        help: 'Username TikTok (digunakan untuk referensi, API TikTok memerlukan approval khusus)' }
+    ]
+  },
+  {
+    id: 'twitter', label: 'X (Twitter)', color: '#1da1f2', icon: '𝕏',
+    fields: [
+      { key: 'userId', label: 'User ID', placeholder: '123456…', mono: true,
+        help: 'Gunakan tweeterid.com untuk cari User ID dari username' }
+    ],
+    apiKeyName: 'twitterBearerToken', apiKeyLabel: 'Bearer Token',
+    apiKeyPlaceholder: 'AAAA…', apiKeyHelp: 'developer.twitter.com → Project → Keys & Tokens → Bearer Token (Free tier: read-only)'
+  }
+];
+
 function renderAutoSyncConfig() {
   const wrap = $('autoSyncList');
   if (!wrap) return;
-  const autoSync = state.settings?.autoSync || {};
-  wrap.innerHTML = getAccounts().map(a => {
-    const chId    = autoSync[a.id]?.youtube?.channelId || '';
-    const lastSync = autoSync[a.id]?.youtube?.lastSync  || '';
-    const lastLabel = lastSync
-      ? `Terakhir sync: ${new Date(lastSync).toLocaleString('id-ID',{day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'})}`
-      : 'Belum pernah sync';
+  const autoSync  = state.settings?.autoSync     || {};
+  const apiKeys   = state.settings?.autoSyncKeys || {};
+
+  // Global API keys section
+  const globalKeys = AUTOSYNC_PLATFORMS.filter(p => p.apiKeyName).map(p => `
+    <div class="form-group" style="margin-bottom:8px">
+      <label class="form-label" style="font-size:.74rem">${esc(p.icon)} ${esc(p.apiKeyLabel)}</label>
+      <input type="password" class="form-inp autosync-key-inp" data-keyname="${esc(p.apiKeyName)}"
+        placeholder="${esc(p.apiKeyPlaceholder)}" value="${esc(apiKeys[p.apiKeyName]||'')}"
+        style="font-size:.76rem;font-family:monospace" autocomplete="off" />
+      <div style="font-size:.67rem;color:var(--muted);margin-top:2px">${esc(p.apiKeyHelp)}</div>
+    </div>`).join('');
+
+  // Per-account per-platform accordion
+  const acctRows = getAccounts().map(a => {
+    const platRows = AUTOSYNC_PLATFORMS.map(p => {
+      const cfg = autoSync[a.id]?.[p.id] || {};
+      const lastSync = cfg.lastSync
+        ? `✅ ${new Date(cfg.lastSync).toLocaleString('id-ID',{day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'})}`
+        : '—';
+      const fieldHtml = p.fields.map(f => `
+        <div style="display:flex;flex-direction:column;gap:2px;flex:1;min-width:160px">
+          <label style="font-size:.68rem;color:var(--muted)">${esc(f.label)}</label>
+          <input type="text" class="form-inp autosync-plat-inp"
+            data-acct="${esc(a.id)}" data-plat="${esc(p.id)}" data-field="${esc(f.key)}"
+            placeholder="${esc(f.placeholder)}" value="${esc(cfg[f.key]||'')}"
+            style="font-size:.75rem;${f.mono?'font-family:monospace':''};padding:4px 6px" />
+          <div style="font-size:.65rem;color:var(--muted)">${esc(f.help)}</div>
+        </div>`).join('');
+      const hasData = p.fields.some(f => cfg[f.key]);
+      return `
+      <div style="display:flex;gap:10px;align-items:flex-start;padding:6px 0;border-bottom:1px solid var(--bd);flex-wrap:wrap">
+        <div style="width:110px;padding-top:18px">
+          <span style="font-size:.76rem;font-weight:600;color:${esc(p.color)}">${esc(p.icon)} ${esc(p.label)}</span>
+          <div style="font-size:.65rem;color:var(--muted);margin-top:2px">Sync: ${lastSync}</div>
+        </div>
+        ${fieldHtml}
+      </div>`;
+    }).join('');
     return `
-    <div style="display:grid;grid-template-columns:160px 1fr auto;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid var(--bd)">
-      <span style="font-size:.82rem;font-weight:600">${esc(a.name)}</span>
-      <div>
-        <input type="text" class="form-inp autosync-inp" data-acct="${esc(a.id)}"
-          placeholder="Channel ID (UCxxxxxxxx…)" value="${esc(chId)}"
-          style="font-size:.78rem;font-family:monospace" />
-        <div style="font-size:.68rem;color:var(--muted);margin-top:3px">${lastLabel}</div>
-      </div>
-      <a href="https://www.youtube.com/@${esc(a.name.toLowerCase().replace(/\s+/g,''))}" target="_blank"
-        style="font-size:.72rem;color:var(--accent);white-space:nowrap" rel="noopener">Cari Channel</a>
-    </div>`;
+    <details class="autosync-acct" style="border:1px solid var(--bd);border-radius:8px;margin-bottom:8px">
+      <summary style="padding:10px 14px;cursor:pointer;font-size:.84rem;font-weight:600;list-style:none;display:flex;align-items:center;gap:8px">
+        <span style="width:10px;height:10px;border-radius:50%;background:${esc(a.color||'#6b7280')};display:inline-block"></span>
+        ${esc(a.name)}
+        <span style="font-size:.68rem;color:var(--muted);font-weight:400;margin-left:auto">
+          ${AUTOSYNC_PLATFORMS.filter(p => autoSync[a.id]?.[p.id] && p.fields.some(f => autoSync[a.id][p.id][f.key])).map(p=>p.label).join(', ') || 'Belum dikonfigurasi'}
+        </span>
+      </summary>
+      <div style="padding:8px 14px 12px">${platRows}</div>
+    </details>`;
   }).join('');
+
+  wrap.innerHTML = `
+    <div style="background:var(--surface);border-radius:8px;padding:10px 14px;margin-bottom:12px">
+      <div style="font-size:.74rem;font-weight:700;color:var(--muted);margin-bottom:8px">🔑 API KEYS GLOBAL</div>
+      ${globalKeys}
+    </div>
+    ${acctRows}`;
 }
 
 async function saveAutoSyncConfig() {
   const settings = state.settings || { kpi:{}, users:[], analyticsUrls:{} };
-  if (!settings.autoSync) settings.autoSync = {};
-  document.querySelectorAll('.autosync-inp').forEach(inp => {
-    const acct = inp.dataset.acct;
-    const chId = inp.value.trim();
-    if (!settings.autoSync[acct]) settings.autoSync[acct] = {};
-    if (!settings.autoSync[acct].youtube) settings.autoSync[acct].youtube = {};
-    settings.autoSync[acct].youtube.channelId = chId;
+  if (!settings.autoSync)     settings.autoSync     = {};
+  if (!settings.autoSyncKeys) settings.autoSyncKeys = {};
+
+  // Simpan global API keys
+  document.querySelectorAll('.autosync-key-inp').forEach(inp => {
+    const v = inp.value.trim();
+    if (v) settings.autoSyncKeys[inp.dataset.keyname] = v;
+    else   delete settings.autoSyncKeys[inp.dataset.keyname];
   });
+
+  // Simpan per-akun per-platform
+  document.querySelectorAll('.autosync-plat-inp').forEach(inp => {
+    const { acct, plat, field } = inp.dataset;
+    if (!settings.autoSync[acct])        settings.autoSync[acct]        = {};
+    if (!settings.autoSync[acct][plat])  settings.autoSync[acct][plat]  = {};
+    settings.autoSync[acct][plat][field] = inp.value.trim();
+  });
+
   state.settings = settings;
   try {
-    state.shas.settings = await window.db.writeData('settings', settings, 'Auto-sync: update channel IDs');
+    state.shas.settings = await window.db.writeData('settings', settings, 'Auto-sync: update config');
     saveDataCache();
+    renderAutoSyncConfig();
     toast('✅ Konfigurasi auto-sync disimpan', 'success');
   } catch(e) { toast('Gagal simpan: ' + e.message, 'error'); }
 }
