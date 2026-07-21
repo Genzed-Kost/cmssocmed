@@ -4014,33 +4014,119 @@ async function saveAutoSyncConfig() {
 }
 
 async function triggerYouTubeSync() {
-  const cfg = window.db.getConfig();
-  if (!cfg?.pat) { toast('Konfigurasi token akses di API Setup terlebih dahulu', 'error'); return; }
-
   const btn = $('btnTriggerYtSync');
-  if (btn) { btn.textContent = '⏳ Memulai sync…'; btn.disabled = true; }
-  try {
-    const resp = await fetch(
-      `https://api.github.com/repos/${cfg.owner}/${cfg.repo}/actions/workflows/sync-youtube.yml/dispatches`,
-      {
-        method: 'POST',
-        headers: {
-          Authorization: `Bearer ${cfg.pat}`,
-          Accept: 'application/vnd.github+json',
-          'Content-Type': 'application/json',
-          'X-GitHub-Api-Version': '2022-11-28'
-        },
-        body: JSON.stringify({ ref: cfg.branch || 'main', inputs: { mode: 'monthly', period: '' } })
+  if (btn) { btn.textContent = '⏳ Sinkronisasi…'; btn.disabled = true; }
+
+  const base = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+    ? 'http://localhost:8888' : '';
+
+  const autoSync = state.settings?.autoSync || {};
+  const apiKeys  = state.settings?.autoSyncKeys || {};
+  const now      = new Date();
+  const period   = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+
+  // Kumpulkan semua task: per-akun per-platform yang punya config
+  const tasks = [];
+  for (const [acctId, platCfg] of Object.entries(autoSync)) {
+    for (const platId of ['youtube', 'instagram', 'facebook']) {
+      const cfg = platCfg?.[platId];
+      if (!cfg) continue;
+      const payload = { platform: platId, mode: 'monthly' };
+      if (platId === 'youtube') {
+        if (!cfg.channelId) continue;
+        payload.channelId = cfg.channelId;
+        payload.apiKey    = apiKeys.youtubeApiKey || '';
+        if (!payload.apiKey) { toast(`YouTube API Key belum diisi di konfigurasi`, 'error'); continue; }
+      } else if (platId === 'instagram') {
+        if (!cfg.userId || !cfg.accessToken) continue;
+        payload.userId      = cfg.userId;
+        payload.accessToken = cfg.accessToken;
+      } else if (platId === 'facebook') {
+        if (!cfg.pageId || !cfg.accessToken) continue;
+        payload.pageId      = cfg.pageId;
+        payload.accessToken = cfg.accessToken;
       }
-    );
-    if (resp.status === 204) {
-      toast('✅ YouTube sync dimulai! Data akan terupdate dalam ~1 menit.', 'success');
-    } else {
-      const err = await resp.json().catch(() => ({}));
-      throw new Error(err.message || `HTTP ${resp.status}`);
+      tasks.push({ acctId, platId, payload });
     }
-  } catch (e) {
-    toast('Gagal trigger sync: ' + e.message, 'error');
+  }
+
+  if (tasks.length === 0) {
+    toast('Tidak ada akun yang dikonfigurasi. Isi Channel ID / API di tabel konfigurasi.', 'error');
+    if (btn) { btn.textContent = '▶ Jalankan Sekarang'; btn.disabled = false; }
+    return;
+  }
+
+  let ok = 0, fail = 0;
+  try {
+    for (const { acctId, platId, payload } of tasks) {
+      try {
+        const res  = await fetch(`${base}/.netlify/functions/sync-stats`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        const json = await res.json();
+        if (!json.ok) throw new Error(json.error || 'Unknown error');
+
+        // Merge ke state.analytics
+        if (!state.analytics[acctId])           state.analytics[acctId] = {};
+        const dataKey  = 'youtube';            // monthly
+        const rowKey   = 'month';
+        if (!state.analytics[acctId][dataKey]) state.analytics[acctId][dataKey] = [];
+        const rows   = state.analytics[acctId][dataKey];
+        const sorted = [...rows].sort((a, b) => (a[rowKey]||'').localeCompare(b[rowKey]||''));
+
+        // Delta subs/views dari entri sebelumnya
+        const prev         = sorted.filter(r => (r[rowKey]||'') < period).pop() || null;
+        const d            = json.data;
+        const subsEOM      = d.subsEOM       || 0;
+        const totVidCumul  = d._cumulativeVideos || 0;
+        const totViewCumul = d._cumulativeViews  || 0;
+        const prevVidC     = prev?._cumulativeVideos || totVidCumul;
+        const prevViewC    = prev?._cumulativeViews  || totViewCumul;
+        const jmlVideo     = Math.max(0, totVidCumul  - prevVidC);
+        const totalViews   = Math.max(0, totViewCumul - prevViewC);
+
+        const entry = {
+          month: period, jmlVideo, totalViews,
+          uniqueViewers:  prev?.uniqueViewers   || 0,
+          subsEOM,        subsGained: subsEOM - (prev?.subsEOM || 0),
+          totalLikes:     prev?.totalLikes      || 0,
+          totalComments:  prev?.totalComments   || 0,
+          totalEngagement:prev?.totalEngagement || 0,
+          erPct:          prev?.erPct           || 0,
+          watchHours:     prev?.watchHours      || 0,
+          impressions:    prev?.impressions     || 0,
+          adImpressions:  prev?.adImpressions   || 0,
+          avgViewsPerVideo: jmlVideo > 0 ? Math.round(totalViews / jmlVideo) : 0,
+          peakViews:      prev?.peakViews       || 0,
+          _cumulativeViews:  totViewCumul,
+          _cumulativeVideos: totVidCumul,
+          _syncedAt: d._syncedAt
+        };
+
+        const idx = rows.findIndex(r => r[rowKey] === period);
+        if (idx >= 0) rows[idx] = { ...rows[idx], ...entry };
+        else rows.push(entry);
+        state.analytics[acctId][dataKey] = rows.sort((a,b)=>(a[rowKey]||'').localeCompare(b[rowKey]||''));
+        ok++;
+      } catch(e) {
+        console.warn(`Sync ${acctId}/${platId}:`, e.message);
+        fail++;
+      }
+    }
+
+    if (ok > 0) {
+      state.shas.analytics = await window.db.writeData('analytics', state.analytics,
+        `chore: auto-sync ${ok} akun (${period})`);
+      saveDataCache();
+    }
+
+    if (ok > 0 && fail === 0) toast(`✅ Sync selesai — ${ok} akun berhasil disinkronisasi (${period})`, 'success');
+    else if (ok > 0)          toast(`⚠️ Selesai — ${ok} berhasil, ${fail} gagal`, 'error');
+    else                      toast(`Semua sync gagal. Cek Channel ID dan API Key.`, 'error');
+  } catch(e) {
+    toast('Gagal sinkronisasi: ' + e.message, 'error');
   } finally {
     if (btn) { btn.textContent = '▶ Jalankan Sekarang'; btn.disabled = false; }
   }
