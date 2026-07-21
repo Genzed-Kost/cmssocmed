@@ -1825,6 +1825,17 @@
   "jaga-asa": {
     "youtube": [
       {
+        "month": "2026-06",
+        "jmlVideo": 8,
+        "totalViews": 88999,
+        "subsEOM": 41222,
+        "subsGained": 2234,
+        "totalLikes": 1122,
+        "totalComments": 345,
+        "totalEngagement": 2054,
+        "watchHours": 6541
+      },
+      {
         "month": "2026-07",
         "jmlVideo": 9,
         "totalViews": 78380,
@@ -1837,7 +1848,7 @@
     ],
     "_meta": {
       "youtube": {
-        "updatedAt": "2026-07-21T02:33:44.353Z",
+        "updatedAt": "2026-07-21T02:35:51.061Z",
         "updatedBy": "Admin"
       }
     }
