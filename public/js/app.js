@@ -3953,14 +3953,22 @@ function renderAutoSyncConfig() {
             style="font-size:.75rem;${f.mono?'font-family:monospace':''};padding:4px 6px" />
           <div style="font-size:.65rem;color:var(--muted)">${esc(f.help)}</div>
         </div>`).join('');
-      const hasData = p.fields.some(f => cfg[f.key]);
+      const btnId = `as-btn-${a.id}-${p.id}`;
       return `
-      <div style="display:flex;gap:10px;align-items:flex-start;padding:6px 0;border-bottom:1px solid var(--bd);flex-wrap:wrap">
-        <div style="width:110px;padding-top:18px">
+      <div style="display:flex;gap:10px;align-items:flex-start;padding:8px 0;border-bottom:1px solid var(--bd);flex-wrap:wrap">
+        <div style="width:110px;padding-top:18px;flex-shrink:0">
           <span style="font-size:.76rem;font-weight:600;color:${esc(p.color)}">${esc(p.icon)} ${esc(p.label)}</span>
-          <div style="font-size:.65rem;color:var(--muted);margin-top:2px">Sync: ${lastSync}</div>
+          <div style="font-size:.63rem;color:var(--muted);margin-top:2px">Sync: ${lastSync}</div>
         </div>
-        ${fieldHtml}
+        <div style="flex:1;display:flex;flex-wrap:wrap;gap:8px;min-width:0">
+          ${fieldHtml}
+        </div>
+        <div style="display:flex;flex-direction:column;gap:4px;align-self:center;flex-shrink:0;padding-top:4px">
+          <button class="btn-sm blue" style="font-size:.7rem;padding:3px 8px;white-space:nowrap"
+            onclick="saveAutoSyncPlatform('${esc(a.id)}','${esc(p.id)}')">💾 Simpan</button>
+          <button class="btn-sm" id="${btnId}" style="font-size:.7rem;padding:3px 8px;white-space:nowrap"
+            onclick="runAutoSyncPlatform('${esc(a.id)}','${esc(p.id)}')">▶ Jalankan</button>
+        </div>
       </div>`;
     }).join('');
     return `
@@ -3980,6 +3988,7 @@ function renderAutoSyncConfig() {
     <div style="background:var(--surface);border-radius:8px;padding:10px 14px;margin-bottom:12px">
       <div style="font-size:.74rem;font-weight:700;color:var(--muted);margin-bottom:8px">🔑 API KEYS GLOBAL</div>
       ${globalKeys}
+      <button class="btn-sm blue" style="font-size:.72rem;margin-top:6px" onclick="saveAutoSyncGlobalKeys()">💾 Simpan API Keys</button>
     </div>
     ${acctRows}`;
 }
@@ -3989,18 +3998,15 @@ async function saveAutoSyncConfig() {
   if (!settings.autoSync)     settings.autoSync     = {};
   if (!settings.autoSyncKeys) settings.autoSyncKeys = {};
 
-  // Simpan global API keys
   document.querySelectorAll('.autosync-key-inp').forEach(inp => {
     const v = inp.value.trim();
     if (v) settings.autoSyncKeys[inp.dataset.keyname] = v;
     else   delete settings.autoSyncKeys[inp.dataset.keyname];
   });
-
-  // Simpan per-akun per-platform
   document.querySelectorAll('.autosync-plat-inp').forEach(inp => {
     const { acct, plat, field } = inp.dataset;
-    if (!settings.autoSync[acct])        settings.autoSync[acct]        = {};
-    if (!settings.autoSync[acct][plat])  settings.autoSync[acct][plat]  = {};
+    if (!settings.autoSync[acct])       settings.autoSync[acct]       = {};
+    if (!settings.autoSync[acct][plat]) settings.autoSync[acct][plat] = {};
     settings.autoSync[acct][plat][field] = inp.value.trim();
   });
 
@@ -4011,6 +4017,143 @@ async function saveAutoSyncConfig() {
     renderAutoSyncConfig();
     toast('✅ Konfigurasi auto-sync disimpan', 'success');
   } catch(e) { toast('Gagal simpan: ' + e.message, 'error'); }
+}
+
+async function saveAutoSyncGlobalKeys() {
+  const settings = state.settings || {};
+  if (!settings.autoSyncKeys) settings.autoSyncKeys = {};
+  document.querySelectorAll('.autosync-key-inp').forEach(inp => {
+    const v = inp.value.trim();
+    if (v) settings.autoSyncKeys[inp.dataset.keyname] = v;
+    else   delete settings.autoSyncKeys[inp.dataset.keyname];
+  });
+  state.settings = settings;
+  try {
+    state.shas.settings = await window.db.writeData('settings', settings, 'Auto-sync: update API keys');
+    saveDataCache();
+    toast('✅ API Keys disimpan', 'success');
+  } catch(e) { toast('Gagal simpan: ' + e.message, 'error'); }
+}
+
+async function saveAutoSyncPlatform(acctId, platId) {
+  const settings = state.settings || {};
+  if (!settings.autoSync)              settings.autoSync              = {};
+  if (!settings.autoSync[acctId])      settings.autoSync[acctId]      = {};
+  if (!settings.autoSync[acctId][platId]) settings.autoSync[acctId][platId] = {};
+
+  document.querySelectorAll(`.autosync-plat-inp[data-acct="${acctId}"][data-plat="${platId}"]`)
+    .forEach(inp => { settings.autoSync[acctId][platId][inp.dataset.field] = inp.value.trim(); });
+
+  state.settings = settings;
+  try {
+    state.shas.settings = await window.db.writeData('settings', settings,
+      `Auto-sync: simpan ${platId} untuk ${acctId}`);
+    saveDataCache();
+    renderAutoSyncConfig();
+    toast(`✅ Konfigurasi ${platId} (${acctId}) disimpan`, 'success');
+  } catch(e) { toast('Gagal simpan: ' + e.message, 'error'); }
+}
+
+async function runAutoSyncPlatform(acctId, platId) {
+  const btnId = `as-btn-${acctId}-${platId}`;
+  const btn   = document.getElementById(btnId);
+  if (btn) { btn.textContent = '⏳…'; btn.disabled = true; }
+
+  const base     = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+    ? 'http://localhost:8888' : '';
+  const cfg      = state.settings?.autoSync?.[acctId]?.[platId] || {};
+  const apiKeys  = state.settings?.autoSyncKeys || {};
+  const now      = new Date();
+  const period   = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+
+  const payload  = { platform: platId, mode: 'monthly' };
+  try {
+    if (platId === 'youtube') {
+      if (!cfg.channelId) throw new Error('Channel ID belum diisi');
+      if (!apiKeys.youtubeApiKey) throw new Error('YouTube API Key belum diisi di bagian API Keys Global');
+      payload.channelId = cfg.channelId;
+      payload.apiKey    = apiKeys.youtubeApiKey;
+    } else if (platId === 'instagram') {
+      if (!cfg.userId || !cfg.accessToken) throw new Error('User ID dan Access Token wajib diisi');
+      payload.userId      = cfg.userId;
+      payload.accessToken = cfg.accessToken;
+    } else if (platId === 'facebook') {
+      if (!cfg.pageId || !cfg.accessToken) throw new Error('Page ID dan Access Token wajib diisi');
+      payload.pageId      = cfg.pageId;
+      payload.accessToken = cfg.accessToken;
+    } else {
+      throw new Error(`Platform ${platId} belum mendukung sync otomatis`);
+    }
+
+    const res  = await fetch(`${base}/.netlify/functions/sync-stats`, {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+    const json = await res.json();
+    if (!json.ok) throw new Error(json.error || 'Sync gagal');
+
+    // Merge ke analytics
+    if (!state.analytics[acctId])                       state.analytics[acctId]                       = {};
+    const dataKey = platId === 'youtube' ? 'youtube' : platId;
+    const rowKey  = 'month';
+    if (!state.analytics[acctId][dataKey])              state.analytics[acctId][dataKey]              = [];
+    const rows   = state.analytics[acctId][dataKey];
+    const sorted = [...rows].sort((a,b) => (a[rowKey]||'').localeCompare(b[rowKey]||''));
+    const prev   = sorted.filter(r => (r[rowKey]||'') < period).pop() || null;
+    const d      = json.data;
+
+    let entry = { month: period, _syncedAt: d._syncedAt };
+    if (platId === 'youtube') {
+      const subsEOM      = d.subsEOM       || 0;
+      const totVidCumul  = d._cumulativeVideos || 0;
+      const totViewCumul = d._cumulativeViews  || 0;
+      const prevVidC     = prev?._cumulativeVideos || totVidCumul;
+      const prevViewC    = prev?._cumulativeViews  || totViewCumul;
+      const jmlVideo     = Math.max(0, totVidCumul  - prevVidC);
+      const totalViews   = Math.max(0, totViewCumul - prevViewC);
+      entry = {
+        ...entry, jmlVideo, totalViews, subsEOM,
+        subsGained:      subsEOM - (prev?.subsEOM || 0),
+        uniqueViewers:   prev?.uniqueViewers   || 0,
+        totalLikes:      prev?.totalLikes      || 0,
+        totalComments:   prev?.totalComments   || 0,
+        totalEngagement: prev?.totalEngagement || 0,
+        erPct:           prev?.erPct           || 0,
+        watchHours:      prev?.watchHours      || 0,
+        impressions:     prev?.impressions     || 0,
+        adImpressions:   prev?.adImpressions   || 0,
+        avgViewsPerVideo: jmlVideo > 0 ? Math.round(totalViews / jmlVideo) : 0,
+        peakViews:       prev?.peakViews       || 0,
+        _cumulativeViews: totViewCumul, _cumulativeVideos: totVidCumul
+      };
+    } else if (platId === 'instagram') {
+      entry = { ...entry, followersEOM: d.followersEOM || 0, _cumulativeMedia: d._cumulativeMedia || 0 };
+    } else if (platId === 'facebook') {
+      entry = { ...entry, pageFollowers: d.pageFollowers || 0 };
+    }
+
+    const idx = rows.findIndex(r => r[rowKey] === period);
+    if (idx >= 0) rows[idx] = { ...rows[idx], ...entry };
+    else rows.push(entry);
+    state.analytics[acctId][dataKey] = rows.sort((a,b)=>(a[rowKey]||'').localeCompare(b[rowKey]||''));
+
+    // Simpan lastSync di settings
+    if (!state.settings.autoSync[acctId])         state.settings.autoSync[acctId]         = {};
+    if (!state.settings.autoSync[acctId][platId]) state.settings.autoSync[acctId][platId] = {};
+    state.settings.autoSync[acctId][platId].lastSync = new Date().toISOString();
+
+    state.shas.analytics = await window.db.writeData('analytics', state.analytics,
+      `chore: sync ${platId} ${acctId} (${period})`);
+    state.shas.settings  = await window.db.writeData('settings', state.settings,
+      `Auto-sync: lastSync ${platId} ${acctId}`);
+    saveDataCache();
+    renderAutoSyncConfig();
+    toast(`✅ Sync ${platId} (${acctId}) selesai — ${period}`, 'success');
+  } catch(e) {
+    toast(`Gagal sync ${platId} (${acctId}): ${e.message}`, 'error');
+  } finally {
+    if (btn) { btn.textContent = '▶ Jalankan'; btn.disabled = false; }
+  }
 }
 
 async function triggerYouTubeSync() {
@@ -8390,6 +8533,9 @@ document.addEventListener('DOMContentLoaded', async () => {
   window.deleteCustomAccount    = deleteCustomAccount;
   window.updateCustomAcctColor  = updateCustomAcctColor;
   window.saveAutoSyncConfig     = saveAutoSyncConfig;
+  window.saveAutoSyncGlobalKeys = saveAutoSyncGlobalKeys;
+  window.saveAutoSyncPlatform   = saveAutoSyncPlatform;
+  window.runAutoSyncPlatform    = runAutoSyncPlatform;
   window.previewContent     = previewContent;
   window.closeCntPreview    = closeCntPreview;
   window.renderActivity       = renderActivity;
