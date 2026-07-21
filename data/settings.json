@@ -952,5 +952,7 @@
       }
     }
   },
-  "autoSyncKeys": {}
+  "autoSyncKeys": {
+    "youtubeApiKey": "AIzaSyC_4Gf-K9cId70ofEecXXUaJrWHSW2uL4w"
+  }
 }
