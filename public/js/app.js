@@ -4089,7 +4089,11 @@ async function runAutoSyncPlatform(acctId, platId) {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload)
     });
-    const json = await res.json();
+    const raw  = await res.text();
+    if (!raw) throw new Error(`Server tidak merespons (HTTP ${res.status}). Pastikan sudah deploy ke Netlify.`);
+    let json;
+    try { json = JSON.parse(raw); }
+    catch { throw new Error(`Respons tidak valid: ${raw.slice(0, 100)}`); }
     if (!json.ok) throw new Error(json.error || 'Sync gagal');
 
     // Merge ke analytics
@@ -4208,7 +4212,10 @@ async function triggerYouTubeSync() {
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(payload)
         });
-        const json = await res.json();
+        const raw  = await res.text();
+        if (!raw) throw new Error(`Server tidak merespons (HTTP ${res.status}). Pastikan sudah deploy ke Netlify.`);
+        let json;
+        try { json = JSON.parse(raw); } catch { throw new Error(`Respons tidak valid: ${raw.slice(0,100)}`); }
         if (!json.ok) throw new Error(json.error || 'Unknown error');
 
         // Merge ke state.analytics
