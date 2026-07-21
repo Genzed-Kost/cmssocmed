@@ -839,33 +839,118 @@
   "autoSync": {
     "penjaga-harapan": {
       "youtube": {
-        "channelId": "AIzaSyC_4Gf-K9cId70ofEecXXUaJrWHSW2uL4w"
+        "channelId": "UCeTTcjSpKCg-2cWWlyu-E6A"
+      },
+      "instagram": {
+        "userId": "",
+        "accessToken": ""
+      },
+      "facebook": {
+        "pageId": "",
+        "accessToken": ""
+      },
+      "tiktok": {
+        "username": ""
+      },
+      "twitter": {
+        "userId": ""
       }
     },
     "33-official": {
       "youtube": {
         "channelId": ""
+      },
+      "instagram": {
+        "userId": "",
+        "accessToken": ""
+      },
+      "facebook": {
+        "pageId": "",
+        "accessToken": ""
+      },
+      "tiktok": {
+        "username": ""
+      },
+      "twitter": {
+        "userId": ""
       }
     },
     "jaga-asa": {
       "youtube": {
         "channelId": ""
+      },
+      "instagram": {
+        "userId": "",
+        "accessToken": ""
+      },
+      "facebook": {
+        "pageId": "",
+        "accessToken": ""
+      },
+      "tiktok": {
+        "username": ""
+      },
+      "twitter": {
+        "userId": ""
       }
     },
     "warga-negara": {
       "youtube": {
         "channelId": ""
+      },
+      "instagram": {
+        "userId": "",
+        "accessToken": ""
+      },
+      "facebook": {
+        "pageId": "",
+        "accessToken": ""
+      },
+      "tiktok": {
+        "username": ""
+      },
+      "twitter": {
+        "userId": ""
       }
     },
     "republik-receh": {
       "youtube": {
         "channelId": ""
+      },
+      "instagram": {
+        "userId": "",
+        "accessToken": ""
+      },
+      "facebook": {
+        "pageId": "",
+        "accessToken": ""
+      },
+      "tiktok": {
+        "username": ""
+      },
+      "twitter": {
+        "userId": ""
       }
     },
     "jejak-data": {
       "youtube": {
         "channelId": ""
+      },
+      "instagram": {
+        "userId": "",
+        "accessToken": ""
+      },
+      "facebook": {
+        "pageId": "",
+        "accessToken": ""
+      },
+      "tiktok": {
+        "username": ""
+      },
+      "twitter": {
+        "userId": ""
       }
     }
-  }
+  },
+  "autoSyncKeys": {}
 }
