@@ -951,7 +951,7 @@
         "updatedBy": "Admin"
       },
       "youtube": {
-        "updatedAt": "2026-07-13T05:44:43.354Z",
+        "updatedAt": "2026-07-21T02:08:02.260Z",
         "updatedBy": "Admin"
       },
       "tiktok": {
@@ -1145,6 +1145,16 @@
         "totalEngagement": 17523,
         "watchHours": 11640,
         "impressions": 276621
+      },
+      {
+        "week": "2026-W29",
+        "jmlVideo": 25,
+        "totalViews": 1458213,
+        "subsEOM": 73481,
+        "subsGained": 761,
+        "totalLikes": 8740,
+        "totalComments": 562,
+        "totalEngagement": 9816
       }
     ],
     "tiktok_w": [
