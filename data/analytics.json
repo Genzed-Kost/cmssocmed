@@ -1822,5 +1822,24 @@
       }
     ]
   },
-  "jaga-asa": {}
+  "jaga-asa": {
+    "youtube": [
+      {
+        "month": "2026-07",
+        "jmlVideo": 9,
+        "totalViews": 78380,
+        "subsEOM": 42491,
+        "subsGained": 1557,
+        "totalLikes": 1091,
+        "totalComments": 248,
+        "watchHours": 10968
+      }
+    ],
+    "_meta": {
+      "youtube": {
+        "updatedAt": "2026-07-21T02:33:44.353Z",
+        "updatedBy": "Admin"
+      }
+    }
+  }
 }
