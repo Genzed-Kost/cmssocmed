@@ -4111,10 +4111,11 @@ function _mergeStatEntry(acctId, platId, d, period) {
     const subsEOM      = d.subsEOM            || 0;
     const totVidCumul  = d._cumulativeVideos  || 0;
     const totViewCumul = d._cumulativeViews   || 0;
-    const prevViewC    = prev?._cumulativeViews || null;
-    // jmlVideo = total video di channel (kumulatif, langsung dari API = sama dengan YouTube)
+    const prevViewC    = (typeof prev?._cumulativeViews === 'number') ? prev._cumulativeViews : null;
+    // jmlVideo = total video di channel (kumulatif, sama dengan yang ditampilkan YouTube)
     const jmlVideo     = totVidCumul;
-    // totalViews = views bulan ini (delta); jika tidak ada prev, pertahankan nilai yang sudah ada
+    // totalViews = views bulan ini (delta dari kumulatif bulan lalu)
+    // Jika tidak ada data kumulatif bulan lalu, pertahankan nilai existing (manual/sebelumnya)
     const deltaViews   = prevViewC !== null ? Math.max(0, totViewCumul - prevViewC) : null;
     const totalViews   = deltaViews !== null ? deltaViews : (existing.totalViews || 0);
     entry = {
