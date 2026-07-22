@@ -219,11 +219,11 @@ const PLATFORM_FIELDS = {
     label: 'YouTube', color: '#ff0000',
     followerKey: 'subsEOM', viewKey: 'totalViews',
     fields: [
-      { key:'jmlVideo',         label:'Jml Video',        fmt:'num' },
-      { key:'totalViews',       label:'Total Views',      fmt:'num' },
+      { key:'jmlVideo',         label:'Jml Video',        fmt:'num', auto:true  },
+      { key:'totalViews',       label:'Total Views',      fmt:'num', auto:'delta' },
       { key:'uniqueViewers',    label:'Unique Viewers',   fmt:'num' },
-      { key:'subsEOM',          label:'Subscribers (EOM)',fmt:'num' },
-      { key:'subsGained',       label:'Subs Gained/Bulan',fmt:'num' },
+      { key:'subsEOM',          label:'Subscribers (EOM)',fmt:'num', auto:true  },
+      { key:'subsGained',       label:'Subs Gained/Bulan',fmt:'num', auto:'delta' },
       { key:'totalLikes',       label:'Total Likes',      fmt:'num' },
       { key:'totalComments',    label:'Total Comments',   fmt:'num' },
       { key:'totalEngagement',  label:'Total Eng.',       fmt:'num' },
@@ -258,7 +258,7 @@ const PLATFORM_FIELDS = {
     label: 'Facebook', color: '#1877f2',
     followerKey: 'pageFollowers', viewKey: 'totalViews',
     fields: [
-      { key:'pageFollowers',    label:'Page Followers',   fmt:'num' },
+      { key:'pageFollowers',    label:'Page Followers',   fmt:'num', auto:true },
       { key:'followersGained',  label:'Follows Monthly',  fmt:'num' },
       { key:'totalPost',        label:'Total Post',       fmt:'num' },
       { key:'totalViews',       label:'Total Views',      fmt:'num' },
@@ -277,7 +277,7 @@ const PLATFORM_FIELDS = {
     label: 'Instagram', color: '#e1306c',
     followerKey: 'followersEOM', viewKey: 'totalViews',
     fields: [
-      { key:'followersEOM',     label:'Followers (EOM)',  fmt:'num' },
+      { key:'followersEOM',     label:'Followers (EOM)',  fmt:'num', auto:true },
       { key:'jmlPost',          label:'Jml Post',         fmt:'num' },
       { key:'totalViews',       label:'Total Views',      fmt:'num' },
       { key:'totalReach',       label:'Total Reach',      fmt:'num' },
@@ -6293,9 +6293,17 @@ function renderStatDataTable(acctId, platId, rows) {
 
   const headerCells = platM.fields.map(f => `<th>${f.label}</th>`).join('');
   const bodyRows = sorted.map(r => {
-    const cells  = platM.fields.map(f =>
-      `<td style="text-align:right">${fmtStatVal(r[f.key], f.fmt)}</td>`
-    ).join('');
+    const cells = platM.fields.map(f => {
+      const val    = r[f.key];
+      const empty  = val === undefined || val === null || val === 0 || val === '';
+      const isAuto = !!f.auto;
+      // Merah jika belum diisi DAN bukan field auto-sync
+      const style  = empty && !isAuto
+        ? 'text-align:right;background:rgba(220,38,38,.12);color:var(--red)'
+        : 'text-align:right';
+      const display = empty && !isAuto ? '—' : fmtStatVal(val, f.fmt);
+      return `<td style="${style}" title="${!isAuto && empty ? 'Isi manual' : ''}">${display}</td>`;
+    }).join('');
     const key  = esc(r[rKey] || '');
     const lbl  = isWeekly ? fmtWeek(r.week||'') : fmtMonth(r.month||'');
     return `<tr>
