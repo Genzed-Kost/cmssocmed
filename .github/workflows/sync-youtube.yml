@@ -2,9 +2,9 @@ name: Sync YouTube Analytics
 
 on:
   schedule:
-    - cron: '0 1 1 * *'      # Bulanan — tanggal 1 jam 01:00 UTC
-    - cron: '0 1 * * 1'      # Mingguan — setiap Senin jam 01:00 UTC
-    - cron: '0 */8 * * *'    # Live — setiap 8 jam (00:00, 08:00, 16:00 UTC)
+    - cron: '0 */8 * * *'      # Live — setiap 8 jam (update views & subs bulan berjalan)
+    - cron: '59 16 * * 0'      # Mingguan — Minggu 23:59 WIB (16:59 UTC)
+    - cron: '59 16 28-31 * *'  # Kandidat akhir bulan — dicek di script
   workflow_dispatch:
     inputs:
       mode:
@@ -39,12 +39,20 @@ jobs:
           if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
             echo "SYNC_MODE=${{ inputs.mode }}" >> $GITHUB_ENV
             echo "OVERRIDE_PERIOD=${{ inputs.period }}" >> $GITHUB_ENV
-          elif [ "$(date +%d)" = "01" ] && [ "$(date +%H)" = "01" ]; then
-            echo "SYNC_MODE=monthly" >> $GITHUB_ENV
-          elif [ "$(date +%u)" = "1" ] && [ "$(date +%H)" = "01" ]; then
-            echo "SYNC_MODE=weekly" >> $GITHUB_ENV
           else
-            echo "SYNC_MODE=live" >> $GITHUB_ENV
+            # Cek apakah besok tanggal 1 (= hari ini akhir bulan)
+            TOMORROW=$(date -u -d "tomorrow" +%d)
+            DAY_OF_WEEK=$(date -u +%u)   # 1=Senin, 7=Minggu
+            HOUR=$(date -u +%H)
+            MINUTE=$(date -u +%M)
+
+            if [ "$TOMORROW" = "01" ] && [ "$HOUR" = "16" ]; then
+              echo "SYNC_MODE=monthly" >> $GITHUB_ENV
+            elif [ "$DAY_OF_WEEK" = "7" ] && [ "$HOUR" = "16" ]; then
+              echo "SYNC_MODE=weekly" >> $GITHUB_ENV
+            else
+              echo "SYNC_MODE=live" >> $GITHUB_ENV
+            fi
           fi
 
       - name: Sync YouTube Stats
@@ -58,5 +66,5 @@ jobs:
           git config user.name  "youtube-sync[bot]"
           git config user.email "youtube-sync@penjagaharapan.cms"
           git add data/analytics.json
-          git diff --staged --quiet || git commit -m "chore: auto-sync YouTube ${SYNC_MODE} $(date +'%Y-%m-%d %H:%M UTC')"
+          git diff --staged --quiet || git commit -m "chore: auto-sync YouTube ${SYNC_MODE} $(date -u +'%Y-%m-%d %H:%M UTC')"
           git push

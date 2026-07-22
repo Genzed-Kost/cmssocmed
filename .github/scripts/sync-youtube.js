@@ -36,17 +36,18 @@ function toISOWeek(date) {
 function resolvePeriod() {
   if (OVERRIDE) return OVERRIDE;
   const now = new Date();
-  if (MODE === 'live') {
-    // Bulan berjalan (untuk update real-time setiap 8 jam)
-    return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+  const yyyy = now.getUTCFullYear();
+  const mm   = String(now.getUTCMonth() + 1).padStart(2, '0');
+
+  if (MODE === 'live' || MODE === 'monthly') {
+    // Bulan berjalan — live update setiap 8 jam, monthly tutup di akhir bulan
+    return `${yyyy}-${mm}`;
   }
   if (MODE === 'weekly') {
-    const prev = new Date(now); prev.setDate(now.getDate() - 7);
-    return toISOWeek(prev);
+    // Minggu berjalan (Minggu 23:59 = akhir minggu ini)
+    return toISOWeek(now);
   }
-  // Bulan lalu (script jalan tanggal 1)
-  const d = new Date(); d.setDate(0);
-  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+  return `${yyyy}-${mm}`;
 }
 
 /* ── Fetch channel stats ─────────────────────────────────────────────────── */
