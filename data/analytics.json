@@ -231,7 +231,7 @@
       },
       {
         "month": "2026-07",
-        "jmlVideo": 1251,
+        "jmlVideo": 1252,
         "totalViews": 3845477,
         "uniqueViewers": 0,
         "subsEOM": 73500,
@@ -242,8 +242,11 @@
         "watchHours": 18183,
         "impressions": 0,
         "adImpressions": 0,
-        "avgViewsPerVideo": 0,
-        "peakViews": 0
+        "avgViewsPerVideo": 3071,
+        "peakViews": 0,
+        "_syncedAt": "2026-07-22T10:44:23.530Z",
+        "_cumulativeViews": 13182723,
+        "_cumulativeVideos": 1252
       }
     ],
     "tiktok": [
@@ -957,7 +960,7 @@
         "updatedBy": "Admin"
       },
       "youtube": {
-        "updatedAt": "2026-07-22T09:26:34.565Z",
+        "updatedAt": "2026-07-22T10:44:23.530Z",
         "updatedBy": "Admin"
       },
       "tiktok": {
