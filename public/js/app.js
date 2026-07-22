@@ -4166,6 +4166,7 @@ async function runAutoSyncPlatform(acctId, platId) {
       `Auto-sync: lastSync ${platId} ${acctId}`);
     saveDataCache();
     renderAutoSyncConfig();
+    renderStatistics();
     toast(`✅ Sync ${platId} (${acctId}) selesai — ${period}`, 'success');
   } catch(e) {
     toast(`Gagal sync ${platId} (${acctId}): ${e.message}`, 'error');
@@ -4225,6 +4226,7 @@ async function triggerYouTubeSync() {
         `Auto-sync: lastSync batch (${period})`);
       saveDataCache();
       renderAutoSyncConfig();
+      renderStatistics();
     }
     if (ok > 0 && fail === 0) toast(`✅ Sync selesai — ${ok} platform berhasil (${period})`, 'success');
     else if (ok > 0)          toast(`⚠️ Selesai — ${ok} berhasil, ${fail} gagal`, 'error');
