@@ -100,15 +100,27 @@ async function syncAccount(acctId, channelId, analytics, period) {
   // Entri yang sudah ada untuk periode ini (live mode: bisa sudah ada di bulan berjalan)
   const existing = rows.find(r => (r[periodKey] || '') === period) || null;
 
-  const prevSubsEOM   = prev?.subsEOM  || 0;
-  const prevViewCumul = (typeof prev?._cumulativeViews === 'number') ? prev._cumulativeViews : null;
+  const prevSubsEOM    = prev?.subsEOM || 0;
+  const prevMonthCumul = (typeof prev?._cumulativeViews === 'number') ? prev._cumulativeViews : null;
 
   // jmlVideo = total video di channel (kumulatif, sama dengan yang tampil di YouTube)
-  const jmlVideo   = totalVidCumul;
-  // totalViews = views bulan ini = selisih dari bulan lalu
-  const totalViews = prevViewCumul !== null
-    ? Math.max(0, totalViewCumul - prevViewCumul)
-    : (existing?.totalViews || 0);
+  const jmlVideo = totalVidCumul;
+
+  // totalViews = views bulan ini
+  // Prioritas 1: delta dari kumulatif akhir bulan lalu (paling akurat)
+  // Prioritas 2: incremental — tambahkan selisih dari _cumulativeViews sync terakhir bulan ini
+  // Prioritas 3: pertahankan nilai yang sudah ada
+  let totalViews;
+  if (prevMonthCumul !== null) {
+    totalViews = Math.max(0, totalViewCumul - prevMonthCumul);
+  } else {
+    const lastSyncCumul = (typeof existing?._cumulativeViews === 'number') ? existing._cumulativeViews : null;
+    if (lastSyncCumul !== null && totalViewCumul > lastSyncCumul) {
+      totalViews = (existing?.totalViews || 0) + (totalViewCumul - lastSyncCumul);
+    } else {
+      totalViews = existing?.totalViews || 0;
+    }
+  }
   const subsGained = subsEOM - prevSubsEOM;
 
   const entry = {

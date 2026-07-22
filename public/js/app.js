@@ -4111,13 +4111,24 @@ function _mergeStatEntry(acctId, platId, d, period) {
     const subsEOM      = d.subsEOM            || 0;
     const totVidCumul  = d._cumulativeVideos  || 0;
     const totViewCumul = d._cumulativeViews   || 0;
-    const prevViewC    = (typeof prev?._cumulativeViews === 'number') ? prev._cumulativeViews : null;
-    // jmlVideo = total video di channel (kumulatif, sama dengan yang ditampilkan YouTube)
-    const jmlVideo     = totVidCumul;
-    // totalViews = views bulan ini (delta dari kumulatif bulan lalu)
-    // Jika tidak ada data kumulatif bulan lalu, pertahankan nilai existing (manual/sebelumnya)
-    const deltaViews   = prevViewC !== null ? Math.max(0, totViewCumul - prevViewC) : null;
-    const totalViews   = deltaViews !== null ? deltaViews : (existing.totalViews || 0);
+    const prevMonthCumul = (typeof prev?._cumulativeViews === 'number') ? prev._cumulativeViews : null;
+    const jmlVideo       = totVidCumul;
+
+    // totalViews = views bulan ini
+    // Prioritas 1: delta dari kumulatif akhir bulan lalu (paling akurat)
+    // Prioritas 2: incremental — tambahkan selisih dari _cumulativeViews sync terakhir bulan ini
+    // Prioritas 3: pertahankan nilai yang sudah ada (manual atau sebelumnya)
+    let totalViews;
+    if (prevMonthCumul !== null) {
+      totalViews = Math.max(0, totViewCumul - prevMonthCumul);
+    } else {
+      const lastSyncCumul = (typeof existing._cumulativeViews === 'number') ? existing._cumulativeViews : null;
+      if (lastSyncCumul !== null && totViewCumul > lastSyncCumul) {
+        totalViews = (existing.totalViews || 0) + (totViewCumul - lastSyncCumul);
+      } else {
+        totalViews = existing.totalViews || 0;
+      }
+    }
     entry = {
       ...existing, ...entry, jmlVideo, totalViews, subsEOM,
       subsGained:       subsEOM - (prev?.subsEOM || 0),
