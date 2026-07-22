@@ -231,13 +231,23 @@
       },
       {
         "month": "2026-07",
-        "jmlVideo": 60,
-        "totalViews": 2249151,
-        "subsEOM": 72855,
-        "subsGained": 2314,
-        "totalLikes": 16932,
-        "totalComments": 1191,
-        "totalEngagement": 18521
+        "jmlVideo": 0,
+        "totalViews": 0,
+        "subsEOM": 73500,
+        "subsGained": 2769,
+        "totalLikes": 6525,
+        "totalComments": 1136,
+        "totalEngagement": 8696,
+        "_syncedAt": "2026-07-22T07:44:09.593Z",
+        "uniqueViewers": 0,
+        "erPct": 0,
+        "watchHours": 18183,
+        "impressions": 0,
+        "adImpressions": 0,
+        "avgViewsPerVideo": 0,
+        "peakViews": 0,
+        "_cumulativeViews": 13182723,
+        "_cumulativeVideos": 1249
       }
     ],
     "tiktok": [
