@@ -4107,36 +4107,32 @@ function _mergeStatEntry(acctId, platId, d, period) {
 
   let entry = { month: period, _syncedAt: d._syncedAt };
   if (platId === 'youtube') {
+    const existing     = rows.find(r => r[rowKey] === period) || {};
     const subsEOM      = d.subsEOM            || 0;
     const totVidCumul  = d._cumulativeVideos  || 0;
     const totViewCumul = d._cumulativeViews   || 0;
-    const prevVidC     = prev?._cumulativeVideos || totVidCumul;
-    const prevViewC    = prev?._cumulativeViews  || totViewCumul;
-    const jmlVideo     = Math.max(0, totVidCumul  - prevVidC);
-    const totalViews   = Math.max(0, totViewCumul - prevViewC);
+    const prevViewC    = prev?._cumulativeViews || null;
+    // jmlVideo = total video di channel (kumulatif, langsung dari API = sama dengan YouTube)
+    const jmlVideo     = totVidCumul;
+    // totalViews = views bulan ini (delta); jika tidak ada prev, pertahankan nilai yang sudah ada
+    const deltaViews   = prevViewC !== null ? Math.max(0, totViewCumul - prevViewC) : null;
+    const totalViews   = deltaViews !== null ? deltaViews : (existing.totalViews || 0);
     entry = {
-      ...entry, jmlVideo, totalViews, subsEOM,
+      ...existing, ...entry, jmlVideo, totalViews, subsEOM,
       subsGained:       subsEOM - (prev?.subsEOM || 0),
-      uniqueViewers:    prev?.uniqueViewers    || 0,
-      totalLikes:       prev?.totalLikes       || 0,
-      totalComments:    prev?.totalComments    || 0,
-      totalEngagement:  prev?.totalEngagement  || 0,
-      erPct:            prev?.erPct            || 0,
-      watchHours:       prev?.watchHours       || 0,
-      impressions:      prev?.impressions      || 0,
-      adImpressions:    prev?.adImpressions    || 0,
-      avgViewsPerVideo: jmlVideo > 0 ? Math.round(totalViews / jmlVideo) : 0,
-      peakViews:        prev?.peakViews        || 0,
+      avgViewsPerVideo: jmlVideo > 0 ? Math.round(totalViews / jmlVideo) : (existing.avgViewsPerVideo || 0),
       _cumulativeViews: totViewCumul, _cumulativeVideos: totVidCumul
     };
   } else if (platId === 'instagram') {
-    entry = { ...entry, followersEOM: d.followersEOM || 0, _cumulativeMedia: d._cumulativeMedia || 0 };
+    entry = { ...(rows.find(r => r[rowKey] === period) || {}), ...entry,
+      followersEOM: d.followersEOM || 0, _cumulativeMedia: d._cumulativeMedia || 0 };
   } else if (platId === 'facebook') {
-    entry = { ...entry, pageFollowers: d.pageFollowers || 0 };
+    entry = { ...(rows.find(r => r[rowKey] === period) || {}), ...entry,
+      pageFollowers: d.pageFollowers || 0 };
   }
 
   const idx = rows.findIndex(r => r[rowKey] === period);
-  if (idx >= 0) rows[idx] = { ...rows[idx], ...entry };
+  if (idx >= 0) rows[idx] = entry;
   else rows.push(entry);
   state.analytics[acctId][dataKey] = rows.sort((a,b)=>(a[rowKey]||'').localeCompare(b[rowKey]||''));
 }
