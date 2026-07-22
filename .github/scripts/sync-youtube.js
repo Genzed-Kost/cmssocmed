@@ -17,7 +17,7 @@
 const fs = require('fs');
 
 const API_KEY   = process.env.YOUTUBE_API_KEY;
-const MODE      = process.env.SYNC_MODE || 'monthly';   // 'monthly' | 'weekly'
+const MODE      = process.env.SYNC_MODE || 'monthly';   // 'monthly' | 'weekly' | 'live'
 const OVERRIDE  = process.env.OVERRIDE_PERIOD || '';
 
 const SETTINGS_PATH  = 'data/settings.json';
@@ -36,8 +36,11 @@ function toISOWeek(date) {
 function resolvePeriod() {
   if (OVERRIDE) return OVERRIDE;
   const now = new Date();
+  if (MODE === 'live') {
+    // Bulan berjalan (untuk update real-time setiap 8 jam)
+    return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+  }
   if (MODE === 'weekly') {
-    // Minggu lalu
     const prev = new Date(now); prev.setDate(now.getDate() - 7);
     return toISOWeek(prev);
   }
@@ -93,30 +96,30 @@ async function syncAccount(acctId, channelId, analytics, period) {
   const totalVidCumul   = parseInt(stats.videoCount)      || 0;
   const totalViewCumul  = parseInt(stats.viewCount)       || 0;
 
-  const prevSubsEOM     = prev?.subsEOM              || 0;
-  const prevVidCumul    = prev?._cumulativeVideos    || totalVidCumul;
-  const prevViewCumul   = prev?._cumulativeViews     || totalViewCumul;
+  // Entri yang sudah ada untuk periode ini (live mode: bisa sudah ada di bulan berjalan)
+  const existing = rows.find(r => (r[periodKey] || '') === period) || null;
 
-  const jmlVideo   = Math.max(0, totalVidCumul  - prevVidCumul);
-  const totalViews = Math.max(0, totalViewCumul - prevViewCumul);
+  const prevSubsEOM   = prev?.subsEOM  || 0;
+  const prevViewCumul = (typeof prev?._cumulativeViews === 'number') ? prev._cumulativeViews : null;
+
+  // jmlVideo = total video di channel (kumulatif, sama dengan yang tampil di YouTube)
+  const jmlVideo   = totalVidCumul;
+  // totalViews = views bulan ini = selisih dari bulan lalu
+  const totalViews = prevViewCumul !== null
+    ? Math.max(0, totalViewCumul - prevViewCumul)
+    : (existing?.totalViews || 0);
   const subsGained = subsEOM - prevSubsEOM;
 
   const entry = {
-    [periodKey]:     period,
+    // Pertahankan semua field existing (manual: watchHours, likes, dll)
+    ...(existing || {}),
+    [periodKey]:      period,
+    // Hanya overwrite field yang bisa diambil dari API
     jmlVideo,
     totalViews,
-    uniqueViewers:    prev?.uniqueViewers   || 0,
     subsEOM,
     subsGained,
-    totalLikes:       prev?.totalLikes      || 0,
-    totalComments:    prev?.totalComments   || 0,
-    totalEngagement:  prev?.totalEngagement || 0,
-    erPct:            prev?.erPct           || 0,
-    watchHours:       prev?.watchHours      || 0,
-    impressions:      prev?.impressions     || 0,
-    adImpressions:    prev?.adImpressions   || 0,
-    avgViewsPerVideo: jmlVideo > 0 ? Math.round(totalViews / jmlVideo) : 0,
-    peakViews:        prev?.peakViews       || 0,
+    avgViewsPerVideo: jmlVideo > 0 ? Math.round(totalViews / jmlVideo) : (existing?.avgViewsPerVideo || 0),
     _cumulativeViews:  totalViewCumul,
     _cumulativeVideos: totalVidCumul,
     _syncedAt:         new Date().toISOString(),
