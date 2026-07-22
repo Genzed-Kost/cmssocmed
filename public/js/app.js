@@ -4136,6 +4136,7 @@ function _mergeStatEntry(acctId, platId, d, period) {
   if (idx >= 0) rows[idx] = entry;
   else rows.push(entry);
   state.analytics[acctId][dataKey] = rows.sort((a,b)=>(a[rowKey]||'').localeCompare(b[rowKey]||''));
+  _setAnalyticsMeta(state.analytics, acctId, platId);
 }
 
 async function runAutoSyncPlatform(acctId, platId) {
