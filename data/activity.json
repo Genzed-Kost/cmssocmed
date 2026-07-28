@@ -1,5 +1,13 @@
 [
   {
+    "id": "ms4c688imxv1n",
+    "user": "Admin",
+    "role": "Admin",
+    "action": "logout",
+    "target": "keluar dari sistem",
+    "timestamp": "2026-07-28T07:30:26.226Z"
+  },
+  {
     "id": "ms4c169o7eqf7",
     "user": "Admin",
     "role": "Admin",
