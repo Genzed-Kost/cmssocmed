@@ -1847,7 +1847,20 @@
       "youtube": {
         "updatedAt": "2026-08-02T15:45:52.001Z",
         "updatedBy": "Admin"
+      },
+      "tiktok": {
+        "updatedAt": "2026-08-02T15:46:40.228Z",
+        "updatedBy": "Admin"
       }
-    }
+    },
+    "tiktok": [
+      {
+        "month": "2026-08",
+        "totalVideoViews": 323822,
+        "followersEOM": 10896,
+        "followersGained": 387,
+        "totalEngagement": 9135
+      }
+    ]
   }
 }
