@@ -1836,18 +1836,16 @@
       },
       {
         "month": "2026-07",
-        "jmlVideo": 9,
-        "totalViews": 78380,
-        "subsEOM": 42491,
-        "subsGained": 1557,
-        "totalLikes": 1091,
-        "totalComments": 248,
+        "totalViews": 116399,
+        "subsEOM": 43346,
+        "subsGained": 2589,
+        "totalEngagement": 2443,
         "watchHours": 10968
       }
     ],
     "_meta": {
       "youtube": {
-        "updatedAt": "2026-07-21T02:35:51.061Z",
+        "updatedAt": "2026-08-02T15:45:52.001Z",
         "updatedBy": "Admin"
       }
     }
