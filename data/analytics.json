@@ -1881,5 +1881,23 @@
         "updatedBy": "Admin"
       }
     }
+  },
+  "republik-receh": {
+    "instagram": [
+      {
+        "month": "2026-07",
+        "followersEOM": 24,
+        "jmlPost": 36,
+        "totalViews": 11689,
+        "followersGained": 24,
+        "totalEngagement": 419
+      }
+    ],
+    "_meta": {
+      "instagram": {
+        "updatedAt": "2026-08-03T03:52:51.646Z",
+        "updatedBy": "Admin"
+      }
+    }
   }
 }
