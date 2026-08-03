@@ -1952,7 +1952,7 @@
         "updatedBy": "Admin"
       },
       "tiktok": {
-        "updatedAt": "2026-08-02T15:46:52.491Z",
+        "updatedAt": "2026-08-03T09:42:54.126Z",
         "updatedBy": "Admin"
       },
       "instagram": {
@@ -1961,6 +1961,14 @@
       }
     },
     "tiktok": [
+      {
+        "month": "2026-07",
+        "totalVideoViews": 323822,
+        "profileViews": 1232,
+        "followersEOM": 10896,
+        "followersGained": 387,
+        "totalEngagement": 9135
+      },
       {
         "month": "2026-08",
         "totalVideoViews": 323822,
