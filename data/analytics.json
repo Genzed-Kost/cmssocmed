@@ -942,7 +942,7 @@
     ],
     "_meta": {
       "instagram": {
-        "updatedAt": "2026-08-03T04:12:17.186Z",
+        "updatedAt": "2026-08-03T04:13:48.616Z",
         "updatedBy": "Admin"
       },
       "facebook": {
@@ -1021,6 +1021,15 @@
         "totalViews": 563025,
         "followersGained": 646,
         "totalEngagement": 13903
+      },
+      {
+        "week": "2026-W31",
+        "followersEOM": 59665,
+        "jmlPost": 50,
+        "totalViews": 1046306,
+        "totalReach": 79831,
+        "followersGained": 256,
+        "totalEngagement": 19496
       }
     ],
     "facebook_w": [
