@@ -1,5 +1,13 @@
 [
   {
+    "id": "mscp3ynuesqm1",
+    "user": "Admin",
+    "role": "Admin",
+    "action": "logout",
+    "target": "keluar dari sistem",
+    "timestamp": "2026-08-03T03:54:44.922Z"
+  },
+  {
     "id": "mscp3jeeeacjj",
     "user": "Admin",
     "role": "Admin",
