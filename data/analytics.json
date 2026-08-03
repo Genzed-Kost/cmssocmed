@@ -1954,6 +1954,10 @@
       "tiktok": {
         "updatedAt": "2026-08-02T15:46:52.491Z",
         "updatedBy": "Admin"
+      },
+      "instagram": {
+        "updatedAt": "2026-08-03T09:42:30.641Z",
+        "updatedBy": "Admin"
       }
     },
     "tiktok": [
@@ -1964,6 +1968,15 @@
         "followersEOM": 10896,
         "followersGained": 387,
         "totalEngagement": 9135
+      }
+    ],
+    "instagram": [
+      {
+        "month": "2026-07",
+        "followersEOM": 15114,
+        "totalViews": 329428,
+        "followersGained": 394,
+        "totalEngagement": 24623
       }
     ]
   },
