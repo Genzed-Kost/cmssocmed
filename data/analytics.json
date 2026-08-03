@@ -1473,11 +1473,19 @@
         "followersGained": 185,
         "totalEngagement": 22388,
         "imageViews": 0
+      },
+      {
+        "month": "2026-07",
+        "followersEOM": 14034,
+        "totalViews": 1712202,
+        "followersGained": 373,
+        "totalEngagement": 23212,
+        "imageViews": 0
       }
     ],
     "_meta": {
       "instagram": {
-        "updatedAt": "2026-07-21T02:26:48.987Z",
+        "updatedAt": "2026-08-03T09:46:05.855Z",
         "updatedBy": "Admin"
       },
       "tiktok": {
