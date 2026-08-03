@@ -1,5 +1,13 @@
 [
   {
+    "id": "mscpg5mbhmqep",
+    "user": "Admin",
+    "role": "Admin",
+    "action": "login",
+    "target": "masuk ke sistem sebagai Admin",
+    "timestamp": "2026-08-03T04:04:13.811Z"
+  },
+  {
     "id": "mscp3ynuesqm1",
     "user": "Admin",
     "role": "Admin",
