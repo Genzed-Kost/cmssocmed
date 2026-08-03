@@ -1863,5 +1863,23 @@
         "totalEngagement": 9135
       }
     ]
+  },
+  "warga-negara": {
+    "instagram": [
+      {
+        "month": "2026-07",
+        "followersEOM": 35,
+        "jmlPost": 60,
+        "totalViews": 25791,
+        "followersGained": 35,
+        "totalEngagement": 1442
+      }
+    ],
+    "_meta": {
+      "instagram": {
+        "updatedAt": "2026-08-03T03:50:42.567Z",
+        "updatedBy": "Admin"
+      }
+    }
   }
 }
