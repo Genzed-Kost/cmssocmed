@@ -1899,5 +1899,23 @@
         "updatedBy": "Admin"
       }
     }
+  },
+  "jejak-data": {
+    "instagram": [
+      {
+        "month": "2026-07",
+        "followersEOM": 83,
+        "jmlPost": 28,
+        "totalViews": 10589,
+        "followersGained": 83,
+        "totalEngagement": 348
+      }
+    ],
+    "_meta": {
+      "instagram": {
+        "updatedAt": "2026-08-03T03:54:23.344Z",
+        "updatedBy": "Admin"
+      }
+    }
   }
 }
