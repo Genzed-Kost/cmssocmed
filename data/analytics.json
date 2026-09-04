@@ -682,6 +682,14 @@
         "followersGained": 3847,
         "totalViews": 3347102,
         "totalEngagement": 119600
+      },
+      {
+        "month": "2026-08",
+        "pageFollowers": 164212,
+        "followersGained": 1842,
+        "totalPost": 161,
+        "totalViews": 1587233,
+        "totalEngagement": 77902
       }
     ],
     "instagram": [
@@ -968,7 +976,7 @@
         "updatedBy": "Admin"
       },
       "facebook": {
-        "updatedAt": "2026-08-03T04:18:35.442Z",
+        "updatedAt": "2026-09-04T09:37:07.990Z",
         "updatedBy": "Admin"
       },
       "youtube": {
