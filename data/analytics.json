@@ -470,6 +470,17 @@
         "followersEOM": 40965,
         "followersGained": 2418,
         "totalEngagement": 188767
+      },
+      {
+        "month": "2026-08",
+        "totalVideoViews": 3203635,
+        "profileViews": 6682,
+        "followersEOM": 42484,
+        "followersGained": 1390,
+        "totalLikes": 183076,
+        "totalComments": 9427,
+        "totalShares": 8290,
+        "totalEngagement": 200793
       }
     ],
     "facebook": [
@@ -954,7 +965,7 @@
         "updatedBy": "Admin"
       },
       "tiktok": {
-        "updatedAt": "2026-08-03T04:40:45.927Z",
+        "updatedAt": "2026-09-04T09:32:03.593Z",
         "updatedBy": "Admin"
       }
     },
