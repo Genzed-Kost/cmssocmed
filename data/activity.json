@@ -1,5 +1,21 @@
 [
   {
+    "id": "munm2mg7p4iul",
+    "user": "Umar",
+    "role": "Publisher",
+    "action": "login",
+    "target": "masuk ke sistem sebagai Publisher",
+    "timestamp": "2026-09-30T04:34:36.199Z"
+  },
+  {
+    "id": "munm2g7z29kva",
+    "user": "Admin",
+    "role": "Admin",
+    "action": "logout",
+    "target": "keluar dari sistem",
+    "timestamp": "2026-09-30T04:34:28.127Z"
+  },
+  {
     "id": "munm2f2zqwnns",
     "user": "Admin",
     "role": "Admin",
