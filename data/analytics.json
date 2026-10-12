@@ -694,6 +694,10 @@
       {
         "month": "2026-09",
         "totalEngagement": 69219
+      },
+      {
+        "month": "2026-10",
+        "totalEngagement": 20514
       }
     ],
     "instagram": [
@@ -988,7 +992,7 @@
         "updatedBy": "Admin"
       },
       "facebook": {
-        "updatedAt": "2026-10-12T09:30:09.221Z",
+        "updatedAt": "2026-10-12T09:30:36.012Z",
         "updatedBy": "Admin"
       },
       "youtube": {
