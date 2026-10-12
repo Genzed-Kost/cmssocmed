@@ -1,5 +1,13 @@
 [
   {
+    "id": "mv51wyq44z958",
+    "user": "Admin",
+    "role": "Admin",
+    "action": "update statistik",
+    "target": "Penjaga Harapan Facebook — Sep 2026",
+    "timestamp": "2026-10-12T09:30:11.021Z"
+  },
+  {
     "id": "mv51v0j0cdvpy",
     "user": "Admin",
     "role": "Admin",
@@ -3990,13 +3998,5 @@
     "action": "logout",
     "target": "keluar dari sistem",
     "timestamp": "2026-06-23T11:02:55.715Z"
-  },
-  {
-    "id": "mqqj5bpwm07b2",
-    "user": "Lisa",
-    "role": "Administrator",
-    "action": "login",
-    "target": "masuk ke sistem sebagai Administrator",
-    "timestamp": "2026-06-23T10:57:12.596Z"
   }
 ]
