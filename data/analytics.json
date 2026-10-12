@@ -972,11 +972,15 @@
       {
         "month": "2026-09",
         "totalReach": 87217
+      },
+      {
+        "month": "2026-10",
+        "totalReach": 18433
       }
     ],
     "_meta": {
       "instagram": {
-        "updatedAt": "2026-10-12T09:28:16.014Z",
+        "updatedAt": "2026-10-12T09:28:38.566Z",
         "updatedBy": "Admin"
       },
       "facebook": {
