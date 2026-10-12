@@ -690,6 +690,10 @@
         "totalPost": 161,
         "totalViews": 1587233,
         "totalEngagement": 77902
+      },
+      {
+        "month": "2026-09",
+        "totalEngagement": 69219
       }
     ],
     "instagram": [
@@ -984,7 +988,7 @@
         "updatedBy": "Admin"
       },
       "facebook": {
-        "updatedAt": "2026-09-04T09:37:07.990Z",
+        "updatedAt": "2026-10-12T09:30:09.221Z",
         "updatedBy": "Admin"
       },
       "youtube": {
