@@ -1,5 +1,13 @@
 [
   {
+    "id": "mv58tlmsn5afl",
+    "user": "Admin",
+    "role": "Admin",
+    "action": "ubah status",
+    "target": "\"Fungsi Koperasi Menyokong Usaha Anggota (Asas Subsidiaritas)\" menjadi Published",
+    "timestamp": "2026-10-12T12:43:31.396Z"
+  },
+  {
     "id": "mv58tgq9zehin",
     "user": "Admin",
     "role": "Admin",
@@ -3990,13 +3998,5 @@
     "action": "logout",
     "target": "keluar dari sistem",
     "timestamp": "2026-06-23T11:08:41.612Z"
-  },
-  {
-    "id": "mqqjexg7tk3ls",
-    "user": "Umar",
-    "role": "Publisher",
-    "action": "login",
-    "target": "masuk ke sistem sebagai Publisher",
-    "timestamp": "2026-06-23T11:04:40.663Z"
   }
 ]
