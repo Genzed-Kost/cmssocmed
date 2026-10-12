@@ -1,5 +1,13 @@
 [
   {
+    "id": "mv58tgq9zehin",
+    "user": "Admin",
+    "role": "Admin",
+    "action": "ubah status",
+    "target": "\"\"Buy More, Get More\": Cara Pembagian Keuntungan Koperasi\" menjadi Published",
+    "timestamp": "2026-10-12T12:43:25.041Z"
+  },
+  {
     "id": "mv521f3vfn7ma",
     "user": "Admin",
     "role": "Admin",
@@ -3990,13 +3998,5 @@
     "action": "login",
     "target": "masuk ke sistem sebagai Publisher",
     "timestamp": "2026-06-23T11:04:40.663Z"
-  },
-  {
-    "id": "mqqjetnu47f9s",
-    "user": "Lisa",
-    "role": "Administrator",
-    "action": "logout",
-    "target": "keluar dari sistem",
-    "timestamp": "2026-06-23T11:04:35.754Z"
   }
 ]
