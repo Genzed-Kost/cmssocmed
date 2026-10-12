@@ -1,5 +1,13 @@
 [
   {
+    "id": "mv5201x9q6cdn",
+    "user": "Admin",
+    "role": "Admin",
+    "action": "update statistik",
+    "target": "Penjaga Harapan TikTok — Sep 2026",
+    "timestamp": "2026-10-12T09:32:35.133Z"
+  },
+  {
     "id": "mv51xj1krzi4l",
     "user": "Admin",
     "role": "Admin",
@@ -3990,13 +3998,5 @@
     "action": "Update Budget",
     "target": "Podcsat Kepala KSP Pak Dudung",
     "timestamp": "2026-06-23T11:04:26.385Z"
-  },
-  {
-    "id": "mqqjcwfx7m22b",
-    "user": "Lisa",
-    "role": "Administrator",
-    "action": "login",
-    "target": "masuk ke sistem sebagai Administrator",
-    "timestamp": "2026-06-23T11:03:06.045Z"
   }
 ]
