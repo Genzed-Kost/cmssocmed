@@ -485,6 +485,10 @@
       {
         "month": "2026-09",
         "totalVideoViews": 878005
+      },
+      {
+        "month": "2026-10",
+        "totalVideoViews": 609303
       }
     ],
     "facebook": [
@@ -1004,7 +1008,7 @@
         "updatedBy": "Admin"
       },
       "tiktok": {
-        "updatedAt": "2026-10-12T09:32:33.271Z",
+        "updatedAt": "2026-10-12T09:33:37.301Z",
         "updatedBy": "Admin"
       }
     },
