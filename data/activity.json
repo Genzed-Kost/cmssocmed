@@ -1,5 +1,13 @@
 [
   {
+    "id": "mv6t2q2j8tjah",
+    "user": "Umar",
+    "role": "Publisher",
+    "action": "ubah status",
+    "target": "\"Menerjemahkan Asta Cita Presiden Prabowo dalam Pembenahan Tata Kelola Lapas\" menjadi Published",
+    "timestamp": "2026-10-13T14:58:15.547Z"
+  },
+  {
     "id": "mv6r82u9h1lke",
     "user": "Umar",
     "role": "Publisher",
@@ -3990,13 +3998,5 @@
     "action": "logout",
     "target": "keluar dari sistem",
     "timestamp": "2026-06-23T11:30:08.249Z"
-  },
-  {
-    "id": "mqqkayygjjfxd",
-    "user": "Wedy",
-    "role": "Creator",
-    "action": "login",
-    "target": "masuk ke sistem sebagai Creator",
-    "timestamp": "2026-06-23T11:29:35.608Z"
   }
 ]
