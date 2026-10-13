@@ -1,5 +1,13 @@
 [
   {
+    "id": "mv6r70zd3l8lc",
+    "user": "Umar",
+    "role": "Publisher",
+    "action": "tambah konten",
+    "target": "berjudul \"Diskriminasi Fasilitas Lapas: \"Keadilan Dikebiri di Dalam Penjara\"\" (tema: Podcast Anggota Ombudsman RI) untuk akun 33 Official dijadwalkan 16 Okt 2026",
+    "timestamp": "2026-10-13T14:05:37.081Z"
+  },
+  {
     "id": "mv6r636rmj46a",
     "user": "Umar",
     "role": "Publisher",
@@ -3990,13 +3998,5 @@
     "action": "logout",
     "target": "keluar dari sistem",
     "timestamp": "2026-06-23T11:29:27.220Z"
-  },
-  {
-    "id": "mqqk9rxb5tpfb",
-    "user": "Admin",
-    "role": "Admin",
-    "action": "login",
-    "target": "masuk ke sistem sebagai Admin",
-    "timestamp": "2026-06-23T11:28:39.839Z"
   }
 ]
