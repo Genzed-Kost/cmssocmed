@@ -1,5 +1,13 @@
 [
   {
+    "id": "mv6r636rmj46a",
+    "user": "Umar",
+    "role": "Publisher",
+    "action": "tambah konten",
+    "target": "berjudul \"Temuan Fasilitas Mewah: Ruang Gym, Simulator Golf, hingga Deretan Mobil Mewah\" (tema: Podcast Anggota Ombudsman RI) untuk akun 33 Official dijadwalkan 15 Okt 2026",
+    "timestamp": "2026-10-13T14:04:53.283Z"
+  },
+  {
     "id": "mv6r5yhrkna5y",
     "user": "Umar",
     "role": "Publisher",
@@ -3990,13 +3998,5 @@
     "action": "login",
     "target": "masuk ke sistem sebagai Admin",
     "timestamp": "2026-06-23T11:28:39.839Z"
-  },
-  {
-    "id": "mqqjzkj5uz1q0",
-    "user": "Umar",
-    "role": "Publisher",
-    "action": "login",
-    "target": "masuk ke sistem sebagai Publisher",
-    "timestamp": "2026-06-23T11:20:43.697Z"
   }
 ]
