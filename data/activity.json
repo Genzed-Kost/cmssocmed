@@ -1,5 +1,13 @@
 [
   {
+    "id": "mv66f3ykgrgf1",
+    "user": "Admin",
+    "role": "Admin",
+    "action": "ubah status",
+    "target": "\"Koperasi Simpan Pinjam: Bank Sendiri Milik Bersama\" menjadi Published",
+    "timestamp": "2026-10-13T04:24:02.252Z"
+  },
+  {
     "id": "mv58tlmsn5afl",
     "user": "Admin",
     "role": "Admin",
@@ -3990,13 +3998,5 @@
     "action": "login",
     "target": "masuk ke sistem sebagai Publisher",
     "timestamp": "2026-06-23T11:08:46.501Z"
-  },
-  {
-    "id": "mqqjk3d81m774",
-    "user": "Lisa",
-    "role": "Administrator",
-    "action": "logout",
-    "target": "keluar dari sistem",
-    "timestamp": "2026-06-23T11:08:41.612Z"
   }
 ]
