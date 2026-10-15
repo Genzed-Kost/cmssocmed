@@ -1,5 +1,13 @@
 [
   {
+    "id": "mv9cnm5tjxqc9",
+    "user": "Admin",
+    "role": "Admin",
+    "action": "edit konten",
+    "target": "\"Temuan Fasilitas Mewah: Ruang Gym, Simulator Golf, hingga Deretan Mobil Mewah\"",
+    "timestamp": "2026-10-15T09:41:55.313Z"
+  },
+  {
     "id": "mv9cnd8zk42ca",
     "user": "Admin",
     "role": "Admin",
@@ -3990,13 +3998,5 @@
     "action": "logout",
     "target": "keluar dari sistem",
     "timestamp": "2026-06-23T12:16:39.912Z"
-  },
-  {
-    "id": "mqqlyql1akt9w",
-    "user": "Lisa",
-    "role": "Administrator",
-    "action": "Update Budget",
-    "target": "Podcsat Kepala KSP Pak Dudung",
-    "timestamp": "2026-06-23T12:16:04.117Z"
   }
 ]
