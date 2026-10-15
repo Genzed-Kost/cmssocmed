@@ -1,5 +1,13 @@
 [
   {
+    "id": "mv9d8k2uf3n7t",
+    "user": "Admin",
+    "role": "Admin",
+    "action": "ubah status",
+    "target": "\"Temuan Fasilitas Mewah: Ruang Gym, Simulator Golf, hingga Deretan Mobil Mewah\" menjadi Published",
+    "timestamp": "2026-10-15T09:58:12.390Z"
+  },
+  {
     "id": "mv9cnm5tjxqc9",
     "user": "Admin",
     "role": "Admin",
@@ -3990,13 +3998,5 @@
     "action": "login",
     "target": "masuk ke sistem sebagai Publisher",
     "timestamp": "2026-06-23T12:16:44.650Z"
-  },
-  {
-    "id": "mqqlzi7chx8l3",
-    "user": "Lisa",
-    "role": "Administrator",
-    "action": "logout",
-    "target": "keluar dari sistem",
-    "timestamp": "2026-06-23T12:16:39.912Z"
   }
 ]
