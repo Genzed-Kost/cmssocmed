@@ -1,5 +1,13 @@
 [
   {
+    "id": "mvayriv6gflfz",
+    "user": "Umar",
+    "role": "Publisher",
+    "action": "ubah status",
+    "target": "\"Urgensi Regulasi & Perlindungan Data Pekerja di Era AI\" menjadi Published",
+    "timestamp": "2026-10-16T12:48:35.394Z"
+  },
+  {
     "id": "mvaxqjkuxs9l6",
     "user": "Umar",
     "role": "Publisher",
@@ -3990,13 +3998,5 @@
     "action": "login",
     "target": "masuk ke sistem sebagai Admin",
     "timestamp": "2026-06-23T13:22:52.489Z"
-  },
-  {
-    "id": "mqqocdcnuilyl",
-    "user": "Umar",
-    "role": "Publisher",
-    "action": "logout",
-    "target": "keluar dari sistem",
-    "timestamp": "2026-06-23T13:22:39.383Z"
   }
 ]
