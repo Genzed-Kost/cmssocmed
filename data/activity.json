@@ -1,5 +1,13 @@
 [
   {
+    "id": "mvaxok9tkngb4",
+    "user": "Admin",
+    "role": "Admin",
+    "action": "tambah konten",
+    "target": "berjudul \"Sektor Kreatif Paling Terdampak Replacement AI\" (tema: Podcast Jurnalis AI) untuk akun 33 Official dijadwalkan 17 Okt 2026",
+    "timestamp": "2026-10-16T12:18:17.633Z"
+  },
+  {
     "id": "mvaxmmfnjcln1",
     "user": "Admin",
     "role": "Admin",
@@ -3990,13 +3998,5 @@
     "action": "ubah creator",
     "target": "\"Hari yang Indah\" dari Idham menjadi Wedy",
     "timestamp": "2026-06-23T12:39:32.312Z"
-  },
-  {
-    "id": "mqqmsr2vy27u9",
-    "user": "Umar",
-    "role": "Publisher",
-    "action": "login",
-    "target": "masuk ke sistem sebagai Publisher",
-    "timestamp": "2026-06-23T12:39:24.439Z"
   }
 ]
