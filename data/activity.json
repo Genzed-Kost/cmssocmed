@@ -1,5 +1,13 @@
 [
   {
+    "id": "mvazr1ts4hqr2",
+    "user": "Umar",
+    "role": "Publisher",
+    "action": "ubah status",
+    "target": "\"Diskriminasi Fasilitas Lapas: \"Keadilan Dikebiri di Dalam Penjara\"\" menjadi Published",
+    "timestamp": "2026-10-16T13:16:12.928Z"
+  },
+  {
     "id": "mvayriv6gflfz",
     "user": "Umar",
     "role": "Publisher",
@@ -3990,13 +3998,5 @@
     "action": "login",
     "target": "masuk ke sistem sebagai Publisher",
     "timestamp": "2026-06-23T13:25:11.015Z"
-  },
-  {
-    "id": "mqqocngpxcdpb",
-    "user": "Admin",
-    "role": "Admin",
-    "action": "login",
-    "target": "masuk ke sistem sebagai Admin",
-    "timestamp": "2026-06-23T13:22:52.489Z"
   }
 ]
