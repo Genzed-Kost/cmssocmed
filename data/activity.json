@@ -1,5 +1,13 @@
 [
   {
+    "id": "mvaxmmfnjcln1",
+    "user": "Admin",
+    "role": "Admin",
+    "action": "tambah konten",
+    "target": "berjudul \"Urgensi Regulasi & Perlindungan Data Pekerja di Era AI\" (tema: Podcast Jurnalis AI) untuk akun 33 Official dijadwalkan 16 Okt 2026",
+    "timestamp": "2026-10-16T12:16:47.123Z"
+  },
+  {
     "id": "mv9d8k2uf3n7t",
     "user": "Admin",
     "role": "Admin",
@@ -3990,13 +3998,5 @@
     "action": "login",
     "target": "masuk ke sistem sebagai Publisher",
     "timestamp": "2026-06-23T12:39:24.439Z"
-  },
-  {
-    "id": "mqqlzluy2h7pa",
-    "user": "Umar",
-    "role": "Publisher",
-    "action": "login",
-    "target": "masuk ke sistem sebagai Publisher",
-    "timestamp": "2026-06-23T12:16:44.650Z"
   }
 ]
