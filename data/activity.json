@@ -1,5 +1,13 @@
 [
   {
+    "id": "mvaxq9o0cqvdi",
+    "user": "Admin",
+    "role": "Admin",
+    "action": "tambah konten",
+    "target": "berjudul \"Eksploitasi Data Digital Tanpa Kompensasi Finansial\" (tema: Podcast Jurnalis AI) untuk akun 33 Official dijadwalkan 19 Okt 2026",
+    "timestamp": "2026-10-16T12:19:37.200Z"
+  },
+  {
     "id": "mvaxok9tkngb4",
     "user": "Admin",
     "role": "Admin",
@@ -3990,13 +3998,5 @@
     "action": "login",
     "target": "masuk ke sistem sebagai Creator",
     "timestamp": "2026-06-23T12:44:08.284Z"
-  },
-  {
-    "id": "mqqmsx5kjmb9x",
-    "user": "Umar",
-    "role": "Publisher",
-    "action": "ubah creator",
-    "target": "\"Hari yang Indah\" dari Idham menjadi Wedy",
-    "timestamp": "2026-06-23T12:39:32.312Z"
   }
 ]
