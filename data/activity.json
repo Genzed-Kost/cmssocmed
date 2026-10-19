@@ -1,5 +1,13 @@
 [
   {
+    "id": "mvfd4t0upzy74",
+    "user": "Umar",
+    "role": "Publisher",
+    "action": "ubah status",
+    "target": "\"Pengungkapan Upaya Iming-Iming 'Kerja Sama' Pasca-Sidak\" menjadi Published",
+    "timestamp": "2026-10-19T14:41:54.414Z"
+  },
+  {
     "id": "mvfcxtsn0zgtv",
     "user": "Umar",
     "role": "Publisher",
@@ -3990,13 +3998,5 @@
     "action": "login",
     "target": "masuk ke sistem sebagai Admin",
     "timestamp": "2026-06-23T13:31:51.836Z"
-  },
-  {
-    "id": "mqqonztst86gq",
-    "user": "Umar",
-    "role": "Publisher",
-    "action": "logout",
-    "target": "keluar dari sistem",
-    "timestamp": "2026-06-23T13:31:41.728Z"
   }
 ]
