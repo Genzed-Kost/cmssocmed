@@ -1,5 +1,13 @@
 [
   {
+    "id": "mvfcxtsn0zgtv",
+    "user": "Umar",
+    "role": "Publisher",
+    "action": "ubah status",
+    "target": "\"Sektor Kreatif Paling Terdampak Replacement AI\" menjadi Published",
+    "timestamp": "2026-10-19T14:36:28.823Z"
+  },
+  {
     "id": "mvfcxm12nxdwu",
     "user": "Umar",
     "role": "Publisher",
@@ -3990,13 +3998,5 @@
     "action": "logout",
     "target": "keluar dari sistem",
     "timestamp": "2026-06-23T13:31:41.728Z"
-  },
-  {
-    "id": "mqqohzaxehjwo",
-    "user": "Umar",
-    "role": "Publisher",
-    "action": "ubah status",
-    "target": "\"Hari yang Indah\" menjadi Done",
-    "timestamp": "2026-06-23T13:27:01.113Z"
   }
 ]
