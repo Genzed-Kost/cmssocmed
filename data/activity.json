@@ -1,5 +1,13 @@
 [
   {
+    "id": "mvfcxm12nxdwu",
+    "user": "Umar",
+    "role": "Publisher",
+    "action": "login",
+    "target": "masuk ke sistem sebagai Publisher",
+    "timestamp": "2026-10-19T14:36:18.758Z"
+  },
+  {
     "id": "mvc323wg7bbec",
     "user": "Umar",
     "role": "Publisher",
@@ -3990,13 +3998,5 @@
     "action": "ubah status",
     "target": "\"Hari yang Indah\" menjadi Done",
     "timestamp": "2026-06-23T13:27:01.113Z"
-  },
-  {
-    "id": "mqqohq241fcqc",
-    "user": "Umar",
-    "role": "Publisher",
-    "action": "ubah creator",
-    "target": "\"Hari yang Indah\" dari Wedy menjadi Umar",
-    "timestamp": "2026-06-23T13:26:49.132Z"
   }
 ]
