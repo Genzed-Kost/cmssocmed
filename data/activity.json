@@ -1,5 +1,13 @@
 [
   {
+    "id": "mvgnpo4mcb9l9",
+    "user": "Umar",
+    "role": "Publisher",
+    "action": "tambah konten",
+    "target": "berjudul \"Pemangkasan Birokrasi Pencairan Bansos: Dari 200 Hari Menjadi 1 Jam\" (tema: Podcast Menteri PAN RB) untuk akun 33 Official dijadwalkan 23 Okt 2026",
+    "timestamp": "2026-10-20T12:25:50.182Z"
+  },
+  {
     "id": "mvgnogetc9qa7",
     "user": "Umar",
     "role": "Publisher",
@@ -3990,13 +3998,5 @@
     "action": "logout",
     "target": "keluar dari sistem",
     "timestamp": "2026-06-23T13:50:21.042Z"
-  },
-  {
-    "id": "mqqpb8dmfucik",
-    "user": "Umar",
-    "role": "Publisher",
-    "action": "login",
-    "target": "masuk ke sistem sebagai Publisher",
-    "timestamp": "2026-06-23T13:49:45.898Z"
   }
 ]
