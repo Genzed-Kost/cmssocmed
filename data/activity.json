@@ -1,5 +1,13 @@
 [
   {
+    "id": "mvgnac44ts4qr",
+    "user": "Umar",
+    "role": "Publisher",
+    "action": "ubah status",
+    "target": "\"Eksploitasi Data Digital Tanpa Kompensasi Finansial\" menjadi Published",
+    "timestamp": "2026-10-20T12:13:54.772Z"
+  },
+  {
     "id": "mvfd4t0upzy74",
     "user": "Umar",
     "role": "Publisher",
@@ -3990,13 +3998,5 @@
     "action": "login",
     "target": "masuk ke sistem sebagai Publisher",
     "timestamp": "2026-06-23T13:47:36.474Z"
-  },
-  {
-    "id": "mqqoo7mkn9spn",
-    "user": "Admin",
-    "role": "Admin",
-    "action": "login",
-    "target": "masuk ke sistem sebagai Admin",
-    "timestamp": "2026-06-23T13:31:51.836Z"
   }
 ]
