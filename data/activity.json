@@ -1,5 +1,13 @@
 [
   {
+    "id": "mvgqetqqmziv0",
+    "user": "Umar",
+    "role": "Publisher",
+    "action": "edit konten",
+    "target": "\"Perintah Presiden Prabowo: \"Pemerintahan Digital Adalah Mutlak, Jangan Buat Rakyat Menunggu!\"\"",
+    "timestamp": "2026-10-20T13:41:23.090Z"
+  },
+  {
     "id": "mvgns3kzve5g7",
     "user": "Umar",
     "role": "Publisher",
@@ -3990,13 +3998,5 @@
     "action": "logout",
     "target": "keluar dari sistem",
     "timestamp": "2026-06-23T13:51:30.188Z"
-  },
-  {
-    "id": "mqqpc7glyr8lr",
-    "user": "Umar",
-    "role": "Publisher",
-    "action": "login",
-    "target": "masuk ke sistem sebagai Publisher",
-    "timestamp": "2026-06-23T13:50:31.365Z"
   }
 ]
