@@ -1,5 +1,13 @@
 [
   {
+    "id": "mvgnogetc9qa7",
+    "user": "Umar",
+    "role": "Publisher",
+    "action": "tambah konten",
+    "target": "berjudul \"Pangkas 27.000 Aplikasi Pemerintah Menjadi Platform \"INA Digital\"\" (tema: Podcast Menteri PAN RB) untuk akun 33 Official dijadwalkan 22 Okt 2026",
+    "timestamp": "2026-10-20T12:24:53.525Z"
+  },
+  {
     "id": "mvgnha9nzrcdy",
     "user": "Umar",
     "role": "Publisher",
@@ -3990,13 +3998,5 @@
     "action": "login",
     "target": "masuk ke sistem sebagai Publisher",
     "timestamp": "2026-06-23T13:49:45.898Z"
-  },
-  {
-    "id": "mqqpa5wv07pvk",
-    "user": "Admin",
-    "role": "Admin",
-    "action": "login",
-    "target": "masuk ke sistem sebagai Admin",
-    "timestamp": "2026-06-23T13:48:56.047Z"
   }
 ]
