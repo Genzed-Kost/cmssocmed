@@ -1,5 +1,13 @@
 [
   {
+    "id": "mvgnha9nzrcdy",
+    "user": "Umar",
+    "role": "Publisher",
+    "action": "tambah konten",
+    "target": "berjudul \"Solusi Anti-Ribet: Penghentian Pengisian Data Berulang untuk Urus Dokumen\" (tema: Podcast Menteri PAN RB) untuk akun 33 Official dijadwalkan 21 Okt 2026",
+    "timestamp": "2026-10-20T12:19:18.971Z"
+  },
+  {
     "id": "mvgndgk6r1ngm",
     "user": "Umar",
     "role": "Publisher",
@@ -3990,13 +3998,5 @@
     "action": "login",
     "target": "masuk ke sistem sebagai Admin",
     "timestamp": "2026-06-23T13:48:56.047Z"
-  },
-  {
-    "id": "mqqp9bjypqxqh",
-    "user": "Umar",
-    "role": "Publisher",
-    "action": "logout",
-    "target": "keluar dari sistem",
-    "timestamp": "2026-06-23T13:48:16.702Z"
   }
 ]
