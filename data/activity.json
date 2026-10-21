@@ -1,5 +1,13 @@
 [
   {
+    "id": "mvi1pbf4wh3es",
+    "user": "Umar",
+    "role": "Publisher",
+    "action": "tambah konten",
+    "target": "berjudul \"Rapat Anggota vs RUPS: Prinsip \"One Person, One Vote\"\" (tema: Belajar Koperasi #2) untuk akun 33 Official dijadwalkan 23 Okt 2026",
+    "timestamp": "2026-10-21T11:45:14.512Z"
+  },
+  {
     "id": "mvi1ofum8nked",
     "user": "Umar",
     "role": "Publisher",
@@ -3990,13 +3998,5 @@
     "action": "Kirim WA Planner",
     "target": "ke  ÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ \"Hari yang Indah\" (Done)",
     "timestamp": "2026-06-23T13:52:37.761Z"
-  },
-  {
-    "id": "mqqpefxlsmmcd",
-    "user": "Admin",
-    "role": "Admin",
-    "action": "ubah creator",
-    "target": "\"Hari yang Indah\" dari (kosong) menjadi Umar",
-    "timestamp": "2026-06-23T13:52:15.657Z"
   }
 ]
