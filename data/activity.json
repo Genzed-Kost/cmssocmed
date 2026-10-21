@@ -1,5 +1,13 @@
 [
   {
+    "id": "mvi1h46thcjaq",
+    "user": "Umar",
+    "role": "Publisher",
+    "action": "ubah status",
+    "target": "\"Wajah Birokrasi Hari Ini: \"Terlalu Asik Bikin Aturan & Kerja di Kotak Sendiri\"\" menjadi Published",
+    "timestamp": "2026-10-21T11:38:51.893Z"
+  },
+  {
     "id": "mvgqetqqmziv0",
     "user": "Umar",
     "role": "Publisher",
@@ -3990,13 +3998,5 @@
     "action": "login",
     "target": "masuk ke sistem sebagai Admin",
     "timestamp": "2026-06-23T13:51:43.903Z"
-  },
-  {
-    "id": "mqqpdguk7zkwn",
-    "user": "Umar",
-    "role": "Publisher",
-    "action": "logout",
-    "target": "keluar dari sistem",
-    "timestamp": "2026-06-23T13:51:30.188Z"
   }
 ]
