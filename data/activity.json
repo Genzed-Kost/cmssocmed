@@ -1,5 +1,13 @@
 [
   {
+    "id": "mvi1njbi0333g",
+    "user": "Umar",
+    "role": "Publisher",
+    "action": "tambah konten",
+    "target": "berjudul \"Pasal 33 UUD 1945: Koperasi Sebagai Pilar Ekonomi Pancasila\" (tema: Belajar Koperasi #2) untuk akun 33 Official dijadwalkan 21 Okt 2026",
+    "timestamp": "2026-10-21T11:43:51.438Z"
+  },
+  {
     "id": "mvi1h46thcjaq",
     "user": "Umar",
     "role": "Publisher",
@@ -3990,13 +3998,5 @@
     "action": "ubah creator",
     "target": "\"Hari yang Indah\" dari Umar menjadi (kosong)",
     "timestamp": "2026-06-23T13:52:08.686Z"
-  },
-  {
-    "id": "mqqpdrfjprcl5",
-    "user": "Admin",
-    "role": "Admin",
-    "action": "login",
-    "target": "masuk ke sistem sebagai Admin",
-    "timestamp": "2026-06-23T13:51:43.903Z"
   }
 ]
