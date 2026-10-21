@@ -1,5 +1,13 @@
 [
   {
+    "id": "mvi1ofum8nked",
+    "user": "Umar",
+    "role": "Publisher",
+    "action": "tambah konten",
+    "target": "berjudul \"Hakikat Utama Koperasi vs Korporasi: Kekuasaan di Tangan Siapa?\" (tema: Belajar Koperasi #2) untuk akun 33 Official dijadwalkan 22 Okt 2026",
+    "timestamp": "2026-10-21T11:44:33.598Z"
+  },
+  {
     "id": "mvi1njbi0333g",
     "user": "Umar",
     "role": "Publisher",
@@ -3990,13 +3998,5 @@
     "action": "ubah creator",
     "target": "\"Hari yang Indah\" dari (kosong) menjadi Umar",
     "timestamp": "2026-06-23T13:52:15.657Z"
-  },
-  {
-    "id": "mqqpeajy1s90y",
-    "user": "Admin",
-    "role": "Admin",
-    "action": "ubah creator",
-    "target": "\"Hari yang Indah\" dari Umar menjadi (kosong)",
-    "timestamp": "2026-06-23T13:52:08.686Z"
   }
 ]
