@@ -1,5 +1,13 @@
 [
   {
+    "id": "mvi1w0by785gd",
+    "user": "Umar",
+    "role": "Publisher",
+    "action": "tambah konten",
+    "target": "berjudul \"Koperasi Desa Merah Putih: Menjaga Harga Layak Petani & Pupuk Murah\" (tema: Belajar Koperasi #2) untuk akun 33 Official dijadwalkan 24 Okt 2026",
+    "timestamp": "2026-10-21T11:50:26.734Z"
+  },
+  {
     "id": "mvi1tylhj45ez",
     "user": "Umar",
     "role": "Publisher",
@@ -3990,13 +3998,5 @@
     "action": "ubah creator",
     "target": "\"Hari yang Indah\" dari Umar menjadi (kosong)",
     "timestamp": "2026-06-23T13:56:58.097Z"
-  },
-  {
-    "id": "mqqpkc8rpv08k",
-    "user": "Umar",
-    "role": "Publisher",
-    "action": "login",
-    "target": "masuk ke sistem sebagai Publisher",
-    "timestamp": "2026-06-23T13:56:50.811Z"
   }
 ]
