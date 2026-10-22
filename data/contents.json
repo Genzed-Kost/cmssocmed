@@ -220,7 +220,7 @@
     "creator": "Umar",
     "editor": "",
     "account": "33-official",
-    "status": "Plan",
+    "status": "Published",
     "theme": "Podcast Menteri PAN RB",
     "format": "Short",
     "script": "(07:57) – (08:47) | Solusi Anti-Ribet: Penghentian Pengisian Data Berulang untuk Urus Dokumen\n\nPoin Kunci: Penjelasan reformasi birokrasi yang memotong proses belibet pengisian data KTP berulang-ulang di berbagai instansi pemerintah lewat sistem terpadu.",
@@ -229,7 +229,8 @@
     "notes": "",
     "platformLinks": {},
     "createdBy": "Umar",
-    "createdAt": "2026-10-20T12:19:16.715Z"
+    "createdAt": "2026-10-20T12:19:16.715Z",
+    "updatedAt": "2026-10-22T09:19:57.016Z"
   },
   {
     "id": "mvgndel3lwfpn",
