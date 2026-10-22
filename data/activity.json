@@ -1,5 +1,13 @@
 [
   {
+    "id": "mvjbydytmip7o",
+    "user": "Umar",
+    "role": "Publisher",
+    "action": "ubah status",
+    "target": "\"Solusi Anti-Ribet: Penghentian Pengisian Data Berulang untuk Urus Dokumen\" menjadi Published",
+    "timestamp": "2026-10-22T09:20:00.053Z"
+  },
+  {
     "id": "mvj1of6bnv80z",
     "user": "Umar",
     "role": "Publisher",
@@ -3990,13 +3998,5 @@
     "action": "login",
     "target": "masuk ke sistem sebagai Publisher",
     "timestamp": "2026-06-23T17:17:31.779Z"
-  },
-  {
-    "id": "mqqqcwxw6g80l",
-    "user": "Umar",
-    "role": "Publisher",
-    "action": "login",
-    "target": "masuk ke sistem sebagai Publisher",
-    "timestamp": "2026-06-23T14:19:04.004Z"
   }
 ]
