@@ -1,5 +1,13 @@
 [
   {
+    "id": "mvj1of6bnv80z",
+    "user": "Umar",
+    "role": "Publisher",
+    "action": "login",
+    "target": "masuk ke sistem sebagai Publisher",
+    "timestamp": "2026-10-22T04:32:18.899Z"
+  },
+  {
     "id": "mvi64e2jjyhni",
     "user": "Umar",
     "role": "Publisher",
@@ -3990,13 +3998,5 @@
     "action": "login",
     "target": "masuk ke sistem sebagai Publisher",
     "timestamp": "2026-06-23T14:19:04.004Z"
-  },
-  {
-    "id": "mqqpl0wp5qi9t",
-    "user": "Umar",
-    "role": "Publisher",
-    "action": "ubah status",
-    "target": "\"Hari yang Indah\" menjadi ACC",
-    "timestamp": "2026-06-23T13:57:22.777Z"
   }
 ]
