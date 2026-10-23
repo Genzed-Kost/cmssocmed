@@ -198,7 +198,7 @@
     "creator": "Umar",
     "editor": "",
     "account": "33-official",
-    "status": "Plan",
+    "status": "Published",
     "theme": "Podcast Menteri PAN RB",
     "format": "Short",
     "script": "(12:23) – (15:42) | Pangkas 27.000 Aplikasi Pemerintah Menjadi Platform \"INA Digital\"\n\nPoin Kunci: Langkah berani menyatukan dan menyederhanakan sekitar 27.000 aplikasi instansi yang terpisah-pisah ke dalam satu platform layanan publik nasional terintegrasi (INA Digital).",
@@ -207,7 +207,8 @@
     "notes": "",
     "platformLinks": {},
     "createdBy": "Umar",
-    "createdAt": "2026-10-20T12:24:51.236Z"
+    "createdAt": "2026-10-20T12:24:51.236Z",
+    "updatedAt": "2026-10-23T10:36:04.793Z"
   },
   {
     "id": "mvgnh8izqszi3",
