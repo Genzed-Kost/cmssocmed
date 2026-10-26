@@ -1,5 +1,13 @@
 [
   {
+    "id": "mvpfd2m7n2b3s",
+    "user": "Umar",
+    "role": "Publisher",
+    "action": "ubah status",
+    "target": "\"Pemangkasan Birokrasi Pencairan Bansos: Dari 200 Hari Menjadi 1 Jam\" menjadi Published",
+    "timestamp": "2026-10-26T15:42:01.087Z"
+  },
+  {
     "id": "mvpeh5157quzr",
     "user": "Umar",
     "role": "Publisher",
@@ -3990,13 +3998,5 @@
     "action": "Kirim WA Bank Konten",
     "target": "ke Umar Ã¢ÂÂ \"Go Prabowo\"",
     "timestamp": "2026-06-23T18:11:30.938Z"
-  },
-  {
-    "id": "mqqylc7mpd4kf",
-    "user": "Umar",
-    "role": "Publisher",
-    "action": "edit konten",
-    "target": "\"Ulta Levenia Deputi Bakom\"",
-    "timestamp": "2026-06-23T18:09:33.970Z"
   }
 ]
