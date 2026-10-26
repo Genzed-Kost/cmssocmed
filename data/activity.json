@@ -1,5 +1,13 @@
 [
   {
+    "id": "mvpeh5157quzr",
+    "user": "Umar",
+    "role": "Publisher",
+    "action": "ubah status",
+    "target": "\"Rapat Anggota vs RUPS: Prinsip \"One Person, One Vote\"\" menjadi Published",
+    "timestamp": "2026-10-26T15:17:11.225Z"
+  },
+  {
     "id": "mvku44oljppmk",
     "user": "Umar",
     "role": "Publisher",
@@ -3990,13 +3998,5 @@
     "action": "edit konten",
     "target": "\"Ulta Levenia Deputi Bakom\"",
     "timestamp": "2026-06-23T18:09:33.970Z"
-  },
-  {
-    "id": "mqqxolep7wxl8",
-    "user": "Umar",
-    "role": "Publisher",
-    "action": "login",
-    "target": "masuk ke sistem sebagai Publisher",
-    "timestamp": "2026-06-23T17:44:06.241Z"
   }
 ]
