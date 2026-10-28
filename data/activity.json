@@ -1,5 +1,13 @@
 [
   {
+    "id": "mvscfh6mrvj7u",
+    "user": "Umar",
+    "role": "Publisher",
+    "action": "ubah status",
+    "target": "\"Koperasi Desa Merah Putih: Menjaga Harga Layak Petani & Pupuk Murah\" menjadi Published",
+    "timestamp": "2026-10-28T16:43:12.958Z"
+  },
+  {
     "id": "mvpfd2m7n2b3s",
     "user": "Umar",
     "role": "Publisher",
@@ -3990,13 +3998,5 @@
     "action": "logout",
     "target": "keluar dari sistem",
     "timestamp": "2026-06-23T18:11:54.983Z"
-  },
-  {
-    "id": "mqqynugqpkvzx",
-    "user": "Umar",
-    "role": "Publisher",
-    "action": "Kirim WA Bank Konten",
-    "target": "ke Umar Ã¢ÂÂ \"Go Prabowo\"",
-    "timestamp": "2026-06-23T18:11:30.938Z"
   }
 ]
