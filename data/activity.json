@@ -1,5 +1,13 @@
 [
   {
+    "id": "mvt701kx0iezk",
+    "user": "Umar",
+    "role": "Publisher",
+    "action": "tambah konten",
+    "target": "berjudul \"Tobat Ekologis! Wacana Car Free Day Sabtu dan Minggu\" (tema: Podcast Menteri LH) untuk akun 33 Official dijadwalkan 02 Nov 2026",
+    "timestamp": "2026-10-29T06:59:00.993Z"
+  },
+  {
     "id": "mvt6yb9bs95j7",
     "user": "Umar",
     "role": "Publisher",
@@ -3990,13 +3998,5 @@
     "action": "hapus konten",
     "target": "Podcsat Kepala KSP Pak Dudung",
     "timestamp": "2026-06-25T09:19:30.298Z"
-  },
-  {
-    "id": "mqtaj81l6qrnz",
-    "user": "Admin",
-    "role": "Admin",
-    "action": "login",
-    "target": "masuk ke sistem sebagai Admin",
-    "timestamp": "2026-06-25T09:19:23.001Z"
   }
 ]
