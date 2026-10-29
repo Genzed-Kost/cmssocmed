@@ -1,5 +1,13 @@
 [
   {
+    "id": "mvt1y2n00wbh6",
+    "user": "Umar",
+    "role": "Publisher",
+    "action": "ubah status",
+    "target": "\"Beda Motif Ekonomi: Profit Oriented vs Benefit Oriented\" menjadi Published",
+    "timestamp": "2026-10-29T04:37:30.972Z"
+  },
+  {
     "id": "mvt1d9hb7o56u",
     "user": "Umar",
     "role": "Publisher",
@@ -3990,13 +3998,5 @@
     "action": "Kirim WA Bank Konten",
     "target": "ke Umar Ã¢ÂÂ \"Go Prabowo\"",
     "timestamp": "2026-06-23T18:12:16.701Z"
-  },
-  {
-    "id": "mqqyols7u2pst",
-    "user": "Admin",
-    "role": "Admin",
-    "action": "login",
-    "target": "masuk ke sistem sebagai Admin",
-    "timestamp": "2026-06-23T18:12:06.343Z"
   }
 ]
