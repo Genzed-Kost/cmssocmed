@@ -1,5 +1,13 @@
 [
   {
+    "id": "mvtfkeg7qu8uo",
+    "user": "Umar",
+    "role": "Publisher",
+    "action": "ubah status",
+    "target": "\"Presiden Prabowo Geram, Pembakar Hutan Terancam Dicabut Izinnya\" menjadi Published",
+    "timestamp": "2026-10-29T10:58:47.719Z"
+  },
+  {
     "id": "mvt716a5g5yyq",
     "user": "Umar",
     "role": "Publisher",
@@ -3990,13 +3998,5 @@
     "action": "hapus konten",
     "target": "Ulta Levenia Deputi Bakom",
     "timestamp": "2026-06-25T09:19:34.614Z"
-  },
-  {
-    "id": "mqtajf9qhdlhw",
-    "user": "Admin",
-    "role": "Admin",
-    "action": "hapus konten",
-    "target": "Makam Pangeran Tubagus Angke",
-    "timestamp": "2026-06-25T09:19:32.366Z"
   }
 ]
