@@ -1,5 +1,13 @@
 [
   {
+    "id": "mvt4ugsvsbxbl",
+    "user": "Umar",
+    "role": "Publisher",
+    "action": "tambah konten",
+    "target": "berjudul \"Presiden Prabowo Geram, Pembakar Hutan Terancam Dicabut Izinnya\" (tema: Podcast Menteri LN) untuk akun 33 Official dijadwalkan 29 Okt 2026",
+    "timestamp": "2026-10-29T05:58:41.551Z"
+  },
+  {
     "id": "mvt4njqjs1kte",
     "user": "Umar",
     "role": "Publisher",
@@ -3990,13 +3998,5 @@
     "action": "login",
     "target": "masuk ke sistem sebagai Admin",
     "timestamp": "2026-06-24T14:44:12.603Z"
-  },
-  {
-    "id": "mqs6l3uvaqm3l",
-    "user": "Umar",
-    "role": "Publisher",
-    "action": "login",
-    "target": "masuk ke sistem sebagai Publisher",
-    "timestamp": "2026-06-24T14:41:06.247Z"
   }
 ]
