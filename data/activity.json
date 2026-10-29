@@ -1,5 +1,13 @@
 [
   {
+    "id": "mvt4zlimlbqu9",
+    "user": "Umar",
+    "role": "Publisher",
+    "action": "tambah konten",
+    "target": "berjudul \"Target Sampah Indonesia Tuntas 2028, Lebih Cepat dari Rencana!\" (tema: Podcast Menteri LH) untuk akun 33 Official dijadwalkan 31 Okt 2026",
+    "timestamp": "2026-10-29T06:02:40.942Z"
+  },
+  {
     "id": "mvt4vs5ltcax9",
     "user": "Umar",
     "role": "Publisher",
@@ -3990,13 +3998,5 @@
     "action": "logout",
     "target": "keluar dari sistem",
     "timestamp": "2026-06-25T09:19:15.361Z"
-  },
-  {
-    "id": "mqtag4hzbypz4",
-    "user": "Umar",
-    "role": "Publisher",
-    "action": "login",
-    "target": "masuk ke sistem sebagai Publisher",
-    "timestamp": "2026-06-25T09:16:58.439Z"
   }
 ]
