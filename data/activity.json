@@ -1,5 +1,13 @@
 [
   {
+    "id": "mvt716a5g5yyq",
+    "user": "Umar",
+    "role": "Publisher",
+    "action": "tambah konten",
+    "target": "berjudul \"Hutan Indonesia Punya Nilai Ekonomi, Masyarakat Adat Harus Diuntungkan\" (tema: Podcast Menteri LH) untuk akun 33 Official dijadwalkan 03 Nov 2026",
+    "timestamp": "2026-10-29T06:59:53.741Z"
+  },
+  {
     "id": "mvt701kx0iezk",
     "user": "Umar",
     "role": "Publisher",
@@ -3990,13 +3998,5 @@
     "action": "hapus konten",
     "target": "Makam Pangeran Tubagus Angke",
     "timestamp": "2026-06-25T09:19:32.366Z"
-  },
-  {
-    "id": "mqtajdoacs3pj",
-    "user": "Admin",
-    "role": "Admin",
-    "action": "hapus konten",
-    "target": "Podcsat Kepala KSP Pak Dudung",
-    "timestamp": "2026-06-25T09:19:30.298Z"
   }
 ]
