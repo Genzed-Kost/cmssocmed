@@ -1,5 +1,13 @@
 [
   {
+    "id": "mvt4njqjs1kte",
+    "user": "Umar",
+    "role": "Publisher",
+    "action": "ubah status",
+    "target": "\"Keunikan Koperasi: \"Beli Mie Sekaligus Jadi Pemilik Perusahaannya\"\" menjadi Published",
+    "timestamp": "2026-10-29T05:53:18.763Z"
+  },
+  {
     "id": "mvt1y2n00wbh6",
     "user": "Umar",
     "role": "Publisher",
@@ -3990,13 +3998,5 @@
     "action": "login",
     "target": "masuk ke sistem sebagai Publisher",
     "timestamp": "2026-06-24T14:41:06.247Z"
-  },
-  {
-    "id": "mqqyotrxuodrl",
-    "user": "Admin",
-    "role": "Admin",
-    "action": "Kirim WA Bank Konten",
-    "target": "ke Umar Ã¢ÂÂ \"Go Prabowo\"",
-    "timestamp": "2026-06-23T18:12:16.701Z"
   }
 ]
