@@ -1,5 +1,13 @@
 [
   {
+    "id": "mvt4vs5ltcax9",
+    "user": "Umar",
+    "role": "Publisher",
+    "action": "tambah konten",
+    "target": "berjudul \"Tambang Nikel Dikejar, Bekas Tambangnya Jangan Ditinggalkan!\" (tema: Podcast Menteri LH) untuk akun 33 Official dijadwalkan 30 Okt 2026",
+    "timestamp": "2026-10-29T05:59:42.921Z"
+  },
+  {
     "id": "mvt4ugsvsbxbl",
     "user": "Umar",
     "role": "Publisher",
@@ -3990,13 +3998,5 @@
     "action": "login",
     "target": "masuk ke sistem sebagai Publisher",
     "timestamp": "2026-06-25T09:16:58.439Z"
-  },
-  {
-    "id": "mqs6p3nfailxt",
-    "user": "Admin",
-    "role": "Admin",
-    "action": "login",
-    "target": "masuk ke sistem sebagai Admin",
-    "timestamp": "2026-06-24T14:44:12.603Z"
   }
 ]
