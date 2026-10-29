@@ -1,5 +1,13 @@
 [
   {
+    "id": "mvt6yb9bs95j7",
+    "user": "Umar",
+    "role": "Publisher",
+    "action": "tambah konten",
+    "target": "berjudul \"Prabowo Disebut Sedang Melakukan Revolusi Ekonomi Indonesia\" (tema: Podcast Menteri LH) untuk akun 33 Official dijadwalkan 01 Nov 2026",
+    "timestamp": "2026-10-29T06:57:40.223Z"
+  },
+  {
     "id": "mvt4zlimlbqu9",
     "user": "Umar",
     "role": "Publisher",
@@ -3990,13 +3998,5 @@
     "action": "login",
     "target": "masuk ke sistem sebagai Admin",
     "timestamp": "2026-06-25T09:19:23.001Z"
-  },
-  {
-    "id": "mqtaj25dv7aes",
-    "user": "Umar",
-    "role": "Publisher",
-    "action": "logout",
-    "target": "keluar dari sistem",
-    "timestamp": "2026-06-25T09:19:15.361Z"
   }
 ]
