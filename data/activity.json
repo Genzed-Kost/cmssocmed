@@ -1,5 +1,13 @@
 [
   {
+    "id": "mvuqken1uda8n",
+    "user": "Umar",
+    "role": "Publisher",
+    "action": "tambah konten",
+    "target": "berjudul \"Prabowo Hidupkan Kembali Restorasi Gambut, Ini Tantangannya!\" (tema: Podcast Sitroom) untuk akun 33 Official dijadwalkan 30 Okt 2026",
+    "timestamp": "2026-10-30T08:54:29.917Z"
+  },
+  {
     "id": "mvtfkeg7qu8uo",
     "user": "Umar",
     "role": "Publisher",
@@ -3990,13 +3998,5 @@
     "action": "login",
     "target": "masuk ke sistem sebagai Admin",
     "timestamp": "2026-06-25T09:23:45.223Z"
-  },
-  {
-    "id": "mqtajh06bgcgz",
-    "user": "Admin",
-    "role": "Admin",
-    "action": "hapus konten",
-    "target": "Ulta Levenia Deputi Bakom",
-    "timestamp": "2026-06-25T09:19:34.614Z"
   }
 ]
