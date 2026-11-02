@@ -1,5 +1,13 @@
 [
   {
+    "id": "mvyykrj998a14",
+    "user": "Umar",
+    "role": "Publisher",
+    "action": "ubah status",
+    "target": "\"Prabowo Disebut Sedang Melakukan Revolusi Ekonomi Indonesia\" menjadi Published",
+    "timestamp": "2026-11-02T07:49:48.261Z"
+  },
+  {
     "id": "mvuqken1uda8n",
     "user": "Umar",
     "role": "Publisher",
@@ -3990,13 +3998,5 @@
     "action": "login",
     "target": "masuk ke sistem sebagai Admin",
     "timestamp": "2026-06-25T12:35:20.908Z"
-  },
-  {
-    "id": "mqtaoudjpvyic",
-    "user": "Admin",
-    "role": "Admin",
-    "action": "login",
-    "target": "masuk ke sistem sebagai Admin",
-    "timestamp": "2026-06-25T09:23:45.223Z"
   }
 ]
