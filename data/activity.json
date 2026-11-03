@@ -1,5 +1,13 @@
 [
   {
+    "id": "mw090uds2ye3i",
+    "user": "Umar",
+    "role": "Publisher",
+    "action": "tambah konten",
+    "target": "berjudul \"Risiko El Niño Sudah Diprediksi, Kenapa Kebakaran Masih Terjadi?\" (tema: Podcast Sitroom) untuk akun 33 Official dijadwalkan 04 Nov 2026",
+    "timestamp": "2026-11-03T05:30:00.784Z"
+  },
+  {
     "id": "mw08zyos19l13",
     "user": "Umar",
     "role": "Publisher",
@@ -3990,13 +3998,5 @@
     "action": "update statistik",
     "target": "33 Official Facebook — Nov 2025",
     "timestamp": "2026-06-25T12:49:45.979Z"
-  },
-  {
-    "id": "mqthyxkjr5xec",
-    "user": "Admin",
-    "role": "Admin",
-    "action": "update statistik",
-    "target": "33 Official Facebook — Okt 2025",
-    "timestamp": "2026-06-25T12:47:33.235Z"
   }
 ]
