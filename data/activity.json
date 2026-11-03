@@ -1,5 +1,13 @@
 [
   {
+    "id": "mw05gvt2c5fn2",
+    "user": "Umar",
+    "role": "Publisher",
+    "action": "edit konten",
+    "target": "\"Tambang Nikel Dikejar, Bekas Tambangnya Jangan Ditinggalkan!\"",
+    "timestamp": "2026-11-03T03:50:30.662Z"
+  },
+  {
     "id": "mw05eon5sf8k6",
     "user": "Umar",
     "role": "Publisher",
@@ -3990,13 +3998,5 @@
     "action": "update statistik",
     "target": "33 Official Facebook — Agt 2025",
     "timestamp": "2026-06-25T12:44:14.086Z"
-  },
-  {
-    "id": "mqthrrldctvc2",
-    "user": "Admin",
-    "role": "Admin",
-    "action": "update statistik",
-    "target": "33 Official Facebook — Jul 2025",
-    "timestamp": "2026-06-25T12:41:58.897Z"
   }
 ]
