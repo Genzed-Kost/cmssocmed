@@ -1,5 +1,13 @@
 [
   {
+    "id": "mw0gfpxjos70y",
+    "user": "Umar",
+    "role": "Publisher",
+    "action": "ubah status",
+    "target": "\"Jangan Tunggu Hutan Terbakar! Pemerintah Harus Bergerak Sebelum Api Datang\" menjadi Published",
+    "timestamp": "2026-11-03T08:57:32.167Z"
+  },
+  {
     "id": "mw093vib4g6t8",
     "user": "Umar",
     "role": "Publisher",
@@ -3990,13 +3998,5 @@
     "action": "update statistik",
     "target": "33 Official Facebook — Mar 2026",
     "timestamp": "2026-06-25T13:06:39.380Z"
-  },
-  {
-    "id": "mqtim9qhh3hzx",
-    "user": "Admin",
-    "role": "Admin",
-    "action": "update statistik",
-    "target": "33 Official Facebook — Feb 2026",
-    "timestamp": "2026-06-25T13:05:42.089Z"
   }
 ]
