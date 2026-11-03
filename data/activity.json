@@ -1,5 +1,13 @@
 [
   {
+    "id": "mw08wagly320j",
+    "user": "Umar",
+    "role": "Publisher",
+    "action": "edit konten",
+    "target": "\"Target Sampah Indonesia Tuntas 2028, Lebih Cepat dari Rencana!\"",
+    "timestamp": "2026-11-03T05:26:28.341Z"
+  },
+  {
     "id": "mw05gvt2c5fn2",
     "user": "Umar",
     "role": "Publisher",
@@ -3990,13 +3998,5 @@
     "action": "update statistik",
     "target": "33 Official Facebook — Sep 2025",
     "timestamp": "2026-06-25T12:45:45.458Z"
-  },
-  {
-    "id": "mqthunwmnj129",
-    "user": "Admin",
-    "role": "Admin",
-    "action": "update statistik",
-    "target": "33 Official Facebook — Agt 2025",
-    "timestamp": "2026-06-25T12:44:14.086Z"
   }
 ]
