@@ -1,5 +1,13 @@
 [
   {
+    "id": "mw08zyos19l13",
+    "user": "Umar",
+    "role": "Publisher",
+    "action": "tambah konten",
+    "target": "berjudul \"Jangan Tunggu Hutan Terbakar! Pemerintah Harus Bergerak Sebelum Api Datang\" (tema: Podcast Sitroom) untuk akun 33 Official dijadwalkan 03 Nov 2026",
+    "timestamp": "2026-11-03T05:29:19.708Z"
+  },
+  {
     "id": "mw08wagly320j",
     "user": "Umar",
     "role": "Publisher",
@@ -3990,13 +3998,5 @@
     "action": "update statistik",
     "target": "33 Official Facebook — Okt 2025",
     "timestamp": "2026-06-25T12:47:33.235Z"
-  },
-  {
-    "id": "mqthwmeq2z3fw",
-    "user": "Admin",
-    "role": "Admin",
-    "action": "update statistik",
-    "target": "33 Official Facebook — Sep 2025",
-    "timestamp": "2026-06-25T12:45:45.458Z"
   }
 ]
