@@ -1,5 +1,13 @@
 [
   {
+    "id": "mw093vib4g6t8",
+    "user": "Umar",
+    "role": "Publisher",
+    "action": "tambah konten",
+    "target": "berjudul \"Karhutla Memicu Kekecewaan Publik, Mengapa Protes Masyarakat Makin Besar?\" (tema: Podcast Sitroom) untuk akun 33 Official dijadwalkan 09 Nov 2026",
+    "timestamp": "2026-11-03T05:32:22.211Z"
+  },
+  {
     "id": "mw092r794zlpq",
     "user": "Umar",
     "role": "Publisher",
@@ -3990,13 +3998,5 @@
     "action": "update statistik",
     "target": "33 Official Facebook — Feb 2026",
     "timestamp": "2026-06-25T13:05:42.089Z"
-  },
-  {
-    "id": "mqtiiwrglmzhf",
-    "user": "Admin",
-    "role": "Admin",
-    "action": "update statistik",
-    "target": "33 Official Facebook — Jan 2026",
-    "timestamp": "2026-06-25T13:03:05.308Z"
   }
 ]
