@@ -1,5 +1,13 @@
 [
   {
+    "id": "mw091odg290s8",
+    "user": "Umar",
+    "role": "Publisher",
+    "action": "tambah konten",
+    "target": "berjudul \"Perusahaan Tidak Siap Hadapi Kebakaran, Pengawasan Harus Diperketat!\" (tema: Podcast Sitroom) untuk akun 33 Official dijadwalkan 05 Nov 2026",
+    "timestamp": "2026-11-03T05:30:39.652Z"
+  },
+  {
     "id": "mw090uds2ye3i",
     "user": "Umar",
     "role": "Publisher",
@@ -3990,13 +3998,5 @@
     "action": "update statistik",
     "target": "33 Official Facebook — Des 2025",
     "timestamp": "2026-06-25T12:50:58.130Z"
-  },
-  {
-    "id": "mqti1rzv0l2zy",
-    "user": "Admin",
-    "role": "Admin",
-    "action": "update statistik",
-    "target": "33 Official Facebook — Nov 2025",
-    "timestamp": "2026-06-25T12:49:45.979Z"
   }
 ]
