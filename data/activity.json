@@ -1,5 +1,13 @@
 [
   {
+    "id": "mw22fomu4v8vo",
+    "user": "Umar",
+    "role": "Publisher",
+    "action": "ubah status",
+    "target": "\"Risiko El Niño Sudah Diprediksi, Kenapa Kebakaran Masih Terjadi?\" menjadi Published",
+    "timestamp": "2026-11-04T12:01:08.214Z"
+  },
+  {
     "id": "mw214s7il1n91",
     "user": "Umar",
     "role": "Publisher",
@@ -3990,13 +3998,5 @@
     "action": "update statistik",
     "target": "33 Official Facebook — Mei 2026",
     "timestamp": "2026-06-25T13:09:00.692Z"
-  },
-  {
-    "id": "mqtiovx2nllc0",
-    "user": "Admin",
-    "role": "Admin",
-    "action": "update statistik",
-    "target": "33 Official Facebook — Apr 2026",
-    "timestamp": "2026-06-25T13:07:44.150Z"
   }
 ]
