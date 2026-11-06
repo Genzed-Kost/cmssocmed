@@ -1,5 +1,13 @@
 [
   {
+    "id": "mw4r7ja2grykx",
+    "user": "Umar",
+    "role": "Publisher",
+    "action": "ubah status",
+    "target": "\"Perusahaan Tidak Siap Hadapi Kebakaran, Pengawasan Harus Diperketat!\" menjadi Published",
+    "timestamp": "2026-11-06T09:10:10.778Z"
+  },
+  {
     "id": "mw4pe5u5k3jwu",
     "user": "Umar",
     "role": "Publisher",
@@ -3990,13 +3998,5 @@
     "action": "update statistik",
     "target": "33 Official Facebook — W24 Jun '26",
     "timestamp": "2026-06-25T13:15:29.390Z"
-  },
-  {
-    "id": "mqtiyd9ue5hiy",
-    "user": "Admin",
-    "role": "Admin",
-    "action": "update statistik",
-    "target": "33 Official Facebook — W24 Jun '26",
-    "timestamp": "2026-06-25T13:15:06.546Z"
   }
 ]
