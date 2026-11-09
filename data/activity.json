@@ -1,5 +1,13 @@
 [
   {
+    "id": "mw8r3lgq3zl2q",
+    "user": "Umar",
+    "role": "Publisher",
+    "action": "ubah status",
+    "target": "\"Prabowo Dorong Transparansi dan Penegakan Hukum Pasar Modal\" menjadi Published",
+    "timestamp": "2026-11-09T04:18:11.690Z"
+  },
+  {
     "id": "mw8qtfxfkv6fv",
     "user": "Umar",
     "role": "Publisher",
@@ -3990,13 +3998,5 @@
     "action": "update statistik",
     "target": "33 Official Instagram — W25 Jun '26",
     "timestamp": "2026-06-25T13:17:47.154Z"
-  },
-  {
-    "id": "mqtj02u4lpzp0",
-    "user": "Admin",
-    "role": "Admin",
-    "action": "update statistik",
-    "target": "33 Official Facebook — W25 Jun '26",
-    "timestamp": "2026-06-25T13:16:26.332Z"
   }
 ]
