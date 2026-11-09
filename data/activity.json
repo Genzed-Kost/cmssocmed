@@ -1,5 +1,13 @@
 [
   {
+    "id": "mw8qtfxfkv6fv",
+    "user": "Umar",
+    "role": "Publisher",
+    "action": "login",
+    "target": "masuk ke sistem sebagai Publisher",
+    "timestamp": "2026-11-09T04:10:17.955Z"
+  },
+  {
     "id": "mw4r7ja2grykx",
     "user": "Umar",
     "role": "Publisher",
@@ -3990,13 +3998,5 @@
     "action": "update statistik",
     "target": "33 Official Facebook — W25 Jun '26",
     "timestamp": "2026-06-25T13:16:26.332Z"
-  },
-  {
-    "id": "mqtiyuwenrfwb",
-    "user": "Admin",
-    "role": "Admin",
-    "action": "update statistik",
-    "target": "33 Official Facebook — W24 Jun '26",
-    "timestamp": "2026-06-25T13:15:29.390Z"
   }
 ]
