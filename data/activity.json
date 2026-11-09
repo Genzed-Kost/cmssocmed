@@ -1,5 +1,13 @@
 [
   {
+    "id": "mw90x9rwrr126",
+    "user": "Umar",
+    "role": "Publisher",
+    "action": "ubah status",
+    "target": "\"Salah Kelola Hutan Jadi Komoditas, Gambut Indonesia Makin Rentan Terbakar\" menjadi Published",
+    "timestamp": "2026-11-09T08:53:12.764Z"
+  },
+  {
     "id": "mw8r3lgq3zl2q",
     "user": "Umar",
     "role": "Publisher",
@@ -3990,13 +3998,5 @@
     "action": "update statistik",
     "target": "33 Official Instagram — W24 Jun '26",
     "timestamp": "2026-06-25T13:18:50.280Z"
-  },
-  {
-    "id": "mqtj1t76inayb",
-    "user": "Admin",
-    "role": "Admin",
-    "action": "update statistik",
-    "target": "33 Official Instagram — W25 Jun '26",
-    "timestamp": "2026-06-25T13:17:47.154Z"
   }
 ]
