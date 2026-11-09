@@ -1,5 +1,13 @@
 [
   {
+    "id": "mw9hjilpyvxpc",
+    "user": "Umar",
+    "role": "Publisher",
+    "action": "Kirim WA Stock Contents",
+    "target": "ke Umar — 6 item",
+    "timestamp": "2026-11-09T16:38:24.493Z"
+  },
+  {
     "id": "mw9hixlehfhv8",
     "user": "Umar",
     "role": "Publisher",
@@ -3990,13 +3998,5 @@
     "action": "update statistik",
     "target": "33 Official Instagram — W25 Jun '26",
     "timestamp": "2026-06-25T13:19:27.962Z"
-  },
-  {
-    "id": "mqtj3pfo6gf0i",
-    "user": "Admin",
-    "role": "Admin",
-    "action": "update statistik",
-    "target": "33 Official Instagram — W24 Jun '26",
-    "timestamp": "2026-06-25T13:19:15.588Z"
   }
 ]
