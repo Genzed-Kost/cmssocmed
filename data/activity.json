@@ -1,5 +1,13 @@
 [
   {
+    "id": "mwabvrh6vue2z",
+    "user": "Umar",
+    "role": "Publisher",
+    "action": "tambah konten",
+    "target": "berjudul \"21:24–23:58 | Penjajah Memetakan Pegunungan untuk Menguasai Produksi Perkebunan\" (tema: Podcast Sitroom) untuk akun 33 Official dijadwalkan 13 Nov 2026",
+    "timestamp": "2026-11-10T06:47:44.346Z"
+  },
+  {
     "id": "mwabu9dxqave2",
     "user": "Umar",
     "role": "Publisher",
@@ -3990,13 +3998,5 @@
     "action": "logout",
     "target": "keluar dari sistem",
     "timestamp": "2026-06-25T17:10:12.700Z"
-  },
-  {
-    "id": "mqtrco4dzo2h9",
-    "user": "Admin",
-    "role": "Admin",
-    "action": "edit user",
-    "target": "Umar → Umar (Publisher)",
-    "timestamp": "2026-06-25T17:10:10.717Z"
   }
 ]
