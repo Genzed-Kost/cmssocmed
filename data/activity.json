@@ -1,5 +1,13 @@
 [
   {
+    "id": "mwaboo2dmrnhh",
+    "user": "Umar",
+    "role": "Publisher",
+    "action": "tambah konten",
+    "target": "berjudul \"Jangan Ulangi Cara Penjajah Memperlakukan Alam Indonesia\" (tema: Podcast Sitroom) untuk akun 33 Official dijadwalkan 10 Nov 2026",
+    "timestamp": "2026-11-10T06:42:13.333Z"
+  },
+  {
     "id": "mwabkayexx4qf",
     "user": "Umar",
     "role": "Publisher",
@@ -3990,13 +3998,5 @@
     "action": "logout",
     "target": "keluar dari sistem",
     "timestamp": "2026-06-25T17:01:21.357Z"
-  },
-  {
-    "id": "mqtqvfwg29ak8",
-    "user": "Admin",
-    "role": "Admin",
-    "action": "login",
-    "target": "masuk ke sistem sebagai Admin",
-    "timestamp": "2026-06-25T16:56:46.912Z"
   }
 ]
