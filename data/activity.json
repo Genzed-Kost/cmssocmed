@@ -1,5 +1,13 @@
 [
   {
+    "id": "mwarkjz3iko9j",
+    "user": "Umar",
+    "role": "Publisher",
+    "action": "ubah status",
+    "target": "\"Jangan Ulangi Cara Penjajah Memperlakukan Alam Indonesia\" menjadi Published",
+    "timestamp": "2026-11-10T14:06:55.263Z"
+  },
+  {
     "id": "mwafjfdvu2bub",
     "user": "Umar",
     "role": "Publisher",
@@ -3990,13 +3998,5 @@
     "action": "logout",
     "target": "keluar dari sistem",
     "timestamp": "2026-06-25T17:10:29.320Z"
-  },
-  {
-    "id": "mqtrcz3a7pwsg",
-    "user": "Umar",
-    "role": "Publisher",
-    "action": "login",
-    "target": "masuk ke sistem sebagai Publisher",
-    "timestamp": "2026-06-25T17:10:24.934Z"
   }
 ]
