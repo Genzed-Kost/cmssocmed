@@ -1,5 +1,13 @@
 [
   {
+    "id": "mwabu9dxqave2",
+    "user": "Umar",
+    "role": "Publisher",
+    "action": "tambah konten",
+    "target": "berjudul \"32:50–33:43 | Belajar dari Masyarakat Adat untuk Menjaga Lingkungan\" (tema: Podcast Sitroom) untuk akun 33 Official dijadwalkan 12 Nov 2026",
+    "timestamp": "2026-11-10T06:46:34.245Z"
+  },
+  {
     "id": "mwabszzcuues3",
     "user": "Umar",
     "role": "Publisher",
@@ -3990,13 +3998,5 @@
     "action": "edit user",
     "target": "Umar → Umar (Publisher)",
     "timestamp": "2026-06-25T17:10:10.717Z"
-  },
-  {
-    "id": "mqtrca211vlyy",
-    "user": "Admin",
-    "role": "Admin",
-    "action": "login",
-    "target": "masuk ke sistem sebagai Admin",
-    "timestamp": "2026-06-25T17:09:52.489Z"
   }
 ]
