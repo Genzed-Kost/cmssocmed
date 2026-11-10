@@ -1,5 +1,13 @@
 [
   {
+    "id": "mwabszzcuues3",
+    "user": "Umar",
+    "role": "Publisher",
+    "action": "tambah konten",
+    "target": "berjudul \"29:57–32:50 | Alam Bukan Sumber Daya yang Bisa Dieksploitasi Tanpa Batas\" (tema: Podcast Sitroom) untuk akun 33 Official dijadwalkan 11 Nov 2026",
+    "timestamp": "2026-11-10T06:45:35.401Z"
+  },
+  {
     "id": "mwaboo2dmrnhh",
     "user": "Umar",
     "role": "Publisher",
@@ -3990,13 +3998,5 @@
     "action": "login",
     "target": "masuk ke sistem sebagai Admin",
     "timestamp": "2026-06-25T17:09:52.489Z"
-  },
-  {
-    "id": "mqtr1bnxwmlrj",
-    "user": "Admin",
-    "role": "Admin",
-    "action": "logout",
-    "target": "keluar dari sistem",
-    "timestamp": "2026-06-25T17:01:21.357Z"
   }
 ]
