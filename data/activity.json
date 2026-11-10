@@ -1,5 +1,13 @@
 [
   {
+    "id": "mwafjfdvu2bub",
+    "user": "Umar",
+    "role": "Publisher",
+    "action": "ubah status",
+    "target": "\"Karhutla Memicu Kekecewaan Publik, Mengapa Protes Masyarakat Makin Besar?\" menjadi Published",
+    "timestamp": "2026-11-10T08:30:07.267Z"
+  },
+  {
     "id": "mwabvrh6vue2z",
     "user": "Umar",
     "role": "Publisher",
@@ -3990,13 +3998,5 @@
     "action": "login",
     "target": "masuk ke sistem sebagai Publisher",
     "timestamp": "2026-06-25T17:10:24.934Z"
-  },
-  {
-    "id": "mqtrcpngyzmfe",
-    "user": "Admin",
-    "role": "Admin",
-    "action": "logout",
-    "target": "keluar dari sistem",
-    "timestamp": "2026-06-25T17:10:12.700Z"
   }
 ]
