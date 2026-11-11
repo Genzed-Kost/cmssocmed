@@ -1,5 +1,13 @@
 [
   {
+    "id": "mwblg2sbp9bij",
+    "user": "Umar",
+    "role": "Publisher",
+    "action": "tambah konten",
+    "target": "berjudul \"Perkara Hukum Jangan Bolak-Balik Tanpa Kepastian\" (tema: Podcast MenKo KUMHAMIMIPAS) untuk akun 33 Official dijadwalkan 14 Nov 2026",
+    "timestamp": "2026-11-11T04:03:14.843Z"
+  },
+  {
     "id": "mwble33xbvb7a",
     "user": "Umar",
     "role": "Publisher",
@@ -3990,13 +3998,5 @@
     "action": "edit user",
     "target": "Wedy → Wedy (Creator)",
     "timestamp": "2026-06-25T17:22:43.906Z"
-  },
-  {
-    "id": "mqtrenrj5f4kr",
-    "user": "Admin",
-    "role": "Admin",
-    "action": "login",
-    "target": "masuk ke sistem sebagai Admin",
-    "timestamp": "2026-06-25T17:11:43.567Z"
   }
 ]
