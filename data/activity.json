@@ -1,5 +1,13 @@
 [
   {
+    "id": "mwc3ygvy3d7dm",
+    "user": "Umar",
+    "role": "Publisher",
+    "action": "ubah status",
+    "target": "\"29:57–32:50 | Alam Bukan Sumber Daya yang Bisa Dieksploitasi Tanpa Batas\" menjadi Published",
+    "timestamp": "2026-11-11T12:41:26.014Z"
+  },
+  {
     "id": "mwbmu6lzgkpr5",
     "user": "Umar",
     "role": "Publisher",
@@ -3990,13 +3998,5 @@
     "action": "reset password",
     "target": "Wedy",
     "timestamp": "2026-06-25T17:23:10.185Z"
-  },
-  {
-    "id": "mqtrt0gvnoj5o",
-    "user": "Admin",
-    "role": "Admin",
-    "action": "edit user",
-    "target": "Idham → Idham (Creator)",
-    "timestamp": "2026-06-25T17:22:53.215Z"
   }
 ]
