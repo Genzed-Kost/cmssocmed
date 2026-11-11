@@ -1,5 +1,13 @@
 [
   {
+    "id": "mwbl8s6rov015",
+    "user": "Umar",
+    "role": "Publisher",
+    "action": "tambah konten",
+    "target": "berjudul \"Rakyat Miskin Harus Bisa Mendapatkan Bantuan Hukum Gratis\" (tema: Podcast MenKo KUMHAMIMIPAS) untuk akun 33 Official dijadwalkan 13 Nov 2026",
+    "timestamp": "2026-11-11T03:57:34.515Z"
+  },
+  {
     "id": "mwbl7kyt8qm0g",
     "user": "Umar",
     "role": "Publisher",
@@ -3990,13 +3998,5 @@
     "action": "reset password",
     "target": "Umar",
     "timestamp": "2026-06-25T17:11:04.899Z"
-  },
-  {
-    "id": "mqtrdju2rk5hk",
-    "user": "Admin",
-    "role": "Admin",
-    "action": "login",
-    "target": "masuk ke sistem sebagai Admin",
-    "timestamp": "2026-06-25T17:10:51.818Z"
   }
 ]
