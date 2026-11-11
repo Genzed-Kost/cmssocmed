@@ -1,5 +1,13 @@
 [
   {
+    "id": "mwbmu6lzgkpr5",
+    "user": "Umar",
+    "role": "Publisher",
+    "action": "ubah status",
+    "target": "\"Prabowo Tak Mau Rakyat Kecil Jadi Korban Ketidakadilan\" menjadi Published",
+    "timestamp": "2026-11-11T04:42:12.599Z"
+  },
+  {
     "id": "mwblg2sbp9bij",
     "user": "Umar",
     "role": "Publisher",
@@ -3990,13 +3998,5 @@
     "action": "edit user",
     "target": "Idham → Idham (Creator)",
     "timestamp": "2026-06-25T17:22:53.215Z"
-  },
-  {
-    "id": "mqtrstaa6yvjz",
-    "user": "Admin",
-    "role": "Admin",
-    "action": "edit user",
-    "target": "Wedy → Wedy (Creator)",
-    "timestamp": "2026-06-25T17:22:43.906Z"
   }
 ]
