@@ -1,5 +1,13 @@
 [
   {
+    "id": "mwbl6bni9pgns",
+    "user": "Umar",
+    "role": "Publisher",
+    "action": "tambah konten",
+    "target": "berjudul \"Prabowo Tak Mau Rakyat Kecil Jadi Korban Ketidakadilan\" (tema: Podcast MenKo KUMHAMIMIPAS) untuk akun 33 Official dijadwalkan 11 Nov 2026",
+    "timestamp": "2026-11-11T03:55:39.774Z"
+  },
+  {
     "id": "mwbl21olsn7yl",
     "user": "Umar",
     "role": "Publisher",
@@ -3990,13 +3998,5 @@
     "action": "logout",
     "target": "keluar dari sistem",
     "timestamp": "2026-06-25T17:10:39.363Z"
-  },
-  {
-    "id": "mqtrd988kilxv",
-    "user": "Admin",
-    "role": "Admin",
-    "action": "login",
-    "target": "masuk ke sistem sebagai Admin",
-    "timestamp": "2026-06-25T17:10:38.072Z"
   }
 ]
