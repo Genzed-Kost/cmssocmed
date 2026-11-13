@@ -1,5 +1,13 @@
 [
   {
+    "id": "mwek15khfis68",
+    "user": "Umar",
+    "role": "Publisher",
+    "action": "ubah status",
+    "target": "\"32:50–33:43 | Belajar dari Masyarakat Adat untuk Menjaga Lingkungan\" menjadi Published",
+    "timestamp": "2026-11-13T05:46:57.521Z"
+  },
+  {
     "id": "mwek0zjnecoli",
     "user": "Umar",
     "role": "Publisher",
@@ -3990,13 +3998,5 @@
     "action": "edit user",
     "target": "Idham → Idham (Creator)",
     "timestamp": "2026-06-25T17:39:52.982Z"
-  },
-  {
-    "id": "mqtseps9wd0ua",
-    "user": "Admin",
-    "role": "Admin",
-    "action": "edit user",
-    "target": "Wedy → Wedy (Creator)",
-    "timestamp": "2026-06-25T17:39:45.801Z"
   }
 ]
