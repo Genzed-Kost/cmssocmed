@@ -1,5 +1,13 @@
 [
   {
+    "id": "mwek0t65fhxhu",
+    "user": "Umar",
+    "role": "Publisher",
+    "action": "login",
+    "target": "masuk ke sistem sebagai Publisher",
+    "timestamp": "2026-11-13T05:46:41.453Z"
+  },
+  {
     "id": "mwc3ygvy3d7dm",
     "user": "Umar",
     "role": "Publisher",
@@ -3990,13 +3998,5 @@
     "action": "reset password",
     "target": "Idham",
     "timestamp": "2026-06-25T17:23:12.076Z"
-  },
-  {
-    "id": "mqtrtdk9dheci",
-    "user": "Admin",
-    "role": "Admin",
-    "action": "reset password",
-    "target": "Wedy",
-    "timestamp": "2026-06-25T17:23:10.185Z"
   }
 ]
