@@ -1,5 +1,13 @@
 [
   {
+    "id": "mwewn9e5uaybd",
+    "user": "Umar",
+    "role": "Publisher",
+    "action": "ubah status",
+    "target": "\"Rakyat Miskin Harus Bisa Mendapatkan Bantuan Hukum Gratis\" menjadi Published",
+    "timestamp": "2026-11-13T11:40:04.301Z"
+  },
+  {
     "id": "mwek15khfis68",
     "user": "Umar",
     "role": "Publisher",
@@ -3990,13 +3998,5 @@
     "action": "edit user",
     "target": "Junaidi → Junaidi (Creator)",
     "timestamp": "2026-06-25T17:39:58.726Z"
-  },
-  {
-    "id": "mqtsevbqituf3",
-    "user": "Admin",
-    "role": "Admin",
-    "action": "edit user",
-    "target": "Idham → Idham (Creator)",
-    "timestamp": "2026-06-25T17:39:52.982Z"
   }
 ]
