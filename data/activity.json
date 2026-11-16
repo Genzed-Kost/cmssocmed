@@ -1,5 +1,13 @@
 [
   {
+    "id": "mwjf1r0xce40p",
+    "user": "Umar",
+    "role": "Publisher",
+    "action": "unduh PDF planner",
+    "target": "80 konten · filter: Semua Konten",
+    "timestamp": "2026-11-16T15:26:18.129Z"
+  },
+  {
     "id": "mwjevrf0w2sfj",
     "user": "Umar",
     "role": "Publisher",
@@ -3990,13 +3998,5 @@
     "action": "update statistik",
     "target": "Penjaga Harapan YouTube — Jun 2026",
     "timestamp": "2026-06-28T18:01:31.465Z"
-  },
-  {
-    "id": "mqy3c9naceecd",
-    "user": "Admin",
-    "role": "Admin",
-    "action": "update statistik",
-    "target": "Penjaga Harapan TikTok — Jun 2026",
-    "timestamp": "2026-06-28T17:56:52.054Z"
   }
 ]
