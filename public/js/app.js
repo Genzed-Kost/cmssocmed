@@ -1080,6 +1080,27 @@ async function doLogin() {
   }
 }
 
+/* ── Info website di halaman login (dari js/version.js) ───────────────── */
+function renderLoginInfo() {
+  const info = window.APP_INFO;
+  if (!info || !$('lgNews')) return;
+  const fmt = d => new Date(d + 'T00:00:00').toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
+  const [latest, ...older] = info.changelog || [];
+  setTxt('lgAppName', info.name);
+  setTxt('lgAppTagline', info.tagline);
+  setTxt('lgVersion', 'v' + info.version);
+  setTxt('lgFoot', `${info.name} · v${info.version}`);
+  if (latest) setTxt('lgUpdated', 'Diperbarui ' + fmt(latest.date));
+  $('lgNews').innerHTML = (latest?.items || []).map(t => `<li>${esc(t)}</li>`).join('');
+  const ow = $('lgOlderWrap');
+  if (ow) ow.style.display = older.length ? '' : 'none';
+  if ($('lgOlder')) $('lgOlder').innerHTML = older.map(v =>
+    `<div class="lg-old"><b>v${esc(v.version)}</b> <span>${v.date ? fmt(v.date) : ''}</span>
+      <ul>${v.items.map(t => `<li>${esc(t)}</li>`).join('')}</ul></div>`).join('');
+}
+document.addEventListener('DOMContentLoaded', renderLoginInfo);
+if (document.readyState !== 'loading') setTimeout(renderLoginInfo, 0);
+
 function doLogout() {
   const name = currentUser();
   const sess = getSess();

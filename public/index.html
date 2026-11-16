@@ -1292,33 +1292,55 @@
 
 <!-- ─── LOGIN PAGE (full-screen) ─────────────────────────────────────────── -->
 <div id="loginPage" class="login-page hidden">
-  <div class="login-bg-orb login-bg-orb--a"></div>
-  <div class="login-bg-orb login-bg-orb--b"></div>
-  <div class="login-card">
-    <div class="login-hero">
-      <div class="login-hero-mark">PH</div>
-      <div class="login-hero-title">Penjaga Harapan CMS</div>
-      <div class="login-hero-sub">Platform manajemen konten tim</div>
-    </div>
-    <div class="login-form">
-      <div class="form-group" style="margin:0">
-        <label class="form-label">Nama</label>
-        <input type="text" id="loginUserSel" class="form-inp"
-          placeholder="Ketik namamu…"
-          autocomplete="off" autocorrect="off" spellcheck="false" />
-      </div>
-      <div id="loginPwWrap" class="form-group" style="margin:0">
-        <label class="form-label">Password</label>
-        <div class="inp-eye-wrap">
-          <input type="password" id="loginPw" class="form-inp" placeholder="Masukkan password…" />
-          <button type="button" class="eye-btn" id="btnToggleLoginPw">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
-          </button>
+  <div class="lg-shell">
+    <!-- Panel info website -->
+    <aside class="lg-info" aria-label="Informasi website">
+      <div class="lg-brand">
+        <div class="lg-mark">PH</div>
+        <div>
+          <div class="lg-brand-name" id="lgAppName">Penjaga Harapan CMS</div>
+          <div class="lg-brand-sub" id="lgAppTagline">Platform manajemen konten tim</div>
         </div>
       </div>
-      <button class="btn-md blue" style="width:100%;justify-content:center;margin-top:4px" id="btnDoLogin">Masuk →</button>
-    </div>
-    <div class="login-footer-note">Penjaga Harapan · CMS v2.0</div>
+      <div class="lg-version-row">
+        <span class="lg-version" id="lgVersion">v2.6.0</span>
+        <span class="lg-updated" id="lgUpdated"></span>
+      </div>
+      <div class="lg-news">
+        <div class="lg-news-title">Pembaruan terbaru</div>
+        <ul class="lg-news-list" id="lgNews"></ul>
+        <details class="lg-older" id="lgOlderWrap">
+          <summary>Riwayat versi</summary>
+          <div id="lgOlder"></div>
+        </details>
+      </div>
+    </aside>
+
+    <!-- Form masuk -->
+    <main class="lg-form-wrap">
+      <div class="lg-form">
+        <div class="lg-mark lg-mark-sm">PH</div>
+        <h1 class="lg-title">Selamat datang</h1>
+        <p class="lg-sub">Masuk untuk melanjutkan ke CMS</p>
+        <div class="form-group">
+          <label class="form-label" for="loginUserSel">Nama</label>
+          <input type="text" id="loginUserSel" class="form-inp lg-inp"
+            placeholder="Ketik namamu…"
+            autocomplete="off" autocorrect="off" spellcheck="false" />
+        </div>
+        <div id="loginPwWrap" class="form-group">
+          <label class="form-label" for="loginPw">Password</label>
+          <div class="inp-eye-wrap">
+            <input type="password" id="loginPw" class="form-inp lg-inp" placeholder="Masukkan password…" />
+            <button type="button" class="eye-btn" id="btnToggleLoginPw" aria-label="Tampilkan password">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+            </button>
+          </div>
+        </div>
+        <button class="btn-md blue lg-btn" id="btnDoLogin">Masuk →</button>
+        <div class="lg-foot" id="lgFoot">Penjaga Harapan · CMS</div>
+      </div>
+    </main>
   </div>
 </div>
 
@@ -1642,6 +1664,7 @@
 <!-- Scripts -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 <script src="js/github-db.js?v=20260628"></script>
+<script src="js/version.js?v=2.6.0"></script>
 <script src="js/app.js?v=20260628"></script>
 <script src="js/chat.js?v=20261116b"></script>
 </body>

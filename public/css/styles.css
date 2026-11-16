@@ -3776,3 +3776,61 @@ ul { list-style: none; }
   .np-actions { border-radius: 14px; padding: 10px 12px !important; }
   .np-actions .btn-md { flex: 1; justify-content: center; }
 }
+
+/* ══ Login: modern minimalis (dua panel) ══════════════════════════ */
+.login-page { background: #f4f6fb; padding: 0; align-items: stretch; overflow-y: auto; }
+.lg-shell { display: grid; grid-template-columns: minmax(320px, 440px) 1fr; width: 100%; min-height: 100%; }
+.lg-info {
+  position: relative; overflow: hidden; color: #fff;
+  display: flex; flex-direction: column; gap: 22px; padding: 40px 36px;
+  background:
+    radial-gradient(circle at 85% 10%, rgba(255,255,255,.14) 0, transparent 35%),
+    radial-gradient(circle at 10% 100%, rgba(225,29,72,.45) 0, transparent 45%),
+    linear-gradient(160deg, #0f172a 0%, #1e3a8a 55%, #4338ca 100%);
+}
+.lg-brand { display: flex; align-items: center; gap: 12px; }
+.lg-mark {
+  width: 44px; height: 44px; border-radius: 13px; flex-shrink: 0;
+  display: inline-flex; align-items: center; justify-content: center;
+  font-weight: 900; font-size: .95rem; color: #fff;
+  background: linear-gradient(135deg, #2563eb, #e11d48); box-shadow: 0 6px 18px rgba(37,99,235,.35);
+}
+.lg-info .lg-mark { background: rgba(255,255,255,.16); border: 1px solid rgba(255,255,255,.25); box-shadow: none; }
+.lg-brand-name { font-weight: 800; font-size: 1.05rem; letter-spacing: -.01em; }
+.lg-brand-sub { font-size: .74rem; opacity: .7; }
+.lg-version-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.lg-version { padding: 3px 10px; border-radius: 999px; background: rgba(255,255,255,.16); border: 1px solid rgba(255,255,255,.25); font-size: .72rem; font-weight: 800; letter-spacing: .02em; }
+.lg-updated { font-size: .72rem; opacity: .75; }
+.lg-news { margin-top: auto; background: rgba(255,255,255,.07); border: 1px solid rgba(255,255,255,.12); border-radius: 16px; padding: 18px; backdrop-filter: blur(6px); }
+.lg-news-title { font-size: .66rem; font-weight: 800; text-transform: uppercase; letter-spacing: .1em; opacity: .7; margin-bottom: 10px; }
+.lg-news-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 9px; }
+.lg-news-list li { font-size: .8rem; line-height: 1.45; opacity: .92; }
+.lg-older { margin-top: 12px; font-size: .74rem; }
+.lg-older summary { cursor: pointer; opacity: .7; list-style: none; }
+.lg-older summary::-webkit-details-marker { display: none; }
+.lg-older summary::before { content: '▸ '; }
+.lg-older[open] summary::before { content: '▾ '; }
+.lg-old { margin-top: 10px; }
+.lg-old span { opacity: .6; }
+.lg-old ul { margin: 4px 0 0; padding-left: 16px; opacity: .85; }
+
+.lg-form-wrap { display: flex; align-items: center; justify-content: center; padding: 40px 24px; }
+.lg-form { width: 100%; max-width: 360px; display: flex; flex-direction: column; animation: loginCardIn .38s cubic-bezier(.22,1,.36,1); }
+.lg-mark-sm { display: none; }
+.lg-title { font-size: 1.6rem; font-weight: 900; letter-spacing: -.02em; margin: 0; color: var(--text); }
+.lg-sub { font-size: .84rem; color: var(--muted); margin: 4px 0 26px; }
+.lg-form .form-group { margin-bottom: 14px; }
+.lg-form .form-label { font-size: .74rem; font-weight: 700; color: var(--muted); }
+.lg-inp { padding: 12px 14px !important; border-radius: 12px !important; font-size: .9rem !important; background: var(--surface); border: 1px solid var(--bd); }
+.lg-inp:focus { border-color: var(--blue); box-shadow: 0 0 0 4px rgba(37,99,235,.12); }
+.lg-btn { width: 100%; justify-content: center; margin-top: 6px; padding: 12px 16px !important; border-radius: 12px !important; font-size: .9rem !important; font-weight: 800; }
+.lg-foot { margin-top: 28px; text-align: center; font-size: .7rem; color: var(--muted-lt); }
+
+@media (max-width: 860px) {
+  .lg-shell { grid-template-columns: 1fr; }
+  .lg-form-wrap { order: -1; padding: 36px 20px 20px; align-items: flex-start; }
+  .lg-mark-sm { display: inline-flex; margin-bottom: 16px; }
+  .lg-info { padding: 24px 20px 28px; gap: 14px; }
+  .lg-info .lg-brand { display: none; }
+  .lg-news { margin-top: 0; }
+}
