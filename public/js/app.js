@@ -3480,41 +3480,6 @@ function scChipHtml(ev, canEdit) {
     ${canEdit ? 'draggable="true"' : ''} title="${esc(tip)}">${label} ${timeHtml}${esc(it.title || '(tanpa judul)')}${extra}</div>`;
 }
 
-/* Tampilan HP: semua tanggal yang punya jadwal dalam satu daftar bergulir.
-   Tanggal lalu di atas, berikutnya di bawah; otomatis menggulir ke hari ini. */
-function renderStockAgenda(byDay, canEdit) {
-  const box = $('scAgenda');
-  if (!box) return;
-  const today = scYmd(new Date());
-  const days  = [...new Set([...Object.keys(byDay), today])].sort();
-  let lastMonth = '';
-  const html = days.map(ymd => {
-    const d = scParse(ymd);
-    const mKey = ymd.slice(0, 7);
-    const head = mKey !== lastMonth
-      ? `<div class="sc-agenda-month">${SC_MONTHS[d.getMonth()]} ${d.getFullYear()} <span class="sc-agenda-count">· ${scMonthStats(mKey).total} item ${scStatsHtml(scMonthStats(mKey))}</span></div>` : '';
-    lastMonth = mKey;
-    const evs = byDay[ymd] || [];
-    const cls = ['sc-day', 'sc-agenda-day',
-      ymd === today ? 'sc-day-today' : '',
-      ymd < today ? 'sc-day-past' : ''].filter(Boolean).join(' ');
-    return `${head}<div class="${cls}" data-date="${ymd}">
-      <div class="sc-day-num"><span class="sc-day-dow">${d.toLocaleDateString('id-ID',{weekday:'short'})}</span>${d.getDate()}</div>
-      <div class="sc-day-items">${evs.length ? evs.map(ev => scChipHtml(ev, canEdit)).join('')
-        : '<span class="sc-unsched-empty">Hari ini — belum ada jadwal</span>'}</div>
-    </div>`;
-  }).join('');
-  const firstRender = !box.childElementCount;
-  const prevScroll  = box.scrollTop;
-  box.innerHTML = html;
-  if (!firstRender) { box.scrollTop = prevScroll; return; }
-  // Gulir ke hari ini setelah layout jadi (hanya saat agenda terlihat)
-  requestAnimationFrame(() => {
-    const t = box.querySelector('.sc-day-today');
-    if (t && box.offsetParent) box.scrollTop = Math.max(0, t.offsetTop - 40);
-  });
-}
-
 /* Item yang punya jadwal (tayang atau produksi) di bulan ym "YYYY-MM". */
 function scItemsInMonth(ym) {
   return (state.stockContents || []).filter(it => {
@@ -3538,12 +3503,11 @@ function scStatsHtml(st) {
     <span class="sc-total-part" title="Belum ada tanggal tayang">❔ ${st.nodate}</span>`;
 }
 
-/* Total per bulan: di komputer = bulan yang sedang dilihat, di HP = bulan berjalan */
+/* Total per bulan = bulan yang sedang dilihat di kalender */
 function scRenderTotal() {
   const el = $('scTotal');
   if (!el) return;
-  const mobile = window.matchMedia?.('(max-width: 680px)').matches;
-  const m  = mobile || !state.scMonth ? new Date() : state.scMonth;
+  const m  = state.scMonth || new Date();
   const st = scMonthStats(scYmd(m).slice(0, 7));
   el.innerHTML = `Total ${SC_MONTHS[m.getMonth()]} ${m.getFullYear()}: <strong>${st.total}</strong> item
     ${scStatsHtml(st)}
@@ -3562,7 +3526,7 @@ function renderStockCalendar() {
   const touch = window.matchMedia?.('(pointer: coarse)').matches;
   setTxt('scCalHint', canEdit
     ? (touch
-        ? 'Ketuk tanggal untuk menambah · ketuk item untuk mengubah. Gulir ke atas untuk tanggal sebelumnya, ke bawah untuk berikutnya.'
+        ? 'Ketuk tanggal untuk menambah · ketuk item untuk mengubah.'
         : 'Klik tanggal untuk menambah · klik item untuk mengubah · seret item ke tanggal lain untuk memindahkan jadwal.')
     : 'Klik item untuk melihat detail. 📅 = tanggal tayang · 🎬 = jadwal produksi.');
 
@@ -3634,7 +3598,6 @@ function renderStockCalendar() {
   if (ul && canEdit) ul.insertAdjacentHTML('beforeend',
     `<span class="sc-unsched-empty">${unsched.length ? 'Seret item ke kalender untuk menjadwalkan tayang.' : ''}</span>`);
 
-  renderStockAgenda(byDay, canEdit);
   scBindCalendar(grid, ul, canEdit);
 }
 
