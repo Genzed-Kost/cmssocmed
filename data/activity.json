@@ -1,5 +1,13 @@
 [
   {
+    "id": "mwj8ifs2i7qr7",
+    "user": "Admin",
+    "role": "Admin",
+    "action": "update statistik",
+    "target": "Penjaga Harapan TikTok — Jun 2026",
+    "timestamp": "2026-11-16T12:23:19.394Z"
+  },
+  {
     "id": "mwj8g8d30mktp",
     "user": "Admin",
     "role": "Admin",
@@ -3990,13 +3998,5 @@
     "action": "edit konten",
     "target": "\"Published Liputan CKG Pemalang\"",
     "timestamp": "2026-06-26T14:14:38.691Z"
-  },
-  {
-    "id": "mqv0i3rhpgirr",
-    "user": "Admin",
-    "role": "Admin",
-    "action": "edit konten",
-    "target": "\"Published Liputan CKG Pemalang\"",
-    "timestamp": "2026-06-26T14:14:06.989Z"
   }
 ]
