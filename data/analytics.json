@@ -498,14 +498,17 @@
       {
         "month": "2026-05",
         "jmlVideo": 162,
-        "totalVideoViews": 1203100,
+        "totalVideoViews": 1199363,
         "profileViews": 7187,
         "followersEOM": 34391,
         "followersGained": 501,
         "totalViewers": 1042657,
         "newViewers": 379257,
         "returningViewers": 663400,
-        "totalEngagement": 36553
+        "totalLikes": 34099,
+        "totalComments": 719,
+        "totalShares": 1462,
+        "totalEngagement": 36280
       },
       {
         "month": "2026-06",
@@ -1100,7 +1103,7 @@
         "updatedBy": "Admin"
       },
       "tiktok": {
-        "updatedAt": "2026-11-16T12:25:23.788Z",
+        "updatedAt": "2026-11-16T12:27:21.481Z",
         "updatedBy": "Admin"
       }
     },
