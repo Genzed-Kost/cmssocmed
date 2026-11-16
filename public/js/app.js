@@ -3377,7 +3377,22 @@ async function savePost() {
    STOCK CONTENTS
    ══════════════════════════════════════════════════════════════════════════ */
 
-const SC_CATEGORIES = ['Podcast PH','Podcast JA','Podcast Hangout','Situation Room','Liputan PH','Liputan JA'];
+/* Daftar Program (kelompok Stock Contents). Bisa diubah Admin di API Setup →
+   disimpan di settings.programs = [{ name, color }]. Daftar di bawah hanya bawaan. */
+const SC_DEFAULT_PROGRAMS = [
+  { name: 'Podcast PH',      color: '#2563eb' },
+  { name: 'Podcast JA',      color: '#7c3aed' },
+  { name: 'Podcast Hangout', color: '#db2777' },
+  { name: 'Situation Room',  color: '#ea580c' },
+  { name: 'Liputan PH',      color: '#16a34a' },
+  { name: 'Liputan JA',      color: '#0891b2' },
+];
+function scPrograms() {
+  const p = state.settings?.programs;
+  return Array.isArray(p) ? p : SC_DEFAULT_PROGRAMS;
+}
+function scProgramNames() { return scPrograms().map(p => p.name); }
+function scCatOrder(cat) { const i = scProgramNames().indexOf(cat); return i === -1 ? 99 : i; }
 
 function renderStockContents() {
   const canEdit = isAdmin();
@@ -3404,17 +3419,9 @@ function renderStockContents() {
    - Semua user: lihat jadwal tayang (📅) & produksi (🎬) per tanggal.
    - Admin: klik tanggal kosong → tambah; klik item → ubah/hapus;
      seret (drag) item ke tanggal lain → pindah jadwal. */
-const SC_COLORS = {
-  'Podcast PH':      '#2563eb',
-  'Podcast JA':      '#7c3aed',
-  'Podcast Hangout': '#db2777',
-  'Situation Room':  '#ea580c',
-  'Liputan PH':      '#16a34a',
-  'Liputan JA':      '#0891b2',
-};
 const SC_MONTHS = ['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'];
 
-function scColor(cat) { return SC_COLORS[cat] || '#64748b'; }
+function scColor(cat) { return scPrograms().find(p => p.name === cat)?.color || '#64748b'; }
 function scYmd(d) {
   return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
 }
@@ -3541,7 +3548,7 @@ function renderStockCalendar() {
 
   // Legenda kategori
   const legend = $('scLegend');
-  if (legend) legend.innerHTML = SC_CATEGORIES.map(c =>
+  if (legend) legend.innerHTML = scProgramNames().map(c =>
     `<span class="sc-legend-item"><i style="background:${scColor(c)}"></i>${esc(c)}</span>`).join('');
 
   // Kumpulkan event per tanggal
@@ -3557,7 +3564,7 @@ function renderStockCalendar() {
   });
   Object.values(byDay).forEach(list => list.sort((a, b) =>
     (a.kind === b.kind ? 0 : a.kind === 'air' ? -1 : 1) ||
-    (SC_CATEGORIES.indexOf(a.it.category) - SC_CATEGORIES.indexOf(b.it.category))));
+    (scCatOrder(a.it.category) - scCatOrder(b.it.category))));
 
   // Grid mulai Senin
   const first   = new Date(month.getFullYear(), month.getMonth(), 1);
@@ -3588,7 +3595,7 @@ function renderStockCalendar() {
 
   // Belum ada tanggal tayang
   const unsched = items.filter(it => !it.airDate)
-    .sort((a, b) => (SC_CATEGORIES.indexOf(a.category) - SC_CATEGORIES.indexOf(b.category)));
+    .sort((a, b) => scCatOrder(a.category) - scCatOrder(b.category));
   setTxt('scUnschedCount', unsched.length ? `(${unsched.length})` : '');
   const ul = $('scUnschedList');
   if (ul) ul.innerHTML = unsched.length
@@ -3697,7 +3704,7 @@ function scOpenModal(id = null, date = '') {
     body.innerHTML = `
       <div class="form-group">
         <label class="form-label" for="scfCategory">Kelompok</label>
-        <select id="scfCategory" class="form-inp">${['', ...SC_CATEGORIES].map(c =>
+        <select id="scfCategory" class="form-inp">${['', ...scProgramNames(), ...(v.category && !scProgramNames().includes(v.category) ? [v.category] : [])].map(c =>
           `<option value="${esc(c)}" ${c === (v.category||'') ? 'selected' : ''}>${c || '— Pilih Kelompok —'}</option>`).join('')}</select>
       </div>
       <div class="form-group">
@@ -3793,7 +3800,7 @@ async function scSendWa() {
     return `${ds.getDate()} ${MN[ds.getMonth()]}–${de.getDate()} ${MN[de.getMonth()]} '${String(de.getFullYear()).slice(-2)}`;
   };
   const todayStr = new Date().toISOString().slice(0, 10);
-  const catOrder = cat => { const i = SC_CATEGORIES.indexOf(cat); return i === -1 ? 99 : i; };
+  const catOrder = scCatOrder;
 
   const sortFn = (a, b) => {
     const cd = catOrder(a.category) - catOrder(b.category); if (cd !== 0) return cd;
@@ -4091,6 +4098,7 @@ function renderApiSetup() {
 
   renderKpiInputs();
   renderCustomAccountsAdmin();
+  renderProgramsAdmin();
   // Gemini key
   sv('cfgGeminiKey', getGeminiKey());
   updateGeminiStatus();
@@ -4788,6 +4796,97 @@ async function saveKpi() {
 }
 
 /* Manajemen Akun Custom */
+/* ── Daftar Program (API Setup, Admin) ──────────────────────────────────── */
+function renderProgramsAdmin() {
+  const wrap = $('programList');
+  if (!wrap) return;
+  const list = scPrograms();
+  const used = name => (state.stockContents || []).filter(it => it.category === name).length;
+  wrap.innerHTML = list.length ? list.map((p, i) => `
+    <div class="program-row">
+      <input type="color" value="${esc(p.color || '#64748b')}" title="Warna di kalender"
+        onchange="updateProgram(${i}, { color: this.value })" />
+      <input type="text" class="form-inp" value="${esc(p.name)}" title="Ubah nama lalu tekan Enter"
+        onchange="updateProgram(${i}, { name: this.value })" />
+      <span class="program-used" title="Jumlah Stock Contents yang memakai program ini">${used(p.name)} item</span>
+      <button type="button" class="btn-xs" title="Naikkan" onclick="moveProgram(${i}, -1)" ${i === 0 ? 'disabled' : ''}>▲</button>
+      <button type="button" class="btn-xs" title="Turunkan" onclick="moveProgram(${i}, 1)" ${i === list.length - 1 ? 'disabled' : ''}>▼</button>
+      <button type="button" class="btn-xs" style="color:var(--red)" onclick="deleteProgram(${i})">Hapus</button>
+    </div>`).join('')
+    : `<p style="font-size:.78rem;color:var(--muted);margin:0">Belum ada program.</p>`;
+}
+
+async function saveProgramsList(list, msg, okMsg, renamed) {
+  const settings = state.settings || { kpi:{}, users:[], analyticsUrls:{} };
+  const prev = settings.programs;
+  settings.programs = list;
+  state.settings = settings;
+  try {
+    state.shas.settings = await window.db.writeData('settings', settings, msg);
+    // Nama program diubah → ikut ubah item Stock Contents yang memakainya
+    if (renamed) {
+      let n = 0;
+      (state.stockContents || []).forEach(it => { if (it.category === renamed.from) { it.category = renamed.to; n++; } });
+      if (n) state.shas.stockContents = await window.db.writeData('stockContents', state.stockContents,
+        `Stock: ganti program "${renamed.from}" → "${renamed.to}"`);
+    }
+    if (okMsg) toast(okMsg, 'success');
+  } catch (e) {
+    settings.programs = prev;
+    toast('Gagal simpan: ' + e.message, 'error');
+  }
+  renderProgramsAdmin();
+}
+
+async function addProgram() {
+  const inp  = $('newProgramName');
+  const name = inp?.value.trim();
+  if (!name) { toast('Masukkan nama program', 'error'); return; }
+  const list = scPrograms().map(p => ({ ...p }));
+  if (list.some(p => p.name.toLowerCase() === name.toLowerCase())) { toast('Program sudah ada', 'error'); return; }
+  const palette = ['#2563eb','#7c3aed','#db2777','#ea580c','#16a34a','#0891b2','#ca8a04','#dc2626','#4f46e5','#0d9488'];
+  list.push({ name, color: palette[list.length % palette.length] });
+  inp.value = '';
+  await saveProgramsList(list, `Program: tambah "${name}"`, `Program "${name}" ditambahkan ✓`);
+}
+
+async function updateProgram(i, patch) {
+  const list = scPrograms().map(p => ({ ...p }));
+  if (!list[i]) return;
+  let renamed = null;
+  if ('name' in patch) {
+    const name = String(patch.name || '').trim();
+    if (!name) { toast('Nama program tidak boleh kosong', 'error'); renderProgramsAdmin(); return; }
+    if (name === list[i].name) return;
+    if (list.some((p, j) => j !== i && p.name.toLowerCase() === name.toLowerCase())) {
+      toast('Program dengan nama itu sudah ada', 'error'); renderProgramsAdmin(); return;
+    }
+    renamed = { from: list[i].name, to: name };
+    list[i].name = name;
+  }
+  if ('color' in patch) list[i].color = patch.color;
+  await saveProgramsList(list,
+    renamed ? `Program: ganti nama "${renamed.from}" → "${renamed.to}"` : `Program: ubah warna "${list[i].name}"`,
+    renamed ? 'Nama program diubah ✓' : 'Warna disimpan ✓', renamed);
+}
+
+async function moveProgram(i, dir) {
+  const list = scPrograms().map(p => ({ ...p }));
+  const j = i + dir;
+  if (j < 0 || j >= list.length) return;
+  [list[i], list[j]] = [list[j], list[i]];
+  await saveProgramsList(list, 'Program: ubah urutan');
+}
+
+async function deleteProgram(i) {
+  const list = scPrograms().map(p => ({ ...p }));
+  const p = list[i]; if (!p) return;
+  const n = (state.stockContents || []).filter(it => it.category === p.name).length;
+  if (!confirm(`Hapus program "${p.name}"?` + (n ? `\n\n${n} item Stock Contents masih memakai program ini. Item tidak ikut terhapus, hanya tampil abu-abu sampai programnya diganti.` : ''))) return;
+  list.splice(i, 1);
+  await saveProgramsList(list, `Program: hapus "${p.name}"`, 'Program dihapus');
+}
+
 function renderCustomAccountsAdmin() {
   const wrap = $('customAccountsList');
   if (!wrap) return;
@@ -8371,6 +8470,10 @@ document.addEventListener('DOMContentLoaded', async () => {
   window.scCloseModal           = scCloseModal;
   window.scSaveModal            = scSaveModal;
   window.scDeleteItem           = scDeleteItem;
+  window.addProgram             = addProgram;
+  window.updateProgram          = updateProgram;
+  window.moveProgram            = moveProgram;
+  window.deleteProgram          = deleteProgram;
   window.copyStatNarrative      = copyStatNarrative;
   window.copyStatTable          = copyStatTable;
   window.exportStatCSV          = exportStatCSV;
