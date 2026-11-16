@@ -297,9 +297,9 @@
         "subsGained": 5169,
         "totalLikes": 10436,
         "totalComments": 290,
+        "totalEngagement": 11076,
         "watchHours": 5605,
-        "adImpressions": 28713,
-        "peakViews": 0
+        "adImpressions": 28713
       }
     ],
     "tiktok": [
@@ -1061,7 +1061,7 @@
         "updatedBy": "Admin"
       },
       "youtube": {
-        "updatedAt": "2026-11-16T11:57:56.677Z",
+        "updatedAt": "2026-11-16T12:05:11.666Z",
         "updatedBy": "Admin"
       },
       "tiktok": {
