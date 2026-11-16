@@ -1,5 +1,13 @@
 [
   {
+    "id": "mwj9hm2atyf3d",
+    "user": "Admin",
+    "role": "Admin",
+    "action": "update statistik",
+    "target": "Penjaga Harapan TikTok — 5-11 Okt '26",
+    "timestamp": "2026-11-16T12:50:40.498Z"
+  },
+  {
     "id": "mwj9e1ypg3kzf",
     "user": "Admin",
     "role": "Admin",
@@ -3990,13 +3998,5 @@
     "action": "logout",
     "target": "keluar dari sistem",
     "timestamp": "2026-06-27T08:49:24.674Z"
-  },
-  {
-    "id": "mqw4c661fzj43",
-    "user": "Admin",
-    "role": "Admin",
-    "action": "tambah anggota",
-    "target": "Om Yudi (Kontraktor)",
-    "timestamp": "2026-06-27T08:49:14.809Z"
   }
 ]
