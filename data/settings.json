@@ -984,6 +984,10 @@
     {
       "name": "Konsultasi Hukum Keluarga",
       "color": "#ca8a04"
+    },
+    {
+      "name": "Gimana Kabarnya",
+      "color": "#dc2626"
     }
   ]
 }
