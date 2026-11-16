@@ -11,7 +11,7 @@ const DEFAULT_Q = 'Prabowo Subianto kebijakan pemerintah';
 const HEADERS = {
   'Content-Type': 'application/json; charset=utf-8',
   'Access-Control-Allow-Origin': '*',
-  'Cache-Control': 'public, max-age=900',
+  'Cache-Control': 'public, max-age=60',
 };
 
 function decode(s) {
@@ -42,7 +42,7 @@ function parseRss(xml, max = 7) {
 async function getText(url) {
   const res = await fetch(url, {
     headers: { 'User-Agent': 'Mozilla/5.0 (compatible; CMSBot/1.0)', 'Accept': 'application/rss+xml, application/xml, text/xml' },
-    cf: { cacheTtl: 900, cacheEverything: true },
+    cf: { cacheTtl: 240, cacheEverything: true },   // < 5 menit agar tiap refresh dapat berita baru
   });
   if (!res.ok) throw new Error(`HTTP ${res.status}`);
   return res.text();
