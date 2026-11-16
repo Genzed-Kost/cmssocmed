@@ -3498,6 +3498,22 @@ function scCountMonth(ym) {
   }).length;
 }
 
+/* Total seluruh agenda + rincian singkat: ✅ sudah tayang · ⏳ menunggu tayang · ❔ belum dijadwalkan */
+function scRenderTotal() {
+  const el = $('scTotal');
+  if (!el) return;
+  const items = (state.stockContents || []).filter(it => it.title || it.airDate || it.prodDate);
+  const today = scYmd(new Date());
+  const aired   = items.filter(it => it.airDate && it.airDate <= today).length;
+  const waiting = items.filter(it => it.airDate && it.airDate > today).length;
+  const nodate  = items.length - aired - waiting;
+  el.innerHTML = `Total: <strong>${items.length}</strong> item
+    <span class="sc-total-part" title="Sudah tayang">✅ ${aired}</span>
+    <span class="sc-total-part" title="Menunggu tayang (sudah dijadwalkan)">⏳ ${waiting}</span>
+    <span class="sc-total-part" title="Belum ada tanggal tayang">❔ ${nodate}</span>
+    <span class="sc-total-legend">✅ sudah tayang · ⏳ menunggu tayang · ❔ belum dijadwalkan</span>`;
+}
+
 function renderStockCalendar() {
   const grid = $('scCalGrid');
   if (!grid) return;
@@ -3506,11 +3522,7 @@ function renderStockCalendar() {
   if (!state.scMonth) { const t = new Date(); state.scMonth = new Date(t.getFullYear(), t.getMonth(), 1); }
   const month = state.scMonth;
   setTxt('scCalTitle', `${SC_MONTHS[month.getMonth()]} ${month.getFullYear()}`);
-  // Total per bulan: di komputer = bulan yang sedang dilihat, di HP = bulan berjalan
-  const mobile = window.matchMedia?.('(max-width: 680px)').matches;
-  const cm = mobile ? new Date() : month;
-  setTxt('scCountLabel', `${SC_MONTHS[cm.getMonth()]} ${cm.getFullYear()}`);
-  setTxt('scCount', scCountMonth(scYmd(cm).slice(0, 7)));
+  scRenderTotal();
   const touch = window.matchMedia?.('(pointer: coarse)').matches;
   setTxt('scCalHint', canEdit
     ? (touch

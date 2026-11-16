@@ -3185,3 +3185,7 @@ ul { list-style: none; }
   .sc-chip { white-space: normal; font-size: .76rem; }
 }
 .sc-agenda-count { font-weight: 600; color: var(--muted); font-size: .74rem; }
+.sc-total { display: inline-flex; align-items: center; flex-wrap: wrap; gap: 4px 10px; font-size: .8rem; color: var(--muted); }
+.sc-total strong { color: var(--text); }
+.sc-total-part { font-weight: 700; color: var(--text); white-space: nowrap; }
+.sc-total-legend { flex-basis: 100%; font-size: .68rem; color: var(--muted-lt); }
