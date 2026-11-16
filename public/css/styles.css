@@ -4002,3 +4002,43 @@ ul { list-style: none; }
 .adm-upd-list li:last-child { border-bottom: 0; padding-bottom: 0; }
 .adm-upd-foot { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 12px 20px; border-top: 1px solid var(--bd); background: var(--bg); }
 .adm-upd-foot span { font-size: .7rem; color: var(--muted); }
+
+/* ══ Dashboard: hero & statistik lebih ringkas ═════════════════════════
+   Empat statistik jadi satu "strip" ber-sekat; tiap item: ikon di kiri,
+   angka + keterangan di kanan, progress tipis di bawah.                */
+#page-dashboard .dash-hero { padding: 14px 20px; margin-bottom: 12px; border-radius: 16px; }
+#page-dashboard .dash-hero-greet { font-size: 1.1rem; }
+#page-dashboard .dash-hero-sub { font-size: .74rem; }
+#page-dashboard .dash-month-bar { margin-bottom: 12px; }
+
+#page-dashboard #dashStatRow {
+  display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 0;
+  background: var(--surface); border-radius: 16px; overflow: hidden; margin-bottom: 14px;
+  border: 1px solid color-mix(in srgb, var(--bd) 65%, transparent);
+  box-shadow: 0 1px 2px rgba(15,23,42,.04), 0 6px 20px rgba(15,23,42,.05);
+}
+#page-dashboard #dashStatRow .stat-card {
+  display: grid; grid-template-columns: 40px 1fr; grid-template-areas: "icon label" "icon value" "icon sub" "bar bar";
+  column-gap: 12px; row-gap: 1px; align-items: center;
+  padding: 12px 18px 12px; border: 0; border-radius: 0; box-shadow: none; background: transparent; min-height: 0;
+}
+#page-dashboard #dashStatRow .stat-card + .stat-card { border-left: 1px solid var(--bd); }
+#page-dashboard #dashStatRow .stat-card::after { display: none; }
+#page-dashboard #dashStatRow .stat-top { display: contents; }
+#page-dashboard #dashStatRow .stat-icon { grid-area: icon; align-self: center; width: 40px; height: 40px; border-radius: 12px; }
+#page-dashboard #dashStatRow .stat-label { grid-area: label; font-size: .6rem; letter-spacing: .07em; margin: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+#page-dashboard #dashStatRow .stat-value { grid-area: value; font-size: 1.45rem; margin: 0; line-height: 1.1; }
+#page-dashboard #dashStatRow .stat-sub { grid-area: sub; font-size: .66rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+#page-dashboard #dashStatRow .stat-progress { grid-area: bar; height: 4px; margin-top: 8px; }
+#page-dashboard #dashStatRow .stat-card:not(:has(.stat-progress)) { grid-template-areas: "icon label" "icon value" "icon sub"; }
+
+@media (max-width: 900px) {
+  #page-dashboard #dashStatRow { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  #page-dashboard #dashStatRow .stat-card:nth-child(3) { border-left: 0; }
+  #page-dashboard #dashStatRow .stat-card:nth-child(n+3) { border-top: 1px solid var(--bd); }
+}
+@media (max-width: 680px) {
+  #page-dashboard #dashStatRow .stat-card { padding: 10px 12px; grid-template-columns: 32px 1fr; column-gap: 10px; }
+  #page-dashboard #dashStatRow .stat-icon { width: 32px; height: 32px; border-radius: 10px; }
+  #page-dashboard #dashStatRow .stat-value { font-size: 1.2rem; }
+}
