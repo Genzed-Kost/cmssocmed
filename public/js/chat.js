@@ -397,6 +397,7 @@
     build();
     const logged = !!meName() && !document.getElementById('loginPage')?.offsetParent;
     $('chatFab').classList.toggle('hidden', !logged);
+    document.body.classList.toggle('has-chat-fab', logged);   // ruang bawah halaman (lihat CSS)
     if (!logged) { close(); return; }
     loadAuth();
     if (S.auth) { refreshInbox(); if (!S.timer) schedule(); }
@@ -404,7 +405,7 @@
   function logout() {
     saveAuth(null); clearTimeout(S.timer); S.timer = null;
     Object.assign(S, { users: [], convs: {}, peer: null, messages: [], lastId: 0, pending: [], unreadTotal: 0 });
-    close(); $('chatFab')?.classList.add('hidden'); updateBadge();
+    close(); $('chatFab')?.classList.add('hidden'); document.body.classList.remove('has-chat-fab'); updateBadge();
   }
 
   window.Chat = { open: openPanel, close, sync, logout, loginWith: (n, p) => loginWith(n, p).catch(() => null) };

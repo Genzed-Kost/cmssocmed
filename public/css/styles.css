@@ -3844,3 +3844,21 @@ ul { list-style: none; }
 }
 /* Sidebar: simbol putih di latar gelap */
 .logo-mark.has-logo { width: 34px; height: 40px; border-radius: 0; }
+
+/* ══ Ruang untuk tombol Pesan (💬) agar tidak menutupi isi halaman ══
+   Tombol mengambang di kanan bawah (56px + jarak 22px). Setiap halaman diberi
+   ruang kosong di bawah supaya baris/pagination terakhir bisa digulir ke atasnya. */
+:root { --fab-space: 92px; }
+body.has-chat-fab .page-inner,
+body.has-chat-fab .page-inner-narrow { padding-bottom: var(--fab-space) !important; }
+/* Planner: tabel dipendekkan sedikit agar footer (jumlah konten & halaman) terlihat tanpa digulir */
+body.has-chat-fab #page-planner .table-wrap { max-height: calc(100vh - 210px - var(--fab-space) + 24px); }
+/* Footer tabel (Planner, Activity Log): sisakan ruang di kanan untuk tombol Pesan */
+body.has-chat-fab .table-footer { padding-right: 72px; }
+/* New Post: tombol Simpan yang menempel di bawah tidak boleh tertutup */
+body.has-chat-fab .np-actions { margin-right: 72px !important; }
+@media (max-width: 680px) {
+  :root { --fab-space: 80px; }
+  body.has-chat-fab .table-footer { padding-right: 64px; }
+  body.has-chat-fab .np-actions { margin-right: 64px !important; }
+}
