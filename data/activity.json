@@ -1,5 +1,13 @@
 [
   {
+    "id": "mwjev58kfzs4o",
+    "user": "Umar",
+    "role": "Publisher",
+    "action": "login",
+    "target": "masuk ke sistem sebagai Publisher",
+    "timestamp": "2026-11-16T15:21:09.956Z"
+  },
+  {
     "id": "mwjep5t5wvkfw",
     "user": "Admin",
     "role": "Admin",
@@ -3990,13 +3998,5 @@
     "action": "update statistik",
     "target": "Penjaga Harapan Instagram — Jun 2026",
     "timestamp": "2026-06-28T17:50:36.123Z"
-  },
-  {
-    "id": "mqy33qhv5pdt0",
-    "user": "Admin",
-    "role": "Admin",
-    "action": "update statistik",
-    "target": "Penjaga Harapan Facebook — Jun 2026",
-    "timestamp": "2026-06-28T17:50:13.987Z"
   }
 ]
