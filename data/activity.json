@@ -1,5 +1,13 @@
 [
   {
+    "id": "mwj7cps3ij1zf",
+    "user": "Admin",
+    "role": "Admin",
+    "action": "update statistik",
+    "target": "Penjaga Harapan YouTube — Okt 2026",
+    "timestamp": "2026-11-16T11:50:52.803Z"
+  },
+  {
     "id": "mwj77zm66fi3k",
     "user": "Admin",
     "role": "Admin",
@@ -3990,13 +3998,5 @@
     "action": "login",
     "target": "masuk ke sistem sebagai Admin",
     "timestamp": "2026-06-26T05:11:22.454Z"
-  },
-  {
-    "id": "mqugzhx0loo8u",
-    "user": "Idham",
-    "role": "Creator",
-    "action": "login",
-    "target": "masuk ke sistem sebagai Creator",
-    "timestamp": "2026-06-26T05:07:46.164Z"
   }
 ]
