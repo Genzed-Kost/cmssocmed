@@ -1,5 +1,13 @@
 [
   {
+    "id": "mwjic2amfrmce",
+    "user": "Admin",
+    "role": "Admin",
+    "action": "hapus anggota",
+    "target": "Luthfi",
+    "timestamp": "2026-11-16T16:58:18.142Z"
+  },
+  {
     "id": "mwjibizmvoamf",
     "user": "Admin",
     "role": "Admin",
@@ -3990,13 +3998,5 @@
     "action": "logout",
     "target": "keluar dari sistem",
     "timestamp": "2026-06-29T04:26:51.076Z"
-  },
-  {
-    "id": "mqyph2d8mwbv4",
-    "user": "Admin",
-    "role": "Admin",
-    "action": "update statistik",
-    "target": "33 Official TikTok — Jun 2026",
-    "timestamp": "2026-06-29T04:16:27.452Z"
   }
 ]
