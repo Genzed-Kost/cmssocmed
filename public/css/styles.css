@@ -3198,3 +3198,96 @@ ul { list-style: none; }
 .news-wait-title { font-weight: 800; font-size: .9rem; }
 .news-wait-text { font-size: .78rem; color: var(--muted); margin-bottom: 6px; }
 .news-wait-text b { color: var(--text); font-variant-numeric: tabular-nums; font-size: .9rem; }
+
+/* ══ Planner: tabel modern ═════════════════════════════════════════ */
+#page-planner .table-wrap { border-radius: 14px; box-shadow: var(--shadow); max-height: calc(100vh - 210px); overflow: auto; }
+.plan-table { font-size: .82rem; border-collapse: separate; border-spacing: 0; }
+.plan-table thead th {
+  position: sticky; top: 0; z-index: 2;
+  background: color-mix(in srgb, var(--surface) 92%, var(--bg));
+  backdrop-filter: blur(6px);
+  font-size: .64rem; letter-spacing: .08em; padding: 11px 14px;
+}
+.plan-table td { padding: 12px 14px; border-bottom: 1px solid color-mix(in srgb, var(--bd) 70%, transparent); }
+.plan-table tbody tr { transition: background .15s; }
+.plan-table tbody tr:hover td { background: color-mix(in srgb, var(--blue-lt) 55%, var(--surface)); }
+.plan-table tbody tr.plan-row-today td { background: color-mix(in srgb, var(--blue-lt) 70%, var(--surface)); }
+.plan-table tbody tr.plan-row-today td:first-child { box-shadow: inset 3px 0 0 var(--blue); }
+
+/* Tanggal */
+.plan-date {
+  display: inline-flex; flex-direction: column; align-items: center; justify-content: center;
+  width: 50px; padding: 4px 0 5px; border-radius: 10px;
+  background: var(--bg); border: 1px solid var(--bd); line-height: 1.05;
+}
+.plan-date-day { font-size: 1.05rem; font-weight: 800; color: var(--text); font-variant-numeric: tabular-nums; }
+.plan-date-mon { font-size: .58rem; font-weight: 700; text-transform: uppercase; letter-spacing: .04em; color: var(--muted); }
+.plan-date.is-today { background: var(--blue); border-color: var(--blue); }
+.plan-date.is-today .plan-date-day, .plan-date.is-today .plan-date-mon { color: #fff; }
+.plan-date.is-past { opacity: .75; }
+.plan-date-sub { font-size: .64rem; color: var(--muted); margin-top: 3px; width: 50px; text-align: center; white-space: nowrap; }
+
+/* Judul + meta */
+.plan-title { font-weight: 650; font-size: .86rem; line-height: 1.35; color: var(--text); }
+.plan-meta { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 8px; margin-top: 5px; font-size: .7rem; color: var(--muted); }
+.plan-acct { display: inline-flex; align-items: center; gap: 5px; font-weight: 600; color: var(--text); }
+.plan-acct i { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
+.plan-theme { display: inline-flex; align-items: center; padding: 1px 8px; border-radius: 999px; background: var(--bg); border: 1px solid var(--bd); max-width: 260px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.plan-muted { color: var(--muted-lt); }
+
+/* Status: pill dengan titik */
+.plan-status { display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px; border-radius: 999px; font-size: .7rem; font-weight: 700; }
+.plan-status::before { content: ''; width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+
+/* Creator */
+.plan-creators { display: flex; align-items: center; min-width: 0; }
+.plan-avatar {
+  width: 26px; height: 26px; border-radius: 50%; flex-shrink: 0;
+  display: inline-flex; align-items: center; justify-content: center;
+  background: color-mix(in srgb, var(--av) 16%, var(--surface)); color: var(--av);
+  font-size: .62rem; font-weight: 800; border: 2px solid var(--surface);
+}
+.plan-avatar + .plan-avatar { margin-left: -8px; }
+.plan-creator-names { margin-left: 7px; font-size: .76rem; color: var(--text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+/* Aksi */
+.plan-actions { display: flex; justify-content: flex-end; gap: 4px; flex-wrap: nowrap; }
+.plan-act {
+  width: 30px; height: 30px; border-radius: 8px; border: 1px solid transparent;
+  background: transparent; color: var(--muted); cursor: pointer;
+  display: inline-flex; align-items: center; justify-content: center; padding: 0; font-size: .85rem;
+  transition: background .15s, color .15s, border-color .15s;
+}
+.plan-act:hover { background: var(--bg); border-color: var(--bd); color: var(--text); }
+.plan-act-wa { color: #16a34a; }
+.plan-act-wa:hover { background: #f0fdf4; border-color: #bbf7d0; color: #15803d; }
+.plan-act-del:hover { background: var(--red-lt); border-color: #fecaca; color: var(--red); }
+.plan-act.budget-planner-btn { border-color: transparent; }
+.plan-act.budget-planner-btn.has-budget { background: #f0fdf4; border-color: #86efac; }
+
+/* HP: tiap baris jadi kartu */
+@media (max-width: 680px) {
+  #page-planner .table-wrap { max-height: none; overflow: visible; border: 0; box-shadow: none; background: transparent; }
+  .plan-table, .plan-table tbody { display: block; }
+  .plan-table thead { display: none; }
+  .plan-table tbody tr {
+    display: grid; grid-template-columns: 58px 1fr; gap: 8px 12px; align-items: start;
+    background: var(--surface); border: 1px solid var(--bd); border-radius: 14px;
+    padding: 12px; margin-bottom: 10px; box-shadow: var(--shadow);
+  }
+  .plan-table tbody tr.plan-row-today { border-color: var(--blue); }
+  .plan-table tbody tr:hover td, .plan-table tbody tr.plan-row-today td { background: transparent; }
+  .plan-table tbody tr.plan-row-today td:first-child { box-shadow: none; }
+  .plan-table td { display: block; padding: 0; border: 0; }
+  .plan-td-date { grid-row: span 2; }
+  .plan-td-title { grid-column: 2; }
+  .plan-table td.plan-td-status, .plan-table td.plan-td-plat, .plan-table td.plan-td-creator { grid-column: 2; display: flex; align-items: center; gap: 8px; min-width: 0; }
+  .plan-td-status::before, .plan-td-plat::before, .plan-td-creator::before {
+    content: attr(data-label); width: 58px; flex-shrink: 0;
+    font-size: .6rem; font-weight: 700; text-transform: uppercase; letter-spacing: .05em; color: var(--muted);
+  }
+  .plan-td-act { grid-column: 1 / -1; border-top: 1px solid var(--bd); padding-top: 8px; }
+  .plan-actions { justify-content: flex-start; }
+  .plan-table td.empty-cell { grid-column: 1 / -1; }
+  .plan-table tbody tr:has(.empty-cell) { display: block; }
+}

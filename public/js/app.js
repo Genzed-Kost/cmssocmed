@@ -2659,46 +2659,67 @@ function renderPlanner(page) {
 
   const tbody  = $('planBody');
   const users  = state.settings?.users || [];
+  const todayYmd = scYmd(new Date());
+  const MON = ['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agu','Sep','Okt','Nov','Des'];
+  const initials = n => String(n || '?').trim().split(/\s+/).slice(0, 2).map(w => w[0]).join('').toUpperCase();
+  const avatarColor = n => {
+    const pal = ['#2563eb','#7c3aed','#db2777','#ea580c','#16a34a','#0891b2','#ca8a04','#4f46e5'];
+    let h = 0; for (const ch of String(n)) h = (h * 31 + ch.charCodeAt(0)) >>> 0;
+    return pal[h % pal.length];
+  };
+  const ICON_EDIT = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>';
+  const ICON_DEL  = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4a1 1 0 011-1h4a1 1 0 011 1v2"/></svg>';
+
   tbody.innerHTML = slice.length ? slice.map(c => {
-    const plats = (c.platforms||[]).map(p => `<span class="plat-pill plat-${p}">${p.charAt(0).toUpperCase()}</span>`).join('');
+    const plats = (c.platforms||[]).map(p => `<span class="plat-pill plat-${p}" title="${esc(p)}">${p.charAt(0).toUpperCase()}</span>`).join('');
     const acct  = getAccounts().find(a => a.id === c.account);
     const crArr = Array.isArray(c.creator) ? c.creator : (c.creator ? [c.creator] : []);
     const hasPhone = crArr.some(cr => users.find(u => getUserName(u) === cr)?.phone);
-    const waBtn = hasPhone
-      ? `<button class="btn-xs" style="color:#16a34a;border-color:#bbf7d0;padding:3px 6px" onclick="openPlannerWa('${c.id}')" title="Kirim WA manual">${WA_SVG}</button>`
-      : '';
     const isDualFmt = FORMATS_DUAL_ROLE.includes(c.format);
     const budgetTotal = (c.budget||[]).reduce((s,r)=>s+(r.qty||0)*(r.price||0),0);
-    // Tombol budget tampil untuk semua user jika format Podcast/Liputan
-    const budgetBtn = isDualFmt
-      ? `<button class="btn-xs budget-planner-btn${budgetTotal>0?' has-budget':''}"
-           onclick="openBudgetModal('${c.id}')" title="Budget Produksi">
-           💰
-         </button>`
-      : '';
-    return `<tr>
-      <td><span class="badge ${STATUS_CLASS[c.status]||'badge-ide'}">${esc(c.status)}</span></td>
-      <td>${fmtDate(c.publishDate)}</td>
-      <td>
-        <div style="font-weight:600">${esc(c.title)}</div>
-        ${acct ? `<div style="font-size:.7rem;color:${acct.color};margin-top:2px">${acct.name}</div>` : ''}
+
+    // Tanggal: kartu kecil (tgl + bulan) dengan hari & jam
+    const d = scParse(c.publishDate);
+    const isToday = c.publishDate === todayYmd;
+    const isPast  = c.publishDate && c.publishDate < todayYmd;
+    const dateCell = d
+      ? `<div class="plan-date${isToday ? ' is-today' : ''}${isPast ? ' is-past' : ''}">
+           <span class="plan-date-day">${d.getDate()}</span>
+           <span class="plan-date-mon">${MON[d.getMonth()]} ${String(d.getFullYear()).slice(-2)}</span>
+         </div>
+         <div class="plan-date-sub">${isToday ? 'Hari ini' : d.toLocaleDateString('id-ID', { weekday: 'short' })}${c.publishTime ? ' · ' + esc(c.publishTime) : ''}</div>`
+      : '<span class="plan-muted">—</span>';
+
+    // Creator: avatar inisial + nama
+    const crHtml = crArr.length
+      ? `<div class="plan-creators">${crArr.map(n =>
+          `<span class="plan-avatar" style="--av:${avatarColor(n)}" title="${esc(n)}">${esc(initials(n))}</span>`).join('')}
+         <span class="plan-creator-names">${esc(crArr.join(', '))}</span></div>`
+      : '<span class="plan-muted">—</span>';
+
+    const actions = [
+      `<button class="plan-act" onclick="editContent('${c.id}')" title="Edit">${ICON_EDIT}</button>`,
+      hasPhone ? `<button class="plan-act plan-act-wa" onclick="openPlannerWa('${c.id}')" title="Kirim WA manual">${WA_SVG}</button>` : '',
+      isDualFmt ? `<button class="plan-act budget-planner-btn${budgetTotal>0?' has-budget':''}" onclick="openBudgetModal('${c.id}')" title="Budget Produksi">💰</button>` : '',
+      admin ? `<button class="plan-act plan-act-del" onclick="deleteContent('${c.id}')" title="Hapus">${ICON_DEL}</button>` : '',
+    ].join('');
+
+    return `<tr class="${isToday ? 'plan-row-today' : ''}">
+      <td class="plan-td-date">${dateCell}</td>
+      <td class="plan-td-title">
+        <div class="plan-title">${esc(c.title)}</div>
+        <div class="plan-meta">
+          ${acct ? `<span class="plan-acct"><i style="background:${acct.color}"></i>${esc(acct.name)}</span>` : ''}
+          ${c.format ? `<span class="format-pill format-${(c.format||'').toLowerCase()}">${esc(c.format)}</span>` : ''}
+          ${c.theme ? `<span class="plan-theme" title="Tema">${esc(c.theme)}</span>` : ''}
+        </div>
       </td>
-      <td>${esc(c.theme||'—')}</td>
-      <td><span class="format-pill format-${(c.format||'').toLowerCase()}">${esc(c.format||'—')}</span></td>
-      <td><div class="plat-pills">${plats||'—'}</div></td>
-      <td>${esc(Array.isArray(c.creator) ? c.creator.join(', ') : (c.creator||'—'))}</td>
-      <td><div style="display:grid;grid-template-columns:1fr 1fr;gap:4px;align-items:center">
-        <button class="btn-xs" style="padding:4px 6px" onclick="editContent('${c.id}')" title="Edit">
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
-        </button>
-        ${waBtn}
-        ${budgetBtn}
-        ${admin ? `<button class="btn-xs" style="padding:4px 6px;border-color:#fca5a5;color:var(--red)" onclick="deleteContent('${c.id}')" title="Hapus">
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4a1 1 0 011-1h4a1 1 0 011 1v2"/></svg>
-        </button>` : ''}
-      </div></td>
+      <td class="plan-td-status" data-label="Status"><span class="badge plan-status ${STATUS_CLASS[c.status]||'badge-ide'}">${esc(c.status)}</span></td>
+      <td class="plan-td-plat" data-label="Platform"><div class="plat-pills">${plats||'<span class="plan-muted">—</span>'}</div></td>
+      <td class="plan-td-creator" data-label="Creator">${crHtml}</td>
+      <td class="plan-td-act"><div class="plan-actions">${actions}</div></td>
     </tr>`;
-  }).join('') : '<tr><td colspan="8" class="empty-cell">Belum ada konten</td></tr>';
+  }).join('') : '<tr><td colspan="6" class="empty-cell">Belum ada konten</td></tr>';
 
   $('planPagination').innerHTML = Array.from({length:total},(_,i) =>
     `<button class="page-btn ${i+1===state.planPage?'active':''}" onclick="renderPlanner(${i+1})">${i+1}</button>`
