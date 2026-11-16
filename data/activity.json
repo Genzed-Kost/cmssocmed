@@ -1,5 +1,13 @@
 [
   {
+    "id": "mwjhyudodbmjt",
+    "user": "Umar",
+    "role": "Publisher",
+    "action": "logout",
+    "target": "keluar dari sistem",
+    "timestamp": "2026-11-16T16:48:01.356Z"
+  },
+  {
     "id": "mwjht0n44pz6v",
     "user": "Umar",
     "role": "Publisher",
@@ -3990,13 +3998,5 @@
     "action": "logout",
     "target": "keluar dari sistem",
     "timestamp": "2026-06-28T18:03:55.404Z"
-  },
-  {
-    "id": "mqy3j7ro8lj3f",
-    "user": "Admin",
-    "role": "Admin",
-    "action": "update statistik",
-    "target": "Penjaga Harapan YouTube — Mei 2026",
-    "timestamp": "2026-06-28T18:02:16.212Z"
   }
 ]
