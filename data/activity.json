@@ -1,5 +1,13 @@
 [
   {
+    "id": "mwj4i8okvx6w0",
+    "user": "Umar",
+    "role": "Publisher",
+    "action": "logout",
+    "target": "keluar dari sistem",
+    "timestamp": "2026-11-16T10:31:11.732Z"
+  },
+  {
     "id": "mwj4a46ersf38",
     "user": "Admin",
     "role": "Admin",
@@ -3990,13 +3998,5 @@
     "action": "login",
     "target": "masuk ke sistem sebagai Administrator",
     "timestamp": "2026-06-25T19:20:09.502Z"
-  },
-  {
-    "id": "mqtt5yr6lrpg5",
-    "user": "Admin",
-    "role": "Admin",
-    "action": "login",
-    "target": "masuk ke sistem sebagai Admin",
-    "timestamp": "2026-06-25T18:00:57.138Z"
   }
 ]
