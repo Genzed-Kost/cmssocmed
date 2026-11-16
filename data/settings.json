@@ -986,12 +986,12 @@
       "color": "#ca8a04"
     },
     {
-      "name": "Gimana Kabarnya",
-      "color": "#dc2626"
-    },
-    {
       "name": "Belajar Koperasi",
       "color": "#4f46e5"
+    },
+    {
+      "name": "Gimana Kabarnya",
+      "color": "#dc2626"
     }
   ]
 }
