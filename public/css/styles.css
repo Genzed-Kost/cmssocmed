@@ -3515,3 +3515,13 @@ ul { list-style: none; }
   .sef-grid { grid-template-columns: 1fr; }
   .stat-edit-head, .stat-edit-body, .stat-edit-foot { padding-left: 14px; padding-right: 14px; }
 }
+
+/* ER % otomatis — kolom ditandai */
+.stat-calc-tag { display: inline-block; margin-left: 4px; padding: 1px 5px; border-radius: 5px; background: #ede9fe; color: #6d28d9; font-size: .55rem; font-weight: 800; letter-spacing: .04em; vertical-align: middle; }
+.stat-th-calc { background: #f5f3ff !important; color: #6d28d9 !important; }
+.stat-td-calc { text-align: right; background: #faf5ff; color: #6d28d9; font-weight: 700; font-variant-numeric: tabular-nums; }
+.stat-data-table tbody tr:hover td.stat-td-calc, .data-table tbody tr:hover td.stat-td-calc { background: #f3e8ff; }
+.sef-calc { background: #faf5ff; border-color: #ede9fe; cursor: default; }
+.sef-calc:hover { background: #faf5ff; }
+.sef-auto-tag { font-style: normal; font-size: .58rem; font-weight: 800; text-transform: uppercase; letter-spacing: .04em; color: #6d28d9; background: #ede9fe; padding: 1px 5px; border-radius: 5px; margin-left: 4px; }
+.sef-out { display: inline-flex; align-items: center; justify-content: flex-end; background: transparent; border-color: transparent; color: #6d28d9; font-weight: 800; }

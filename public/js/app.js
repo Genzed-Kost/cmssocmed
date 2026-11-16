@@ -227,7 +227,7 @@ const PLATFORM_FIELDS = {
       { key:'totalLikes',       label:'Total Likes',      fmt:'num' },
       { key:'totalComments',    label:'Total Comments',   fmt:'num' },
       { key:'totalEngagement',  label:'Total Eng.',       fmt:'num' },
-      { key:'erPct',            label:'ER %',             fmt:'pct' },
+      { key:'erPct',            label:'ER %',             fmt:'pct', auto:'calc' },
       { key:'watchHours',       label:'Watch Hours',      fmt:'num' },
       { key:'impressions',      label:'Impressions',      fmt:'num' },
       { key:'adImpressions',    label:'Ad Impressions',   fmt:'num' },
@@ -251,7 +251,7 @@ const PLATFORM_FIELDS = {
       { key:'totalComments',    label:'Total Comments',   fmt:'num' },
       { key:'totalShares',      label:'Total Shares',     fmt:'num' },
       { key:'totalEngagement',  label:'Total Eng.',       fmt:'num' },
-      { key:'erPct',            label:'ER %',             fmt:'pct' },
+      { key:'erPct',            label:'ER %',             fmt:'pct', auto:'calc' },
     ]
   },
   facebook: {
@@ -270,7 +270,7 @@ const PLATFORM_FIELDS = {
       { key:'avgViewsPerPost',  label:'Avg Views/Post',   fmt:'num' },
       { key:'avgEngPerPost',    label:'Avg Eng/Post',     fmt:'num' },
       { key:'maxViewsSingle',   label:'Max Views Single', fmt:'num' },
-      { key:'erPct',            label:'ER %',             fmt:'pct' },
+      { key:'erPct',            label:'ER %',             fmt:'pct', auto:'calc' },
     ]
   },
   instagram: {
@@ -287,7 +287,7 @@ const PLATFORM_FIELDS = {
       { key:'totalShares',      label:'Total Shares',     fmt:'num' },
       { key:'totalSaves',       label:'Total Saves',      fmt:'num' },
       { key:'totalEngagement',  label:'Total Eng.',       fmt:'num' },
-      { key:'erPct',            label:'ER %',             fmt:'pct' },
+      { key:'erPct',            label:'ER %',             fmt:'pct', auto:'calc' },
       { key:'avgViews',         label:'Avg Views',        fmt:'num' },
       { key:'peakViews',        label:'Peak Views',       fmt:'num' },
       { key:'avgEng',           label:'Avg Eng',          fmt:'num' },
@@ -303,7 +303,7 @@ const PLATFORM_FIELDS = {
       { key:'totalPost',        label:'Total Post',       fmt:'num' },
       { key:'impressions',      label:'Impressions',      fmt:'num' },
       { key:'totalEngagement',  label:'Total Eng.',       fmt:'num' },
-      { key:'erPct',            label:'ER %',             fmt:'pct' },
+      { key:'erPct',            label:'ER %',             fmt:'pct', auto:'calc' },
       { key:'totalLikes',       label:'Total Likes',      fmt:'num' },
       { key:'totalRetweets',    label:'Total Retweets',   fmt:'num' },
       { key:'followers',        label:'Followers',        fmt:'num' },
@@ -5880,6 +5880,33 @@ function _getAnalyticsMeta(acctId, platId) {
 }
 
 /* ── alias so existing references to renderStatTable still work ─────────── */
+/* ── ER (Engagement Rate) otomatis ──────────────────────────────────────────
+   ER % = Total Engagement ÷ Total Views × 100 (views = viewKey platform).
+   Bila Total Engagement kosong, dijumlah dari likes/comments/shares/saves/reactions. */
+function calcEngagement(row) {
+  const te = +row.totalEngagement || 0;
+  if (te) return te;
+  return ['totalLikes','totalComments','totalShares','totalSaves','totalReactions']
+    .reduce((s, k) => s + (+row[k] || 0), 0);
+}
+function calcER(platId, row) {
+  const platM = PLATFORM_FIELDS[platId];
+  if (!platM || !row) return null;
+  const views = +row[platM.viewKey] || 0;
+  const eng   = calcEngagement(row);
+  if (!views || !eng) return null;
+  return Math.round(eng / views * 10000) / 100;   // 2 desimal
+}
+/* Isi erPct semua baris akun+platform (bulanan & mingguan) dari rumus di atas */
+function applyAutoER(acctId, platId) {
+  ['', '_w'].forEach(sfx => {
+    (state.analytics?.[acctId]?.[platId + sfx] || []).forEach(r => {
+      const er = calcER(platId, r);
+      if (er === null) delete r.erPct; else r.erPct = er;
+    });
+  });
+}
+
 function renderStatTable() { renderStatChart(); }
 
 function renderStatChart() {
@@ -5888,9 +5915,7 @@ function renderStatChart() {
   const platM  = PLATFORM_FIELDS[platId];
   if (!platM) return;
 
-  // Update input form title
-  const title = $('statInputTitle');
-  if (title) title.textContent = `📊 Input ${platM.label} — ${getAcctName(acctId)}`;
+  applyAutoER(acctId, platId);   // ER % selalu dihitung otomatis
 
   const isWeekly = state.statViewMode === 'weekly';
   const dataKey  = isWeekly ? platId + '_w' : platId;
@@ -6360,7 +6385,9 @@ function renderStatDataTable(acctId, platId, rows) {
   const rKey     = isWeekly ? 'week' : 'month';
   const sorted   = [...rows].sort((a, b) => (b[rKey]||'').localeCompare(a[rKey]||''));
 
-  const headerCells = platM.fields.map(f => `<th>${f.label}</th>`).join('');
+  const headerCells = platM.fields.map(f => f.auto === 'calc'
+    ? `<th class="stat-th-calc" title="Dihitung otomatis: Total Engagement ÷ Views × 100">${f.label} <span class="stat-calc-tag">AUTO</span></th>`
+    : `<th>${f.label}</th>`).join('');
   const bodyRows = sorted.map(r => {
     const cells = platM.fields.map(f => {
       const val    = r[f.key];
@@ -6370,6 +6397,9 @@ function renderStatDataTable(acctId, platId, rows) {
       const style  = empty && !isAuto
         ? 'text-align:right;background:rgba(220,38,38,.12);color:var(--red)'
         : 'text-align:right';
+      if (f.auto === 'calc') {
+        return `<td class="stat-td-calc" title="Otomatis: Total Engagement ÷ Views × 100">${empty ? '—' : fmtStatVal(val, f.fmt)}</td>`;
+      }
       const display = empty && !isAuto ? '—' : fmtStatVal(val, f.fmt);
       return `<td style="${style}" title="${!isAuto && empty ? 'Isi manual' : ''}">${display}</td>`;
     }).join('');
@@ -7524,20 +7554,36 @@ function renderStatInputFields(acctId, platIdOverride, prefill) {
     </label>`;
   };
   const manual = platM.fields.filter(f => !f.auto);
-  const auto   = platM.fields.filter(f => f.auto);
+  const calc   = platM.fields.filter(f => f.auto === 'calc');
+  const auto   = platM.fields.filter(f => f.auto && f.auto !== 'calc');
+  const calcRow = f => `<div class="sef-row sef-calc" title="Dihitung otomatis: Total Engagement ÷ ${esc(platM.fields.find(x => x.key === platM.viewKey)?.label || 'Views')} × 100">
+      <span class="sef-label">${esc(f.label)} <em class="sef-auto-tag">otomatis</em></span>
+      <output id="sif_${f.key}_calc" class="sef-inp sef-out">—</output>
+    </div>`;
   container.innerHTML = `
     <div class="sef-group-title">Isi manual</div>
-    <div class="sef-grid">${manual.map(field).join('')}</div>
+    <div class="sef-grid">${manual.map(field).join('')}${calc.map(calcRow).join('')}</div>
     ${auto.length ? `<details class="sef-auto"${prefill && auto.some(f => prefill[f.key]) ? ' open' : ''}>
       <summary>Data otomatis <span>(${auto.length} kolom · boleh dikosongkan, terisi dari sinkronisasi)</span></summary>
       <div class="sef-grid">${auto.map(field).join('')}</div>
     </details>` : ''}`;
   setTxt('statEditSub', `${platM.label} · ${getAcctName(acctId)}`);
+  container.dataset.plat = platId;
   statEditCount();
 }
 
 function statEditCount() {
-  const inputs = [...document.querySelectorAll('#statInputFields .sef-inp')];
+  // Hitung ER % langsung dari isian
+  const box = $('statInputFields');
+  const platId = box?.dataset.plat;
+  const out = $('sif_erPct_calc');
+  if (out && platId) {
+    const row = {};
+    box.querySelectorAll('input.sef-inp').forEach(i => { if (i.value !== '') row[i.id.replace('sif_', '')] = +i.value; });
+    const er = calcER(platId, row);
+    out.textContent = er === null ? '—' : er.toFixed(2) + '%';
+  }
+  const inputs = [...document.querySelectorAll('#statInputFields input.sef-inp')];
   const filled = inputs.filter(i => i.value !== '').length;
   setTxt('statLastSaved', `${filled}/${inputs.length} kolom terisi`);
   inputs.forEach(i => i.closest('.sef-row')?.classList.toggle('is-filled', i.value !== ''));
@@ -7569,6 +7615,10 @@ async function saveAnalyticsEntry() {
     }
   });
   if (!hasAny) { toast('Isi minimal satu field', 'error'); return; }
+  // ER % dihitung otomatis, tidak dari isian
+  delete entry.erPct;
+  const er = calcER(platId, entry);
+  if (er !== null) entry.erPct = er;
 
   // Replace atau tambah — tidak mengganggu array lain
   analytics[acctId][storeKey] = analytics[acctId][storeKey].filter(r => r[rKey] !== periodVal);
