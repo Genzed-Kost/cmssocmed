@@ -2761,7 +2761,7 @@ function renderActivity(page) {
   if (state.actPage > total) state.actPage = total;
   const slice = filtered.slice((state.actPage - 1) * ACT_PAGE_SIZE, state.actPage * ACT_PAGE_SIZE);
 
-  const icons = { tambah:'➕', edit:'✏️', hapus:'🗑️', publish:'🚀', login:'🔑', logout:'🚪', unduh:'📥', statistik:'📊', default:'📋' };
+  const icons = { tambah:'➕', edit:'✏️', hapus:'🗑️', publish:'🚀', login:'🔑', logout:'🚪', unduh:'📥', statistik:'📊', berita:'📰', default:'📋' };
 
   if (!slice.length) {
     list.innerHTML = '<li class="act-empty" style="padding:20px 0">Belum ada aktivitas</li>';
@@ -7932,10 +7932,13 @@ function newsWaitLeft() {
   const c = getCachedNews();
   return c ? Math.max(0, NEWS_COOLDOWN - (Date.now() - c.ts)) : 0;
 }
-function refreshNews() {
+async function refreshNews() {
   if (_newsLoading) return;
   if (newsWaitLeft() > 0) { openNewsWait(); return; }
-  fetchNews();
+  const r = await fetchNews();
+  // Catat ke Activity Log (hanya refresh yang benar-benar memuat berita / gagal)
+  if (r) logActivity(currentUser(), 'refresh berita Info Presiden',
+    r.ok ? `${r.count} berita (sumber: ${r.source})` : 'gagal memuat berita');
 }
 function openNewsWait() {
   const pop = $('newsWaitPop');
@@ -8024,7 +8027,7 @@ async function fetchNews() {
   $('newsContent').innerHTML = `<div class="news-loading"><div class="spinner"></div><span>Mengambil berita terkini…</span></div>`;
   $('newsTimestamp').textContent = '';
   _newsLoading = true;
-  try { await _fetchNewsInner(); } finally { _newsLoading = false; }
+  try { return await _fetchNewsInner(); } finally { _newsLoading = false; }
 }
 async function _fetchNewsInner() {
   const q = encodeURIComponent(NEWS_QUERY);
@@ -8040,11 +8043,12 @@ async function _fetchNewsInner() {
       const items = await run();
       setCachedNews(JSON.stringify(items));
       renderNewsItems(items, Date.now());
-      return;
+      return { ok: true, source: name, count: items.length };
     } catch (e) { errors.push(`${name}: ${e.message}`); }
   }
   $('newsContent').innerHTML = `<div style="color:var(--red);font-size:.82rem;padding:12px 0">
     Gagal memuat berita.<br><span style="color:var(--muted);font-size:.75rem">${errors.map(esc).join('<br>')}</span></div>`;
+  return { ok: false, errors };
 }
 
 function renderNewsContent(text, ts) {
