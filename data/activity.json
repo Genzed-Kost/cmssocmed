@@ -1,5 +1,13 @@
 [
   {
+    "id": "mwj89ilas5knq",
+    "user": "Admin",
+    "role": "Admin",
+    "action": "update statistik",
+    "target": "Penjaga Harapan TikTok — Agt 2026",
+    "timestamp": "2026-11-16T12:16:23.134Z"
+  },
+  {
     "id": "mwj86hjqyyzwk",
     "user": "Admin",
     "role": "Admin",
@@ -3990,13 +3998,5 @@
     "action": "tambah konten",
     "target": "berjudul \"Published Liputan CKG Pemalang\" (tema: Siap Siap) untuk akun Penjaga Harapan dijadwalkan 09 Jul 2026",
     "timestamp": "2026-06-26T14:11:39.958Z"
-  },
-  {
-    "id": "mqv09iqygrxaj",
-    "user": "Admin",
-    "role": "Admin",
-    "action": "login",
-    "target": "masuk ke sistem sebagai Admin",
-    "timestamp": "2026-06-26T14:07:26.506Z"
   }
 ]
