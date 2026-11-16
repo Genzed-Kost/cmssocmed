@@ -843,6 +843,20 @@
             </ul>
           </div>
 
+          <!-- Daftar Program -->
+          <div class="card setup-card">
+            <div class="card-head">
+              <span class="card-title">🎙 Daftar Program</span>
+            </div>
+            <p style="font-size:.75rem;color:var(--muted);margin:0 0 10px">Program (Podcast, Liputan, dll) yang muncul sebagai pilihan Kelompok di Stock Contents. Warna dipakai di kalender; urutan dipakai di legenda &amp; pesan WA.</p>
+            <div id="programList" style="display:flex;flex-direction:column;gap:6px;margin-bottom:12px"></div>
+            <div style="display:flex;gap:6px;align-items:center">
+              <input type="text" id="newProgramName" class="form-inp" placeholder="Nama program baru…" style="flex:1"
+                onkeydown="if(event.key==='Enter') addProgram()" />
+              <button class="btn-sm blue" onclick="addProgram()">+ Tambah</button>
+            </div>
+          </div>
+
           </div><!-- /setup-col kiri -->
 
           <!-- ── Kolom Kanan: URL Platform + API Keys + KPI ─────── -->
@@ -979,20 +993,6 @@
             </div>
             <div class="form-actions-row" style="margin-top:12px">
               <button class="btn-sm blue" id="btnSaveKpi">Simpan KPI</button>
-            </div>
-          </div>
-
-          <!-- Daftar Program -->
-          <div class="card setup-card">
-            <div class="card-head">
-              <span class="card-title">🎙 Daftar Program</span>
-            </div>
-            <p style="font-size:.75rem;color:var(--muted);margin:0 0 10px">Program (Podcast, Liputan, dll) yang muncul sebagai pilihan Kelompok di Stock Contents. Warna dipakai di kalender; urutan dipakai di legenda &amp; pesan WA.</p>
-            <div id="programList" style="display:flex;flex-direction:column;gap:6px;margin-bottom:12px"></div>
-            <div style="display:flex;gap:6px;align-items:center">
-              <input type="text" id="newProgramName" class="form-inp" placeholder="Nama program baru…" style="flex:1"
-                onkeydown="if(event.key==='Enter') addProgram()" />
-              <button class="btn-sm blue" onclick="addProgram()">+ Tambah</button>
             </div>
           </div>
 
