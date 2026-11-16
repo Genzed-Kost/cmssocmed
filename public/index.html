@@ -706,7 +706,11 @@
     <section id="page-stockcontents" class="page">
       <div class="page-inner">
         <div class="toolbar">
-          <div class="toolbar-left">
+          <div class="toolbar-left" style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+            <div class="sc-view-toggle" role="tablist">
+              <button type="button" class="sc-view-btn active" data-view="cal" onclick="scSetView('cal')">📅 Kalender</button>
+              <button type="button" class="sc-view-btn" data-view="list" onclick="scSetView('list')">☰ Daftar</button>
+            </div>
             <span style="font-size:.8rem;color:var(--muted)">Total: <strong id="scCount">0</strong> item</span>
           </div>
           <div class="toolbar-right">
@@ -721,13 +725,37 @@
               </button>
             </div>
             <div id="scAdminTools" style="display:flex;gap:6px">
-              <button class="btn-sm blue" onclick="scAddRow()">
+              <button class="btn-sm blue" onclick="scOpenModal()">
                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
                 Tambah
               </button>
             </div>
           </div>
         </div>
+        <!-- Tampilan kalender -->
+        <div id="scCalWrap" class="sc-cal-wrap">
+          <div class="sc-cal-head">
+            <div class="sc-cal-nav">
+              <button type="button" class="btn-sm" onclick="scShiftMonth(-1)" aria-label="Bulan sebelumnya">‹</button>
+              <button type="button" class="btn-sm" onclick="scShiftMonth(0)">Hari ini</button>
+              <button type="button" class="btn-sm" onclick="scShiftMonth(1)" aria-label="Bulan berikutnya">›</button>
+            </div>
+            <h3 id="scCalTitle" class="sc-cal-title">—</h3>
+            <div id="scLegend" class="sc-legend"></div>
+          </div>
+          <p id="scCalHint" class="sc-cal-hint"></p>
+          <div class="sc-cal-dow">
+            <span>Sen</span><span>Sel</span><span>Rab</span><span>Kam</span><span>Jum</span><span>Sab</span><span>Min</span>
+          </div>
+          <div id="scCalGrid" class="sc-cal-grid"></div>
+          <div class="sc-unsched">
+            <div class="sc-unsched-title">⏳ Belum ada tanggal tayang <span id="scUnschedCount"></span></div>
+            <div id="scUnschedList" class="sc-unsched-list"></div>
+          </div>
+        </div>
+
+        <!-- Tampilan daftar (tabel lama) -->
+        <div id="scListWrap" class="hidden">
         <div class="table-wrap">
           <table class="data-table" id="scTable">
             <thead>
@@ -747,6 +775,7 @@
         </div>
         <div class="table-footer">
           <span id="scCountFoot" style="font-size:.78rem;color:var(--muted)"></span>
+        </div>
         </div>
       </div>
     </section>
@@ -1029,6 +1058,18 @@
         ✅ Verifikasi &amp; Hubungkan
       </button>
     </div>
+  </div>
+</div>
+
+<!-- ─── STOCK CONTENTS: tambah / ubah / detail ─────────────────────────── -->
+<div id="scModal" class="modal-overlay hidden" onclick="if(event.target===this) scCloseModal()">
+  <div class="modal" style="max-width:440px">
+    <div class="modal-head" style="display:flex;align-items:center;justify-content:space-between">
+      <span class="modal-title" id="scModalTitle">Stock Content</span>
+      <button type="button" class="modal-close-btn" onclick="scCloseModal()" aria-label="Tutup">✕</button>
+    </div>
+    <div class="modal-body" id="scModalBody" style="display:flex;flex-direction:column;gap:12px"></div>
+    <div class="modal-foot" id="scModalFoot" style="display:flex;gap:8px;justify-content:flex-end"></div>
   </div>
 </div>
 
