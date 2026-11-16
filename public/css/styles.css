@@ -3845,20 +3845,29 @@ ul { list-style: none; }
 /* Sidebar: simbol putih di latar gelap */
 .logo-mark.has-logo { width: 34px; height: 40px; border-radius: 0; }
 
-/* ══ Ruang untuk tombol Pesan (💬) agar tidak menutupi isi halaman ══
-   Tombol mengambang di kanan bawah (56px + jarak 22px). Setiap halaman diberi
-   ruang kosong di bawah supaya baris/pagination terakhir bisa digulir ke atasnya. */
-:root { --fab-space: 92px; }
-body.has-chat-fab .page-inner,
-body.has-chat-fab .page-inner-narrow { padding-bottom: var(--fab-space) !important; }
-/* Planner: tabel dipendekkan sedikit agar footer (jumlah konten & halaman) terlihat tanpa digulir */
-body.has-chat-fab #page-planner .table-wrap { max-height: calc(100vh - 210px - var(--fab-space) + 24px); }
-/* Footer tabel (Planner, Activity Log): sisakan ruang di kanan untuk tombol Pesan */
-body.has-chat-fab .table-footer { padding-right: 72px; }
-/* New Post: tombol Simpan yang menempel di bawah tidak boleh tertutup */
-body.has-chat-fab .np-actions { margin-right: 72px !important; }
+/* ══ Tombol Pesan: tab tersembunyi di tepi kanan layar ══════════════
+   Hanya sebagian kecil yang terlihat; arahkan kursor / ketuk untuk membuka.
+   Badge belum dibaca tetap terlihat. Tidak lagi menutupi isi halaman.   */
+.chat-fab {
+  top: 50%; bottom: auto; right: -18px; width: 48px; height: 56px;
+  border-radius: 14px 0 0 14px; justify-content: flex-start; padding-left: 9px;
+  transform: translateY(-50%); transition: right .2s ease, box-shadow .2s, opacity .2s;
+  box-shadow: -4px 6px 18px rgba(37,99,235,.35); opacity: .85;
+}
+.chat-fab svg { width: 18px; height: 18px; }
+.chat-fab:hover, .chat-fab:focus-visible, .chat-fab.active { right: 0; opacity: 1; transform: translateY(-50%); box-shadow: -6px 8px 24px rgba(37,99,235,.45); }
+.chat-fab .chat-badge { top: -7px; right: auto; left: -7px; }
+/* Panel muncul di samping tab */
+.chat-panel { right: 58px; bottom: auto; top: 50%; transform: translateY(-50%); animation: none; }
 @media (max-width: 680px) {
-  :root { --fab-space: 80px; }
-  body.has-chat-fab .table-footer { padding-right: 64px; }
-  body.has-chat-fab .np-actions { margin-right: 64px !important; }
+  .chat-fab { right: -16px; width: 42px; height: 50px; bottom: auto; padding-left: 8px; }
+  .chat-fab svg { width: 16px; height: 16px; }
+  .chat-panel { inset: 0; transform: none; top: 0; right: 0; }
+}
+
+/* Planner: tabel tampil penuh (tanpa kotak gulir sendiri); halaman yang digulir */
+#page-planner .table-wrap { max-height: none; overflow: visible; }
+#page-planner .plan-table thead th { top: var(--topbar-h); }
+@media (min-width: 681px) {
+  #page-planner .table-wrap { overflow-x: auto; overflow-y: visible; }
 }
