@@ -1,5 +1,13 @@
 [
   {
+    "id": "mwizk69z0pgbe",
+    "user": "Admin",
+    "role": "Admin",
+    "action": "login",
+    "target": "masuk ke sistem sebagai Admin",
+    "timestamp": "2026-11-16T08:12:43.847Z"
+  },
+  {
     "id": "mwizjsqb2pczd",
     "user": "Umar",
     "role": "Publisher",
@@ -3990,13 +3998,5 @@
     "action": "edit user",
     "target": "Siska → Siska (Administrator)",
     "timestamp": "2026-06-25T17:40:29.519Z"
-  },
-  {
-    "id": "mqtsfierpnssz",
-    "user": "Admin",
-    "role": "Admin",
-    "action": "edit user",
-    "target": "Lydia → Lydia (Planner)",
-    "timestamp": "2026-06-25T17:40:22.899Z"
   }
 ]
