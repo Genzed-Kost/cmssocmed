@@ -8041,9 +8041,8 @@ function getCachedNews() {
 function setCachedNews(text) { localStorage.setItem(NEWS_KEY, JSON.stringify({ text, ts: Date.now() })); }
 
 /* Ambil berita Info Presiden. Dicoba berurutan:
-   1. Cloudflare Pages Function  /api/news          (hosting saat ini)
-   2. Netlify Function           /.netlify/functions/news-proxy (bila pindah ke Netlify)
-   3. Gemini + Google Search     (butuh Gemini API Key di perangkat ini)            */
+   1. Cloudflare Pages Function  /api/news  (functions/api/news.js)
+   2. Gemini + Google Search     (butuh Gemini API Key di perangkat ini)            */
 const NEWS_QUERY = 'Prabowo Subianto kebijakan pemerintah';
 /* Supaya tiap refresh menampilkan berita yang berbeda:
    - kata kunci bergantian tiap refresh (sumber berita lebih beragam),
@@ -8145,10 +8144,8 @@ async function fetchNews() {
 async function _fetchNewsInner() {
   const query = nextNewsQuery();
   const q = encodeURIComponent(query);
-  const local = ['localhost', '127.0.0.1'].includes(window.location.hostname);
   const attempts = [
     ['Server', () => fetchNewsFromServer(`/api/news?q=${q}&n=30`)],
-    ['Server (Netlify)', () => fetchNewsFromServer(`${local ? 'http://localhost:8888' : ''}/.netlify/functions/news-proxy?q=${q}`)],
     ['Gemini AI', () => fetchNewsFromGemini(query)],
   ];
   const errors = [];
