@@ -514,6 +514,9 @@
         "profileViews": 21618,
         "followersEOM": 38563,
         "followersGained": 4172,
+        "totalViewers": 5926156,
+        "newViewers": 2521773,
+        "returningViewers": 3404383,
         "totalLikes": 462361,
         "totalComments": 13822,
         "totalShares": 28631,
@@ -1091,7 +1094,7 @@
         "updatedBy": "Admin"
       },
       "tiktok": {
-        "updatedAt": "2026-11-16T12:21:34.623Z",
+        "updatedAt": "2026-11-16T12:23:17.632Z",
         "updatedBy": "Admin"
       }
     },
