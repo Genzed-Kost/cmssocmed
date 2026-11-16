@@ -1,5 +1,13 @@
 [
   {
+    "id": "mwj26q5jj9boe",
+    "user": "Umar",
+    "role": "Publisher",
+    "action": "login",
+    "target": "masuk ke sistem sebagai Publisher",
+    "timestamp": "2026-11-16T09:26:15.271Z"
+  },
+  {
     "id": "mwj22ptfuv48k",
     "user": "Umar",
     "role": "Publisher",
@@ -3990,13 +3998,5 @@
     "action": "tambah anggota",
     "target": "Haji Ismail (Ketua)",
     "timestamp": "2026-06-25T17:41:53.929Z"
-  },
-  {
-    "id": "mqtsg7891iw90",
-    "user": "Admin",
-    "role": "Admin",
-    "action": "edit user",
-    "target": "Haji Doni → Haji Doni (Planner)",
-    "timestamp": "2026-06-25T17:40:55.065Z"
   }
 ]
