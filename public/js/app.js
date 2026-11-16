@@ -2098,6 +2098,8 @@ function refreshKpiList() {
   renderKpiList(filtered);
 }
 
+const DASH_NEAR_MAX = 4;   // maksimal kartu per kolom (Upcoming / Published)
+
 function renderDashNearContent() {
   const el = $('dashNearList');
   if (!el) return;
@@ -2121,7 +2123,7 @@ function renderDashNearContent() {
       const db = b.publishDate ? new Date(b.publishDate) : new Date('9999');
       return da - db;
     })
-    .slice(0, 3);
+    .slice(0, DASH_NEAR_MAX);
 
   const published = state.contents
     .filter(c => {
@@ -2135,7 +2137,7 @@ function renderDashNearContent() {
       return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
     })
     .sort((a,b) => new Date(b.publishDate||b.createdAt||0) - new Date(a.publishDate||a.createdAt||0))
-    .slice(0, 3);
+    .slice(0, DASH_NEAR_MAX);
 
   el.innerHTML = `
     <div class="near-split">
