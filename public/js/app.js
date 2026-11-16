@@ -3582,9 +3582,16 @@ function renderStockCalendar() {
       for (let i = 0; i <= span; i++) push(scAddDays(it.prodDate, i), { it, kind: 'prod', i, span });
     }
   });
-  Object.values(byDay).forEach(list => list.sort((a, b) =>
-    (a.kind === b.kind ? 0 : a.kind === 'air' ? -1 : 1) ||
-    (scCatOrder(a.it.category) - scCatOrder(b.it.category))));
+  // Urutan dalam satu hari: yang berjam lebih dulu, dari jam paling awal;
+  // lalu yang tanpa jam (tayang dulu, kemudian produksi, per urutan program).
+  const evTime = ev => (ev.kind === 'prod' && ev.i === 0 && ev.it.prodTime) || '';
+  Object.values(byDay).forEach(list => list.sort((a, b) => {
+    const ta = evTime(a), tb = evTime(b);
+    if (ta && tb && ta !== tb) return ta < tb ? -1 : 1;
+    if (!!ta !== !!tb) return ta ? -1 : 1;
+    return (a.kind === b.kind ? 0 : a.kind === 'air' ? -1 : 1) ||
+      (scCatOrder(a.it.category) - scCatOrder(b.it.category));
+  }));
 
   // Grid mulai Senin
   const first   = new Date(month.getFullYear(), month.getMonth(), 1);
