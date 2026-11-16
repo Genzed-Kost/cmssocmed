@@ -8699,11 +8699,19 @@ function initSidebarNav() {
   const save  = on => { try { localStorage.setItem(SB_KEY, on ? '1' : '0'); } catch {} };
   const open  = () => { sb.classList.add('peek'); sb.classList.remove('collapsed'); save(true); };
   const close = () => { sb.classList.remove('peek'); sb.classList.add('collapsed'); save(false); };
-  sb.addEventListener('click', e => {
-    if (!isDesk()) return;
-    if (e.target.closest('.nav-item, a, button, input, select')) return;   // menu & tombol berfungsi biasa
-    sb.classList.contains('peek') ? close() : open();                      // klik area sidebar → buka / tutup
-  });
+  // Hanya TEPI KANAN sidebar yang bisa diklik (kursor berubah di tepi saja)
+  if (!sb.querySelector('.sb-edge')) {
+    const edge = document.createElement('div');
+    edge.className = 'sb-edge';
+    edge.title = 'Buka / tutup menu';
+    edge.setAttribute('role', 'button');
+    edge.setAttribute('tabindex', '0');
+    edge.setAttribute('aria-label', 'Buka / tutup menu');
+    const toggle = () => { if (isDesk()) (sb.classList.contains('peek') ? close() : open()); };
+    edge.addEventListener('click', toggle);
+    edge.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggle(); } });
+    sb.appendChild(edge);
+  }
   document.addEventListener('keydown', e => { if (e.key === 'Escape' && sb.classList.contains('peek') && isDesk()) close(); });
   try { if (isDesk() && localStorage.getItem(SB_KEY) === '1') open(); } catch {}
 
