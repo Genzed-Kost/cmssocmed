@@ -1,5 +1,13 @@
 [
   {
+    "id": "mwji3ll07m4hg",
+    "user": "Umar",
+    "role": "Publisher",
+    "action": "logout",
+    "target": "keluar dari sistem",
+    "timestamp": "2026-11-16T16:51:43.236Z"
+  },
+  {
     "id": "mwji0yotrn2b2",
     "user": "Umar",
     "role": "Publisher",
@@ -3990,13 +3998,5 @@
     "action": "login",
     "target": "masuk ke sistem sebagai Admin",
     "timestamp": "2026-06-29T04:02:27.229Z"
-  },
-  {
-    "id": "mqyovne6xwa0d",
-    "user": "Admin",
-    "role": "Admin",
-    "action": "update statistik",
-    "target": "33 Official Instagram — Jun 2026",
-    "timestamp": "2026-06-29T03:59:48.270Z"
   }
 ]
