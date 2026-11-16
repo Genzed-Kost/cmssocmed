@@ -1,5 +1,13 @@
 [
   {
+    "id": "mwj2ekmrv1ssx",
+    "user": "Umar",
+    "role": "Publisher",
+    "action": "login",
+    "target": "masuk ke sistem sebagai Publisher",
+    "timestamp": "2026-11-16T09:32:21.363Z"
+  },
+  {
     "id": "mwj26q5jj9boe",
     "user": "Umar",
     "role": "Publisher",
@@ -3990,13 +3998,5 @@
     "action": "tambah anggota",
     "target": "Pak Arul (TA Sesneg)",
     "timestamp": "2026-06-25T18:00:18.989Z"
-  },
-  {
-    "id": "mqtshgnd8a1nx",
-    "user": "Admin",
-    "role": "Admin",
-    "action": "tambah anggota",
-    "target": "Haji Ismail (Ketua)",
-    "timestamp": "2026-06-25T17:41:53.929Z"
   }
 ]
