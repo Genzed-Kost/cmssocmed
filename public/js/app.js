@@ -1525,30 +1525,7 @@ function renderDashTicker() {
   const todayStr = scYmd(new Date());   // tanggal lokal (bukan UTC)
   const items    = [];
 
-  // 1. Bank of Contents: semua item yang belum lewat atau hari ini
-  (state.bankKonten || []).forEach(b => {
-    if (!b.publishDate || b.publishDate < todayStr) return;
-    const acctLabel = getAccounts().find(a => a.id === b.account)?.name || b.account || '';
-    const daysLeft  = Math.round((new Date(b.publishDate) - new Date(todayStr)) / 86400000);
-    const when      = daysLeft === 0 ? 'Hari ini' : daysLeft === 1 ? 'Besok' : fmtDate(b.publishDate);
-    items.push(`📋 <strong>${esc(b.title || 'Bank Konten')}</strong>${b.creator ? ` · ${esc(b.creator)}` : ''}${acctLabel ? ` · ${esc(acctLabel)}` : ''} — ${when}`);
-  });
-
-  // 2. Planner: format Liputan, Podcast, Monolog yang belum selesai
-  const tickerFormats = ['Liputan', 'Podcast', 'Monolog', 'Short'];
-  const doneStatus    = ['Published', 'Done', 'Drop'];
-  (state.contents || []).forEach(c => {
-    if (!c.publishDate || c.publishDate < todayStr) return;
-    if (doneStatus.includes(c.status)) return;
-    if (!tickerFormats.includes(c.format)) return;
-    const daysLeft = Math.round((new Date(c.publishDate) - new Date(todayStr)) / 86400000);
-    const when     = daysLeft === 0 ? 'Hari ini' : daysLeft === 1 ? 'Besok' : fmtDate(c.publishDate);
-    const icon     = c.format === 'Podcast' ? '🎙' : c.format === 'Monolog' ? '🎤' : c.format === 'Liputan' ? '📰' : '📱';
-    const crTxt = Array.isArray(c.creator) ? c.creator.join(', ') : (c.creator || '');
-    items.push(`${icon} <strong>${esc(c.title || 'Konten')}</strong>${crTxt ? ` · ${esc(crTxt)}` : ''} [${esc(c.format)}] — ${when}${c.publishTime ? ' ⏰ ' + esc(c.publishTime) : ''}`);
-  });
-
-  // 3. Stock Contents (urutan program dari Daftar Program):
+  // Ticker hanya menampilkan Stock Contents
   //    📅 tanggal tayang yang belum lewat + 🎬 jadwal produksi yang belum selesai
   const whenTxt = ymd => {
     const dl = Math.round((scParse(ymd) - scParse(todayStr)) / 86400000);
