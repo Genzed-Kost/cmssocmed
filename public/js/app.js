@@ -8694,16 +8694,18 @@ function initSidebarNav() {
   sb.querySelectorAll('.nav-item').forEach(a => { if (!a.title) a.title = a.textContent.trim(); });
   // Komputer: KLIK sidebar ramping untuk membuka (bukan otomatis saat kursor lewat).
   // Ikon menu di jalur ramping tetap bisa diklik langsung untuk pindah halaman.
-  const open  = () => { sb.classList.add('peek'); sb.classList.remove('collapsed'); };
-  const close = () => { sb.classList.remove('peek'); sb.classList.add('collapsed'); };
+  // Terbuka → konten menyusut (seperti dulu) dan tetap terbuka sampai sidebar diklik lagi.
+  const SB_KEY = 'cms_sidebar_open';
+  const save  = on => { try { localStorage.setItem(SB_KEY, on ? '1' : '0'); } catch {} };
+  const open  = () => { sb.classList.add('peek'); sb.classList.remove('collapsed'); save(true); };
+  const close = () => { sb.classList.remove('peek'); sb.classList.add('collapsed'); save(false); };
   sb.addEventListener('click', e => {
     if (!isDesk()) return;
-    if (e.target.closest('.nav-item')) { close(); return; }        // pilih menu → kembali ramping
-    if (sb.classList.contains('collapsed')) open();                  // klik area sidebar → buka
+    if (e.target.closest('.nav-item, a, button, input, select')) return;   // menu & tombol berfungsi biasa
+    sb.classList.contains('peek') ? close() : open();                      // klik area sidebar → buka / tutup
   });
-  // Klik di luar sidebar / tombol Esc → tutup
-  document.addEventListener('click', e => { if (isDesk() && sb.classList.contains('peek') && !sb.contains(e.target)) close(); });
-  document.addEventListener('keydown', e => { if (e.key === 'Escape' && sb.classList.contains('peek')) close(); });
+  document.addEventListener('keydown', e => { if (e.key === 'Escape' && sb.classList.contains('peek') && isDesk()) close(); });
+  try { if (isDesk() && localStorage.getItem(SB_KEY) === '1') open(); } catch {}
 
   // HP: tab tepi kiri + latar gelap + usap
   const setMobile = on => { sb.classList.toggle('mobile-open', on); document.body.classList.toggle('sb-mobile-open', on); };

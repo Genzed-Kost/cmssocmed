@@ -3906,8 +3906,8 @@ ul { list-style: none; }
     content: ''; position: absolute; top: 50%; right: 6px; width: 3px; height: 36px;
     border-radius: 3px; background: rgba(255,255,255,.18); transform: translateY(-50%);
   }
-  .sidebar.peek { box-shadow: 12px 0 40px rgba(2,6,23,.35); }
-  .sidebar.peek ~ .main-wrap { margin-left: 60px; }
+  .sidebar.peek { box-shadow: 4px 0 24px rgba(0,0,0,.18); }
+  .sidebar.peek ~ .main-wrap { margin-left: var(--sidebar-w); }   /* konten menyusut saat sidebar terbuka */
 }
 .sb-edge-tab, .sb-backdrop { display: none; }
 @media (max-width: 680px) {
@@ -3930,4 +3930,10 @@ ul { list-style: none; }
   .sidebar.collapsed:hover { background: #111c33; }
   .sidebar.collapsed:hover::after { background: rgba(255,255,255,.45); }
   .sidebar.collapsed .nav-item[title] { position: relative; }
+}
+
+/* Sidebar terbuka: area kosong bisa diklik untuk menutup kembali */
+@media (min-width: 681px) {
+  .sidebar.peek { cursor: w-resize; }
+  .sidebar.peek .nav-item, .sidebar.peek a, .sidebar.peek button { cursor: pointer; }
 }
