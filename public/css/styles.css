@@ -4068,3 +4068,23 @@ ul { list-style: none; }
 .anl-empty { font-size: .76rem; color: var(--muted); margin: 0; }
 .anl-back { align-self: flex-start; border: 0; background: transparent; color: var(--blue); font: inherit; font-size: .7rem; font-weight: 700; cursor: pointer; padding: 0; }
 @media (max-width: 680px) { .anl-kpis { grid-template-columns: 1fr 1fr; } }
+
+/* ── Platform Analytics: kolom Analisis Singkat di kanan, sejajar header ──
+   Kiri: header (judul + dropdown akun sejajar kartu X) + 5 kartu platform.
+   Kanan: Analisis Singkat dengan header sejajar header kiri; tinggi mengikuti
+   kartu (tidak memanjang), isi bisa digulir.                                */
+.anlp-wrap { display: grid; grid-template-columns: minmax(0, 1fr); }
+.anlp-main { min-width: 0; display: flex; flex-direction: column; }
+.anlp-grid { grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); flex: 1; }
+.anlp-analysis { grid-column: auto; padding: 0; gap: 0; display: flex; flex-direction: column; border-top: 1px solid var(--bd); min-height: 0; }
+.anl-head { padding: 14px 18px; border-bottom: 1px solid var(--bd); min-height: 61px; box-sizing: border-box; }
+.anl-body { padding: 12px 18px 14px; display: flex; flex-direction: column; gap: 10px; min-height: 0; }
+@media (min-width: 1200px) {
+  .anlp-wrap { grid-template-columns: minmax(0, 1fr) minmax(320px, 32%); }
+  .anlp-grid { grid-template-columns: repeat(5, minmax(0, 1fr)); }
+  .anlp-analysis { border-top: 0; border-left: 1px solid var(--bd); position: relative; }
+  /* Tinggi kolom kanan = tinggi kolom kiri; isi lebih panjang digulir */
+  .anlp-analysis { height: 0; min-height: 100%; }
+  .anl-body { flex: 1; overflow-y: auto; scrollbar-width: thin; }
+}
+.anlp-header, .anl-head { min-height: 62px; box-sizing: border-box; }

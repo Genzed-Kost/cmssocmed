@@ -2333,7 +2333,8 @@ function renderAnalyticsPanel() {
         </div>
       </div>
     </div>`;
-  }).join('') + `<div class="anlp-analysis" id="anlpAnalysis">${renderAnlAnalysis(acctId)}</div>`;
+  }).join('');
+  if ($('anlpAnalysis')) $('anlpAnalysis').innerHTML = renderAnlAnalysis(acctId);
 
   grid.querySelectorAll('.anlp-card[data-plat]').forEach(card => {
     const pick = e => {
@@ -2369,16 +2370,16 @@ function renderAnlAnalysis(acctId) {
       er: er.length ? er.reduce((a, b) => a + b, 0) / er.length : null, best };
   });
   const withData = stat.filter(x => x.last);
-  const head = t => `<div class="anl-head"><span class="anl-title">🧠 ${t}</span><span class="anl-acct">${esc(acct)}</span></div>`;
+  const head = t => `<div class="anl-head"><span class="anl-title">🧠 ${t}</span><span class="anl-acct">${esc(acct)}</span></div><div class="anl-body">`;
   if (!withData.length) return head('Analisis Singkat') +
-    `<p class="anl-empty">Belum ada data statistik untuk akun ini. Isi data di halaman <a href="#statistics">Statistik</a>.</p>`;
+    `<p class="anl-empty">Belum ada data statistik untuk akun ini. Isi data di halaman <a href="#statistics">Statistik</a>.</p></div>`;
 
   // ── Fokus satu platform ──
   const focus = state.anlFocusPlat && stat.find(x => x.pid === state.anlFocusPlat);
   if (focus) {
     const x = focus;
     if (!x.last) return head(`Analisis ${x.pm.label}`) +
-      `<p class="anl-empty">Belum ada data ${esc(x.pm.label)} untuk akun ini.</p><button class="anl-back" data-anl-reset>← Ringkasan semua platform</button>`;
+      `<p class="anl-empty">Belum ada data ${esc(x.pm.label)} untuk akun ini.</p><button class="anl-back" data-anl-reset>← Ringkasan semua platform</button></div>`;
     const trend = x.rows.slice(-3).map(r => +(r[x.pm.viewKey] || 0));
     const naik  = trend.length === 3 && trend[2] > trend[1] && trend[1] > trend[0];
     const turun = trend.length === 3 && trend[2] < trend[1] && trend[1] < trend[0];
@@ -2399,7 +2400,7 @@ function renderAnlAnalysis(acctId) {
         <li>${naik ? '🔥 Views naik 3 bulan berturut-turut' : turun ? '⚠️ Views turun 3 bulan berturut-turut' : '↔️ Tren views 3 bulan terakhir naik-turun'}</li>
         ${tips.map(t => `<li>💡 ${t}</li>`).join('')}
       </ul>
-      <button class="anl-back" data-anl-reset>← Ringkasan semua platform</button>`;
+      <button class="anl-back" data-anl-reset>← Ringkasan semua platform</button></div>`;
   }
 
   // ── Ringkasan semua platform ──
@@ -2429,7 +2430,7 @@ function renderAnlAnalysis(acctId) {
         `<li><span class="anl-dot" style="background:${x.pm.color}"></span>${esc(x.pm.label)}: ${fmtNum(x.views)} views ${chip(x.viewsChg)}</li>`).join('')}
       ${tips.map(t => `<li>💡 ${esc(t)}</li>`).join('')}
     </ul>
-    <div class="anl-hint">Klik kartu platform untuk analisis detail.</div>`;
+    <div class="anl-hint">Klik kartu platform untuk analisis detail.</div></div>`;
 }
 
 /* ── Dashboard Planner Sections ─────────────────────────────────────────── */
