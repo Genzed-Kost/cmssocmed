@@ -147,7 +147,7 @@
         "totalLikes": 8906,
         "totalComments": 5584,
         "totalEngagement": 14490,
-        "erPct": 2.94,
+        "erPct": 2.24,
         "watchHours": 4270,
         "impressions": 157351,
         "adImpressions": 33360,
@@ -164,7 +164,7 @@
         "totalLikes": 6979,
         "totalComments": 4624,
         "totalEngagement": 11603,
-        "erPct": 1.68,
+        "erPct": 1.69,
         "watchHours": 24817,
         "impressions": 1636766,
         "adImpressions": 193804,
@@ -181,7 +181,7 @@
         "totalLikes": 6856,
         "totalComments": 5854,
         "totalEngagement": 12710,
-        "erPct": 1.84,
+        "erPct": 1.59,
         "watchHours": 6106,
         "impressions": 222647,
         "adImpressions": 49118,
@@ -198,7 +198,7 @@
         "totalLikes": 1121,
         "totalComments": 290,
         "totalEngagement": 1411,
-        "erPct": 0.5,
+        "erPct": 0.25,
         "watchHours": 4214,
         "impressions": 225165,
         "adImpressions": 23977,
@@ -216,7 +216,8 @@
         "totalComments": 582,
         "totalEngagement": 8944,
         "watchHours": 18581,
-        "impressions": 1318056
+        "impressions": 1318056,
+        "erPct": 0.81
       },
       {
         "month": "2026-06",
@@ -227,7 +228,8 @@
         "totalLikes": 6525,
         "totalComments": 1136,
         "totalEngagement": 8696,
-        "watchHours": 18183
+        "watchHours": 18183,
+        "erPct": 0.8
       },
       {
         "month": "2026-07",
@@ -238,7 +240,7 @@
         "subsGained": 5933,
         "totalComments": 0,
         "totalEngagement": 37545,
-        "erPct": 0,
+        "erPct": 0.87,
         "watchHours": 31700,
         "impressions": 0,
         "adImpressions": 0,
@@ -254,7 +256,7 @@
         "totalLikes": 22384,
         "totalComments": 606,
         "totalEngagement": 23957,
-        "erPct": 0,
+        "erPct": 2.28,
         "watchHours": 18743,
         "impressions": 0,
         "adImpressions": 87371,
@@ -272,7 +274,8 @@
         "totalEngagement": 16852,
         "watchHours": 11797,
         "adImpressions": 107141,
-        "peakViews": 0
+        "peakViews": 0,
+        "erPct": 2.11
       },
       {
         "month": "2026-10",
@@ -286,7 +289,8 @@
         "totalEngagement": 23130,
         "watchHours": 10536,
         "adImpressions": 71164,
-        "peakViews": 0
+        "peakViews": 0,
+        "erPct": 2.59
       },
       {
         "month": "2026-11",
@@ -299,7 +303,8 @@
         "totalComments": 290,
         "totalEngagement": 11076,
         "watchHours": 5605,
-        "adImpressions": 28713
+        "adImpressions": 28713,
+        "erPct": 1.92
       }
     ],
     "tiktok": [
@@ -381,7 +386,7 @@
         "totalComments": 18535,
         "totalShares": 5685,
         "totalEngagement": 249008,
-        "erPct": 5.08
+        "erPct": 4.75
       },
       {
         "month": "2025-10",
@@ -508,7 +513,8 @@
         "totalLikes": 34099,
         "totalComments": 719,
         "totalShares": 1462,
-        "totalEngagement": 36280
+        "totalEngagement": 36280,
+        "erPct": 3.02
       },
       {
         "month": "2026-06",
@@ -523,7 +529,8 @@
         "totalLikes": 462361,
         "totalComments": 13822,
         "totalShares": 28631,
-        "totalEngagement": 475949
+        "totalEngagement": 475949,
+        "erPct": 7.1
       },
       {
         "month": "2026-07",
@@ -538,7 +545,8 @@
         "totalLikes": 176236,
         "totalComments": 8487,
         "totalShares": 8861,
-        "totalEngagement": 193584
+        "totalEngagement": 193584,
+        "erPct": 6.76
       },
       {
         "month": "2026-08",
@@ -553,7 +561,8 @@
         "totalLikes": 183076,
         "totalComments": 9427,
         "totalShares": 8290,
-        "totalEngagement": 200793
+        "totalEngagement": 200793,
+        "erPct": 6.27
       },
       {
         "month": "2026-09",
@@ -568,7 +577,8 @@
         "totalLikes": 37634,
         "totalComments": 2699,
         "totalShares": 3486,
-        "totalEngagement": 43819
+        "totalEngagement": 43819,
+        "erPct": 4.99
       },
       {
         "month": "2026-10",
@@ -583,7 +593,8 @@
         "totalLikes": 30131,
         "totalComments": 1319,
         "totalShares": 1765,
-        "totalEngagement": 33215
+        "totalEngagement": 33215,
+        "erPct": 5.45
       }
     ],
     "facebook": [
@@ -1103,7 +1114,7 @@
         "updatedBy": "Admin"
       },
       "tiktok": {
-        "updatedAt": "2026-11-16T12:27:21.481Z",
+        "updatedAt": "2026-11-16T12:37:06.087Z",
         "updatedBy": "Admin"
       }
     },
@@ -1266,7 +1277,8 @@
         "totalEngagement": 110697,
         "watchHours": 10279,
         "impressions": 528154,
-        "peakViews": 48143
+        "peakViews": 48143,
+        "erPct": 40.33
       },
       {
         "week": "2026-W24",
@@ -1280,7 +1292,8 @@
         "totalEngagement": 99152,
         "watchHours": 3375,
         "impressions": 195225,
-        "adImpressions": 23977
+        "adImpressions": 23977,
+        "erPct": 34.54
       },
       {
         "week": "2026-W25",
@@ -1289,7 +1302,8 @@
         "subsEOM": 69743,
         "subsGained": 420,
         "totalEngagement": 112074,
-        "watchHours": 2581
+        "watchHours": 2581,
+        "erPct": 43.24
       },
       {
         "week": "2026-W26",
@@ -1301,7 +1315,8 @@
         "totalComments": 317,
         "totalEngagement": 2439,
         "watchHours": 2250,
-        "impressions": 113155
+        "impressions": 113155,
+        "erPct": 1.03
       },
       {
         "week": "2026-W27",
@@ -1313,7 +1328,8 @@
         "totalComments": 138,
         "totalEngagement": 1049,
         "watchHours": 4247,
-        "impressions": 220614
+        "impressions": 220614,
+        "erPct": 0.5
       },
       {
         "week": "2026-W28",
@@ -1325,7 +1341,8 @@
         "totalComments": 1088,
         "totalEngagement": 17523,
         "watchHours": 11640,
-        "impressions": 276621
+        "impressions": 276621,
+        "erPct": 0.84
       },
       {
         "week": "2026-W29",
@@ -1335,7 +1352,8 @@
         "subsGained": 761,
         "totalLikes": 8740,
         "totalComments": 562,
-        "totalEngagement": 9816
+        "totalEngagement": 9816,
+        "erPct": 0.67
       },
       {
         "week": "2026-W30",
@@ -1349,7 +1367,8 @@
         "watchHours": 2799,
         "impressions": 230353,
         "adImpressions": 0,
-        "peakViews": 0
+        "peakViews": 0,
+        "erPct": 0.6
       },
       {
         "week": "2026-W31",
@@ -1362,7 +1381,8 @@
         "totalEngagement": 6569,
         "watchHours": 2704,
         "impressions": 167972,
-        "peakViews": 0
+        "peakViews": 0,
+        "erPct": 2.76
       }
     ],
     "tiktok_w": [
@@ -1378,7 +1398,8 @@
         "totalLikes": 124400,
         "totalComments": 1952,
         "totalShares": 10608,
-        "totalEngagement": 136960
+        "totalEngagement": 136960,
+        "erPct": 8.31
       },
       {
         "week": "2026-W24",
@@ -1388,7 +1409,8 @@
         "followersGained": 294,
         "totalViewers": 410281,
         "totalLikes": 37841,
-        "totalEngagement": 40906
+        "totalEngagement": 40906,
+        "erPct": 5.96
       },
       {
         "week": "2026-W25",
@@ -1399,7 +1421,8 @@
         "totalLikes": 97782,
         "totalComments": 2264,
         "totalShares": 6110,
-        "totalEngagement": 106156
+        "totalEngagement": 106156,
+        "erPct": 6.47
       },
       {
         "week": "2026-W26",
@@ -1410,7 +1433,8 @@
         "totalLikes": 113790,
         "totalComments": 5633,
         "totalShares": 4605,
-        "totalEngagement": 124028
+        "totalEngagement": 124028,
+        "erPct": 6.79
       },
       {
         "week": "2026-W27",
@@ -1422,7 +1446,8 @@
         "totalLikes": 35423,
         "totalComments": 2005,
         "totalShares": 1561,
-        "totalEngagement": 38989
+        "totalEngagement": 38989,
+        "erPct": 5.14
       },
       {
         "week": "2026-W28",
@@ -1434,7 +1459,8 @@
         "totalLikes": 18628,
         "totalComments": 554,
         "totalShares": 1026,
-        "totalEngagement": 20208
+        "totalEngagement": 20208,
+        "erPct": 6.43
       },
       {
         "week": "2026-W29",
@@ -1446,7 +1472,8 @@
         "totalLikes": 59489,
         "totalComments": 1948,
         "totalShares": 1984,
-        "totalEngagement": 63421
+        "totalEngagement": 63421,
+        "erPct": 7.88
       },
       {
         "week": "2026-W30",
@@ -1457,7 +1484,8 @@
         "totalLikes": 42951,
         "totalComments": 1845,
         "totalShares": 2144,
-        "totalEngagement": 46941
+        "totalEngagement": 46941,
+        "erPct": 8.6
       },
       {
         "week": "2026-W31",
@@ -1468,7 +1496,24 @@
         "totalLikes": 39782,
         "totalComments": 1211,
         "totalShares": 3321,
-        "totalEngagement": 44314
+        "totalEngagement": 44314,
+        "erPct": 4.81
+      },
+      {
+        "week": "2026-W45",
+        "jmlVideo": 30,
+        "totalVideoViews": 209363,
+        "profileViews": 546,
+        "followersEOM": 43410,
+        "followersGained": 112,
+        "totalViewers": 168814,
+        "newViewers": 86416,
+        "returningViewers": 82398,
+        "totalLikes": 11146,
+        "totalComments": 603,
+        "totalShares": 953,
+        "totalEngagement": 12702,
+        "erPct": 6.07
       }
     ]
   },
