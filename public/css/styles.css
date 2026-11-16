@@ -3956,3 +3956,25 @@ ul { list-style: none; }
   .sb-edge:hover::before, .sb-edge:focus-visible::before { height: 100%; top: 50%; background: var(--blue); }
 }
 @media (max-width: 680px) { .sb-edge { display: none; } }
+
+/* ── Sidebar: kurs USD/IDR & IHSG (live, berkedip saat diperbarui) ── */
+.sb-market { border-bottom: 1px solid var(--sb-bd); margin-bottom: 10px; padding-bottom: 4px; }
+.sb-market .sb-rate { border-bottom: 0; margin: 0; padding: 5px 4px; border-radius: 8px; }
+.sb-rate-label { display: inline-flex; align-items: center; gap: 6px; }
+.sb-rate-right { display: inline-flex; flex-direction: column; align-items: flex-end; line-height: 1.15; }
+.sb-market .sb-rate-value { font-size: .9rem; }
+.sb-rate-chg { font-size: .58rem; font-weight: 800; color: #94a3b8; font-family: inherit; }
+.sb-rate-chg.up { color: #4ade80; }
+.sb-rate-chg.down { color: #f87171; }
+#ihsgValue { color: #e2e8f0; }
+.sb-live { width: 6px; height: 6px; border-radius: 50%; background: #4ade80; display: inline-block; animation: sbLive 1.4s ease-in-out infinite; }
+@keyframes sbLive { 0%, 100% { opacity: 1; box-shadow: 0 0 0 0 rgba(74,222,128,.6); } 50% { opacity: .25; box-shadow: 0 0 0 4px rgba(74,222,128,0); } }
+.sb-rate.flash-up   { animation: sbFlashUp 1.6s ease; }
+.sb-rate.flash-down { animation: sbFlashDown 1.6s ease; }
+.sb-rate.flash-same { animation: sbFlashSame 1.6s ease; }
+.sb-rate.flash-up .sb-rate-value, .sb-rate.flash-down .sb-rate-value, .sb-rate.flash-same .sb-rate-value { animation: sbBlink .4s steps(2) 3; }
+@keyframes sbFlashUp   { 0%, 60% { background: rgba(74,222,128,.22); } 100% { background: transparent; } }
+@keyframes sbFlashDown { 0%, 60% { background: rgba(248,113,113,.22); } 100% { background: transparent; } }
+@keyframes sbFlashSame { 0%, 60% { background: rgba(96,165,250,.18); } 100% { background: transparent; } }
+@keyframes sbBlink { 50% { opacity: .2; } }
+@media (prefers-reduced-motion: reduce) { .sb-live, .sb-rate[class*="flash-"], .sb-rate[class*="flash-"] .sb-rate-value { animation: none !important; } }

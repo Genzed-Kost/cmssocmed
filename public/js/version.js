@@ -17,6 +17,7 @@ window.APP_INFO = {
         '📅 Stock Contents: kalender, jam produksi, Daftar Program',
         '📰 Info Presiden: berita berganti tiap refresh (jeda 5 menit)',
         '🖨 PDF Laporan Planner lebih rapi + nomor halaman di setiap halaman',
+        '📈 Kurs USD/IDR & IHSG live di sidebar (refresh 3 menit, berkedip saat berubah)',
       ],
     },
     {

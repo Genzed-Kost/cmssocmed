@@ -4510,46 +4510,90 @@ function startClock() {
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════
-   KURS USD/IDR — fetchExchangeRate (frankfurter.app, refresh tiap 5 mnt)
+   KURS USD/IDR & IHSG — refresh tiap 3 menit, angka berkedip saat diperbarui
+   Sumber utama: /api/market (Cloudflare Function → Yahoo Finance)
+   Cadangan USD/IDR: API kurs publik (bila /api/market gagal)
    ══════════════════════════════════════════════════════════════════════════ */
-async function fetchExchangeRate() {
-  const CACHE_KEY = 'cms_usd_idr_v1';
+const MARKET_REFRESH = 3 * 60 * 1000;
+const MARKET_CACHE   = 'cms_market_v1';
 
-  const _show = (rate) => {
-    const el = document.getElementById('rateValue');
-    if (el) el.textContent = 'Rp ' + Math.round(rate).toLocaleString('id-ID');
-    // widget selalu visible (tidak perlu remove hidden lagi)
-  };
+function _showMarket(key, valueText, changePct) {
+  const ids  = key === 'usd' ? ['rateValue', 'rateChg', 'rateRowUsd'] : ['ihsgValue', 'ihsgChg', 'rateRowIhsg'];
+  const vEl  = document.getElementById(ids[0]);
+  const cEl  = document.getElementById(ids[1]);
+  const row  = document.getElementById(ids[2]);
+  if (!vEl) return;
+  const prevText = vEl.textContent;
+  vEl.textContent = valueText;
+  if (cEl) {
+    if (changePct == null || isNaN(changePct)) { cEl.textContent = ''; cEl.className = 'sb-rate-chg'; }
+    else {
+      const up = changePct >= 0;
+      cEl.textContent = `${up ? '▲' : '▼'} ${Math.abs(changePct).toFixed(2)}%`;
+      cEl.className = 'sb-rate-chg ' + (up ? 'up' : 'down');
+    }
+  }
+  // Kedip: hijau bila naik, merah bila turun, biru bila sama/baru dimuat
+  if (row) {
+    const n = s => +String(s).replace(/[^\d,]/g, '').replace(',', '.');
+    const dir = prevText && prevText !== '...' && n(valueText) !== n(prevText)
+      ? (n(valueText) > n(prevText) ? 'up' : 'down') : 'same';
+    row.classList.remove('flash-up', 'flash-down', 'flash-same');
+    void row.offsetWidth;   // restart animasi
+    row.classList.add('flash-' + dir);
+  }
+}
 
-  // Tampilkan cache dulu agar widget muncul instan
+async function fetchExchangeRate() {   // nama lama dipertahankan (dipanggil saat init)
+  const fmtUsd  = v => 'Rp ' + Math.round(v).toLocaleString('id-ID');
+  const fmtIhsg = v => v.toLocaleString('id-ID', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
+  // Tampilkan cache dulu agar langsung terisi
   try {
-    const c = JSON.parse(localStorage.getItem(CACHE_KEY) || 'null');
-    if (c?.rate && c.rate > 1000) _show(c.rate);
+    const c = JSON.parse(localStorage.getItem(MARKET_CACHE) || 'null');
+    if (c && document.getElementById('rateValue')?.textContent === '...') {
+      if (c.usd?.price) _showMarket('usd', fmtUsd(c.usd.price), c.usd.changePct);
+      if (c.ihsg?.price) _showMarket('ihsg', fmtIhsg(c.ihsg.price), c.ihsg.changePct);
+    }
   } catch {}
 
-  // Coba 3 API secara berurutan
-  const APIS = [
-    { url: 'https://open.er-api.com/v6/latest/USD',          get: d => d?.rates?.IDR },
-    { url: 'https://api.frankfurter.app/latest?from=USD&to=IDR', get: d => d?.rates?.IDR },
-    { url: 'https://cdn.jsdelivr.net/npm/@fawazahmed0/currency-api@latest/v1/currencies/usd.json', get: d => d?.usd?.idr }
-  ];
+  let usd = null, ihsg = null;
+  try {
+    const ctrl = new AbortController(); const tid = setTimeout(() => ctrl.abort(), 8000);
+    const r = await fetch('/api/market', { signal: ctrl.signal, headers: { Accept: 'application/json' } });
+    clearTimeout(tid);
+    if (r.ok && (r.headers.get('content-type') || '').includes('json')) {
+      const d = await r.json();
+      if (d.usdidr?.price > 1000) usd = d.usdidr;
+      if (d.ihsg?.price > 100)    ihsg = d.ihsg;
+    }
+  } catch {}
 
-  for (const api of APIS) {
-    try {
-      const ctrl = new AbortController();
-      const tid  = setTimeout(() => ctrl.abort(), 5000);
-      const r    = await fetch(api.url, { signal: ctrl.signal });
-      clearTimeout(tid);
-      if (!r.ok) continue;
-      const d    = await r.json();
-      const rate = api.get(d);
-      if (rate && rate > 1000) {
-        _show(rate);
-        localStorage.setItem(CACHE_KEY, JSON.stringify({ rate, ts: Date.now() }));
-        return;
-      }
-    } catch { continue; }
+  // Cadangan USD/IDR
+  if (!usd) {
+    const APIS = [
+      { url: 'https://open.er-api.com/v6/latest/USD',               get: d => d?.rates?.IDR },
+      { url: 'https://api.frankfurter.app/latest?from=USD&to=IDR',  get: d => d?.rates?.IDR },
+      { url: 'https://cdn.jsdelivr.net/npm/@fawazahmed0/currency-api@latest/v1/currencies/usd.json', get: d => d?.usd?.idr },
+    ];
+    for (const api of APIS) {
+      try {
+        const ctrl = new AbortController(); const tid = setTimeout(() => ctrl.abort(), 5000);
+        const r = await fetch(api.url, { signal: ctrl.signal }); clearTimeout(tid);
+        if (!r.ok) continue;
+        const rate = api.get(await r.json());
+        if (rate > 1000) { usd = { price: rate, changePct: null }; break; }
+      } catch {}
+    }
   }
+
+  if (usd)  _showMarket('usd',  fmtUsd(usd.price),  usd.changePct);
+  if (ihsg) _showMarket('ihsg', fmtIhsg(ihsg.price), ihsg.changePct);
+  else if (document.getElementById('ihsgValue')?.textContent === '...') setTxt('ihsgValue', '—');
+  try {
+    const old = JSON.parse(localStorage.getItem(MARKET_CACHE) || 'null') || {};
+    localStorage.setItem(MARKET_CACHE, JSON.stringify({ usd: usd || old.usd, ihsg: ihsg || old.ihsg, ts: Date.now() }));
+  } catch {}
 }
 function showInviteCreatorModal() {
   const cfg = window.db.getConfig();
@@ -9142,7 +9186,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   /* ── Kurs USD/IDR ───────────────────────────────────────────────── */
   fetchExchangeRate();
-  setInterval(fetchExchangeRate, 5 * 60 * 1000);  // refresh tiap 5 menit
+  setInterval(fetchExchangeRate, MARKET_REFRESH);  // refresh tiap 3 menit (kurs USD/IDR & IHSG)
 
   /* ── INIT: Pre-configure dengan default repo jika belum ada config ── */
   if (!window.db.isConfigured()) {

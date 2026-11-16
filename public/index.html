@@ -75,9 +75,15 @@
   <div class="sidebar-footer">
     <!-- Jam Digital — hanya muncul di HP (di PC ada di topbar) -->
     <!-- Kurs USD/IDR di sidebar (PC dan HP) -->
-    <div class="sb-rate">
-      <span class="sb-rate-label">USD / IDR</span>
-      <span class="sb-rate-value" id="rateValue">...</span>
+    <div class="sb-market">
+      <div class="sb-rate" id="rateRowUsd">
+        <span class="sb-rate-label"><i class="sb-live"></i>USD / IDR</span>
+        <span class="sb-rate-right"><span class="sb-rate-value" id="rateValue">...</span><span class="sb-rate-chg" id="rateChg"></span></span>
+      </div>
+      <div class="sb-rate" id="rateRowIhsg">
+        <span class="sb-rate-label"><i class="sb-live"></i>IHSG</span>
+        <span class="sb-rate-right"><span class="sb-rate-value" id="ihsgValue">...</span><span class="sb-rate-chg" id="ihsgChg"></span></span>
+      </div>
     </div>
     <div id="sbClock" class="sb-clock">
       <div class="sb-clock-time">
