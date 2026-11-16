@@ -3199,3 +3199,6 @@ ul { list-style: none; }
 .program-row .form-inp { flex: 1; min-width: 0; padding-top: 6px; padding-bottom: 6px; }
 .program-used { font-size: .7rem; color: var(--muted); white-space: nowrap; }
 .program-row .btn-xs[disabled] { opacity: .35; cursor: default; }
+.sc-dt-row { display: grid; grid-template-columns: 1fr 120px; gap: 8px; }
+.sc-chip-time { font-weight: 700; }
+.sc-chip-prod .sc-chip-time { font-variant-numeric: tabular-nums; }

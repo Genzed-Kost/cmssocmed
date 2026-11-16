@@ -3451,13 +3451,33 @@ function scShiftMonth(n) {
   renderStockCalendar();
 }
 
+/* Teks rentang produksi lengkap dengan jam, mis. "Senin, 16 November 2026 09:00 s/d 12:00"
+   atau "16 Nov 2026 09:00 s/d 18 Nov 2026 17:00". fmt = pemformat tanggal. */
+function scProdText(it, fmt = scFmtLong) {
+  if (!it.prodDate) return '';
+  const t1 = it.prodTime ? ' ' + it.prodTime : '';
+  const t2 = it.prodTimeEnd || '';
+  const multi = it.prodDateEnd && it.prodDateEnd !== it.prodDate;
+  if (multi) return `${fmt(it.prodDate)}${t1} s/d ${fmt(it.prodDateEnd)}${t2 ? ' ' + t2 : ''}`;
+  return `${fmt(it.prodDate)}${t1}${t2 ? ' s/d ' + t2 : ''}`;
+}
+
 function scChipHtml(ev, canEdit) {
   const it = ev.it, col = scColor(it.category);
   const label = ev.kind === 'air' ? '📅' : '🎬';
+  // Jam produksi: hari pertama = jam mulai (dan jam selesai bila 1 hari), hari terakhir = jam selesai
+  let time = '';
+  if (ev.kind === 'prod') {
+    const first = ev.i === 0, last = ev.i === ev.span;
+    if (first && it.prodTime) time = it.prodTime + (ev.span === 0 && it.prodTimeEnd ? '–' + it.prodTimeEnd : '');
+    else if (last && ev.span > 0 && it.prodTimeEnd) time = 's/d ' + it.prodTimeEnd;
+  }
+  const timeHtml = time ? `<b class="sc-chip-time">${esc(time)}</b> ` : '';
   const extra = ev.kind === 'prod' && ev.span > 0 ? ` <small>(${ev.i + 1}/${ev.span + 1})</small>` : '';
-  const tip   = `${it.category || 'Tanpa kelompok'} — ${it.title || '(tanpa judul)'} · ${ev.kind === 'air' ? 'Tayang' : 'Produksi'}`;
+  const tip   = `${it.category || 'Tanpa kelompok'} — ${it.title || '(tanpa judul)'} · ` +
+    (ev.kind === 'air' ? 'Tayang' : 'Produksi ' + scProdText(it));
   return `<div class="sc-chip sc-chip-${ev.kind}" style="--c:${col}" data-id="${esc(it.id)}" data-kind="${ev.kind}"
-    ${canEdit ? 'draggable="true"' : ''} title="${esc(tip)}">${label} ${esc(it.title || '(tanpa judul)')}${extra}</div>`;
+    ${canEdit ? 'draggable="true"' : ''} title="${esc(tip)}">${label} ${timeHtml}${esc(it.title || '(tanpa judul)')}${extra}</div>`;
 }
 
 /* Tampilan HP: semua tanggal yang punya jadwal dalam satu daftar bergulir.
@@ -3602,7 +3622,7 @@ function renderStockCalendar() {
     ? unsched.map(it => `<div class="sc-chip sc-chip-air sc-chip-unsched" style="--c:${scColor(it.category)}" data-id="${esc(it.id)}" data-kind="air"
         ${canEdit ? 'draggable="true"' : ''} title="${esc(it.category || 'Tanpa kelompok')}">
         <b>${esc(it.category || 'Tanpa kelompok')}</b> · ${esc(it.title || '(tanpa judul)')}
-        ${it.prodDate ? `<small> · 🎬 ${esc(it.prodDate)}${it.prodDateEnd ? ' s/d ' + esc(it.prodDateEnd) : ''}</small>` : ''}</div>`).join('')
+        ${it.prodDate ? `<small> · 🎬 ${esc(scProdText(it, d => d))}</small>` : ''}</div>`).join('')
     : `<span class="sc-unsched-empty">Semua stok sudah punya tanggal tayang ✓</span>`;
   if (ul && canEdit) ul.insertAdjacentHTML('beforeend',
     `<span class="sc-unsched-empty">${unsched.length ? 'Seret item ke kalender untuk menjadwalkan tayang.' : ''}</span>`);
@@ -3689,9 +3709,7 @@ function scOpenModal(id = null, date = '') {
 
   if (!canEdit) {
     setTxt('scModalTitle', 'Detail Stock Content');
-    const prod = it.prodDate
-      ? scFmtLong(it.prodDate) + (it.prodDateEnd && it.prodDateEnd !== it.prodDate ? ' s/d ' + scFmtLong(it.prodDateEnd) : '')
-      : '—';
+    const prod = scProdText(it) || '—';
     body.innerHTML = `
       <div><span class="sc-badge" style="--c:${col}">${esc(it.category || 'Tanpa kelompok')}</span></div>
       <div style="font-weight:700;font-size:1rem">${esc(it.title || '(tanpa judul)')}</div>
@@ -3700,7 +3718,7 @@ function scOpenModal(id = null, date = '') {
     foot.innerHTML = `<button type="button" class="btn-sm" onclick="scCloseModal()">Tutup</button>`;
   } else {
     setTxt('scModalTitle', it ? 'Ubah Stock Content' : 'Tambah Stock Content');
-    const v = it || { category: '', title: '', prodDate: '', prodDateEnd: '', airDate: date };
+    const v = it || { category: '', title: '', prodDate: '', prodTime: '', prodDateEnd: '', prodTimeEnd: '', airDate: date };
     body.innerHTML = `
       <div class="form-group">
         <label class="form-label" for="scfCategory">Kelompok</label>
@@ -3711,14 +3729,18 @@ function scOpenModal(id = null, date = '') {
         <label class="form-label" for="scfTitle">Judul Liputan / Podcast</label>
         <input id="scfTitle" type="text" class="form-inp" value="${esc(v.title || '')}" placeholder="Judul…" />
       </div>
-      <div class="form-row-2">
-        <div class="form-group">
-          <label class="form-label" for="scfProd">🎬 Mulai Produksi</label>
+      <div class="form-group">
+        <label class="form-label" for="scfProd">🎬 Mulai Produksi</label>
+        <div class="sc-dt-row">
           <input id="scfProd" type="date" class="form-inp" value="${esc(v.prodDate || '')}" />
+          <input id="scfProdTime" type="time" class="form-inp" value="${esc(v.prodTime || '')}" aria-label="Jam mulai produksi" />
         </div>
-        <div class="form-group">
-          <label class="form-label" for="scfProdEnd">s/d (opsional)</label>
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="scfProdEnd">s/d <span style="font-weight:400;color:var(--muted)">(opsional — kosongkan tanggal bila selesai di hari yang sama)</span></label>
+        <div class="sc-dt-row">
           <input id="scfProdEnd" type="date" class="form-inp" value="${esc(v.prodDateEnd || '')}" />
+          <input id="scfProdTimeEnd" type="time" class="form-inp" value="${esc(v.prodTimeEnd || '')}" aria-label="Jam selesai produksi" />
         </div>
       </div>
       <div class="form-group">
@@ -3743,13 +3765,19 @@ async function scSaveModal(id) {
     category:    $('scfCategory').value,
     title:       $('scfTitle').value.trim(),
     prodDate:    $('scfProd').value,
+    prodTime:    $('scfProdTime').value,
     prodDateEnd: $('scfProdEnd').value,
+    prodTimeEnd: $('scfProdTimeEnd').value,
     airDate:     $('scfAir').value,
   };
   if (!data.title) { toast('Judul wajib diisi', 'error'); $('scfTitle').focus(); return; }
   if (data.prodDateEnd && !data.prodDate) { data.prodDate = data.prodDateEnd; data.prodDateEnd = ''; }
   if (data.prodDateEnd && data.prodDateEnd < data.prodDate) { toast('Tanggal akhir produksi sebelum tanggal mulai', 'error'); return; }
   if (data.prodDateEnd === data.prodDate) data.prodDateEnd = '';
+  if (!data.prodDate) { data.prodTime = ''; data.prodTimeEnd = ''; }
+  if (!data.prodDateEnd && data.prodTime && data.prodTimeEnd && data.prodTimeEnd < data.prodTime) {
+    toast('Jam selesai produksi sebelum jam mulai', 'error'); return;
+  }
 
   $('scfSave').disabled = true;
   let undo;
@@ -3829,7 +3857,7 @@ async function scSendWa() {
       const rows = its.map(it => {
         let line = `  ${no++}. ${it.title||'(tanpa judul)'}`;
         if (showProd && (it.prodDate || it.prodDateEnd))
-          line += ` 🎬 Prod: ${fmtRange(it.prodDate, it.prodDateEnd)}`;
+          line += ` 🎬 Prod: ${it.prodTime || it.prodTimeEnd ? scProdText(it, fmtD) : fmtRange(it.prodDate, it.prodDateEnd)}`;
         line += ` — 📅 Tayang: ${fmtD(it.airDate)}`;
         return line;
       }).join('\n');
