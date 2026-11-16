@@ -1,5 +1,13 @@
 [
   {
+    "id": "mwj86hjqyyzwk",
+    "user": "Admin",
+    "role": "Admin",
+    "action": "update statistik",
+    "target": "Penjaga Harapan TikTok — Sep 2026",
+    "timestamp": "2026-11-16T12:14:01.814Z"
+  },
+  {
     "id": "mwj7v660ysup6",
     "user": "Admin",
     "role": "Admin",
@@ -3990,13 +3998,5 @@
     "action": "login",
     "target": "masuk ke sistem sebagai Admin",
     "timestamp": "2026-06-26T14:07:26.506Z"
-  },
-  {
-    "id": "mquuatxfl8evj",
-    "user": "Umar",
-    "role": "Publisher",
-    "action": "Hapus Bank Konten",
-    "target": "\"Go Prabowo\"",
-    "timestamp": "2026-06-26T11:20:29.955Z"
   }
 ]
