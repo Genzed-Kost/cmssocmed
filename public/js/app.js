@@ -3912,78 +3912,129 @@ function _closeAllAssetDrops() {
   $$('.asset-dropdown').forEach(d => d.classList.add('hidden'));
 }
 
+/* Jenis aset ditebak dari URL → ikon & warna kartu */
+function assetKind(url) {
+  const u = String(url || '').toLowerCase();
+  if (u.includes('drive.google.com/drive/folders')) return { label: 'Folder Drive', icon: '📁', c: '#f59e0b' };
+  if (u.includes('docs.google.com/document'))       return { label: 'Google Docs',  icon: '📄', c: '#2563eb' };
+  if (u.includes('docs.google.com/spreadsheets'))   return { label: 'Google Sheets',icon: '📊', c: '#16a34a' };
+  if (u.includes('docs.google.com/presentation'))   return { label: 'Google Slides',icon: '📽', c: '#ea580c' };
+  if (u.includes('drive.google.com/file'))          return { label: 'File Drive',   icon: '🗂', c: '#0891b2' };
+  if (u.includes('youtube.com') || u.includes('youtu.be')) return { label: 'YouTube', icon: '▶️', c: '#dc2626' };
+  if (u.includes('canva.com'))                      return { label: 'Canva',        icon: '🎨', c: '#7c3aed' };
+  if (u.includes('figma.com'))                      return { label: 'Figma',        icon: '🎨', c: '#db2777' };
+  return { label: 'Tautan', icon: '🔗', c: '#64748b' };
+}
+
 function renderAssets() {
   const sec = $('assetsSection');
   if (!sec) return;
-  const admin  = isAdmin();
-  const files  = state.assets || [];
+  const admin = isAdmin();
+  const files = state.assets || [];
+  const q     = (state.assetSearch || '').toLowerCase();
+  const shown = files.filter(f => !q || `${f.name} ${f.notes || ''}`.toLowerCase().includes(q));
 
-  const filesHtml = files.length === 0
-    ? `<div class="asset-empty"><span>📂</span><p>Belum ada file aset.${admin ? ' Klik "+ Tambah File" untuk mulai.' : ''}</p></div>`
-    : files.map(f => {
-        const url = f.url || '#';
-        return `
-          <div class="asset-folder-item">
-            <a class="asset-folder-link" href="${esc(url)}" target="_blank" rel="noopener" title="${esc(f.name)}">
-              <span class="asset-folder-icon">
-                ${f.emoji
-                  ? `<span style="font-size:1.4rem">${esc(f.emoji)}</span>`
-                  : `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" width="28" height="28"><path d="M22 19a2 2 0 01-2 2H4a2 2 0 01-2-2V5a2 2 0 012-2h5l2 3h9a2 2 0 012 2z" fill="#d1d5db" stroke="#9ca3af"/></svg>`}
-              </span>
-              <span class="asset-folder-name">${esc(f.name)}</span>
-            </a>
-            <div class="asset-menu-wrap">
-              <button class="asset-menu-btn" title="Opsi" onclick="toggleAssetMenu(event,'${f.id}')">
-                <svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16"><circle cx="12" cy="5" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="12" cy="19" r="1.5"/></svg>
-              </button>
-              <div class="asset-dropdown hidden" data-fid="${f.id}">
-                ${admin ? `<button onclick="_closeAllAssetDrops();openEditAssetFile('${f.id}')">✏️ Edit</button>` : ''}
-                <button onclick="_closeAllAssetDrops();openAssetInfo('${f.id}')">ℹ️ Informasi File</button>
-                ${admin ? `<button class="red" onclick="_closeAllAssetDrops();deleteAssetFile('${f.id}')">🗑️ Hapus</button>` : ''}
-              </div>
+  const card = f => {
+    const k   = assetKind(f.url);
+    const url = f.url || '#';
+    const host = (() => { try { return new URL(url).hostname.replace(/^www\./, ''); } catch { return ''; } })();
+    return `
+      <div class="asset-card" style="--ac:${k.c}">
+        <div class="asset-card-top">
+          <span class="asset-card-icon">${f.emoji ? esc(f.emoji) : k.icon}</span>
+          <div class="asset-menu-wrap">
+            <button class="asset-menu-btn" title="Opsi" onclick="toggleAssetMenu(event,'${f.id}')">
+              <svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16"><circle cx="5" cy="12" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="19" cy="12" r="1.6"/></svg>
+            </button>
+            <div class="asset-dropdown hidden" data-fid="${f.id}">
+              <button onclick="_closeAllAssetDrops();copyAssetLink('${esc(url)}')">🔗 Salin Link</button>
+              <button onclick="_closeAllAssetDrops();openAssetInfo('${f.id}')">ℹ️ Informasi</button>
+              ${admin ? `<button onclick="_closeAllAssetDrops();openEditAssetFile('${f.id}')">✏️ Edit</button>
+              <button class="red" onclick="_closeAllAssetDrops();deleteAssetFile('${f.id}')">🗑️ Hapus</button>` : ''}
             </div>
-          </div>`;
-      }).join('');
+          </div>
+        </div>
+        <a class="asset-card-name" href="${esc(url)}" target="_blank" rel="noopener" title="${esc(f.name)}">${esc(f.name)}</a>
+        <div class="asset-card-notes">${f.notes ? esc(f.notes) : '<span class="asset-muted">Tanpa keterangan</span>'}</div>
+        <div class="asset-card-foot">
+          <span class="asset-kind">${k.label}</span>
+          ${f.addedAt ? `<span class="asset-muted" title="${esc(host)}">${fmtDate(f.addedAt.slice(0, 10))}</span>` : ''}
+          <a class="asset-open" href="${esc(url)}" target="_blank" rel="noopener">Buka
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M7 17L17 7M9 7h8v8"/></svg></a>
+        </div>
+      </div>`;
+  };
+
+  const listHtml = files.length === 0
+    ? `<div class="asset-empty-state"><div class="asset-empty-icon">📂</div><b>Belum ada aset</b>
+         <p>${admin ? 'Simpan tautan Google Drive, Docs, atau file lain agar mudah ditemukan tim.' : 'Admin belum menambahkan aset.'}</p>
+         ${admin ? '<button class="btn-sm blue" onclick="openAddAssetFile()">+ Tambah Aset</button>' : ''}</div>`
+    : shown.length === 0
+      ? `<div class="asset-empty-state"><div class="asset-empty-icon">🔍</div><b>Tidak ditemukan</b><p>Tidak ada aset yang cocok dengan "${esc(state.assetSearch)}".</p></div>`
+      : `<div class="asset-grid2">${shown.map(card).join('')}</div>`;
 
   sec.innerHTML = `
-    ${admin ? `<div style="margin-bottom:14px"><button class="btn blue" onclick="openAddAssetFile()">+ Tambah File</button></div>` : ''}
-    <div class="asset-grid">${filesHtml}</div>
+    <div class="asset-head">
+      <div>
+        <div class="asset-head-title">Aset Tim</div>
+        <div class="asset-head-sub">${files.length} aset tersimpan · tautan Drive, dokumen, dan materi produksi</div>
+      </div>
+      <div class="asset-head-tools">
+        <label class="asset-search">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          <input id="assetSearchInp" type="search" placeholder="Cari aset…" value="${esc(state.assetSearch || '')}"
+            oninput="state.assetSearch=this.value;renderAssets();const i=$('assetSearchInp');i.focus();i.setSelectionRange(i.value.length,i.value.length)" />
+        </label>
+        ${admin ? '<button class="btn-sm blue" onclick="openAddAssetFile()">+ Tambah Aset</button>' : ''}
+      </div>
+    </div>
+    ${listHtml}
 
-    <!-- Modal tambah/edit file -->
-    <div id="assetFileModal" class="modal-overlay hidden">
-      <div class="modal-box" style="max-width:420px">
-        <h3 id="assetFileModalTitle" class="modal-title">Tambah File</h3>
-        <input type="hidden" id="assetFileEditId">
-        <div class="form-group">
-          <label class="form-label">Emoji / Ikon <span style="color:var(--muted);font-weight:400">(opsional, mis. 🎬 📸 🎨)</span></label>
-          <input id="assetFileEmoji" class="form-input" placeholder="📁" maxlength="4" style="width:70px">
+    <!-- Modal tambah/edit aset -->
+    <div id="assetFileModal" class="modal-overlay hidden" onclick="if(event.target===this) closeAssetFileModal()">
+      <div class="modal asset-modal">
+        <div class="asset-modal-head">
+          <span id="assetFileModalTitle" class="stat-edit-title">Tambah Aset</span>
+          <button class="modal-close-btn" onclick="closeAssetFileModal()" aria-label="Tutup">✕</button>
         </div>
-        <div class="form-group">
-          <label class="form-label">Nama File *</label>
-          <input id="assetFileName" class="form-input" placeholder="mis. Stock Video, Foto PH, Logo...">
+        <div class="asset-modal-body">
+          <input type="hidden" id="assetFileEditId">
+          <div class="asset-form-row">
+            <div class="form-group" style="width:76px">
+              <label class="form-label" for="assetFileEmoji">Ikon</label>
+              <input id="assetFileEmoji" class="form-inp" placeholder="📁" maxlength="4" style="text-align:center">
+            </div>
+            <div class="form-group" style="flex:1">
+              <label class="form-label" for="assetFileName">Nama *</label>
+              <input id="assetFileName" class="form-inp" placeholder="mis. Stock Video, Foto PH, Logo…">
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="assetFileUrl">Link Drive / URL *</label>
+            <input id="assetFileUrl" class="form-inp" type="url" placeholder="https://drive.google.com/…">
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="assetFileNotes">Keterangan</label>
+            <input id="assetFileNotes" class="form-inp" placeholder="Opsional — isi singkat aset ini">
+          </div>
         </div>
-        <div class="form-group">
-          <label class="form-label">URL Drive / Link *</label>
-          <input id="assetFileUrl" class="form-input" type="url" placeholder="https://drive.google.com/...">
-        </div>
-        <div class="form-group">
-          <label class="form-label">Keterangan</label>
-          <input id="assetFileNotes" class="form-input" placeholder="Opsional — deskripsi singkat isi file">
-        </div>
-        <div class="modal-footer">
-          <button class="btn" onclick="closeAssetFileModal()">Batal</button>
-          <button class="btn blue" onclick="saveAssetFile()">Simpan</button>
+        <div class="stat-edit-foot">
+          <button class="btn-sm" onclick="closeAssetFileModal()">Batal</button>
+          <button class="btn-sm blue" onclick="saveAssetFile()">Simpan</button>
         </div>
       </div>
     </div>
 
-    <!-- Modal informasi file -->
-    <div id="assetInfoModal" class="modal-overlay hidden">
-      <div class="modal-box" style="max-width:380px">
-        <h3 class="modal-title">ℹ️ Informasi File</h3>
-        <div id="assetInfoBody" style="display:flex;flex-direction:column;gap:10px;padding:4px 0 8px"></div>
-        <div class="modal-footer">
-          <button class="btn blue" onclick="$('assetInfoModal').classList.add('hidden')">Tutup</button>
+    <!-- Modal informasi aset -->
+    <div id="assetInfoModal" class="modal-overlay hidden" onclick="if(event.target===this) this.classList.add('hidden')">
+      <div class="modal asset-modal">
+        <div class="asset-modal-head">
+          <span class="stat-edit-title">Informasi Aset</span>
+          <button class="modal-close-btn" onclick="$('assetInfoModal').classList.add('hidden')" aria-label="Tutup">✕</button>
+        </div>
+        <div id="assetInfoBody" class="asset-modal-body"></div>
+        <div class="stat-edit-foot">
+          <button class="btn-sm blue" onclick="$('assetInfoModal').classList.add('hidden')">Tutup</button>
         </div>
       </div>
     </div>`;
@@ -4017,7 +4068,7 @@ function _initAssetClickOutside() {
 
 /* ── Asset CRUD ─────────────────────────────────────────────────────────── */
 function openAddAssetFile() {
-  $('assetFileModalTitle').textContent = 'Tambah File';
+  $('assetFileModalTitle').textContent = 'Tambah Aset';
   $('assetFileEditId').value  = '';
   $('assetFileEmoji').value   = '';
   $('assetFileName').value    = '';
@@ -4029,7 +4080,7 @@ function openAddAssetFile() {
 function openEditAssetFile(fileId) {
   const f = (state.assets || []).find(x => x.id === fileId);
   if (!f) return;
-  $('assetFileModalTitle').textContent = 'Edit File';
+  $('assetFileModalTitle').textContent = 'Edit Aset';
   $('assetFileEditId').value  = f.id;
   $('assetFileEmoji').value   = f.emoji || '';
   $('assetFileName').value    = f.name  || '';
@@ -4080,7 +4131,7 @@ function openAssetInfo(fileId) {
   const body = $('assetInfoBody');
   if (!body) return;
   const row = (label, val) => val
-    ? `<div style="display:flex;gap:8px;align-items:flex-start"><span style="color:var(--muted);font-size:.8rem;min-width:90px;padding-top:1px">${label}</span><span style="font-size:.85rem;word-break:break-all">${val}</span></div>`
+    ? `<div class="sc-detail-row"><span>${label}</span><b style="word-break:break-all;text-align:right;font-weight:600">${val}</b></div>`
     : '';
   body.innerHTML = [
     row('Nama', esc(f.name)),
