@@ -3382,7 +3382,6 @@ const SC_CATEGORIES = ['Podcast PH','Podcast JA','Podcast Hangout','Situation Ro
 function renderStockContents() {
   const canEdit = isAdmin();
   const users   = state.settings?.users || [];
-  const items   = state.stockContents || [];
 
   const tools = $('scAdminTools');
   if (tools) tools.style.display = canEdit ? '' : 'none';
@@ -3398,7 +3397,6 @@ function renderStockContents() {
       }).join('');
   }
 
-  setTxt('scCount', items.length);
   renderStockCalendar();
 }
 
@@ -3467,7 +3465,7 @@ function renderStockAgenda(byDay, canEdit) {
     const d = scParse(ymd);
     const mKey = ymd.slice(0, 7);
     const head = mKey !== lastMonth
-      ? `<div class="sc-agenda-month">${SC_MONTHS[d.getMonth()]} ${d.getFullYear()}</div>` : '';
+      ? `<div class="sc-agenda-month">${SC_MONTHS[d.getMonth()]} ${d.getFullYear()} <span class="sc-agenda-count">· ${scCountMonth(mKey)} item</span></div>` : '';
     lastMonth = mKey;
     const evs = byDay[ymd] || [];
     const cls = ['sc-day', 'sc-agenda-day',
@@ -3490,6 +3488,16 @@ function renderStockAgenda(byDay, canEdit) {
   });
 }
 
+/* Jumlah item yang punya jadwal (tayang atau produksi) di bulan ym "YYYY-MM". */
+function scCountMonth(ym) {
+  return (state.stockContents || []).filter(it => {
+    if (it.airDate && it.airDate.slice(0, 7) === ym) return true;
+    if (!it.prodDate) return false;
+    const end = it.prodDateEnd && it.prodDateEnd >= it.prodDate ? it.prodDateEnd : it.prodDate;
+    return it.prodDate.slice(0, 7) <= ym && end.slice(0, 7) >= ym;
+  }).length;
+}
+
 function renderStockCalendar() {
   const grid = $('scCalGrid');
   if (!grid) return;
@@ -3498,6 +3506,11 @@ function renderStockCalendar() {
   if (!state.scMonth) { const t = new Date(); state.scMonth = new Date(t.getFullYear(), t.getMonth(), 1); }
   const month = state.scMonth;
   setTxt('scCalTitle', `${SC_MONTHS[month.getMonth()]} ${month.getFullYear()}`);
+  // Total per bulan: di komputer = bulan yang sedang dilihat, di HP = bulan berjalan
+  const mobile = window.matchMedia?.('(max-width: 680px)').matches;
+  const cm = mobile ? new Date() : month;
+  setTxt('scCountLabel', `${SC_MONTHS[cm.getMonth()]} ${cm.getFullYear()}`);
+  setTxt('scCount', scCountMonth(scYmd(cm).slice(0, 7)));
   const touch = window.matchMedia?.('(pointer: coarse)').matches;
   setTxt('scCalHint', canEdit
     ? (touch

@@ -3184,3 +3184,4 @@ ul { list-style: none; }
   .sc-day-items { flex: 1; min-width: 0; }
   .sc-chip { white-space: normal; font-size: .76rem; }
 }
+.sc-agenda-count { font-weight: 600; color: var(--muted); font-size: .74rem; }
