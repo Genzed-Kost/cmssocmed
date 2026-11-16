@@ -459,8 +459,8 @@
 
     <!-- ═══ NEW POST ══════════════════════════════════════════════════════ -->
     <section id="page-newpost" class="page">
-      <div class="page-inner page-inner-narrow">
-        <div class="form-card" id="newPostForm">
+      <div class="page-inner page-inner-narrow np-wrap">
+        <div class="np-form" id="newPostForm">
           <input type="hidden" id="editPostId" value="" />
 
           <!-- Published lock banner -->
@@ -468,131 +468,143 @@
             🔒 Konten sudah dipublish — status &amp; creator tidak dapat diubah
           </div>
 
-          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
-            <span style="font-size:.7rem;color:var(--muted)"><span class="req-star">*</span> wajib diisi</span>
-            <span id="draftSaveInd" style="font-size:.7rem;color:var(--muted)"></span>
+          <div class="np-topline">
+            <span><span class="req-star">*</span> wajib diisi</span>
+            <span id="draftSaveInd"></span>
           </div>
 
-          <div class="form-row-2">
+          <!-- 1. Konten -->
+          <section class="np-card">
+            <div class="np-card-head"><span class="np-step">1</span><div><b>Konten</b><i>Judul, tema, dan jenis konten</i></div></div>
             <div class="form-group">
-              <label class="form-label">Tanggal Tayang <span class="req-star">*</span></label>
-              <div style="display:flex;gap:8px;align-items:center">
-                <input type="date" id="postDate" class="form-inp" style="flex:1" />
-                <input type="time" id="postTime" class="form-inp hidden" style="width:110px" title="Jam tayang (opsional)" />
-              </div>
+              <label class="form-label" for="postTitle">Judul Konten <span class="req-star">*</span></label>
+              <input type="text" id="postTitle" class="form-inp np-title-inp" placeholder="Tulis judul konten…" />
             </div>
-            <div class="form-group">
-              <label id="postCreatorLabel" class="form-label">Creator <span class="req-star">*</span></label>
-              <!-- Single select — format biasa (Post, Reels, Story, dll.) -->
-              <select id="postCreator" class="form-inp">
-                <option value="">— Pilih Creator —</option>
-              </select>
-              <!-- Chip UI — multi-creator untuk Podcast / Liputan -->
-              <div id="postCreatorMulti" class="creator-multi-wrap hidden">
-                <div id="creatorChips" class="creator-chips"></div>
-                <select id="creatorAddSel" class="form-inp" style="margin-top:4px"
-                  onchange="addCreatorChip(this.value); this.value=''">
-                  <option value="">＋ Tambah creator…</option>
+            <div class="form-row-2">
+              <div class="form-group">
+                <label class="form-label" for="postTheme">Tema <span class="req-star">*</span></label>
+                <input type="text" id="postTheme" class="form-inp" placeholder="Tema / topik…" />
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="postFormat">Content Type <span class="req-star">*</span></label>
+                <select id="postFormat" class="form-inp" onchange="onFormatChange(this.value)">
+                  <option>Flayer</option><option>Meme</option><option>Karikatur</option>
+                  <option>Komikstrip</option><option>Animasi</option><option>Video</option>
+                  <option>Short</option><option>Monolog</option><option>Carousell</option>
+                  <option>Podcast</option><option>Liputan</option>
                 </select>
               </div>
             </div>
-          </div>
+          </section>
 
-          <!-- Editor field — hanya muncul saat format Podcast / Liputan -->
-          <div id="postEditorRow" class="form-group hidden">
-            <label class="form-label">Editor
-              <span class="form-hint" style="margin:0;font-size:.7rem;color:var(--muted)">(pasca produksi)</span>
-            </label>
-            <select id="postEditor" class="form-inp">
-              <option value="">— Pilih Editor —</option>
-            </select>
-          </div>
+          <!-- 2. Jadwal & Tim -->
+          <section class="np-card">
+            <div class="np-card-head"><span class="np-step">2</span><div><b>Jadwal &amp; Tim</b><i>Kapan tayang, siapa yang mengerjakan</i></div></div>
+            <div class="form-row-2">
+              <div class="form-group">
+                <label class="form-label" for="postDate">Tanggal Tayang <span class="req-star">*</span></label>
+                <div class="np-date-row">
+                  <input type="date" id="postDate" class="form-inp" />
+                  <input type="time" id="postTime" class="form-inp hidden" title="Jam tayang (opsional)" />
+                </div>
+              </div>
+              <div class="form-group">
+                <label id="postCreatorLabel" class="form-label">Creator <span class="req-star">*</span></label>
+                <!-- Single select — format biasa -->
+                <select id="postCreator" class="form-inp">
+                  <option value="">— Pilih Creator —</option>
+                </select>
+                <!-- Chip UI — multi-creator untuk Podcast / Liputan -->
+                <div id="postCreatorMulti" class="creator-multi-wrap hidden">
+                  <div id="creatorChips" class="creator-chips"></div>
+                  <select id="creatorAddSel" class="form-inp" style="margin-top:4px"
+                    onchange="addCreatorChip(this.value); this.value=''">
+                    <option value="">＋ Tambah creator…</option>
+                  </select>
+                </div>
+              </div>
+            </div>
 
-          <div class="form-row-2">
-            <div class="form-group">
-              <label class="form-label">Akun Target <span class="req-star">*</span></label>
-              <select id="postAccount" class="form-inp">
-                <option value="">— Pilih Akun —</option>
-                <option value="penjaga-harapan">Penjaga Harapan</option>
-                <option value="33-official">33 Official</option>
-                <option value="jaga-asa">Jaga Asa</option>
+            <!-- Editor field — hanya muncul saat format Podcast / Liputan -->
+            <div id="postEditorRow" class="form-group hidden">
+              <label class="form-label" for="postEditor">Editor <span class="label-opt">pasca produksi</span></label>
+              <select id="postEditor" class="form-inp">
+                <option value="">— Pilih Editor —</option>
               </select>
             </div>
+
+            <div class="form-row-2">
+              <div class="form-group">
+                <label class="form-label" for="postAccount">Akun Target <span class="req-star">*</span></label>
+                <select id="postAccount" class="form-inp">
+                  <option value="">— Pilih Akun —</option>
+                  <option value="penjaga-harapan">Penjaga Harapan</option>
+                  <option value="33-official">33 Official</option>
+                  <option value="jaga-asa">Jaga Asa</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="postStatus">Status <span class="req-star">*</span></label>
+                <select id="postStatus" class="form-inp">
+                  <option>Plan</option><option>Review</option><option>Revisi</option>
+                  <option>Ongoing</option><option>ACC</option><option>Done</option>
+                  <option>Published</option><option>Drop</option><option>Hold</option>
+                </select>
+              </div>
+            </div>
+          </section>
+
+          <!-- 3. Distribusi -->
+          <section class="np-card">
+            <div class="np-card-head"><span class="np-step">3</span><div><b>Platform Distribusi <span class="req-star">*</span></b><i>Pilih satu atau lebih</i></div></div>
+            <div class="platform-checks np-plats" id="platformChecks">
+              <label class="check-item np-plat" style="--pc:#e1306c"><input type="checkbox" value="instagram" /> Instagram</label>
+              <label class="check-item np-plat" style="--pc:#111827"><input type="checkbox" value="tiktok" /> TikTok</label>
+              <label class="check-item np-plat" style="--pc:#0f172a"><input type="checkbox" value="twitter" /> X (Twitter)</label>
+              <label class="check-item np-plat" style="--pc:#1877f2"><input type="checkbox" value="facebook" /> Facebook</label>
+              <label class="check-item np-plat" style="--pc:#ff0000"><input type="checkbox" value="youtube" /> YouTube</label>
+            </div>
+          </section>
+
+          <!-- 4. Naskah & Caption -->
+          <section class="np-card">
+            <div class="np-card-head"><span class="np-step">4</span><div><b>Naskah &amp; Caption</b><i>Bisa dibantu AI</i></div></div>
             <div class="form-group">
-              <label class="form-label">Status <span class="req-star">*</span></label>
-              <select id="postStatus" class="form-inp">
-                <option>Plan</option><option>Review</option><option>Revisi</option>
-                <option>Ongoing</option><option>ACC</option><option>Done</option>
-                <option>Published</option><option>Drop</option><option>Hold</option>
-              </select>
-            </div>
-          </div>
-
-          <div class="form-group">
-            <label class="form-label">Judul Konten <span class="req-star">*</span></label>
-            <input type="text" id="postTitle" class="form-inp" placeholder="Judul konten…" />
-          </div>
-
-          <div class="form-row-2">
-            <div class="form-group">
-              <label class="form-label">Tema <span class="req-star">*</span></label>
-              <input type="text" id="postTheme" class="form-inp" placeholder="Tema / topik…" />
+              <div class="form-label-row">
+                <label class="form-label" for="postScript">Script / Naskah</label>
+                <button type="button" class="ai-btn" id="btnGenerateDraft" title="Generate Draft dengan AI">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 2l3 7h7l-5.5 4 2 7L12 16l-6.5 4 2-7L2 9h7z"/></svg>
+                  Generate Draft AI
+                </button>
+              </div>
+              <textarea id="postScript" class="form-inp form-ta" rows="6" placeholder="Tulis naskah / script konten di sini…"></textarea>
             </div>
             <div class="form-group">
-              <label class="form-label">Content Type <span class="req-star">*</span></label>
-              <select id="postFormat" class="form-inp" onchange="onFormatChange(this.value)">
-                <option>Flayer</option><option>Meme</option><option>Karikatur</option>
-                <option>Komikstrip</option><option>Animasi</option><option>Video</option>
-                <option>Short</option><option>Monolog</option><option>Carousell</option>
-                <option>Podcast</option><option>Liputan</option>
-              </select>
+              <div class="form-label-row">
+                <label class="form-label" for="postCaption">Caption Medsos</label>
+                <button type="button" class="ai-btn" id="btnGenerateCaption" title="Generate Caption dengan AI">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 2l3 7h7l-5.5 4 2 7L12 16l-6.5 4 2-7L2 9h7z"/></svg>
+                  Auto-Caption AI
+                </button>
+              </div>
+              <textarea id="postCaption" class="form-inp form-ta" rows="4" placeholder="Caption untuk media sosial…"></textarea>
             </div>
-          </div>
+          </section>
 
-          <div class="form-group">
-            <label class="form-label">Platform Distribusi <span class="req-star">*</span></label>
-            <div class="platform-checks" id="platformChecks">
-              <label class="check-item"><input type="checkbox" value="instagram" /> Instagram</label>
-              <label class="check-item"><input type="checkbox" value="tiktok" />    TikTok</label>
-              <label class="check-item"><input type="checkbox" value="twitter" />   X (Twitter)</label>
-              <label class="check-item"><input type="checkbox" value="facebook" />  Facebook</label>
-              <label class="check-item"><input type="checkbox" value="youtube" />   YouTube</label>
+          <!-- 5. Lainnya -->
+          <section class="np-card">
+            <div class="np-card-head"><span class="np-step">5</span><div><b>Lainnya</b><i>Opsional</i></div></div>
+            <div class="form-group">
+              <label class="form-label" for="postOutputLink">Output Link</label>
+              <input type="url" id="postOutputLink" class="form-inp" placeholder="https://link hasil konten…" />
             </div>
-          </div>
-
-          <div class="form-group">
-            <div class="form-label-row">
-              <label class="form-label">Script / Naskah</label>
-              <button type="button" class="ai-btn" id="btnGenerateDraft" title="Generate Draft dengan AI">
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 2l3 7h7l-5.5 4 2 7L12 16l-6.5 4 2-7L2 9h7z"/></svg>
-                Generate Draft AI
-              </button>
+            <div class="form-group">
+              <label class="form-label" for="postNotes">Catatan Khusus</label>
+              <textarea id="postNotes" class="form-inp form-ta" rows="2" placeholder="Catatan tambahan untuk tim…"></textarea>
             </div>
-            <textarea id="postScript" class="form-inp form-ta" rows="6" placeholder="Tulis naskah / script konten di sini…"></textarea>
-          </div>
+          </section>
 
-          <div class="form-group">
-            <div class="form-label-row">
-              <label class="form-label">Caption Medsos</label>
-              <button type="button" class="ai-btn" id="btnGenerateCaption" title="Generate Caption dengan AI">
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 2l3 7h7l-5.5 4 2 7L12 16l-6.5 4 2-7L2 9h7z"/></svg>
-                Auto-Caption AI
-              </button>
-            </div>
-            <textarea id="postCaption" class="form-inp form-ta" rows="4" placeholder="Caption untuk media sosial…"></textarea>
-          </div>
-
-          <div class="form-group">
-            <label class="form-label">Output Link <span class="label-opt">opsional</span></label>
-            <input type="url" id="postOutputLink" class="form-inp" placeholder="https://link hasil konten…" />
-          </div>
-
-          <div class="form-group">
-            <label class="form-label">Catatan Khusus <span class="label-opt">opsional</span></label>
-            <textarea id="postNotes" class="form-inp form-ta" rows="2" placeholder="Catatan tambahan untuk tim… (tidak wajib)"></textarea>
-          </div>
-
-          <div class="form-actions">
+          <div class="form-actions np-actions">
             <button type="button" class="btn-md" id="btnCancelPost">Batal</button>
             <button type="button" class="btn-md blue" id="btnSavePost">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
