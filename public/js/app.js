@@ -2576,6 +2576,19 @@ function renderTodoList() {
    PLANNER
    ══════════════════════════════════════════════════════════════════════════ */
 
+/* Urutan Planner: tanggal terbaru → terlama (jam tayang ikut diperhitungkan).
+   Konten tanpa tanggal ditaruh paling bawah. */
+function comparePlanNewestFirst(a, b) {
+  const key = c => {
+    if (!c.publishDate) return -Infinity;
+    const t = new Date(`${c.publishDate}T${c.publishTime || '00:00'}`).getTime();
+    return isNaN(t) ? (new Date(c.publishDate).getTime() || -Infinity) : t;
+  };
+  const ka = key(a), kb = key(b);
+  if (ka === kb) return 0;
+  return kb > ka ? 1 : -1;
+}
+
 function renderPlanner(page) {
   if (page !== undefined) state.planPage = page;
 
@@ -2625,7 +2638,7 @@ function renderPlanner(page) {
     return true;
   });
 
-  rows.sort((a, b) => new Date(a.publishDate||'9999') - new Date(b.publishDate||'9999'));
+  rows.sort(comparePlanNewestFirst);
   $('planCount').textContent = `${rows.length} konten`;
 
   const total = Math.ceil(rows.length / PAGE_SIZE) || 1;
@@ -7679,7 +7692,7 @@ function downloadPlannerPdf() {
     return true;
   });
 
-  filtered.sort((a,b) => new Date(a.publishDate||'9999') - new Date(b.publishDate||'9999'));
+  filtered.sort(comparePlanNewestFirst);
 
   // Build filter summary for header
   const filterParts = [];
