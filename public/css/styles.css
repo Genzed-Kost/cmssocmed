@@ -3834,3 +3834,13 @@ ul { list-style: none; }
   .lg-info .lg-brand { display: none; }
   .lg-news { margin-top: 0; }
 }
+
+/* ══ Logo Penjaga Harapan ═════════════════════════════════════════ */
+.lg-brand { flex-direction: column; align-items: flex-start; gap: 10px; }
+.lg-logo-white { height: 64px; width: auto; display: block; }
+.lg-logo-dark { display: none; height: 44px; width: auto; margin-bottom: 18px; align-self: flex-start; }
+@media (max-width: 860px) {
+  .lg-logo-dark { display: block; }
+}
+/* Sidebar: simbol putih di latar gelap */
+.logo-mark.has-logo { width: 34px; height: 40px; border-radius: 0; }

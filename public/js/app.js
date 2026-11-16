@@ -8561,9 +8561,12 @@ function downloadPlannerPdf() {
 
   const html = `<div style="font-family:Arial,sans-serif;padding:24px;color:#0f172a">
     <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:16px;border-bottom:2px solid #e2e8f0;padding-bottom:12px">
-      <div>
+      <div style="display:flex;align-items:center;gap:14px">
+        <img src="${location.origin}/img/logo-dark.png" alt="Penjaga Harapan" style="height:46px;width:auto" crossorigin="anonymous" />
+        <div>
         <div style="font-size:20px;font-weight:800;color:#1e293b">Laporan Planner Konten</div>
         <div style="font-size:12px;color:#64748b;margin-top:3px">Penjaga Harapan CMS</div>
+        </div>
       </div>
       <div style="text-align:right;font-size:11px;color:#64748b;line-height:1.7">
         <div>Diekspor oleh: <strong>${esc(downloader)}</strong></div>
