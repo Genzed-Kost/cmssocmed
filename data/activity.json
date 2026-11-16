@@ -1,5 +1,13 @@
 [
   {
+    "id": "mwizfzdo9g3oz",
+    "user": "Umar",
+    "role": "Publisher",
+    "action": "ubah status",
+    "target": "\"KUHP Nasional Bukan Lagi Hukum Warisan Kolonial\" menjadi Published",
+    "timestamp": "2026-11-16T08:09:28.284Z"
+  },
+  {
     "id": "mwiswh1r4dpfp",
     "user": "Umar",
     "role": "Publisher",
@@ -3990,13 +3998,5 @@
     "action": "edit user",
     "target": "Lisa → Lisa (Administrator)",
     "timestamp": "2026-06-25T17:40:16.834Z"
-  },
-  {
-    "id": "mqtsf8xv79835",
-    "user": "Admin",
-    "role": "Admin",
-    "action": "edit user",
-    "target": "Dio → Dio (Creator)",
-    "timestamp": "2026-06-25T17:40:10.627Z"
   }
 ]
