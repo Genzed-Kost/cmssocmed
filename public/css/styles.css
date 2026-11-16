@@ -3156,22 +3156,31 @@ ul { list-style: none; }
 .sc-detail-row { display: flex; justify-content: space-between; gap: 12px; font-size: .82rem; border-top: 1px solid var(--bd); padding-top: 8px; }
 .sc-detail-row span { color: var(--muted); }
 
-/* Layar kecil: kalender jadi agenda (hanya hari yang ada jadwal) */
+.sc-agenda { display: none; }
+
+/* Layar kecil: agenda bergulir — tanggal lalu di atas, berikutnya di bawah */
 @media (max-width: 680px) {
   .sc-cal-wrap { padding: 10px; }
   .sc-legend { margin-left: 0; }
-  .sc-cal-dow { display: none; }
-  .sc-cal-grid { display: block; border: 0; }
-  .sc-day { min-height: 0; border: 1px solid var(--bd); border-radius: 8px; margin-bottom: 6px; flex-direction: row; align-items: flex-start; gap: 8px; padding: 6px; }
-  .sc-day-empty:not(.sc-day-today), .sc-day-out { display: none; }
+  .sc-cal-nav, .sc-cal-title, .sc-cal-dow, .sc-cal-grid { display: none; }
+  .sc-agenda {
+    display: block; position: relative;
+    max-height: calc(100vh - 230px); min-height: 260px;
+    overflow-y: auto; -webkit-overflow-scrolling: touch; overscroll-behavior: contain;
+    margin: 0 -4px; padding: 0 4px;
+  }
+  .sc-agenda-month {
+    position: sticky; top: 0; z-index: 1;
+    background: var(--surface); font-size: .8rem; font-weight: 800;
+    padding: 8px 2px 6px; border-bottom: 1px solid var(--bd); margin-bottom: 6px;
+  }
+  .sc-agenda-day { min-height: 0; border: 1px solid var(--bd); border-radius: 8px; margin-bottom: 6px; flex-direction: row; align-items: flex-start; gap: 8px; padding: 6px; }
+  .sc-agenda-day.sc-day-past { opacity: .6; }
+  .sc-agenda-day.sc-day-today { border-color: var(--blue); box-shadow: 0 0 0 2px var(--blue-lt); }
   .sc-day-num { width: 44px; flex-shrink: 0; text-align: center; font-size: .95rem; line-height: 1.1; }
   .sc-day-dow { display: block; font-size: .62rem; font-weight: 600; color: var(--muted); text-transform: uppercase; }
   .sc-day-today .sc-day-num { align-self: auto; padding: 3px 0; }
   .sc-day-today .sc-day-dow { color: #fff; }
-  .sc-day-items { flex: 1; }
+  .sc-day-items { flex: 1; min-width: 0; }
   .sc-chip { white-space: normal; font-size: .76rem; }
-}
-.sc-cal-empty { display: none; }
-@media (max-width: 680px) {
-  .sc-cal-empty { display: block; font-size: .78rem; color: var(--muted); text-align: center; padding: 18px 8px; }
 }

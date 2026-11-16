@@ -3383,13 +3383,9 @@ function renderStockContents() {
   const canEdit = isAdmin();
   const users   = state.settings?.users || [];
   const items   = state.stockContents || [];
-  const body    = $('scBody');
-  if (!body) return;
 
-  const actHead = $('scActHead');
-  const tools   = $('scAdminTools');
-  if (actHead) actHead.style.display = canEdit ? '' : 'none';
-  if (tools)   tools.style.display   = canEdit ? '' : 'none';
+  const tools = $('scAdminTools');
+  if (tools) tools.style.display = canEdit ? '' : 'none';
 
   // Isi dropdown user WA
   const waUserSel = $('scWaUser');
@@ -3403,121 +3399,7 @@ function renderStockContents() {
   }
 
   setTxt('scCount', items.length);
-  setTxt('scCountFoot', items.length ? `${items.length} item tersimpan` : '');
-
-  if (scApplyView() === 'cal') { renderStockCalendar(); }
-
-  // Urutkan per kelompok lalu tanggal tayang terdekat
-  const catOrder = cat => { const i = SC_CATEGORIES.indexOf(cat); return i === -1 ? 99 : i; };
-  const sorted = [...items].sort((a, b) => {
-    const cd = catOrder(a.category) - catOrder(b.category);
-    if (cd !== 0) return cd;
-    if (!a.airDate && !b.airDate) return 0;
-    if (!a.airDate) return 1; if (!b.airDate) return -1;
-    return new Date(a.airDate) - new Date(b.airDate);
-  });
-
-  const fmtD    = d => d ? new Date(d).toLocaleDateString('id-ID',{day:'2-digit',month:'short',year:'numeric'}) : '—';
-  const fmtRange = (s, e) => {
-    if (!s && !e) return '—';
-    if (!e) return fmtD(s);
-    const ds = new Date(s), de = new Date(e);
-    const MNAMES = ['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agt','Sep','Okt','Nov','Des'];
-    if (ds.getMonth() === de.getMonth() && ds.getFullYear() === de.getFullYear())
-      return `${ds.getDate()}–${de.getDate()} ${MNAMES[de.getMonth()]} '${String(de.getFullYear()).slice(-2)}`;
-    return `${ds.getDate()} ${MNAMES[ds.getMonth()]}–${de.getDate()} ${MNAMES[de.getMonth()]} '${String(de.getFullYear()).slice(-2)}`;
-  };
-  const catOpts = (sel='') => ['', ...SC_CATEGORIES].map(c =>
-    `<option value="${esc(c)}" ${c===sel?'selected':''}>${c||'— Pilih Kelompok —'}</option>`).join('');
-
-  if (items.length === 0) {
-    body.innerHTML = `<tr><td colspan="6" class="empty-cell">${canEdit ? 'Belum ada data. Klik "+ Tambah" untuk memulai.' : 'Belum ada data.'}</td></tr>`;
-    return;
-  }
-
-  // Render dengan pemisah kelompok
-  const rows = [];
-  let lastCat = null;
-  sorted.forEach((it, i) => {
-    const cat = it.category || '';
-    if (cat !== lastCat) {
-      lastCat = cat;
-      const label = cat || 'Tanpa Kelompok';
-      rows.push(`<tr class="sc-group-row"><td colspan="6" style="background:var(--surface);font-size:.7rem;font-weight:700;color:var(--muted-lt);text-transform:uppercase;letter-spacing:.06em;padding:6px 12px">${esc(label)}</td></tr>`);
-    }
-    if (canEdit) {
-      rows.push(`<tr data-id="${it.id}">
-        <td style="text-align:center;color:var(--muted)">${i+1}</td>
-        <td><select class="bk-sel sc-inp" data-id="${it.id}" data-field="category">${catOpts(it.category||'')}</select></td>
-        <td><input type="text" class="bk-inp sc-inp" data-id="${it.id}" data-field="title"
-          value="${esc(it.title||'')}" placeholder="Judul…" /></td>
-        <td style="white-space:nowrap">
-          <div style="display:flex;align-items:center;gap:3px">
-            <input type="date" class="bk-inp sc-inp" data-id="${it.id}" data-field="prodDate"
-              value="${esc(it.prodDate||'')}" style="width:120px" />
-            <span class="sc-range-sep" data-id="${it.id}" title="Tambah tanggal akhir produksi"
-              style="cursor:pointer;color:var(--accent);font-size:.7rem;padding:0 2px;user-select:none"
-              onclick="scToggleEndDate('${it.id}')">s/d</span>
-            <input type="date" class="bk-inp sc-inp sc-end-date" data-id="${it.id}" data-field="prodDateEnd"
-              value="${esc(it.prodDateEnd||'')}" style="width:120px;${it.prodDateEnd?'':'display:none'}" />
-          </div>
-        </td>
-        <td><input type="date" class="bk-inp sc-inp" data-id="${it.id}" data-field="airDate"
-          value="${esc(it.airDate||'')}" /></td>
-        <td style="text-align:center;white-space:nowrap">
-          <button type="button" class="icon-btn sc-save-btn" data-id="${it.id}" title="Simpan">
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
-          </button>
-          <button type="button" class="icon-btn sc-del-btn" data-id="${it.id}" title="Hapus">
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6M14 11v6M9 6V4h6v2"/></svg>
-          </button>
-        </td>
-      </tr>`);
-    } else {
-      rows.push(`<tr>
-        <td style="text-align:center;color:var(--muted)">${i+1}</td>
-        <td style="color:var(--muted);font-size:.8rem">${esc(it.category||'—')}</td>
-        <td>${esc(it.title||'—')}</td>
-        <td style="color:var(--muted)">${fmtRange(it.prodDate, it.prodDateEnd)}</td>
-        <td style="color:var(--muted)">${fmtD(it.airDate)}</td>
-      </tr>`);
-    }
-  });
-  body.innerHTML = rows.join('');
-
-  if (!canEdit) return;
-
-  // Simpan
-  body.querySelectorAll('.sc-save-btn').forEach(btn => {
-    btn.onclick = async () => {
-      const id  = btn.dataset.id;
-      const row = body.querySelector(`tr[data-id="${id}"]`);
-      const get = f => row.querySelector(`[data-field="${f}"]`)?.value.trim() || '';
-      const idx = state.stockContents.findIndex(x => x.id === id);
-      if (idx === -1) return;
-      state.stockContents[idx] = { ...state.stockContents[idx], category: get('category'), title: get('title'), prodDate: get('prodDate'), prodDateEnd: get('prodDateEnd'), airDate: get('airDate') };
-      btn.disabled = true;
-      try {
-        state.shas.stockContents = await window.db.writeData('stockContents', state.stockContents, 'Stock: update item');
-        toast('Tersimpan ✓', 'success');
-        renderStockContents();
-      } catch(e) { toast('Gagal simpan: ' + e.message, 'error'); }
-      btn.disabled = false;
-    };
-  });
-
-  // Hapus
-  body.querySelectorAll('.sc-del-btn').forEach(btn => {
-    btn.onclick = async () => {
-      if (!confirm('Hapus item ini?')) return;
-      state.stockContents = state.stockContents.filter(x => x.id !== btn.dataset.id);
-      try {
-        state.shas.stockContents = await window.db.writeData('stockContents', state.stockContents, 'Stock: delete item');
-        toast('Dihapus', 'success');
-        renderStockContents();
-      } catch(e) { toast('Gagal hapus: ' + e.message, 'error'); }
-    };
-  });
+  renderStockCalendar();
 }
 
 /* ── Stock Contents: tampilan KALENDER ─────────────────────────────────────
@@ -3532,7 +3414,6 @@ const SC_COLORS = {
   'Liputan PH':      '#16a34a',
   'Liputan JA':      '#0891b2',
 };
-const SC_VIEW_LS_KEY = 'cms_sc_view';
 const SC_MONTHS = ['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'];
 
 function scColor(cat) { return SC_COLORS[cat] || '#64748b'; }
@@ -3556,13 +3437,6 @@ function scFmtLong(ymd) {
   return d ? d.toLocaleDateString('id-ID', { weekday:'long', day:'numeric', month:'long', year:'numeric' }) : '—';
 }
 
-function scGetView() {
-  try { return localStorage.getItem(SC_VIEW_LS_KEY) === 'list' ? 'list' : 'cal'; } catch (_) { return 'cal'; }
-}
-function scSetView(v) {
-  try { localStorage.setItem(SC_VIEW_LS_KEY, v === 'list' ? 'list' : 'cal'); } catch (_) {}
-  renderStockContents();
-}
 function scShiftMonth(n) {
   if (n === 0) { const t = new Date(); state.scMonth = new Date(t.getFullYear(), t.getMonth(), 1); }
   else {
@@ -3572,12 +3446,48 @@ function scShiftMonth(n) {
   renderStockCalendar();
 }
 
-function scApplyView() {
-  const v = scGetView();
-  $('scCalWrap')?.classList.toggle('hidden', v !== 'cal');
-  $('scListWrap')?.classList.toggle('hidden', v !== 'list');
-  document.querySelectorAll('.sc-view-btn').forEach(b => b.classList.toggle('active', b.dataset.view === v));
-  return v;
+function scChipHtml(ev, canEdit) {
+  const it = ev.it, col = scColor(it.category);
+  const label = ev.kind === 'air' ? '📅' : '🎬';
+  const extra = ev.kind === 'prod' && ev.span > 0 ? ` <small>(${ev.i + 1}/${ev.span + 1})</small>` : '';
+  const tip   = `${it.category || 'Tanpa kelompok'} — ${it.title || '(tanpa judul)'} · ${ev.kind === 'air' ? 'Tayang' : 'Produksi'}`;
+  return `<div class="sc-chip sc-chip-${ev.kind}" style="--c:${col}" data-id="${esc(it.id)}" data-kind="${ev.kind}"
+    ${canEdit ? 'draggable="true"' : ''} title="${esc(tip)}">${label} ${esc(it.title || '(tanpa judul)')}${extra}</div>`;
+}
+
+/* Tampilan HP: semua tanggal yang punya jadwal dalam satu daftar bergulir.
+   Tanggal lalu di atas, berikutnya di bawah; otomatis menggulir ke hari ini. */
+function renderStockAgenda(byDay, canEdit) {
+  const box = $('scAgenda');
+  if (!box) return;
+  const today = scYmd(new Date());
+  const days  = [...new Set([...Object.keys(byDay), today])].sort();
+  let lastMonth = '';
+  const html = days.map(ymd => {
+    const d = scParse(ymd);
+    const mKey = ymd.slice(0, 7);
+    const head = mKey !== lastMonth
+      ? `<div class="sc-agenda-month">${SC_MONTHS[d.getMonth()]} ${d.getFullYear()}</div>` : '';
+    lastMonth = mKey;
+    const evs = byDay[ymd] || [];
+    const cls = ['sc-day', 'sc-agenda-day',
+      ymd === today ? 'sc-day-today' : '',
+      ymd < today ? 'sc-day-past' : ''].filter(Boolean).join(' ');
+    return `${head}<div class="${cls}" data-date="${ymd}">
+      <div class="sc-day-num"><span class="sc-day-dow">${d.toLocaleDateString('id-ID',{weekday:'short'})}</span>${d.getDate()}</div>
+      <div class="sc-day-items">${evs.length ? evs.map(ev => scChipHtml(ev, canEdit)).join('')
+        : '<span class="sc-unsched-empty">Hari ini — belum ada jadwal</span>'}</div>
+    </div>`;
+  }).join('');
+  const firstRender = !box.childElementCount;
+  const prevScroll  = box.scrollTop;
+  box.innerHTML = html;
+  if (!firstRender) { box.scrollTop = prevScroll; return; }
+  // Gulir ke hari ini setelah layout jadi (hanya saat agenda terlihat)
+  requestAnimationFrame(() => {
+    const t = box.querySelector('.sc-day-today');
+    if (t && box.offsetParent) box.scrollTop = Math.max(0, t.offsetTop - 40);
+  });
 }
 
 function renderStockCalendar() {
@@ -3591,7 +3501,7 @@ function renderStockCalendar() {
   const touch = window.matchMedia?.('(pointer: coarse)').matches;
   setTxt('scCalHint', canEdit
     ? (touch
-        ? 'Ketuk item untuk mengubah tanggal · tombol "+ Tambah" untuk item baru.'
+        ? 'Ketuk tanggal untuk menambah · ketuk item untuk mengubah. Gulir ke atas untuk tanggal sebelumnya, ke bawah untuk berikutnya.'
         : 'Klik tanggal untuk menambah · klik item untuk mengubah · seret item ke tanggal lain untuk memindahkan jadwal.')
     : 'Klik item untuk melihat detail. 📅 = tanggal tayang · 🎬 = jadwal produksi.');
 
@@ -3634,23 +3544,13 @@ function renderStockCalendar() {
       ymd === today ? 'sc-day-today' : '',
       evs.length ? '' : 'sc-day-empty',
       canEdit ? 'sc-day-edit' : ''].filter(Boolean).join(' ');
-    const chips = evs.map(ev => {
-      const it = ev.it, col = scColor(it.category);
-      const label = ev.kind === 'air' ? '📅' : '🎬';
-      const extra = ev.kind === 'prod' && ev.span > 0 ? ` <small>(${ev.i + 1}/${ev.span + 1})</small>` : '';
-      const tip   = `${it.category || 'Tanpa kelompok'} — ${it.title || '(tanpa judul)'} · ${ev.kind === 'air' ? 'Tayang' : 'Produksi'}`;
-      return `<div class="sc-chip sc-chip-${ev.kind}" style="--c:${col}" data-id="${esc(it.id)}" data-kind="${ev.kind}"
-        ${canEdit ? 'draggable="true"' : ''} title="${esc(tip)}">${label} ${esc(it.title || '(tanpa judul)')}${extra}</div>`;
-    }).join('');
+    const chips = evs.map(ev => scChipHtml(ev, canEdit)).join('');
     html.push(`<div class="${cls}" data-date="${ymd}">
       <div class="sc-day-num"><span class="sc-day-dow">${d.toLocaleDateString('id-ID',{weekday:'short'})}</span>${d.getDate()}${inMonth ? '' : ' ' + SC_MONTHS[d.getMonth()].slice(0,3)}</div>
       <div class="sc-day-items">${chips}</div>
     </div>`);
   }
-  const monthKey = scYmd(first).slice(0, 7);
-  const hasEvents = Object.keys(byDay).some(k => k.startsWith(monthKey));
-  grid.innerHTML = html.join('') +
-    (hasEvents ? '' : `<div class="sc-cal-empty">Belum ada jadwal produksi / tayang di bulan ini.</div>`);
+  grid.innerHTML = html.join('');
 
   // Belum ada tanggal tayang
   const unsched = items.filter(it => !it.airDate)
@@ -3666,6 +3566,7 @@ function renderStockCalendar() {
   if (ul && canEdit) ul.insertAdjacentHTML('beforeend',
     `<span class="sc-unsched-empty">${unsched.length ? 'Seret item ke kalender untuk menjadwalkan tayang.' : ''}</span>`);
 
+  renderStockAgenda(byDay, canEdit);
   scBindCalendar(grid, ul, canEdit);
 }
 
@@ -3824,7 +3725,7 @@ async function scSaveModal(id) {
   }
   scCloseModal();
   const jump = scParse(data.airDate || data.prodDate);
-  if (jump && scGetView() === 'cal') state.scMonth = new Date(jump.getFullYear(), jump.getMonth(), 1);
+  if (jump) state.scMonth = new Date(jump.getFullYear(), jump.getMonth(), 1);
   await scPersist(id ? 'Stock: update item' : 'Stock: tambah item', undo, id ? 'Perubahan tersimpan ✓' : 'Item ditambahkan ✓');
 }
 
@@ -3836,21 +3737,6 @@ async function scDeleteItem(id) {
   state.stockContents = prev.filter(x => x.id !== id);
   scCloseModal();
   await scPersist('Stock: delete item', () => { state.stockContents = prev; }, 'Dihapus');
-}
-
-function scToggleEndDate(id) {
-  const inp = document.querySelector(`.sc-end-date[data-id="${id}"]`);
-  if (!inp) return;
-  const visible = inp.style.display !== 'none';
-  if (visible) { inp.value = ''; inp.style.display = 'none'; }
-  else { inp.style.display = ''; inp.focus(); }
-}
-
-function scAddRow() {
-  if (!isAdmin()) return;
-  state.stockContents.unshift({ id: 'sc_' + Date.now(), category: '', title: '', prodDate: '', prodDateEnd: '', airDate: '' });
-  renderStockContents();
-  $('scBody')?.querySelector('.sc-inp')?.focus();
 }
 
 async function scSendWa() {
@@ -8445,10 +8331,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   window.onStatPeriodChange     = onStatPeriodChange;
   window.setStatViewMode        = setStatViewMode;
   window.renderStockContents    = renderStockContents;
-  window.scAddRow               = scAddRow;
-  window.scToggleEndDate        = scToggleEndDate;
   window.scSendWa               = scSendWa;
-  window.scSetView              = scSetView;
   window.scShiftMonth           = scShiftMonth;
   window.scOpenModal            = scOpenModal;
   window.scCloseModal           = scCloseModal;

@@ -707,10 +707,6 @@
       <div class="page-inner">
         <div class="toolbar">
           <div class="toolbar-left" style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
-            <div class="sc-view-toggle" role="tablist">
-              <button type="button" class="sc-view-btn active" data-view="cal" onclick="scSetView('cal')">📅 Kalender</button>
-              <button type="button" class="sc-view-btn" data-view="list" onclick="scSetView('list')">☰ Daftar</button>
-            </div>
             <span style="font-size:.8rem;color:var(--muted)">Total: <strong id="scCount">0</strong> item</span>
           </div>
           <div class="toolbar-right">
@@ -732,7 +728,6 @@
             </div>
           </div>
         </div>
-        <!-- Tampilan kalender -->
         <div id="scCalWrap" class="sc-cal-wrap">
           <div class="sc-cal-head">
             <div class="sc-cal-nav">
@@ -748,35 +743,14 @@
             <span>Sen</span><span>Sel</span><span>Rab</span><span>Kam</span><span>Jum</span><span>Sab</span><span>Min</span>
           </div>
           <div id="scCalGrid" class="sc-cal-grid"></div>
+          <!-- Tampilan HP: agenda bergulir (tanggal lalu di atas, berikutnya di bawah) -->
+          <div id="scAgenda" class="sc-agenda"></div>
           <div class="sc-unsched">
             <div class="sc-unsched-title">⏳ Belum ada tanggal tayang <span id="scUnschedCount"></span></div>
             <div id="scUnschedList" class="sc-unsched-list"></div>
           </div>
         </div>
 
-        <!-- Tampilan daftar (tabel lama) -->
-        <div id="scListWrap" class="hidden">
-        <div class="table-wrap">
-          <table class="data-table" id="scTable">
-            <thead>
-              <tr>
-                <th style="width:38px;text-align:center">NO</th>
-                <th style="width:160px">KELOMPOK</th>
-                <th>JUDUL LIPUTAN / PODCAST</th>
-                <th style="width:160px">RENTANG PRODUKSI</th>
-                <th style="width:140px">TGL TAYANG</th>
-                <th style="width:80px;text-align:center" id="scActHead">AKSI</th>
-              </tr>
-            </thead>
-            <tbody id="scBody">
-              <tr><td colspan="4" class="empty-cell">Belum ada data.</td></tr>
-            </tbody>
-          </table>
-        </div>
-        <div class="table-footer">
-          <span id="scCountFoot" style="font-size:.78rem;color:var(--muted)"></span>
-        </div>
-        </div>
       </div>
     </section>
 
