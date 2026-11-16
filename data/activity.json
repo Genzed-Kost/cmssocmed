@@ -1,5 +1,13 @@
 [
   {
+    "id": "mwj7luri4bzq1",
+    "user": "Admin",
+    "role": "Admin",
+    "action": "update statistik",
+    "target": "Penjaga Harapan YouTube — Jul 2026",
+    "timestamp": "2026-11-16T11:57:59.166Z"
+  },
+  {
     "id": "mwj7kbxdg2vw3",
     "user": "Admin",
     "role": "Admin",
@@ -3990,13 +3998,5 @@
     "action": "login",
     "target": "masuk ke sistem sebagai Publisher",
     "timestamp": "2026-06-26T11:20:16.927Z"
-  },
-  {
-    "id": "mquh7i91bf5pp",
-    "user": "Admin",
-    "role": "Admin",
-    "action": "tambah anggota",
-    "target": "Pak Ato (TA Sesneg)",
-    "timestamp": "2026-06-26T05:13:59.845Z"
   }
 ]
