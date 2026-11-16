@@ -7929,22 +7929,81 @@ function getCachedNews() {
 }
 function setCachedNews(text) { localStorage.setItem(NEWS_KEY, JSON.stringify({ text, ts: Date.now() })); }
 
-async function fetchNews() {
-  $('newsContent').innerHTML = `<div class="news-loading"><div class="spinner"></div><span>Mengambil berita terkini dari Google News…</span></div>`;
-  $('newsTimestamp').textContent = '';
-  try {
-    const base = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
-      ? 'http://localhost:8888'
-      : '';
-    const res = await fetch(`${base}/.netlify/functions/news-proxy?q=Prabowo+Subianto+kebijakan+pemerintah`);
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    const json = await res.json();
-    if (json.error) throw new Error(json.error);
-    setCachedNews(JSON.stringify(json.items));
-    renderNewsItems(json.items, Date.now());
-  } catch (e) {
-    $('newsContent').innerHTML = `<div style="color:var(--red);font-size:.82rem;padding:12px 0">Gagal memuat: ${esc(e.message)}</div>`;
+/* Ambil berita Info Presiden. Dicoba berurutan:
+   1. Cloudflare Pages Function  /api/news          (hosting saat ini)
+   2. Netlify Function           /.netlify/functions/news-proxy (bila pindah ke Netlify)
+   3. Gemini + Google Search     (butuh Gemini API Key di perangkat ini)            */
+const NEWS_QUERY = 'Prabowo Subianto kebijakan pemerintah';
+
+async function fetchNewsFromServer(url) {
+  const res = await fetch(url, { headers: { Accept: 'application/json' } });
+  const ct  = res.headers.get('content-type') || '';
+  // Tanpa fungsi server, hosting mengembalikan index.html (bukan JSON)
+  if (!ct.includes('json')) throw new Error('layanan berita tidak tersedia di server');
+  const json = await res.json();
+  if (json.error) throw new Error(json.error);
+  if (!res.ok) throw new Error(`HTTP ${res.status}`);
+  if (!Array.isArray(json.items) || !json.items.length) throw new Error('tidak ada berita');
+  return json.items;
+}
+
+async function fetchNewsFromGemini() {
+  if (!getGeminiKey()) throw new Error('Gemini API Key belum diisi di perangkat ini');
+  const today = new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
+  const prompt = `Hari ini ${today}. Cari 7 berita terbaru (maksimal 3 hari terakhir) dari media Indonesia tentang
+"${NEWS_QUERY}". Jawab HANYA dengan array JSON tanpa teks lain, format:
+[{"title":"judul berita","source":"nama media","pubDate":"YYYY-MM-DD","desc":"ringkasan 1-2 kalimat","link":"URL artikel"}]`;
+  let lastErr = 'Gemini gagal';
+  for (const model of GEMINI_MODELS.filter(m => !m.startsWith('gemini-1.5'))) {
+    try {
+      const generationConfig = GEMINI_THINKING_MODELS.has(model)
+        ? { temperature: 0.2, maxOutputTokens: 2048, thinkingConfig: { thinkingBudget: 0 } }
+        : { temperature: 0.2, maxOutputTokens: 2048 };
+      const res  = await fetch(geminiUrl(model), {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }], tools: [{ google_search: {} }], generationConfig }),
+      });
+      const data = await res.json();
+      if (data.error) { lastErr = data.error.message; continue; }
+      const text = (data.candidates?.[0]?.content?.parts || []).map(p => p.text || '').join('');
+      const arr  = JSON.parse((text.match(/\[[\s\S]*\]/) || ['[]'])[0]);
+      const items = arr.filter(x => x && x.title).slice(0, 7).map(x => ({
+        title:   String(x.title),
+        source:  String(x.source || ''),
+        pubDate: String(x.pubDate || ''),
+        desc:    String(x.desc || ''),
+        // Tautan dari AI bisa keliru → pakai bila berbentuk URL, selain itu cari judulnya di Google News
+        link: /^https?:\/\//.test(x.link || '') ? x.link
+          : `https://news.google.com/search?q=${encodeURIComponent(x.title)}&hl=id&gl=ID&ceid=ID:id`,
+      }));
+      if (items.length) return items;
+      lastErr = 'Respons Gemini kosong';
+    } catch (e) { lastErr = e.message; }
   }
+  throw new Error(lastErr);
+}
+
+async function fetchNews() {
+  $('newsContent').innerHTML = `<div class="news-loading"><div class="spinner"></div><span>Mengambil berita terkini…</span></div>`;
+  $('newsTimestamp').textContent = '';
+  const q = encodeURIComponent(NEWS_QUERY);
+  const local = ['localhost', '127.0.0.1'].includes(window.location.hostname);
+  const attempts = [
+    ['Server', () => fetchNewsFromServer(`/api/news?q=${q}`)],
+    ['Server (Netlify)', () => fetchNewsFromServer(`${local ? 'http://localhost:8888' : ''}/.netlify/functions/news-proxy?q=${q}`)],
+    ['Gemini AI', fetchNewsFromGemini],
+  ];
+  const errors = [];
+  for (const [name, run] of attempts) {
+    try {
+      const items = await run();
+      setCachedNews(JSON.stringify(items));
+      renderNewsItems(items, Date.now());
+      return;
+    } catch (e) { errors.push(`${name}: ${e.message}`); }
+  }
+  $('newsContent').innerHTML = `<div style="color:var(--red);font-size:.82rem;padding:12px 0">
+    Gagal memuat berita.<br><span style="color:var(--muted);font-size:.75rem">${errors.map(esc).join('<br>')}</span></div>`;
 }
 
 function renderNewsContent(text, ts) {
