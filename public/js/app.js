@@ -6013,7 +6013,7 @@ function renderStatChart() {
         const prevTo   = prevRows[prevRows.length-1]?.[isWeekly?'week':'month'] || '';
         const fmt      = v => isWeekly ? fmtWeek(v) : fmtMonth(v);
         const prevLabel = prevFrom ? `vs ${fmt(prevFrom)}${prevTo && prevTo!==prevFrom ? ' – '+fmt(prevTo) : ''}` : 'vs periode sebelumnya';
-        trendHtml = `<span style="font-size:.65rem;color:${color};font-weight:700;margin-left:4px;cursor:default" title="${prevLabel}">${arrow}${Math.abs(pct).toFixed(1)}%</span>`;
+        trendHtml = `<span class="stat-trend ${up ? 'up' : 'down'}" title="${prevLabel}">${arrow}${Math.abs(pct).toFixed(1)}%</span>`;
       }
       const period = isPt
         ? `${isWeekly ? 'Minggu' : 'Bulan'} ${fmtPeriod(latestRow?.[isWeekly?'week':'month'] || '')}`
@@ -6148,6 +6148,13 @@ function renderStatChart() {
   const cmpData   = showCmp ? prevRows.map(r => +(r[platM.viewKey]||0)) : [];
 
   const isMobile = window.innerWidth <= 640;
+  // Batang bergradasi lembut sesuai warna platform
+  const barGrad = ctx.createLinearGradient(0, 0, 0, 320);
+  barGrad.addColorStop(0, barColor + 'cc');
+  barGrad.addColorStop(1, barColor + '26');
+  const viewGrad = ctx.createLinearGradient(0, 0, 0, 320);
+  viewGrad.addColorStop(0, 'rgba(99,102,241,.22)');
+  viewGrad.addColorStop(1, 'rgba(99,102,241,0)');
   window._statChart = new Chart(ctx, {
     data: {
       labels,
@@ -6156,10 +6163,12 @@ function renderStatChart() {
           type: 'bar',
           label: follLabel,
           data: follData,
-          backgroundColor: barColor + '33',
-          borderColor: barColor,
-          borderWidth: 1.5,
-          borderRadius: 5,
+          backgroundColor: barGrad,
+          hoverBackgroundColor: barColor,
+          borderWidth: 0,
+          borderRadius: 8,
+          borderSkipped: false,
+          maxBarThickness: 46,
           yAxisID: 'yFoll',
           order: 3
         },
@@ -6168,11 +6177,14 @@ function renderStatChart() {
           label: 'Views',
           data: viewData,
           borderColor: '#6366f1',
-          backgroundColor: 'rgba(99,102,241,.08)',
-          borderWidth: 2,
-          pointRadius: 4,
+          backgroundColor: viewGrad,
+          borderWidth: 2.5,
+          pointRadius: 3.5,
           pointHoverRadius: 6,
-          tension: 0.35,
+          pointBackgroundColor: '#fff',
+          pointBorderColor: '#6366f1',
+          pointBorderWidth: 2,
+          tension: 0.4,
           fill: true,
           yAxisID: 'yView',
           order: 1
@@ -6232,7 +6244,7 @@ function renderStatChart() {
               const up    = pct >= 0;
               const color = up ? '#16a34a' : '#dc2626';
               const prevLabel = `vs ${isWeekly ? (prevRow.week||'') : fmtMonth(prevRow.month||'')}`;
-              trendHtml = `<span style="font-size:.65rem;color:${color};font-weight:700;margin-left:4px" title="${prevLabel}">${up?'↑':'↓'}${Math.abs(pct).toFixed(1)}% <span style="font-weight:400;opacity:.75">(${prevLabel})</span></span>`;
+              trendHtml = `<span class="stat-trend ${up ? 'up' : 'down'}" title="${prevLabel}">${up?'↑':'↓'}${Math.abs(pct).toFixed(1)}%</span>`;
             }
             const desc = STAT_FIELD_DESC[card.key] || '';
             return `<div class="stat-summary-card" style="outline:2px solid ${platM.color}33">
@@ -6247,10 +6259,13 @@ function renderStatChart() {
         </div>`;
       },
       plugins: {
-        legend: { display: true, position: 'top',
-          labels: { boxWidth: 12, font: { size: isMobile ? 9 : 11 } }
+        legend: { display: true, position: 'top', align: 'end',
+          labels: { boxWidth: 12, usePointStyle: true, pointStyle: 'circle', padding: 14, color: '#64748b', font: { size: isMobile ? 9 : 11, weight: '600' } }
         },
         tooltip: {
+          backgroundColor: '#0f172a', titleColor: '#fff', bodyColor: '#e2e8f0',
+          padding: 12, cornerRadius: 10, boxPadding: 4, usePointStyle: true,
+          titleFont: { weight: '700' },
           callbacks: {
             label: ctx => ` ${ctx.dataset.label}: ${fmtNum(ctx.parsed.y)}`
           }
@@ -6260,16 +6275,16 @@ function renderStatChart() {
         yFoll: {
           type: 'linear', position: 'left',
           title: { display: false },
-          ticks: { callback: v => fmtNum(v), font: { size: isMobile ? 8 : 10 }, maxTicksLimit: 5 },
-          grid: { color: 'rgba(0,0,0,.06)' }
+          ticks: { callback: v => fmtNum(v), font: { size: isMobile ? 8 : 10 }, maxTicksLimit: 5, color: '#94a3b8' },
+          grid: { color: 'rgba(148,163,184,.15)' }, border: { display: false }
         },
         yView: {
           type: 'linear', position: 'right',
           title: { display: false },
-          ticks: { callback: v => fmtNum(v), font: { size: isMobile ? 8 : 10 }, maxTicksLimit: 5 },
-          grid: { drawOnChartArea: false }
+          ticks: { callback: v => fmtNum(v), font: { size: isMobile ? 8 : 10 }, maxTicksLimit: 5, color: '#94a3b8' },
+          grid: { drawOnChartArea: false }, border: { display: false }
         },
-        x: { ticks: { font: { size: isMobile ? 8 : 10 }, maxRotation: 45, autoSkip: true, maxTicksLimit: isMobile ? 6 : 12 } }
+        x: { ticks: { font: { size: isMobile ? 8 : 10 }, color: '#64748b', maxRotation: 45, autoSkip: true, maxTicksLimit: isMobile ? 6 : 12 }, grid: { display: false }, border: { display: false } }
       }
     }
   });
