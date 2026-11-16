@@ -1989,6 +1989,28 @@ function renderDashboard() {
   setTxt('dStatProgress', progress);
   setTxt('dStatTeam',     teamCount);
 
+  // Persentase & progress bar kartu statistik
+  const pct = (a, b) => b ? Math.min(100, Math.round(a / b * 100)) : 0;
+  const total = monthContents.length;
+  const setBar = (id, v) => { const el = $(id); if (el) el.style.width = v + '%'; };
+  setTxt('dStatKontenPct',  monthlyTarget ? `· ${pct(total, monthlyTarget)}%` : '');
+  setBar('dStatKontenBar',  pct(total, monthlyTarget));
+  setTxt('dStatSelesaiPct', total ? `· ${pct(selesai, total)}%` : '');
+  setBar('dStatSelesaiBar', pct(selesai, total));
+  setBar('dStatProgressBar', pct(progress, total));
+
+  // Sapaan
+  const h = new Date().getHours();
+  const salam = h < 11 ? 'Selamat pagi' : h < 15 ? 'Selamat siang' : h < 18 ? 'Selamat sore' : 'Selamat malam';
+  const nama = (typeof currentUser === 'function' && currentUser()) || '';
+  setTxt('dashGreet', `${salam}${nama && nama !== '—' ? ', ' + nama : ''} 👋`);
+  const todayY = scYmd(new Date());
+  const todayCnt = (state.contents || []).filter(c => c.publishDate === todayY).length;
+  const scToday  = (state.stockContents || []).filter(it => it.airDate === todayY ||
+    (it.prodDate && it.prodDate <= todayY && (it.prodDateEnd || it.prodDate) >= todayY)).length;
+  setTxt('dashHeroSub', `${new Date().toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}`
+    + ` · ${todayCnt} konten terjadwal hari ini · ${scToday} jadwal Stock Contents hari ini`);
+
   refreshKpiList();  // KPI Harian has its own period filter
   renderTodoList();
   renderDashNearContent();

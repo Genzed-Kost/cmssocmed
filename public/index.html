@@ -142,6 +142,14 @@
     <section id="page-dashboard" class="page active">
       <div class="page-inner">
 
+        <!-- Sapaan -->
+        <div class="dash-hero">
+          <div class="dash-hero-text">
+            <div class="dash-hero-greet" id="dashGreet">Selamat datang 👋</div>
+            <div class="dash-hero-sub" id="dashHeroSub"></div>
+          </div>
+        </div>
+
         <!-- Period Filter Bar (ticker sits in the middle) -->
         <div class="dash-month-bar">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
@@ -177,23 +185,38 @@
 
         <!-- Stats row -->
         <div class="stat-row" id="dashStatRow">
-          <div class="stat-card">
-            <div class="stat-label">Konten Bulan Ini</div>
+          <div class="stat-card stat-c-indigo">
+            <div class="stat-top">
+              <div class="stat-label">Konten Bulan Ini</div>
+              <span class="stat-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></span>
+            </div>
             <div class="stat-value" id="dStatKonten">—</div>
-            <div class="stat-sub">dari target <span id="dStatTarget">—</span></div>
+            <div class="stat-sub">dari target <span id="dStatTarget">—</span> <b class="stat-pct" id="dStatKontenPct"></b></div>
+            <div class="stat-progress"><i id="dStatKontenBar"></i></div>
           </div>
-          <div class="stat-card">
-            <div class="stat-label">Selesai</div>
+          <div class="stat-card stat-c-green">
+            <div class="stat-top">
+              <div class="stat-label">Selesai</div>
+              <span class="stat-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg></span>
+            </div>
             <div class="stat-value green" id="dStatSelesai">—</div>
-            <div class="stat-sub">konten published</div>
+            <div class="stat-sub">konten published <b class="stat-pct" id="dStatSelesaiPct"></b></div>
+            <div class="stat-progress"><i id="dStatSelesaiBar"></i></div>
           </div>
-          <div class="stat-card">
-            <div class="stat-label">On Progress</div>
+          <div class="stat-card stat-c-amber">
+            <div class="stat-top">
+              <div class="stat-label">On Progress</div>
+              <span class="stat-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></span>
+            </div>
             <div class="stat-value yellow" id="dStatProgress">—</div>
             <div class="stat-sub">sedang dikerjakan</div>
+            <div class="stat-progress"><i id="dStatProgressBar"></i></div>
           </div>
-          <div class="stat-card">
-            <div class="stat-label">Anggota Tim</div>
+          <div class="stat-card stat-c-blue">
+            <div class="stat-top">
+              <div class="stat-label">Anggota Tim</div>
+              <span class="stat-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg></span>
+            </div>
             <div class="stat-value blue" id="dStatTeam">—</div>
             <div class="stat-sub">creator aktif</div>
           </div>

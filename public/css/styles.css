@@ -3291,3 +3291,86 @@ ul { list-style: none; }
   .plan-table td.empty-cell { grid-column: 1 / -1; }
   .plan-table tbody tr:has(.empty-cell) { display: block; }
 }
+
+/* ══ Dashboard: tampilan modern ═════════════════════════════════════ */
+#page-dashboard .card,
+#page-dashboard .stat-card,
+#page-dashboard .dash-month-bar {
+  border: 1px solid color-mix(in srgb, var(--bd) 65%, transparent);
+  border-radius: 16px;
+  box-shadow: 0 1px 2px rgba(15,23,42,.04), 0 6px 20px rgba(15,23,42,.05);
+}
+#page-dashboard .card { padding: 20px 22px; transition: box-shadow .2s; }
+#page-dashboard .card:hover { box-shadow: 0 1px 2px rgba(15,23,42,.05), 0 10px 28px rgba(15,23,42,.08); }
+#page-dashboard .card-title { font-size: .95rem; font-weight: 800; }
+#page-dashboard .dash-grid { gap: 16px; }
+#page-dashboard .dash-month-bar { padding: 8px 10px; margin-bottom: 16px; }
+
+/* Sapaan */
+.dash-hero {
+  display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  margin-bottom: 14px; padding: 18px 22px; border-radius: 18px; color: #fff;
+  background:
+    radial-gradient(circle at 92% 20%, rgba(255,255,255,.18) 0, transparent 38%),
+    radial-gradient(circle at 75% 120%, rgba(225,29,72,.45) 0, transparent 45%),
+    linear-gradient(120deg, #1e3a8a 0%, #1d4ed8 55%, #4f46e5 100%);
+  box-shadow: 0 10px 30px rgba(29,78,216,.25);
+}
+.dash-hero-greet { font-size: 1.25rem; font-weight: 800; letter-spacing: -.01em; }
+.dash-hero-sub   { font-size: .78rem; opacity: .85; margin-top: 3px; }
+
+/* Kartu statistik */
+#page-dashboard .stat-row { gap: 16px; margin-bottom: 16px; }
+#page-dashboard .stat-card { --sc: var(--blue); padding: 16px 18px 14px; overflow: hidden; }
+#page-dashboard .stat-card::before { display: none; }
+#page-dashboard .stat-c-indigo { --sc: #4f46e5; }
+#page-dashboard .stat-c-green  { --sc: #16a34a; }
+#page-dashboard .stat-c-amber  { --sc: #d97706; }
+#page-dashboard .stat-c-blue   { --sc: #2563eb; }
+#page-dashboard .stat-card::after {
+  content: ''; position: absolute; left: 0; right: 0; bottom: 0; height: 3px;
+  background: linear-gradient(90deg, transparent, color-mix(in srgb, var(--sc) 35%, transparent)); pointer-events: none;
+}
+.stat-top { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 6px; }
+.stat-top .stat-label { margin: 0; }
+.stat-icon {
+  width: 36px; height: 36px; border-radius: 11px; flex-shrink: 0; position: relative; z-index: 1;
+  display: inline-flex; align-items: center; justify-content: center;
+  background: color-mix(in srgb, var(--sc) 12%, var(--surface)); color: var(--sc);
+}
+#page-dashboard .stat-value { font-size: 2rem; font-weight: 900; margin: 2px 0 4px; }
+#page-dashboard .stat-value.yellow { color: #d97706; }
+.stat-pct { color: var(--sc); font-weight: 800; }
+.stat-progress { height: 6px; border-radius: 99px; background: color-mix(in srgb, var(--sc) 12%, var(--bg)); margin-top: 10px; overflow: hidden; }
+.stat-progress i { display: block; height: 100%; width: 0; border-radius: 99px; background: linear-gradient(90deg, color-mix(in srgb, var(--sc) 70%, #fff), var(--sc)); transition: width .6s cubic-bezier(.2,.8,.2,1); }
+
+/* KPI Harian */
+#page-dashboard .kpi-list { gap: 12px; }
+#page-dashboard .kpi-item { padding: 6px 8px; border-radius: 10px; transition: background .15s; }
+#page-dashboard .kpi-item:hover { background: var(--bg); }
+#page-dashboard .kpi-bar-wrap { height: 10px; background: color-mix(in srgb, var(--blue) 8%, var(--bg)); }
+#page-dashboard .kpi-bar { background: linear-gradient(90deg, #60a5fa, var(--blue)); }
+#page-dashboard .kpi-bar.green  { background: linear-gradient(90deg, #4ade80, var(--green)); }
+#page-dashboard .kpi-bar.yellow { background: linear-gradient(90deg, #fcd34d, #f59e0b); }
+#page-dashboard .kpi-fraction { font-weight: 700; color: var(--text); font-variant-numeric: tabular-nums; }
+
+/* Kartu konten (Upcoming / Published) */
+#page-dashboard .dash-content-card { border-radius: 14px; border-color: color-mix(in srgb, var(--bd) 70%, transparent); transition: transform .15s, box-shadow .2s, border-color .2s; }
+#page-dashboard .dash-content-card:hover { transform: translateY(-2px); box-shadow: 0 12px 28px rgba(15,23,42,.1); border-color: var(--blue-bd); }
+#page-dashboard .dash-section-title { font-weight: 800; letter-spacing: .08em; }
+
+/* Analytics */
+#page-dashboard .anlp-wrap { overflow: hidden; }
+#page-dashboard .anlp-card { transition: background .15s; }
+
+@media (max-width: 680px) {
+  .dash-hero { padding: 14px 16px; border-radius: 14px; }
+  .dash-hero-greet { font-size: 1.05rem; }
+  .dash-hero-sub { font-size: .72rem; }
+  #page-dashboard .stat-row { gap: 10px; }
+  #page-dashboard .stat-card { padding: 12px 14px; }
+  #page-dashboard .stat-value { font-size: 1.6rem; }
+  .stat-icon { width: 30px; height: 30px; border-radius: 9px; }
+  .stat-icon svg { width: 15px; height: 15px; }
+  #page-dashboard .card { padding: 16px; }
+}
