@@ -2274,6 +2274,7 @@ function buildAnlAcctSel() {
   });
   sel.addEventListener('change', () => {
     state.anlActiveAcct = sel.value;
+    state.anlFocusPlat = null;
     renderAnalyticsPanel();
   });
 }
@@ -2310,7 +2311,8 @@ function renderAnalyticsPanel() {
     const sparkMonths = last6.map(r => r.month);
     const hasData    = last6.length >= 2;
 
-    return `<div class="anlp-card">
+    return `<div class="anlp-card${state.anlFocusPlat === platId ? ' is-focus' : ''}" data-plat="${platId}" role="button" tabindex="0"
+        title="Klik untuk melihat analisis ${esc(platM.label)}">
       <div class="anlp-card-head">
         <span class="anlp-card-icon" style="color:${platM.color}">${platIconMap[platId]||''}</span>
         <span class="anlp-card-name">${platM.label.toUpperCase()}</span>
@@ -2331,7 +2333,103 @@ function renderAnalyticsPanel() {
         </div>
       </div>
     </div>`;
-  }).join('');
+  }).join('') + `<div class="anlp-analysis" id="anlpAnalysis">${renderAnlAnalysis(acctId)}</div>`;
+
+  grid.querySelectorAll('.anlp-card[data-plat]').forEach(card => {
+    const pick = e => {
+      if (e.target.closest('a')) return;          // tautan "buka" tetap berfungsi
+      state.anlFocusPlat = state.anlFocusPlat === card.dataset.plat ? null : card.dataset.plat;
+      renderAnalyticsPanel();
+    };
+    card.addEventListener('click', pick);
+    card.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); pick(e); } });
+  });
+  $('anlpAnalysis')?.querySelector('[data-anl-reset]')?.addEventListener('click', () => { state.anlFocusPlat = null; renderAnalyticsPanel(); });
+}
+
+/* ── Analisis singkat Platform Analytics (tanpa AI, dihitung dari data) ──────
+   Default: ringkasan seluruh platform untuk akun terpilih.
+   Klik kartu platform: analisis khusus platform tersebut.                     */
+function renderAnlAnalysis(acctId) {
+  const anl   = state.analytics?.[acctId] || {};
+  const acct  = getAcctName(acctId) || acctId;
+  const pct   = (a, b) => (b ? (a - b) / b * 100 : null);
+  const chip  = v => v == null || !isFinite(v) ? '<span class="anl-chg">—</span>'
+    : `<span class="anl-chg ${v >= 0 ? 'up' : 'down'}">${v >= 0 ? '▲' : '▼'} ${Math.abs(v).toFixed(1)}%</span>`;
+  const stat = Object.entries(PLATFORM_FIELDS).map(([pid, pm]) => {
+    const v = r => +(r?.[pm.viewKey] || 0), f = r => +(r?.[pm.followerKey] || 0);
+    // Abaikan bulan yang belum terisi (views & followers kosong/0)
+    const rows = (anl[pid] || []).filter(r => r.month && (v(r) > 0 || f(r) > 0)).slice().sort((a, b) => a.month.localeCompare(b.month));
+    const last = rows[rows.length - 1], prev = rows[rows.length - 2];
+    const er = rows.slice(-3).map(r => +r.erPct || 0).filter(Boolean);
+    const best = rows.slice(-6).reduce((b, r) => (v(r) > v(b || {}) ? r : b), null);
+    return { pid, pm, rows, last, prev,
+      foll: f(last), follChg: prev && f(prev) ? pct(f(last), f(prev)) : null,
+      views: v(last), viewsChg: prev && v(prev) ? pct(v(last), v(prev)) : null,
+      er: er.length ? er.reduce((a, b) => a + b, 0) / er.length : null, best };
+  });
+  const withData = stat.filter(x => x.last);
+  const head = t => `<div class="anl-head"><span class="anl-title">🧠 ${t}</span><span class="anl-acct">${esc(acct)}</span></div>`;
+  if (!withData.length) return head('Analisis Singkat') +
+    `<p class="anl-empty">Belum ada data statistik untuk akun ini. Isi data di halaman <a href="#statistics">Statistik</a>.</p>`;
+
+  // ── Fokus satu platform ──
+  const focus = state.anlFocusPlat && stat.find(x => x.pid === state.anlFocusPlat);
+  if (focus) {
+    const x = focus;
+    if (!x.last) return head(`Analisis ${x.pm.label}`) +
+      `<p class="anl-empty">Belum ada data ${esc(x.pm.label)} untuk akun ini.</p><button class="anl-back" data-anl-reset>← Ringkasan semua platform</button>`;
+    const trend = x.rows.slice(-3).map(r => +(r[x.pm.viewKey] || 0));
+    const naik  = trend.length === 3 && trend[2] > trend[1] && trend[1] > trend[0];
+    const turun = trend.length === 3 && trend[2] < trend[1] && trend[1] < trend[0];
+    const tips = [];
+    if (x.viewsChg != null && x.viewsChg < -15) tips.push('Views turun cukup tajam — evaluasi jam tayang, hook 3 detik pertama, dan format yang dipakai.');
+    if (x.viewsChg != null && x.viewsChg > 15)  tips.push('Views sedang naik — pertahankan pola konten bulan ini dan tambah frekuensi unggah.');
+    if (x.er != null && x.er < 1)               tips.push('ER di bawah 1% — perbanyak ajakan berkomentar dan konten yang memancing diskusi.');
+    if (x.er != null && x.er >= 3)              tips.push('ER sangat baik (≥3%) — audiens aktif; manfaatkan untuk kolaborasi atau seri konten.');
+    if (!tips.length) tips.push('Performa stabil — uji 1–2 format baru untuk mencari lonjakan.');
+    return head(`Analisis ${x.pm.label}`) + `
+      <div class="anl-kpis">
+        <div><span>${x.pid === 'youtube' ? 'Subscribers' : 'Followers'}</span><b>${x.foll ? fmtNum(x.foll) : '—'}</b>${chip(x.follChg)}</div>
+        <div><span>Views ${fmtMonth(x.last.month)}</span><b>${x.views ? fmtNum(x.views) : '—'}</b>${chip(x.viewsChg)}</div>
+        <div><span>Rata-rata ER (3 bln)</span><b>${x.er != null ? x.er.toFixed(2) + '%' : '—'}</b></div>
+      </div>
+      <ul class="anl-list">
+        ${x.best ? `<li>📈 Bulan terbaik (6 bln): <b>${fmtMonth(x.best.month)}</b> — ${fmtNum(+(x.best[x.pm.viewKey] || 0))} views</li>` : ''}
+        <li>${naik ? '🔥 Views naik 3 bulan berturut-turut' : turun ? '⚠️ Views turun 3 bulan berturut-turut' : '↔️ Tren views 3 bulan terakhir naik-turun'}</li>
+        ${tips.map(t => `<li>💡 ${t}</li>`).join('')}
+      </ul>
+      <button class="anl-back" data-anl-reset>← Ringkasan semua platform</button>`;
+  }
+
+  // ── Ringkasan semua platform ──
+  const totFoll  = withData.reduce((s, x) => s + x.foll, 0);
+  const prevFoll = withData.reduce((s, x) => s + (x.prev ? +(x.prev[x.pm.followerKey] || 0) : x.foll), 0);
+  const topViews = withData.slice().sort((a, b) => b.views - a.views)[0];
+  const grow     = withData.filter(x => x.follChg != null).sort((a, b) => b.follChg - a.follChg)[0];
+  const drop     = withData.filter(x => x.viewsChg != null && x.viewsChg < -10).sort((a, b) => a.viewsChg - b.viewsChg)[0];
+  const ers      = withData.filter(x => x.er != null);
+  const avgER    = ers.length ? ers.reduce((s, x) => s + x.er, 0) / ers.length : null;
+  const missing  = stat.filter(x => !x.last).map(x => x.pm.label);
+  const latestM  = withData.map(x => x.last.month).sort().pop();
+  const stale    = withData.filter(x => x.last.month < latestM).map(x => x.pm.label);
+  const tips = [];
+  if (drop) tips.push(`Views ${drop.pm.label} turun ${Math.abs(drop.viewsChg).toFixed(0)}% — perlu evaluasi konten di platform ini.`);
+  if (grow && grow.follChg > 0) tips.push(`Pertumbuhan followers tercepat di ${grow.pm.label} — prioritaskan distribusi ke sini.`);
+  if (stale.length) tips.push(`Data ${stale.join(', ')} belum diperbarui sampai ${fmtMonth(latestM)}.`);
+  if (missing.length) tips.push(`Belum ada data: ${missing.join(', ')}.`);
+  return head('Analisis Singkat') + `
+    <div class="anl-kpis">
+      <div><span>Total followers</span><b>${fmtNum(totFoll)}</b>${chip(pct(totFoll, prevFoll))}</div>
+      <div><span>Views terbanyak</span><b>${esc(topViews.pm.label)}</b><i>${fmtNum(topViews.views)} · ${fmtMonth(topViews.last.month)}</i></div>
+      <div><span>Rata-rata ER</span><b>${avgER != null ? avgER.toFixed(2) + '%' : '—'}</b></div>
+    </div>
+    <ul class="anl-list">
+      ${withData.filter(x => x.views > 0).sort((a, b) => b.views - a.views).map(x =>
+        `<li><span class="anl-dot" style="background:${x.pm.color}"></span>${esc(x.pm.label)}: ${fmtNum(x.views)} views ${chip(x.viewsChg)}</li>`).join('')}
+      ${tips.map(t => `<li>💡 ${esc(t)}</li>`).join('')}
+    </ul>
+    <div class="anl-hint">Klik kartu platform untuk analisis detail.</div>`;
 }
 
 /* ── Dashboard Planner Sections ─────────────────────────────────────────── */

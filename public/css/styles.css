@@ -4042,3 +4042,29 @@ ul { list-style: none; }
   #page-dashboard #dashStatRow .stat-icon { width: 32px; height: 32px; border-radius: 10px; }
   #page-dashboard #dashStatRow .stat-value { font-size: 1.2rem; }
 }
+
+/* ── Dashboard: panel Analisis Singkat di Platform Analytics ── */
+.anlp-card[data-plat] { cursor: pointer; position: relative; }
+.anlp-card.is-focus { background: color-mix(in srgb, var(--blue-lt) 70%, var(--surface)); box-shadow: inset 0 -3px 0 var(--blue); }
+.anlp-analysis { background: var(--surface); padding: 14px 18px; grid-column: 1 / -1; display: flex; flex-direction: column; gap: 10px; min-width: 0; }
+@media (min-width: 1200px) {
+  .anlp-grid { grid-template-columns: repeat(5, minmax(0, 1fr)) minmax(300px, 1.7fr); }
+  .anlp-analysis { grid-column: auto; }
+}
+.anl-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.anl-title { font-size: .72rem; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; }
+.anl-acct { font-size: .66rem; font-weight: 700; color: var(--blue); background: var(--blue-lt); padding: 2px 8px; border-radius: 999px; white-space: nowrap; }
+.anl-kpis { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+.anl-kpis > div { display: flex; flex-direction: column; gap: 1px; padding: 8px 10px; border-radius: 10px; background: var(--bg); min-width: 0; }
+.anl-kpis span { font-size: .58rem; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: .05em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.anl-kpis b { font-size: .95rem; font-weight: 800; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.anl-kpis i { font-style: normal; font-size: .62rem; color: var(--muted); }
+.anl-chg { font-size: .62rem; font-weight: 800; color: var(--muted); }
+.anl-chg.up { color: #16a34a; } .anl-chg.down { color: #dc2626; }
+.anl-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 5px; font-size: .74rem; line-height: 1.4; color: var(--text); }
+.anl-list li { display: flex; align-items: baseline; gap: 6px; flex-wrap: wrap; }
+.anl-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; flex-shrink: 0; }
+.anl-hint { font-size: .64rem; color: var(--muted-lt); }
+.anl-empty { font-size: .76rem; color: var(--muted); margin: 0; }
+.anl-back { align-self: flex-start; border: 0; background: transparent; color: var(--blue); font: inherit; font-size: .7rem; font-weight: 700; cursor: pointer; padding: 0; }
+@media (max-width: 680px) { .anl-kpis { grid-template-columns: 1fr 1fr; } }
