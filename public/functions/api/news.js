@@ -51,8 +51,10 @@ async function getText(url) {
 export async function onRequestGet({ request }) {
   const params = new URL(request.url).searchParams;
   const q = params.get('q') || DEFAULT_Q;
-  const n = Math.min(Math.max(parseInt(params.get('n'), 10) || 7, 1), 40);
+  const n = Math.min(Math.max(parseInt(params.get('n'), 10) || 7, 1), 100);
   const sources = [
+    // Utamakan berita 24 jam terakhir (operator Google News "when:1d"); bila terlalu sedikit, pakai tanpa batas waktu
+    `https://news.google.com/rss/search?q=${encodeURIComponent(q + ' when:1d')}&hl=id&gl=ID&ceid=ID:id`,
     `https://news.google.com/rss/search?q=${encodeURIComponent(q)}&hl=id&gl=ID&ceid=ID:id`,
     `https://www.bing.com/news/search?q=${encodeURIComponent(q)}&format=rss&setlang=id&cc=ID`,
   ];
@@ -60,7 +62,7 @@ export async function onRequestGet({ request }) {
   for (const url of sources) {
     try {
       const items = parseRss(await getText(url), n);
-      if (items.length) return new Response(JSON.stringify({ items }), { headers: HEADERS });
+      if (items.length >= Math.min(7, n)) return new Response(JSON.stringify({ items }), { headers: HEADERS });
       errors.push(`${new URL(url).hostname}: kosong`);
     } catch (e) {
       errors.push(`${new URL(url).hostname}: ${e.message}`);

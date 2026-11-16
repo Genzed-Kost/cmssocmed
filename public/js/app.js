@@ -8249,29 +8249,56 @@ async function generateCaption() {
   showAiLoad(`Generating caption… (${count + 1}/${AI_MAX})`);
   try {
     const hasDialog = script && /host:|narasi:|pertanyaan:|jawaban:/i.test(script);
-    const scriptExcerpt = script ? script.slice(0, 600) : '';
-    const platformStr   = plats.length ? plats.join(', ') : 'Instagram, TikTok';
+    const scriptExcerpt = script ? script.slice(0, 1800) : '';
+    const theme   = gv('postTheme');
+    const format  = gv('postFormat');
+    const pubDate = gv('postDate');
+    const PLAT_NAME = { instagram: 'Instagram', tiktok: 'TikTok', twitter: 'X (Twitter)', facebook: 'Facebook', youtube: 'YouTube' };
+    const platNames = plats.length ? plats.map(p => PLAT_NAME[p] || p) : ['Instagram', 'TikTok'];
+    const hasX   = plats.includes('twitter');
+    const hasYT  = plats.includes('youtube');
+    const dateTx = pubDate ? new Date(pubDate + 'T00:00:00').toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }) : '';
 
-    const prompt = `Kamu adalah copywriter profesional media sosial untuk akun "${acct}" di Indonesia.
+    const prompt = `Kamu adalah editor berita digital & spesialis SEO media sosial untuk akun "${acct}" (Indonesia).
+Tugasmu: menulis caption bergaya BERITA yang akurat, informatif, dan dioptimalkan SEO agar mudah ditemukan lewat pencarian
+di ${platNames.join(', ')} maupun Google.
 
-Buatkan caption media sosial yang PANJANG, menarik, dan engaging untuk platform: ${platformStr}.
-
-Detail konten:
-- Judul: ${title}
+DATA KONTEN
+- Judul: ${title || '-'}
+- Tema/topik: ${theme || '-'}
+- Format: ${format || '-'}
 - Akun: ${acct}
-${scriptExcerpt ? `- Naskah/ringkasan:\n${scriptExcerpt}` : ''}
-${hasDialog ? '\n- Konten ini memiliki format dialog/percakapan. Sertakan cuplikan percakapan menarik dalam caption.' : ''}
+${dateTx ? `- Tanggal tayang: ${dateTx}` : ''}
+${scriptExcerpt ? `- Naskah/ringkasan (sumber fakta utama):\n"""\n${scriptExcerpt}\n"""` : ''}
+${hasDialog ? '- Naskah berformat dialog/wawancara: kutip 1–2 pernyataan terkuat secara langsung (pakai tanda kutip dan sebut pembicaranya).' : ''}
 
-Panduan penulisan caption:
-1. Buka dengan hook yang kuat (pertanyaan atau pernyataan mengejutkan)
-2. Jelaskan konten dengan detail dan informatif (minimal 3-4 paragraf)
-${hasDialog ? '3. Sertakan 1-2 baris dialog/percakapan menarik sebagai teaser\n4.' : '3.'} Tutup dengan call-to-action yang kuat
-${hasDialog ? '5.' : '4.'} Wajib cantumkan hashtag #PenjagaHarapan sebagai hashtag PERTAMA
-${hasDialog ? '6.' : '5.'} Tambahkan 10-15 hashtag relevan lainnya di akhir
-${hasDialog ? '7.' : '6.'} Gunakan emoji yang sesuai di setiap paragraf
-${hasDialog ? '8.' : '7.'} Bahasa Indonesia yang natural, semangat, dan menginspirasi
+ATURAN FAKTA
+- Gunakan HANYA fakta dari judul, tema, dan naskah di atas. Jangan menambah angka, nama, kutipan, atau klaim yang tidak ada.
+- Bila informasi 5W1H tidak tersedia, jangan dikarang — lewati saja.
 
-Langsung tulis caption-nya sekarang.`;
+STRUKTUR CAPTION (piramida terbalik)
+1. HEADLINE/HOOK (baris pertama, ≤ 125 karakter): memuat KATA KUNCI UTAMA di awal kalimat, kuat dan jelas — baris ini yang
+   terlihat sebelum "selengkapnya", jadi harus membuat orang berhenti menggulir. Boleh 1 emoji di awal.
+2. LEAD (1 paragraf): rangkum inti berita — apa, siapa, kapan, di mana, mengapa, bagaimana (yang tersedia).
+3. ISI (2–3 paragraf pendek, 2–3 kalimat per paragraf): detail penting, konteks/latar belakang, dampak bagi masyarakat,
+   dan kutipan langsung bila ada. Sisipkan kata kunci turunan secara alami (jangan diulang berlebihan).
+4. POIN PENTING: 3–5 butir ringkas diawali emoji yang relevan (✅ 📌 💡 dsb.).
+5. CTA: ajak audiens berdiskusi di kolom komentar (pertanyaan terbuka), simpan, dan bagikan; sebut ${acct} untuk info lainnya.
+6. HASHTAG di baris terakhir: #PenjagaHarapan WAJIB pertama, lalu 8–12 hashtag campuran:
+   kata kunci utama, topik spesifik, tokoh/instansi terkait (bila ada di data), dan 2–3 hashtag umum berita Indonesia.
+   Tanpa spasi di dalam hashtag, tanpa hashtag yang tidak berhubungan.
+
+GAYA
+- Bahasa Indonesia baku namun mudah dibaca (bukan kaku), netral dan berimbang seperti media berita, tidak provokatif.
+- Kalimat aktif, paragraf pendek dengan baris kosong di antaranya agar nyaman dibaca di HP.
+- Emoji secukupnya (maks. 1 per paragraf). Hindari huruf kapital semua kecuali singkatan.
+- Panjang caption utama 900–1.800 karakter (batas Instagram/TikTok 2.200).
+
+FORMAT JAWABAN (tulis langsung, tanpa penjelasan tambahan, tanpa markdown tebal/miring):
+[caption utama lengkap sesuai struktur di atas]
+${hasX ? `\n---\nVersi X (Twitter) — maks. 270 karakter termasuk 2–3 hashtag, #PenjagaHarapan disertakan:\n[tulis versi pendeknya]` : ''}${hasYT ? `\n---\nJudul YouTube (maks. 90 karakter, kata kunci utama di depan):\n[tulis judulnya]` : ''}
+---
+Kata kunci SEO: [kata kunci utama], [4–6 kata kunci turunan dipisah koma]`;
 
     const text = await callAI(prompt);
     sv('postCaption', text);
@@ -8356,7 +8383,7 @@ function setCachedNews(text) { localStorage.setItem(NEWS_KEY, JSON.stringify({ t
 const NEWS_QUERY = 'Prabowo Subianto kebijakan pemerintah';
 /* Supaya tiap refresh menampilkan berita yang berbeda:
    - kata kunci bergantian tiap refresh (sumber berita lebih beragam),
-   - server mengirim hingga 30 berita, lalu dipilih 7 yang BELUM pernah
+   - server mengirim hingga 100 berita (utamakan 24 jam terakhir), lalu dipilih 7 yang BELUM pernah
      ditampilkan di perangkat ini (terbaru lebih dulu).                      */
 const NEWS_QUERIES  = [
   'Prabowo Subianto kebijakan pemerintah',
@@ -8455,7 +8482,7 @@ async function _fetchNewsInner() {
   const query = nextNewsQuery();
   const q = encodeURIComponent(query);
   const attempts = [
-    ['Server', () => fetchNewsFromServer(`/api/news?q=${q}&n=30`)],
+    ['Server', () => fetchNewsFromServer(`/api/news?q=${q}&n=100`)],   // hingga 100 berita sekali ambil
     ['Gemini AI', () => fetchNewsFromGemini(query)],
   ];
   const errors = [];
