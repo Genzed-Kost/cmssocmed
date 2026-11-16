@@ -3864,3 +3864,33 @@ ul { list-style: none; }
   .chat-fab svg { width: 16px; height: 16px; }
   .chat-panel { inset: 0; transform: none; top: 0; right: 0; }
 }
+
+/* Pesan: hapus untuk semua orang */
+.chat-msg { position: relative; }
+.chat-msg-menu {
+  position: absolute; top: 50%; transform: translateY(-50%); left: -30px;
+  width: 26px; height: 26px; border-radius: 8px; border: 0; cursor: pointer;
+  display: inline-flex; align-items: center; justify-content: center;
+  background: var(--surface); color: var(--muted); box-shadow: 0 1px 4px rgba(15,23,42,.15);
+  opacity: 0; transition: opacity .15s;
+}
+.chat-msg:hover .chat-msg-menu, .chat-msg-menu:focus-visible { opacity: 1; }
+.chat-msg-menu:hover { color: var(--red); }
+@media (hover: none) { .chat-msg-menu { opacity: .7; } }
+
+/* Foto sekali lihat */
+.chat-once { display: flex; align-items: center; gap: 10px; padding: 8px 10px; margin-bottom: 6px; border-radius: 12px; border: 0; font: inherit; text-align: left; color: inherit; background: rgba(15,23,42,.06); min-width: 180px; }
+.chat-msg.mine .chat-once { background: rgba(255,255,255,.16); }
+.chat-once.open { cursor: pointer; background: color-mix(in srgb, var(--blue) 12%, var(--surface)); }
+.chat-once.open:hover { background: color-mix(in srgb, var(--blue) 20%, var(--surface)); }
+.chat-once span:last-child { display: flex; flex-direction: column; font-size: .76rem; }
+.chat-once i { font-style: normal; font-size: .66rem; opacity: .75; }
+.chat-once-ic { width: 30px; height: 30px; border-radius: 50%; flex-shrink: 0; display: inline-flex; align-items: center; justify-content: center; font-weight: 900; font-size: .8rem; border: 2px dashed currentColor; }
+.chat-once.done { opacity: .7; }
+.chat-once.done .chat-once-ic { border-style: solid; }
+.chat-once-toggle { border: 1.5px solid var(--bd); background: var(--surface); color: var(--muted); border-radius: 999px; padding: 3px 8px; font-size: .7rem; font-weight: 800; cursor: pointer; }
+.chat-once-toggle.on { background: var(--blue); border-color: var(--blue); color: #fff; }
+.chat-once-view { position: fixed; inset: 0; z-index: 2000; background: rgba(2,6,23,.94); display: flex; align-items: center; justify-content: center; padding: 56px 16px 16px; }
+.chat-once-view img { max-width: 100%; max-height: 100%; object-fit: contain; border-radius: 8px; user-select: none; -webkit-user-drag: none; pointer-events: none; }
+.chat-once-bar { position: absolute; top: 0; left: 0; right: 0; display: flex; align-items: center; justify-content: space-between; padding: 12px 16px; color: #e2e8f0; font-size: .8rem; }
+.chat-once-bar button { width: 36px; height: 36px; border-radius: 50%; border: 0; background: rgba(255,255,255,.12); color: #fff; font-size: 1rem; cursor: pointer; }

@@ -11,7 +11,7 @@ window.APP_INFO = {
       version: '2.6.0', date: '2026-11-16',
       items: [
         '🎨 Logo resmi Penjaga Harapan di login, sidebar, ikon browser & PDF',
-        '💬 Pesan antar user: teks, emoji, foto & file (maks 10 MB)',
+        '💬 Pesan antar user: teks, emoji, foto & file (maks 10 MB), hapus ≤ 60 menit, foto sekali lihat',
         '✨ Tampilan baru: Dashboard, Planner, Statistik, Aset, New Post, Login',
         '📊 Data Bulanan otomatis dari Data Mingguan & ER % otomatis',
         '📅 Stock Contents: kalender, jam produksi, Daftar Program',

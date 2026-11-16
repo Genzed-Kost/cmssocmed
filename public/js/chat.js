@@ -7,6 +7,7 @@
   const TOKEN_KEY = 'cms_chat_auth_v1';
   const MAX_FILE  = 10 * 1024 * 1024;
   const ALL       = '#all';
+  const DELETE_WINDOW = 60 * 60 * 1000;   // hapus untuk semua orang ≤ 60 menit
   const EMOJIS = ('😀 😁 😂 🤣 😊 😍 😘 😎 🤩 🥳 😇 🙂 😉 😅 😆 🤔 🤗 🤭 😴 😢 😭 😡 😱 🥺 😬 🙄 😏 🤝 👍 👎 👏 🙏 💪 👌 ✌️ 🤞 👋 🙌 ' +
                   '❤️ 🧡 💛 💚 💙 💜 🔥 ✨ ⭐ 🎉 🎊 💯 ✅ ❌ ⚠️ 📌 📢 📅 ⏰ 📷 🎥 🎬 🎙 📝 📁 💡 🚀 ☕ 🍕').split(' ');
 
@@ -46,6 +47,7 @@
   const avColor = n => { const p = ['#2563eb','#7c3aed','#db2777','#ea580c','#16a34a','#0891b2','#ca8a04','#4f46e5']; let h = 0; for (const c of String(n)) h = (h * 31 + c.charCodeAt(0)) >>> 0; return p[h % p.length]; };
   const linkify = t => esc(t).replace(/(https?:\/\/[^\s<]+)/g, '<a href="$1" target="_blank" rel="noopener">$1</a>').replace(/\n/g, '<br>');
   const notify = (m, type) => (typeof toast === 'function' ? toast(m, type) : console.log(m));
+  const previewFiles = m => (m.files || []).some(f => f.once) ? '📷 Foto sekali lihat' : (m.files || []).some(f => (f.type || '').startsWith('image/')) ? '📷 Foto' : '📎 Lampiran';
 
   function loadAuth() {
     try { S.auth = JSON.parse(localStorage.getItem(TOKEN_KEY) || 'null'); } catch { S.auth = null; }
@@ -186,7 +188,7 @@
     $('chatBody').innerHTML = `<div class="chat-search"><input id="chatSearch" placeholder="Cari nama…" /></div>
       <div class="chat-list">${rows.map(r => {
         const isAll = r.name === ALL;
-        const prev  = r.last ? `${low(r.last.from) === low(S.auth?.name) ? 'Anda: ' : isAll ? esc(r.last.from) + ': ' : ''}${r.last.text ? esc(r.last.text.slice(0, 60)) : '📎 Lampiran'}` : '<span class="chat-muted">Belum ada pesan</span>';
+        const prev  = r.last ? `${low(r.last.from) === low(S.auth?.name) ? 'Anda: ' : isAll ? esc(r.last.from) + ': ' : ''}${r.last.text ? esc(r.last.text.slice(0, 60)) : previewFiles(r.last)}` : '<span class="chat-muted">Belum ada pesan</span>';
         return `<button class="chat-row${r.unread ? ' unread' : ''}" data-peer="${esc(r.name)}" data-q="${esc(low(isAll ? 'semua tim' : r.name))}">
           <span class="chat-av" style="--av:${isAll ? '#1d4ed8' : avColor(r.name)}">${isAll ? '👥' : esc(initials(r.name))}</span>
           <span class="chat-row-main"><span class="chat-row-top"><b>${isAll ? 'Semua Tim' : esc(r.name)}</b>${r.ts ? `<i>${fmtTime(r.ts)}</i>` : ''}</span>
@@ -201,7 +203,7 @@
   }
 
   async function openThread(peer) {
-    S.peer = peer; S.messages = []; S.lastId = 0; S.pending = [];
+    S.peer = peer; S.messages = []; S.lastId = 0; S.pending = []; S.syncTs = 0;
     const isAll = peer === ALL;
     const u = S.users.find(x => x.name === peer);
     setHead(isAll ? 'Semua Tim' : peer, isAll ? `${S.users.length + 1} anggota` : (u?.role ? String(u.role).replace(/^\w/, c => c.toUpperCase()) : ''),
@@ -211,16 +213,30 @@
     renderPending();
     setTimeout(() => $('chatInput')?.focus(), 50);
     await fetchMessages(true);
+    schedule();   // langsung pakai jeda cepat (4 detik) saat percakapan terbuka
   }
 
   async function fetchMessages(first) {
     if (!S.peer) return;
     const peer = S.peer;
     try {
-      const r = await api(`/messages?with=${encodeURIComponent(peer)}${S.lastId ? '&after=' + S.lastId : ''}`);
+      const r = await api(`/messages?with=${encodeURIComponent(peer)}${S.lastId ? '&after=' + S.lastId : ''}&since=${S.syncTs || 0}`);
       if (S.peer !== peer) return;
+      S.syncTs = r.now || Date.now();
+      let changed = false;
+      if (r.deleted?.length) {
+        const gone = new Set(r.deleted);
+        const n = S.messages.length;
+        S.messages = S.messages.filter(m => !gone.has(m.id));
+        changed = S.messages.length !== n;
+      }
+      (r.updated || []).forEach(u => {
+        const i = S.messages.findIndex(m => m.id === u.id);
+        if (i >= 0 && JSON.stringify(S.messages[i].files) !== JSON.stringify(u.files)) { S.messages[i] = u; changed = true; }
+      });
+      if (changed && !r.messages.length && !first) renderThread(false);
       if (r.messages.length || first) {
-        S.messages.push(...r.messages);
+        S.messages.push(...r.messages.filter(m => !S.messages.some(x => x.id === m.id)));
         S.lastId = S.messages.length ? S.messages[S.messages.length - 1].id : S.lastId;
         renderThread(first);
         if (S.lastId) api('/read', { method: 'POST', json: { with: peer, lastId: S.lastId } }).then(() => refreshInbox()).catch(() => {});
@@ -243,20 +259,70 @@
       lastDay = day;
       const prev = S.messages[i - 1];
       const showName = !mine && S.peer === ALL && (!prev || prev.from !== m.from || sep);
-      const files = (m.files || []).map(f => (f.type || '').startsWith('image/')
+      const files = (m.files || []).map(f => f.once
+        ? (mine
+            ? `<div class="chat-once${f.viewed ? ' done' : ''}"><span class="chat-once-ic">${f.viewed ? '✓' : '1'}</span>
+                 <span><b>Foto sekali lihat</b><i>${f.viewed ? 'Sudah dibuka' : 'Belum dibuka'}</i></span></div>`
+            : f.viewed || !f.key
+              ? `<div class="chat-once done"><span class="chat-once-ic">✓</span><span><b>Foto sekali lihat</b><i>Sudah dilihat</i></span></div>`
+              : `<button type="button" class="chat-once open" data-once="${esc(f.key)}" data-mid="${m.id}"><span class="chat-once-ic">1</span>
+                   <span><b>Foto sekali lihat</b><i>Ketuk untuk melihat</i></span></button>`)
+        : (f.type || '').startsWith('image/')
         ? `<a class="chat-img" href="${fileUrl(f.key)}" target="_blank" rel="noopener"><img src="${fileUrl(f.key)}" alt="${esc(f.name)}" loading="lazy" /></a>`
         : (f.type || '').startsWith('video/')
           ? `<video class="chat-video" src="${fileUrl(f.key)}" controls preload="metadata"></video>`
           : `<a class="chat-file" href="${fileUrl(f.key, true)}" target="_blank" rel="noopener"><span class="chat-file-ic">📄</span>
                <span class="chat-file-meta"><b>${esc(f.name)}</b><i>${fmtSize(f.size)}</i></span><span class="chat-file-dl">⬇</span></a>`).join('');
       const onlyEmoji = m.text && !files && /^(\p{Extended_Pictographic}|️|‍|\s){1,8}$/u.test(m.text);
-      return `${sep}<div class="chat-msg ${mine ? 'mine' : 'theirs'}">
+      const canDel = mine && Date.now() - m.ts < DELETE_WINDOW;
+      return `${sep}<div class="chat-msg ${mine ? 'mine' : 'theirs'}" data-id="${m.id}">
         ${showName ? `<div class="chat-msg-name" style="color:${avColor(m.from)}">${esc(m.from)}</div>` : ''}
+        ${canDel ? `<button type="button" class="chat-msg-menu" data-del="${m.id}" title="Hapus untuk semua orang" aria-label="Hapus pesan">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/></svg></button>` : ''}
         <div class="chat-bubble${onlyEmoji ? ' emoji-only' : ''}">${files}${m.text ? `<div class="chat-text">${linkify(m.text)}</div>` : ''}
           <span class="chat-time">${fmtTime(m.ts).replace(/^.* (\d\d[.:]\d\d)$/, '$1')}</span></div></div>`;
     }).join('');
     if (forceBottom || nearBottom) box.scrollTop = box.scrollHeight;
+    box.querySelectorAll('[data-del]').forEach(b => b.onclick = () => deleteMessage(+b.dataset.del));
+    box.querySelectorAll('[data-once]').forEach(b => b.onclick = () => openOnce(b.dataset.once, +b.dataset.mid));
     box.querySelectorAll('img').forEach(img => img.addEventListener('load', () => { if (forceBottom || nearBottom) box.scrollTop = box.scrollHeight; }, { once: true }));
+  }
+
+  /* ── hapus untuk semua orang ─────────────────────────────── */
+  async function deleteMessage(id) {
+    const m = S.messages.find(x => x.id === id); if (!m) return;
+    if (Date.now() - m.ts >= DELETE_WINDOW) { notify('Pesan hanya bisa dihapus maksimal 60 menit setelah dikirim', 'error'); renderThread(false); return; }
+    if (!confirm('Hapus pesan ini untuk semua orang?')) return;
+    try {
+      await api('/delete', { method: 'POST', json: { id } });
+      S.messages = S.messages.filter(x => x.id !== id);
+      renderThread(false); refreshInbox();
+    } catch (e) { handleErr(e, true); }
+  }
+
+  /* ── foto sekali lihat: dibuka di layar penuh, tidak disimpan ── */
+  async function openOnce(key, mid) {
+    try {
+      const res = await fetch(`${API}/file?key=${encodeURIComponent(key)}`, { headers: { Authorization: 'Bearer ' + (S.auth?.token || '') } });
+      if (!res.ok) { const d = await res.json().catch(() => ({})); throw new Error(d.error || 'Foto tidak tersedia'); }
+      const url = URL.createObjectURL(await res.blob());
+      const ov = document.createElement('div');
+      ov.className = 'chat-once-view';
+      ov.innerHTML = `<div class="chat-once-bar"><span>📷 Foto sekali lihat · akan hilang setelah ditutup</span>
+          <button type="button" aria-label="Tutup">✕</button></div>
+        <img src="${url}" alt="" draggable="false" />`;
+      const close = () => { URL.revokeObjectURL(url); ov.remove(); document.removeEventListener('keydown', onKey, true); };
+      const onKey = e => { if (e.key === 'Escape') { e.stopPropagation(); close(); } };
+      ov.addEventListener('contextmenu', e => e.preventDefault());
+      ov.querySelector('button').onclick = close;
+      ov.onclick = e => { if (e.target === ov) close(); };
+      document.addEventListener('keydown', onKey, true);
+      document.body.appendChild(ov);
+    } catch (e) { notify(e.message, 'error'); }
+    // tandai sudah dilihat di tampilan lokal
+    const m = S.messages.find(x => x.id === mid);
+    (m?.files || []).forEach(f => { if (f.key === key) { f.viewed = true; f.key = null; } });
+    renderThread(false);
   }
 
   /* ── lampiran ────────────────────────────────────────────── */
@@ -289,7 +355,12 @@
       ${p.preview ? `<img src="${p.preview}" alt="">` : '<span class="chat-file-ic">📄</span>'}
       <span class="chat-pend-meta"><b>${esc(p.name)}</b><i>${p.error ? esc(p.error) : p.done ? fmtSize(p.size) + ' · siap' : p.progress + '%'}</i>
         ${!p.done && !p.error ? `<span class="chat-prog"><i style="width:${p.progress}%"></i></span>` : ''}</span>
+      ${p.preview && S.peer !== ALL ? `<button type="button" class="chat-once-toggle${p.once ? ' on' : ''}" data-once-toggle="${p.id}"
+          title="Sekali lihat: penerima hanya bisa membuka sekali, lalu foto dihapus">1×</button>` : ''}
       <button type="button" data-rm="${p.id}" title="Hapus" aria-label="Hapus lampiran">✕</button></div>`).join('');
+    box.querySelectorAll('[data-once-toggle]').forEach(b => b.onclick = () => {
+      const p = S.pending.find(x => x.id === b.dataset.onceToggle); if (p) { p.once = !p.once; renderPending(); }
+    });
     box.querySelectorAll('[data-rm]').forEach(b => b.onclick = () => {
       const p = S.pending.find(x => x.id === b.dataset.rm); if (p?.xhr && !p.done) p.xhr.abort();
       S.pending = S.pending.filter(x => x.id !== b.dataset.rm); renderPending();
@@ -301,7 +372,7 @@
     const input = $('chatInput');
     const text  = input.value.trim();
     if (S.pending.some(p => !p.done && !p.error)) { notify('Tunggu, file masih diunggah…'); return; }
-    const files = S.pending.filter(p => p.done).map(p => p.done);
+    const files = S.pending.filter(p => p.done).map(p => ({ ...p.done, once: !!p.once && S.peer !== ALL }));
     if (!text && !files.length) return;
     $('chatSend').disabled = true;
     try {
@@ -333,7 +404,7 @@
         const viewing = S.open && S.peer && convOf(S.peer) === c.conv;
         if (isNew && !viewing && Object.keys(prev).length) {
           S.seenNotify.add(c.id);
-          notify(`💬 ${c.from}${c.conv === 'all' ? ' (Semua Tim)' : ''}: ${c.text ? c.text.slice(0, 50) : '📎 Lampiran'}`);
+          notify(`💬 ${c.from}${c.conv === 'all' ? ' (Semua Tim)' : ''}: ${c.text ? c.text.slice(0, 50) : previewFiles(c)}`);
         }
       });
       if (render || (S.open && !S.peer)) renderList();

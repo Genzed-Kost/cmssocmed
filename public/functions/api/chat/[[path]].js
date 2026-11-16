@@ -16,6 +16,8 @@ const DEFAULT_SETTINGS_URL = 'https://raw.githubusercontent.com/Genzed-Kost/cmss
 const MAX_FILE  = 10 * 1024 * 1024;   // 10 MB
 const MAX_TEXT  = 4000;
 const TOKEN_TTL = 30 * 24 * 3600;     // detik
+const DELETE_WINDOW = 60 * 60 * 1000; // pesan bisa dihapus untuk semua orang ≤ 60 menit
+const SYNC_WINDOW   = 3 * 60 * 60 * 1000; // rentang info hapus/ubah yang dikirim ke klien
 
 const J = (data, status = 200) => new Response(JSON.stringify(data), {
   status, headers: { 'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': 'no-store' },
@@ -79,11 +81,15 @@ async function ensureSchema(db) {
     db.prepare(`CREATE INDEX IF NOT EXISTS idx_msg_conv ON messages(conv, id)`),
     db.prepare(`CREATE TABLE IF NOT EXISTS reads (
       user TEXT NOT NULL, conv TEXT NOT NULL, last_id INTEGER NOT NULL, PRIMARY KEY (user, conv))`),
+    db.prepare(`CREATE TABLE IF NOT EXISTS deleted (id INTEGER PRIMARY KEY, conv TEXT NOT NULL, ts INTEGER NOT NULL)`),
   ]);
+  // Kolom 'edited' (waktu terakhir pesan berubah, mis. foto sekali lihat sudah dibuka)
+  try { await db.prepare(`ALTER TABLE messages ADD COLUMN edited INTEGER`).run(); } catch { /* sudah ada */ }
   schemaReady = true;
 }
 const rowOut = r => ({ id: r.id, conv: r.conv, from: r.sender, to: r.recipient, text: r.body || '',
-  files: r.files ? JSON.parse(r.files) : [], ts: r.ts });
+  files: r.files ? JSON.parse(r.files).map(f => f.once && f.viewed ? { ...f, key: null } : f) : [], ts: r.ts });
+const fileLike = key => '%' + JSON.stringify(key).slice(1, -1).replace(/[%_]/g, '') + '%';
 
 /* ── handler ──────────────────────────────────────────────────────────── */
 export async function onRequest({ request, env, params }) {
@@ -149,7 +155,11 @@ export async function onRequest({ request, env, params }) {
         ? db.prepare(`SELECT * FROM messages WHERE conv = ? AND id > ? ORDER BY id ASC LIMIT 200`).bind(conv, after)
         : db.prepare(`SELECT * FROM (SELECT * FROM messages WHERE conv = ? ORDER BY id DESC LIMIT 100) ORDER BY id ASC`).bind(conv);
       const { results } = await q.all();
-      return J({ conv, messages: results.map(rowOut) });
+      const since = Math.max(parseInt(url.searchParams.get('since') || '0', 10) || 0, Date.now() - SYNC_WINDOW);
+      const del = await db.prepare(`SELECT id FROM deleted WHERE conv = ? AND ts > ?`).bind(conv, since).all();
+      const upd = await db.prepare(`SELECT * FROM messages WHERE conv = ? AND edited > ?`).bind(conv, since).all();
+      return J({ conv, messages: results.map(rowOut), deleted: del.results.map(r => r.id),
+        updated: upd.results.map(rowOut), now: Date.now() });
     }
 
     /* Tandai sudah dibaca */
@@ -188,7 +198,8 @@ export async function onRequest({ request, env, params }) {
       const conv = convOf(me.name, to);
       const files = (Array.isArray(body.files) ? body.files : []).slice(0, 10)
         .filter(f => f && typeof f.key === 'string' && f.key.startsWith(conv + '/'))
-        .map(f => ({ key: f.key, name: String(f.name || ''), size: +f.size || 0, type: String(f.type || '') }));
+        .map(f => ({ key: f.key, name: String(f.name || ''), size: +f.size || 0, type: String(f.type || ''),
+          ...(f.once && to !== '#all' && String(f.type || '').startsWith('image/') ? { once: true } : {}) }));
       if (!text.trim() && !files.length) return err('Pesan kosong');
       if (to !== '#all') {
         const team = teamList(await loadSettings(env));
@@ -204,12 +215,53 @@ export async function onRequest({ request, env, params }) {
       return J({ message: { id, conv, from: me.name, to, text, files, ts } });
     }
 
+    /* Hapus pesan untuk semua orang — hanya pengirim, maks 60 menit setelah dikirim.
+       Pesan & lampirannya hilang tanpa pemberitahuan ke penerima. */
+    if (route === '/delete' && method === 'POST') {
+      const { id } = await request.json().catch(() => ({}));
+      const row = await db.prepare(`SELECT * FROM messages WHERE id = ?`).bind(+id || 0).first();
+      if (!row) return J({ ok: true });
+      if (low(row.sender) !== meL) return err('Hanya pengirim yang bisa menghapus pesan ini', 403);
+      if (Date.now() - row.ts > DELETE_WINDOW) return err('Pesan hanya bisa dihapus maksimal 60 menit setelah dikirim', 403);
+      for (const f of (row.files ? JSON.parse(row.files) : [])) {
+        if (f.key) await env.CHAT_FILES.delete(f.key).catch(() => {});
+      }
+      await db.batch([
+        db.prepare(`DELETE FROM messages WHERE id = ?`).bind(row.id),
+        db.prepare(`INSERT OR REPLACE INTO deleted (id, conv, ts) VALUES (?, ?, ?)`).bind(row.id, row.conv, Date.now()),
+      ]);
+      return J({ ok: true });
+    }
+
     /* Unduh / tampilkan file — hanya peserta percakapan */
     if (route === '/file' && method === 'GET') {
       const key  = url.searchParams.get('key') || '';
       const conv = key.split('/')[0];
       const allowed = conv === 'all' || (conv.startsWith('dm:') && conv.slice(3).split('|').includes(meL));
       if (!allowed) return err('Tidak diizinkan', 403);
+
+      // Foto sekali lihat: hanya penerima, sekali buka, lalu file dihapus permanen dari penyimpanan
+      const owner = await db.prepare(`SELECT id, sender, files FROM messages WHERE conv = ? AND files LIKE ?`)
+        .bind(conv, fileLike(key)).first();
+      const ofiles = owner?.files ? JSON.parse(owner.files) : [];
+      const of = ofiles.find(f => f.key === key);
+      if (of?.once) {
+        if (low(owner.sender) === meL) return err('Foto sekali lihat hanya bisa dibuka penerima', 403);
+        if (of.viewed) return err('Foto sekali lihat sudah dibuka', 410);
+        const obj1 = await env.CHAT_FILES.get(key);
+        if (!obj1) return err('Foto sudah tidak tersedia', 410);
+        const buf = await obj1.arrayBuffer();
+        of.viewed = true; of.viewedAt = Date.now();
+        await env.CHAT_FILES.delete(key);
+        await db.prepare(`UPDATE messages SET files = ?, edited = ? WHERE id = ?`)
+          .bind(JSON.stringify(ofiles), Date.now(), owner.id).run();
+        return new Response(buf, { headers: {
+          'Content-Type': obj1.httpMetadata?.contentType || 'image/jpeg',
+          'Content-Disposition': 'inline',
+          'Cache-Control': 'no-store, private',
+        } });
+      }
+
       const obj = await env.CHAT_FILES.get(key);
       if (!obj) return err('File tidak ditemukan', 404);
       const name = obj.customMetadata?.name || key.split('/').pop();
