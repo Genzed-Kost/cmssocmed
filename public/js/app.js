@@ -6415,40 +6415,60 @@ function renderStatDataTable(acctId, platId, rows) {
     <td></td>
   </tr>`;
 
+  // Tabel data dibungkus dropdown (lipat/buka); status buka diingat per browser
+  const unit = isWeekly ? 'minggu' : 'bulan';
+  const incomplete = sorted.filter(r => platM.fields.some(f => !f.auto &&
+    (r[f.key] === undefined || r[f.key] === null || r[f.key] === 0 || r[f.key] === ''))).length;
+  let open = false;
+  try { open = localStorage.getItem('cms_stat_table_open') === '1'; } catch {}
+  const cmpOn = !!$('statCmpToggle')?.checked;   // pertahankan centang saat tabel dirender ulang
   wrap.innerHTML = `
-    <div class="card" style="margin-top:16px">
-      <div class="card-head">
-        <span class="card-title">📋 Data ${isWeekly?'Mingguan':'Bulanan'} — ${platM.label} · ${getAcctName(acctId)}</span>
-        <div style="display:flex;align-items:center;gap:8px">
+    <details class="card stat-data-dd" style="margin-top:16px" ${open ? 'open' : ''}
+      ontoggle="try{localStorage.setItem('cms_stat_table_open', this.open ? '1' : '0')}catch(e){}">
+      <summary class="stat-dd-summary">
+        <span class="stat-dd-chev" aria-hidden="true">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
+        </span>
+        <span class="stat-dd-title">
+          <span class="card-title">📋 Data ${isWeekly?'Mingguan':'Bulanan'} — ${platM.label} · ${getAcctName(acctId)}</span>
+          <span class="stat-dd-meta">${sorted.length} ${unit} tersimpan${incomplete
+            ? ` · <b class="stat-dd-warn">${incomplete} ${unit} belum lengkap</b>`
+            : ' · <b class="stat-dd-ok">semua lengkap</b>'}</span>
+        </span>
+        <span class="stat-dd-actions">
+          <button class="btn-sm blue" onclick="event.preventDefault();event.stopPropagation();addStatRowFromTable()">
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            Tambah ${isWeekly?'Minggu':'Bulan'}
+          </button>
+          <span class="badge-status ok" style="font-size:.68rem">Admin Only</span>
+        </span>
+      </summary>
+      <div class="stat-dd-body">
+        <div class="stat-dd-tools">
           <label style="font-size:.7rem;color:var(--muted);display:flex;align-items:center;gap:4px;cursor:pointer">
-            <input type="checkbox" id="statCmpToggle" onchange="renderStatChart()" style="accent-color:var(--blue)">
+            <input type="checkbox" id="statCmpToggle" ${cmpOn ? 'checked' : ''} onchange="renderStatChart()" style="accent-color:var(--blue)">
             Bandingkan periode sebelumnya
           </label>
-          <span class="badge-status ok" style="font-size:.68rem">Admin Only</span>
+          <span style="display:flex;gap:6px;flex-wrap:wrap">
+            <button class="btn-sm" onclick="copyStatTable('${acctId}','${platId}')">📋 Salin Tabel</button>
+            <button class="btn-sm" onclick="exportStatCSV('${acctId}','${platId}')">📥 Export CSV</button>
+          </span>
+        </div>
+        <div style="overflow-x:auto;-webkit-overflow-scrolling:touch">
+          <table class="data-table" style="font-size:.78rem">
+            <thead>
+              <tr>
+                <th style="white-space:nowrap">${isWeekly?'MINGGU':'BULAN'}</th>
+                ${headerCells}
+                <th style="white-space:nowrap;text-align:center">Aksi</th>
+              </tr>
+            </thead>
+            <tbody>${bodyRows}</tbody>
+            <tfoot>${totalRow}</tfoot>
+          </table>
         </div>
       </div>
-      <div style="overflow-x:auto;-webkit-overflow-scrolling:touch">
-        <table class="data-table" style="font-size:.78rem">
-          <thead>
-            <tr>
-              <th style="white-space:nowrap">${isWeekly?'MINGGU':'BULAN'}</th>
-              ${headerCells}
-              <th style="white-space:nowrap;text-align:center">Aksi</th>
-            </tr>
-          </thead>
-          <tbody>${bodyRows}</tbody>
-          <tfoot>${totalRow}</tfoot>
-        </table>
-      </div>
-      <div style="padding:10px 0 0;display:flex;gap:8px;flex-wrap:wrap">
-        <button class="btn-sm blue" onclick="addStatRowFromTable()">
-          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-          Tambah ${isWeekly?'Minggu':'Bulan'}
-        </button>
-        <button class="btn-sm" onclick="copyStatTable('${acctId}','${platId}')">📋 Salin Tabel</button>
-        <button class="btn-sm" onclick="exportStatCSV('${acctId}','${platId}')">📥 Export CSV</button>
-      </div>
-    </div>`;
+    </details>`;
 }
 
 /* Tambah baris baru lewat tabel */

@@ -3445,3 +3445,31 @@ ul { list-style: none; }
   #page-statistics .stat-header-row--plat { padding: 0 12px 10px; }
   #page-statistics .stat-chart-wrap { padding: 12px; }
 }
+
+/* Statistik: tabel data sebagai dropdown */
+.stat-data-dd { padding: 0 !important; overflow: hidden; }
+.stat-dd-summary {
+  list-style: none; cursor: pointer; user-select: none;
+  display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+  padding: 14px 18px; transition: background .15s;
+}
+.stat-dd-summary::-webkit-details-marker { display: none; }
+.stat-dd-summary:hover { background: color-mix(in srgb, var(--bg) 70%, var(--surface)); }
+.stat-dd-chev {
+  width: 28px; height: 28px; border-radius: 8px; flex-shrink: 0;
+  display: inline-flex; align-items: center; justify-content: center;
+  background: var(--bg); color: var(--muted); transition: transform .2s, background .15s, color .15s;
+}
+.stat-data-dd[open] .stat-dd-chev { transform: rotate(90deg); background: var(--blue-lt); color: var(--blue); }
+.stat-dd-title { display: flex; flex-direction: column; gap: 2px; flex: 1; min-width: 200px; }
+.stat-dd-meta { font-size: .72rem; color: var(--muted); }
+.stat-dd-warn { color: var(--red); font-weight: 700; }
+.stat-dd-ok { color: var(--green); font-weight: 700; }
+.stat-dd-actions { display: flex; align-items: center; gap: 8px; }
+.stat-dd-body { padding: 0 18px 18px; border-top: 1px solid var(--bd); animation: modal-in .18s ease; }
+.stat-dd-tools { display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-wrap: wrap; padding: 12px 0; }
+@media (max-width: 680px) {
+  .stat-dd-summary { padding: 12px; }
+  .stat-dd-body { padding: 0 12px 12px; }
+  .stat-dd-actions { width: 100%; justify-content: space-between; }
+}
