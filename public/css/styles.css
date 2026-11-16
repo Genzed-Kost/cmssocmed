@@ -3989,3 +3989,16 @@ ul { list-style: none; }
 .lg-news-scroll::-webkit-scrollbar-track { background: transparent; }
 .lg-news-scroll .lg-older:last-child { padding-bottom: 14px; }
 @media (max-width: 860px) { .lg-news { max-height: 320px; } }
+
+/* Pop up pembaruan khusus Admin */
+.adm-upd { max-width: 460px; padding: 0; border-radius: 18px; overflow: hidden; }
+.adm-upd-head { display: flex; align-items: center; gap: 12px; padding: 18px 20px; color: #fff;
+  background: linear-gradient(120deg, #0f172a, #1e3a8a 60%, #4338ca); }
+.adm-upd-badge { padding: 3px 8px; border-radius: 6px; background: rgba(255,255,255,.16); border: 1px solid rgba(255,255,255,.3); font-size: .62rem; font-weight: 900; letter-spacing: .08em; }
+.adm-upd-title { font-weight: 800; font-size: 1rem; }
+.adm-upd-sub { font-size: .72rem; opacity: .75; }
+.adm-upd-list { list-style: none; margin: 0; padding: 16px 20px; display: flex; flex-direction: column; gap: 10px; max-height: min(52vh, 360px); overflow-y: auto; }
+.adm-upd-list li { font-size: .82rem; line-height: 1.5; color: var(--text); padding-bottom: 10px; border-bottom: 1px solid var(--bd); }
+.adm-upd-list li:last-child { border-bottom: 0; padding-bottom: 0; }
+.adm-upd-foot { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 12px 20px; border-top: 1px solid var(--bd); background: var(--bg); }
+.adm-upd-foot span { font-size: .7rem; color: var(--muted); }

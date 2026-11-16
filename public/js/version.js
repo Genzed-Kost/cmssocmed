@@ -1,6 +1,8 @@
 /* ================================================================
-   Info versi & pembaruan terbaru — tampil di halaman login.
-   Perbarui daftar ini setiap kali ada rilis baru (terbaru di atas).
+   Info versi & pembaruan — terbaru di atas. Perbarui setiap rilis.
+   - items      : pembaruan yang dirasakan SEMUA user → tampil di halaman login
+   - adminItems : pembaruan khusus Admin → muncul sebagai pop up saat Admin
+                  masuk (maksimal sekali sehari)
    ================================================================ */
 window.APP_INFO = {
   name: 'Penjaga Harapan CMS',
@@ -10,15 +12,23 @@ window.APP_INFO = {
     {
       version: '2.6.0', date: '2026-11-16',
       items: [
-        '🎨 Logo resmi Penjaga Harapan di login, sidebar, ikon browser & PDF',
         '💬 Pesan antar user: teks, emoji, foto & file (maks 10 MB), hapus ≤ 60 menit, foto sekali lihat',
-        '✨ Tampilan baru: Dashboard, Planner, Statistik, Aset, New Post, Login',
-        '📊 Data Bulanan otomatis dari Data Mingguan & ER % otomatis',
-        '📅 Stock Contents: kalender, jam produksi, Daftar Program',
-        '📰 Info Presiden: hingga 100 berita terbaru (24 jam) & berganti tiap refresh (jeda 5 menit)',
-        '✍️ Auto-Caption AI bergaya berita + SEO (headline, 5W1H, poin, hashtag, versi X & judul YouTube)',
-        '🖨 PDF Laporan Planner lebih rapi + nomor halaman di setiap halaman',
-        '📈 Kurs USD/IDR & IHSG live di sidebar (refresh 3 menit, berkedip saat berubah)',
+        '✨ Tampilan baru yang lebih modern: Dashboard, Planner, Statistik, Aset, New Post & Login',
+        '🎨 Logo resmi Penjaga Harapan di login, sidebar, dan ikon browser',
+        '📅 Stock Contents tampil sebagai kalender, lengkap dengan jam produksi',
+        '✍️ Auto-Caption AI bergaya berita + SEO (headline, 5W1H, hashtag, versi X & judul YouTube)',
+        '📰 Info Presiden: berita lebih baru & berganti setiap refresh (jeda 5 menit)',
+        '🖨 PDF Laporan Planner lebih rapi dengan nomor halaman',
+        '📈 Kurs USD/IDR & IHSG live di sidebar',
+        '🧭 Menu samping baru: klik tepi sidebar untuk membuka/menutup (HP: tab tepi kiri / usap)',
+      ],
+      adminItems: [
+        '📊 Statistik: Data Bulanan terisi otomatis dari Data Mingguan — angka yang diisi manual tidak ditimpa',
+        '🧮 ER % dihitung otomatis (Total Engagement ÷ Views); kolom ditandai AUTO',
+        '🗂 Tabel Data Bulanan kini berupa dropdown; form edit data jadi pop up ringkas',
+        '🎙 Daftar Program (kelompok Stock Contents) bisa diatur di API Setup',
+        '💬 Fitur Pesan berjalan di Cloudflare (D1 + R2); pesan & file tidak masuk repo GitHub',
+        '🧹 Kode Netlify & file lama di root repo sudah dihapus — hosting: Cloudflare Pages',
       ],
     },
     {

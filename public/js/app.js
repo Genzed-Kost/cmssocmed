@@ -679,6 +679,9 @@ function applyAuthState() {
 
   // Tombol pesan (pop up chat)
   window.Chat?.sync();
+
+  // Pop up pembaruan khusus Admin (sekali sehari)
+  if (sess && admin) setTimeout(() => showAdminUpdates(), 600);
 }
 
 /* ── Custom confirm dialog (replaces native confirm()) ───────────────────── */
@@ -1100,6 +1103,39 @@ function renderLoginInfo() {
 }
 document.addEventListener('DOMContentLoaded', renderLoginInfo);
 if (document.readyState !== 'loading') setTimeout(renderLoginInfo, 0);
+
+/* ── Pop up pembaruan khusus Admin (maksimal sekali sehari) ──────────── */
+function showAdminUpdates(force = false) {
+  const info = window.APP_INFO;
+  if (!info || !getSess() || !isAdmin()) return;
+  const latest = (info.changelog || []).find(v => (v.adminItems || []).length);
+  if (!latest) return;
+  const today = scYmd(new Date());   // tanggal lokal
+  const KEY = 'cms_admin_updates_seen';
+  try { if (!force && localStorage.getItem(KEY) === today) return; } catch {}
+  if ($('adminUpdModal')) return;
+  const fmt = d => d ? new Date(d + 'T00:00:00').toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' }) : '';
+  const ov = document.createElement('div');
+  ov.id = 'adminUpdModal';
+  ov.className = 'modal-overlay';
+  ov.innerHTML = `<div class="modal adm-upd" role="dialog" aria-labelledby="admUpdTitle">
+      <div class="adm-upd-head">
+        <span class="adm-upd-badge">ADMIN</span>
+        <div><div class="adm-upd-title" id="admUpdTitle">Pembaruan untuk Admin</div>
+          <div class="adm-upd-sub">v${esc(latest.version)}${latest.date ? ' · ' + fmt(latest.date) : ''}</div></div>
+      </div>
+      <ul class="adm-upd-list">${latest.adminItems.map(t => `<li>${esc(t)}</li>`).join('')}</ul>
+      <div class="adm-upd-foot">
+        <span>Ditampilkan sekali sehari</span>
+        <button type="button" class="btn-sm blue" id="admUpdOk">Mengerti</button>
+      </div>
+    </div>`;
+  const close = () => { ov.remove(); try { localStorage.setItem(KEY, today); } catch {} };
+  ov.addEventListener('click', e => { if (e.target === ov) close(); });
+  document.body.appendChild(ov);
+  $('admUpdOk').onclick = close;
+  setTimeout(() => $('admUpdOk')?.focus(), 50);
+}
 
 function doLogout() {
   const name = currentUser();
