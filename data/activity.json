@@ -1,5 +1,13 @@
 [
   {
+    "id": "mwji0yotrn2b2",
+    "user": "Umar",
+    "role": "Publisher",
+    "action": "refresh berita Info Presiden",
+    "target": "7 berita, 7 baru (sumber: Server)",
+    "timestamp": "2026-11-16T16:49:40.253Z"
+  },
+  {
     "id": "mwji0bwjlpxrr",
     "user": "Umar",
     "role": "Publisher",
@@ -3990,13 +3998,5 @@
     "action": "update statistik",
     "target": "33 Official Instagram — Jun 2026",
     "timestamp": "2026-06-29T03:59:48.270Z"
-  },
-  {
-    "id": "mqyoqyqjxcy7x",
-    "user": "Admin",
-    "role": "Admin",
-    "action": "login",
-    "target": "masuk ke sistem sebagai Admin",
-    "timestamp": "2026-06-29T03:56:09.691Z"
   }
 ]
