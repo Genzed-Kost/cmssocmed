@@ -13,7 +13,7 @@
  */
 
 const DEFAULT_SETTINGS_URL = 'https://raw.githubusercontent.com/Genzed-Kost/cmssocmed/main/data/settings.json';
-const MAX_FILE  = 50 * 1024 * 1024;   // 50 MB
+const MAX_FILE  = 10 * 1024 * 1024;   // 10 MB
 const MAX_TEXT  = 4000;
 const TOKEN_TTL = 30 * 24 * 3600;     // detik
 
@@ -161,14 +161,14 @@ export async function onRequest({ request, env, params }) {
       return J({ ok: true });
     }
 
-    /* Unggah file (maks 50 MB) → R2 */
+    /* Unggah file (maks 10 MB) → R2 */
     if (route === '/upload' && method === 'POST') {
       const len = +request.headers.get('Content-Length') || 0;
-      if (len > MAX_FILE + 1024 * 1024) return err('File melebihi 50 MB', 413);
+      if (len > MAX_FILE + 1024 * 1024) return err('File melebihi 10 MB', 413);
       const form = await request.formData();
       const file = form.get('file');
       if (!file || typeof file === 'string') return err('File tidak ditemukan');
-      if (file.size > MAX_FILE) return err('File melebihi 50 MB', 413);
+      if (file.size > MAX_FILE) return err('File melebihi 10 MB', 413);
       const to   = String(form.get('to') || '#all');
       const conv = convOf(me.name, to);
       const safe = String(file.name || 'file').replace(/[^\w.\- ()]+/g, '_').slice(-120);

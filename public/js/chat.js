@@ -1,11 +1,11 @@
 /* ================================================================
-   Pesan antar user — pop up chat (teks, emoji, file/foto maks 50 MB)
+   Pesan antar user — pop up chat (teks, emoji, file/foto maks 10 MB)
    Server: Cloudflare Pages Function /api/chat/* (D1 + R2)
    ================================================================ */
 (function () {
   const API       = '/api/chat';
   const TOKEN_KEY = 'cms_chat_auth_v1';
-  const MAX_FILE  = 50 * 1024 * 1024;
+  const MAX_FILE  = 10 * 1024 * 1024;
   const ALL       = '#all';
   const EMOJIS = ('😀 😁 😂 🤣 😊 😍 😘 😎 🤩 🥳 😇 🙂 😉 😅 😆 🤔 🤗 🤭 😴 😢 😭 😡 😱 🥺 😬 🙄 😏 🤝 👍 👎 👏 🙏 💪 👌 ✌️ 🤞 👋 🙌 ' +
                   '❤️ 🧡 💛 💚 💙 💜 🔥 ✨ ⭐ 🎉 🎊 💯 ✅ ❌ ⚠️ 📌 📢 📅 ⏰ 📷 🎥 🎬 🎙 📝 📁 💡 🚀 ☕ 🍕').split(' ');
@@ -98,7 +98,7 @@
         <div class="chat-emoji-pop hidden" id="chatEmojiPop">${EMOJIS.map(e => `<button type="button">${e}</button>`).join('')}</div>
         <div class="chat-compose-row">
           <button class="chat-icon-btn" id="chatEmojiBtn" title="Emoji" aria-label="Emoji">😊</button>
-          <button class="chat-icon-btn" id="chatAttachBtn" title="Lampirkan file/foto (maks 50 MB)" aria-label="Lampirkan file">
+          <button class="chat-icon-btn" id="chatAttachBtn" title="Lampirkan file/foto (maks 10 MB)" aria-label="Lampirkan file">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21.44 11.05l-9.19 9.19a6 6 0 01-8.49-8.49l9.19-9.19a4 4 0 015.66 5.66l-9.2 9.19a2 2 0 01-2.83-2.83l8.49-8.48"/></svg></button>
           <input type="file" id="chatFile" multiple hidden />
           <textarea id="chatInput" rows="1" placeholder="Tulis pesan…" maxlength="4000"></textarea>
@@ -232,7 +232,7 @@
     const box = $('chatThread'); if (!box) return;
     const nearBottom = box.scrollHeight - box.scrollTop - box.clientHeight < 80;
     if (!S.messages.length) {
-      box.innerHTML = `<div class="chat-empty"><div class="chat-empty-ic">👋</div><b>Mulai percakapan</b><p>Kirim pesan, emoji, foto, atau file (maks 50 MB).</p></div>`;
+      box.innerHTML = `<div class="chat-empty"><div class="chat-empty-ic">👋</div><b>Mulai percakapan</b><p>Kirim pesan, emoji, foto, atau file (maks 10 MB).</p></div>`;
       return;
     }
     let lastDay = '';
@@ -262,7 +262,7 @@
   /* ── lampiran ────────────────────────────────────────────── */
   function addFile(file) {
     if (!S.peer) return;
-    if (file.size > MAX_FILE) { notify(`"${file.name}" melebihi 50 MB`, 'error'); return; }
+    if (file.size > MAX_FILE) { notify(`"${file.name}" melebihi 10 MB`, 'error'); return; }
     const item = { id: Math.random().toString(36).slice(2), file, name: file.name, size: file.size, type: file.type, progress: 0, done: null, error: null };
     item.preview = file.type.startsWith('image/') ? URL.createObjectURL(file) : null;
     S.pending.push(item); renderPending(); upload(item);
