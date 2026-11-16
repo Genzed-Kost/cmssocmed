@@ -1,5 +1,13 @@
 [
   {
+    "id": "mwirmpvi0bz6f",
+    "user": "Umar",
+    "role": "Publisher",
+    "action": "ubah status",
+    "target": "\"21:24–23:58 | Penjajah Memetakan Pegunungan untuk Menguasai Produksi Perkebunan\" menjadi Published",
+    "timestamp": "2026-11-16T04:30:45.630Z"
+  },
+  {
     "id": "mwewn9e5uaybd",
     "user": "Umar",
     "role": "Publisher",
@@ -3990,13 +3998,5 @@
     "action": "edit user",
     "target": "Luthfi → Luthfi (Creator)",
     "timestamp": "2026-06-25T17:40:04.879Z"
-  },
-  {
-    "id": "mqtsezraiwo3x",
-    "user": "Admin",
-    "role": "Admin",
-    "action": "edit user",
-    "target": "Junaidi → Junaidi (Creator)",
-    "timestamp": "2026-06-25T17:39:58.726Z"
   }
 ]
