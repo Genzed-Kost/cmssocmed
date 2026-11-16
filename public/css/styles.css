@@ -3128,6 +3128,8 @@ ul { list-style: none; }
 .sc-day-edit:hover { background: var(--bg); }
 .sc-day-out { background: color-mix(in srgb, var(--bg) 60%, transparent); }
 .sc-day-out .sc-day-num { color: var(--muted-lt); }
+.sc-day-out .sc-chip { opacity: .4; filter: grayscale(.5); }
+.sc-day-out .sc-chip:hover { opacity: .85; filter: none; }
 .sc-day-num { font-size: .74rem; font-weight: 700; color: var(--text); padding: 1px 3px; }
 .sc-day-dow { display: none; }
 .sc-day-today .sc-day-num { color: #fff; background: var(--blue); border-radius: 6px; align-self: flex-start; padding: 1px 7px; }
