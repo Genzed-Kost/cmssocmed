@@ -8681,25 +8681,69 @@ function downloadPdf()   { downloadPlannerPdf(); }
    EVENT LISTENERS & INIT
    ══════════════════════════════════════════════════════════════════════════ */
 
+function initSidebarNav() {
+  const sb = $('sidebar');
+  if (!sb) return;
+  const isDesk = () => window.innerWidth > 680;
+  const apply  = () => {
+    if (isDesk()) { if (!sb.classList.contains('peek')) sb.classList.add('collapsed'); sb.classList.remove('mobile-open'); }
+    else sb.classList.remove('collapsed', 'peek');
+    document.body.classList.toggle('sb-mobile-open', !isDesk() && sb.classList.contains('mobile-open'));
+  };
+  let t;
+  const open  = () => { clearTimeout(t); t = setTimeout(() => { sb.classList.add('peek'); sb.classList.remove('collapsed'); }, 90); };
+  const close = () => { clearTimeout(t); t = setTimeout(() => { sb.classList.remove('peek'); sb.classList.add('collapsed'); }, 220); };
+  sb.addEventListener('mouseenter', () => { if (isDesk()) open(); });
+  sb.addEventListener('mouseleave', () => { if (isDesk()) close(); });
+  sb.addEventListener('focusin',   () => { if (isDesk()) open(); });
+  sb.addEventListener('focusout',  e => { if (isDesk() && !sb.contains(e.relatedTarget)) close(); });
+  // Klik menu: sidebar kembali ramping setelah pindah halaman
+  sb.addEventListener('click', e => { if (isDesk() && e.target.closest('.nav-item')) close(); });
+
+  // HP: tab tepi kiri + latar gelap + usap
+  const setMobile = on => { sb.classList.toggle('mobile-open', on); document.body.classList.toggle('sb-mobile-open', on); };
+  if (!$('sbEdgeTab')) {
+    const tab = document.createElement('button');
+    tab.id = 'sbEdgeTab'; tab.className = 'sb-edge-tab'; tab.type = 'button';
+    tab.setAttribute('aria-label', 'Buka menu');
+    tab.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="9 18 15 12 9 6"/></svg>';
+    tab.onclick = () => setMobile(true);
+    document.body.appendChild(tab);
+    const bd = document.createElement('div');
+    bd.id = 'sbBackdrop'; bd.className = 'sb-backdrop';
+    bd.onclick = () => setMobile(false);
+    document.body.appendChild(bd);
+  }
+  let sx = null, sy = 0, fromEdge = false;
+  document.addEventListener('touchstart', e => {
+    if (isDesk() || e.touches.length !== 1) return;
+    sx = e.touches[0].clientX; sy = e.touches[0].clientY;
+    fromEdge = sx < 24 && !sb.classList.contains('mobile-open');
+  }, { passive: true });
+  document.addEventListener('touchend', e => {
+    if (sx === null || isDesk()) return;
+    const dx = e.changedTouches[0].clientX - sx, dy = Math.abs(e.changedTouches[0].clientY - sy);
+    if (fromEdge && dx > 50 && dy < 60) setMobile(true);
+    else if (sb.classList.contains('mobile-open') && dx < -50 && dy < 60) setMobile(false);
+    sx = null;
+  }, { passive: true });
+  document.querySelectorAll('.nav-item').forEach(a => a.addEventListener('click', () => { if (!isDesk()) setMobile(false); }));
+  window.addEventListener('resize', apply);
+  apply();
+}
+
 document.addEventListener('DOMContentLoaded', async () => {
 
-  /* ── Sidebar toggle ─────────────────────────────────────────── */
-  $('sidebarToggle')?.addEventListener('click', () => {
-    const s = $('sidebar');
-    // X di dalam sidebar: mobile → tutup, desktop → collapse toggle
-    window.innerWidth <= 680 ? s.classList.remove('mobile-open') : s.classList.toggle('collapsed');
-  });
-  $('menuBtn')?.addEventListener('click', () => {
-    const s = $('sidebar');
-    // ☰ di topbar: mobile → buka/tutup overlay, desktop → collapse toggle
-    window.innerWidth <= 680 ? s.classList.toggle('mobile-open') : s.classList.toggle('collapsed');
-  });
+  /* ── Sidebar tanpa tombol ☰ ─────────────────────────────────
+     Komputer: sidebar berupa jalur ikon; arahkan kursor ke sidebar → terbuka penuh,
+               kursor keluar → kembali ramping.
+     HP     : tab kecil di tepi kiri / usap dari tepi kiri layar → buka;
+               ketuk di luar / usap ke kiri → tutup. */
+  initSidebarNav();
 
   /* ── Hash routing ───────────────────────────────────────────── */
   window.addEventListener('hashchange', handleHash);
-  $$('.nav-item').forEach(a => a.addEventListener('click', () => {
-    if (window.innerWidth <= 680) $('sidebar').classList.remove('mobile-open');
-  }));
+
 
   /* ── Wizard ─────────────────────────────────────────────────── */
   $('btnWs1Next')?.addEventListener('click', wizardStep1Next);
