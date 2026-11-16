@@ -3190,3 +3190,11 @@ ul { list-style: none; }
 .sc-dt-row { display: grid; grid-template-columns: 1fr 120px; gap: 8px; }
 .sc-chip-time { font-weight: 700; }
 .sc-chip-prod .sc-chip-time { font-variant-numeric: tabular-nums; }
+
+/* ── Info Presiden: pop up waktu tunggu refresh ────────────────── */
+.news-wait { position: absolute; inset: 0; z-index: 5; display: flex; align-items: center; justify-content: center; background: rgba(15,23,42,.35); padding: 16px; }
+.news-wait-box { background: var(--surface); border-radius: var(--radius); box-shadow: var(--shadow-lg); padding: 18px 20px; text-align: center; max-width: 260px; width: 100%; display: flex; flex-direction: column; align-items: center; gap: 6px; animation: modal-in .18s ease; }
+.news-wait-icon { font-size: 1.6rem; line-height: 1; }
+.news-wait-title { font-weight: 800; font-size: .9rem; }
+.news-wait-text { font-size: .78rem; color: var(--muted); margin-bottom: 6px; }
+.news-wait-text b { color: var(--text); font-variant-numeric: tabular-nums; font-size: .9rem; }

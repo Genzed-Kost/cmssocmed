@@ -31,7 +31,7 @@ const GEMINI_MODELS = [
   'gemini-1.5-flash',      // fallback lama
 ];
 const NEWS_KEY        = 'cmsph_news_v1';
-const NEWS_TTL        = 5 * 60 * 1000;   // berita diperbarui tiap 5 menit
+const NEWS_COOLDOWN   = 5 * 60 * 1000;   // jeda minimal antar refresh berita per user
 const DATA_CACHE_KEY     = 'cmsph_data_v2';
 const DATA_CACHE_TTL     = 3 * 60 * 1000;   // 3 minutes — reduces GitHub API rate-limit hits
 const TEAM_TOKEN_KEY     = 'cmsph_team_token_v1'; // cache teamToken agar request selalu authenticated
@@ -7908,7 +7908,6 @@ Langsung tulis caption-nya sekarang.`;
 function openNewsPanel() {
   $('newsPanel').classList.add('open');
   $('newsOverlay').classList.add('active');
-  startNewsAutoRefresh();
   const cache = getCachedNews();
   if (cache) {
     try {
@@ -7920,23 +7919,48 @@ function openNewsPanel() {
     fetchNews();
   }
 }
-// Selama panel terbuka: cek tiap 30 detik, ambil berita baru begitu data berumur 5 menit
-let _newsTimer = null;
-function startNewsAutoRefresh() {
-  clearInterval(_newsTimer);
-  _newsTimer = setInterval(() => {
-    if (!$('newsPanel')?.classList.contains('open')) return stopNewsAutoRefresh();
-    if (!getCachedNews() && !_newsLoading) fetchNews(true);
-  }, 30 * 1000);
-}
-function stopNewsAutoRefresh() { clearInterval(_newsTimer); _newsTimer = null; }
 function closeNewsPanel() {
   $('newsPanel').classList.remove('open');
   $('newsOverlay').classList.remove('active');
-  stopNewsAutoRefresh();
+  closeNewsWait();
+}
+
+/* Refresh manual dengan jeda 5 menit per user (dihitung dari berita terakhir berhasil dimuat).
+   Bila belum 5 menit, tampilkan pop up waktu tunggu dengan hitung mundur. */
+let _newsWaitTimer = null;
+function newsWaitLeft() {
+  const c = getCachedNews();
+  return c ? Math.max(0, NEWS_COOLDOWN - (Date.now() - c.ts)) : 0;
+}
+function refreshNews() {
+  if (_newsLoading) return;
+  if (newsWaitLeft() > 0) { openNewsWait(); return; }
+  fetchNews();
+}
+function openNewsWait() {
+  const pop = $('newsWaitPop');
+  const tick = () => {
+    const ms = newsWaitLeft();
+    if (ms <= 0) {
+      closeNewsWait();
+      toast('Berita terbaru sudah bisa dimuat, klik Refresh', 'success');
+      return;
+    }
+    const sec = Math.ceil(ms / 1000);
+    setTxt('newsWaitTime', `${Math.floor(sec / 60)}:${String(sec % 60).padStart(2, '0')}`);
+  };
+  tick();
+  if (newsWaitLeft() <= 0) return;
+  pop.classList.remove('hidden');
+  clearInterval(_newsWaitTimer);
+  _newsWaitTimer = setInterval(tick, 1000);
+}
+function closeNewsWait() {
+  clearInterval(_newsWaitTimer); _newsWaitTimer = null;
+  $('newsWaitPop')?.classList.add('hidden');
 }
 function getCachedNews() {
-  try { const o = JSON.parse(localStorage.getItem(NEWS_KEY)||'null'); return (o && Date.now()-o.ts < NEWS_TTL) ? o : null; }
+  try { const o = JSON.parse(localStorage.getItem(NEWS_KEY)||'null'); return (o && o.ts && o.text) ? o : null; }
   catch { return null; }
 }
 function setCachedNews(text) { localStorage.setItem(NEWS_KEY, JSON.stringify({ text, ts: Date.now() })); }
@@ -7996,17 +8020,13 @@ async function fetchNewsFromGemini() {
 }
 
 let _newsLoading = false;
-/* silent = refresh otomatis: berita lama tetap tampil sampai yang baru siap;
-   bila gagal, berita lama tidak dihapus. */
-async function fetchNews(silent = false) {
-  if (!silent) {
-    $('newsContent').innerHTML = `<div class="news-loading"><div class="spinner"></div><span>Mengambil berita terkini…</span></div>`;
-    $('newsTimestamp').textContent = '';
-  }
+async function fetchNews() {
+  $('newsContent').innerHTML = `<div class="news-loading"><div class="spinner"></div><span>Mengambil berita terkini…</span></div>`;
+  $('newsTimestamp').textContent = '';
   _newsLoading = true;
-  try { await _fetchNewsInner(silent); } finally { _newsLoading = false; }
+  try { await _fetchNewsInner(); } finally { _newsLoading = false; }
 }
-async function _fetchNewsInner(silent) {
+async function _fetchNewsInner() {
   const q = encodeURIComponent(NEWS_QUERY);
   const local = ['localhost', '127.0.0.1'].includes(window.location.hostname);
   const attempts = [
@@ -8023,7 +8043,6 @@ async function _fetchNewsInner(silent) {
       return;
     } catch (e) { errors.push(`${name}: ${e.message}`); }
   }
-  if (silent) return;
   $('newsContent').innerHTML = `<div style="color:var(--red);font-size:.82rem;padding:12px 0">
     Gagal memuat berita.<br><span style="color:var(--muted);font-size:.75rem">${errors.map(esc).join('<br>')}</span></div>`;
 }
@@ -8099,7 +8118,7 @@ function renderNewsItems(items, ts) {
 
   if (ts) {
     const d = new Date(ts);
-    $('newsTimestamp').textContent = `Update: ${d.toLocaleString('id-ID',{hour:'2-digit',minute:'2-digit',day:'2-digit',month:'short'})} · diperbarui otomatis tiap 5 menit`;
+    $('newsTimestamp').textContent = `Update: ${d.toLocaleString('id-ID',{hour:'2-digit',minute:'2-digit',day:'2-digit',month:'short'})} · refresh tiap 5 menit`;
   }
 }
 
@@ -8419,7 +8438,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   $('badgeInfoPresiden')?.addEventListener('click', openNewsPanel);
   $('closeNewsPanel')?.addEventListener('click', closeNewsPanel);
   $('newsOverlay')?.addEventListener('click', closeNewsPanel);
-  $('btnRefreshNews')?.addEventListener('click', () => { localStorage.removeItem(NEWS_KEY); fetchNews(); });
+  $('btnRefreshNews')?.addEventListener('click', refreshNews);
 
   /* ── Statistics download dropdown ───────────────────────────── */
   $('btnDlDropdown')?.addEventListener('click', e => {
@@ -8563,6 +8582,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   window.scCloseModal           = scCloseModal;
   window.scSaveModal            = scSaveModal;
   window.scDeleteItem           = scDeleteItem;
+  window.closeNewsWait          = closeNewsWait;
   window.addProgram             = addProgram;
   window.updateProgram          = updateProgram;
   window.moveProgram            = moveProgram;

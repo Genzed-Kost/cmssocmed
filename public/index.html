@@ -1307,6 +1307,15 @@
     <span id="newsTimestamp" class="news-ts"></span>
     <button class="btn-xs" id="btnRefreshNews">Refresh</button>
   </div>
+  <!-- Pop up waktu tunggu refresh berita -->
+  <div id="newsWaitPop" class="news-wait hidden" role="alertdialog" aria-live="polite">
+    <div class="news-wait-box">
+      <div class="news-wait-icon">⏳</div>
+      <div class="news-wait-title">Tunggu sebentar</div>
+      <div class="news-wait-text">Berita terbaru bisa dimuat lagi dalam <b id="newsWaitTime">5:00</b></div>
+      <button class="btn-sm blue" type="button" onclick="closeNewsWait()">OK</button>
+    </div>
+  </div>
 </div>
 <div id="newsOverlay" class="news-overlay"></div>
 
