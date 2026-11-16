@@ -3582,7 +3582,10 @@ function renderStockCalendar() {
       <div class="sc-day-items">${chips}</div>
     </div>`);
   }
-  grid.innerHTML = html.join('');
+  const monthKey  = scYmd(first).slice(0, 7);
+  const hasEvents = Object.keys(byDay).some(k => k.startsWith(monthKey));
+  grid.innerHTML = html.join('') +
+    (hasEvents ? '' : `<div class="sc-cal-empty">Belum ada jadwal produksi / tayang di bulan ini.</div>`);
 
   // Belum ada tanggal tayang
   const unsched = items.filter(it => !it.airDate)
