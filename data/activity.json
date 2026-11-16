@@ -1,5 +1,13 @@
 [
   {
+    "id": "mwjabwv4tzqd1",
+    "user": "Admin",
+    "role": "Admin",
+    "action": "refresh berita Info Presiden",
+    "target": "7 berita, 7 baru (sumber: Server)",
+    "timestamp": "2026-11-16T13:14:14.176Z"
+  },
+  {
     "id": "mwj9tg7efrhkz",
     "user": "Admin",
     "role": "Admin",
@@ -3990,13 +3998,5 @@
     "action": "logout",
     "target": "keluar dari sistem",
     "timestamp": "2026-06-27T17:16:21.109Z"
-  },
-  {
-    "id": "mqwmf4poi36qr",
-    "user": "Lisa",
-    "role": "Administrator",
-    "action": "login",
-    "target": "masuk ke sistem sebagai Administrator",
-    "timestamp": "2026-06-27T17:15:25.980Z"
   }
 ]
