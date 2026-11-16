@@ -660,10 +660,11 @@ function applyAuthState() {
         roleEl.classList.remove('hidden');
       } else {
         roleEl.classList.add('hidden');
-        return;   // skip the outer remove-hidden below
       }
     }
-    roleEl.classList.remove('hidden');
+    // Sebelumnya di sini ada `return` yang menghentikan seluruh applyAuthState
+    // (tombol sync/logout/menu admin tidak diperbarui) untuk user tanpa role.
+    if (admin || roleEl.textContent) roleEl.classList.toggle('hidden', !admin && !getUserRole((state.settings?.users || []).find(u => getUserName(u) === name) || null));
   }
 
   // API Setup nav: hanya admin/Admin (bukan Administrator)
@@ -675,6 +676,9 @@ function applyAuthState() {
 
   // Logout button
   if ($('btnLogout')) $('btnLogout').style.display = sess ? '' : 'none';
+
+  // Tombol pesan (pop up chat)
+  window.Chat?.sync();
 }
 
 /* ── Custom confirm dialog (replaces native confirm()) ───────────────────── */
@@ -1055,6 +1059,8 @@ async function doLogin() {
     }
 
     const loginName = isAdm ? adminName : getUserName(userObj);
+    // Buka akses pesan antar user dengan password yang sama (di latar belakang)
+    window.Chat?.loginWith(loginName, pw);
     $('loginPage').classList.add('hidden');
     sv('loginPw', '');
     if (inp) inp.value = '';
@@ -1081,6 +1087,7 @@ function doLogout() {
     : (getUserRole((state.settings?.users||[]).find(u=>getUserName(u)===name)||null)||'Creator');
   logActivity(name, 'logout', 'keluar dari sistem').catch(() => {});
   clearSess();
+  window.Chat?.logout();
   $$('.page').forEach(s => s.classList.remove('active'));
   showLogin();
   applyAuthState();
