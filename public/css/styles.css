@@ -3096,3 +3096,11 @@ ul { list-style: none; }
 .asset-dropdown button:hover { background: var(--hover); }
 .asset-dropdown button.red { color: #dc2626; }
 .asset-dropdown button.red:hover { background: #fee2e2; }
+
+/* ── Planner: pilihan jumlah baris per halaman ─────────────────── */
+.page-size-wrap { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+.page-size-label { display: inline-flex; align-items: center; gap: 6px; font-size: .78rem; color: var(--muted); }
+.page-size-select {
+  padding: 3px 8px; border-radius: 6px; font-size: .75rem;
+  border: 1.5px solid var(--bd); background: var(--surface); color: inherit; cursor: pointer;
+}

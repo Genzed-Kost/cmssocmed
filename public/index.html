@@ -311,7 +311,16 @@
           </table>
         </div>
         <div class="table-footer">
-          <span id="planCount">0 konten</span>
+          <div class="page-size-wrap">
+            <span id="planCount">0 konten</span>
+            <label class="page-size-label">Tampilkan
+              <select id="planPageSize" class="page-size-select">
+                <option value="20">20</option>
+                <option value="50">50</option>
+                <option value="200">200</option>
+              </select>
+            </label>
+          </div>
           <div class="pagination" id="planPagination"></div>
         </div>
       </div>

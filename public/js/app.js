@@ -2589,6 +2589,21 @@ function comparePlanNewestFirst(a, b) {
   return kb > ka ? 1 : -1;
 }
 
+/* Jumlah baris per halaman Planner (20 / 50 / 200), diingat per browser. */
+const PLAN_PAGE_SIZES = [20, 50, 200];
+const PLAN_PAGE_SIZE_LS_KEY = 'cms_plan_page_size';
+function getPlanPageSize() {
+  let v = 20;
+  try { v = parseInt(localStorage.getItem(PLAN_PAGE_SIZE_LS_KEY), 10) || 20; } catch (_) {}
+  return PLAN_PAGE_SIZES.includes(v) ? v : 20;
+}
+function setPlanPageSize(v) {
+  v = parseInt(v, 10);
+  if (!PLAN_PAGE_SIZES.includes(v)) v = 20;
+  try { localStorage.setItem(PLAN_PAGE_SIZE_LS_KEY, String(v)); } catch (_) {}
+  renderPlanner(1);
+}
+
 function renderPlanner(page) {
   if (page !== undefined) state.planPage = page;
 
@@ -2641,9 +2656,11 @@ function renderPlanner(page) {
   rows.sort(comparePlanNewestFirst);
   $('planCount').textContent = `${rows.length} konten`;
 
-  const total = Math.ceil(rows.length / PAGE_SIZE) || 1;
+  const pageSize = getPlanPageSize();
+  if ($('planPageSize') && $('planPageSize').value !== String(pageSize)) $('planPageSize').value = String(pageSize);
+  const total = Math.ceil(rows.length / pageSize) || 1;
   state.planPage = Math.min(state.planPage, total);
-  const slice = rows.slice((state.planPage - 1) * PAGE_SIZE, state.planPage * PAGE_SIZE);
+  const slice = rows.slice((state.planPage - 1) * pageSize, state.planPage * pageSize);
   const admin  = isAdmin();
 
   const tbody  = $('planBody');
@@ -7885,6 +7902,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   $('btnGenerateCaption')?.addEventListener('click', generateCaption);
 
   /* ── Planner filters ────────────────────────────────────────── */
+  $('planPageSize')?.addEventListener('change', e => setPlanPageSize(e.target.value));
   ['planSearch','planFilterCreator','planFilterStatus','planFilterTime','planDateFrom','planDateTo'].forEach(id => {
     $(id)?.addEventListener('input',  () => renderPlanner(1));
     $(id)?.addEventListener('change', () => renderPlanner(1));
