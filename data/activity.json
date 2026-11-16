@@ -1,5 +1,13 @@
 [
   {
+    "id": "mwjdmjiucjbr0",
+    "user": "Admin",
+    "role": "Admin",
+    "action": "login",
+    "target": "masuk ke sistem sebagai Admin",
+    "timestamp": "2026-11-16T14:46:28.950Z"
+  },
+  {
     "id": "mwjdhaesyqrac",
     "user": "Admin",
     "role": "Admin",
@@ -3990,13 +3998,5 @@
     "action": "update statistik",
     "target": "Penjaga Harapan TikTok — Jul 2025",
     "timestamp": "2026-06-28T14:02:47.012Z"
-  },
-  {
-    "id": "mqxutq295wz08",
-    "user": "Admin",
-    "role": "Admin",
-    "action": "update statistik",
-    "target": "Penjaga Harapan TikTok — Jun 2025",
-    "timestamp": "2026-06-28T13:58:29.937Z"
   }
 ]
