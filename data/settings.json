@@ -94,6 +94,12 @@
       "role": "TA Sesneg",
       "phone": "082281878389",
       "passwordHash": "e2c0d4325a5f2ffbb18dbae5cfd535548d0364b394a05f023b35d8ee025f7985"
+    },
+    {
+      "name": "Sehan",
+      "role": "Designer",
+      "phone": "085780381305",
+      "passwordHash": "301ac97c4808009f31e9cf295e2cf96bceebb47507ea50842e852f76c229fb7a"
     }
   ],
   "analyticsUrls": {
