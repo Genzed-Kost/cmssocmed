@@ -2849,8 +2849,8 @@ ul { list-style: none; }
 .dash-ticker-item .ticker-meta  { color: #a16207; font-size: .75rem; }
 
 @keyframes ticker-scroll {
-  from { transform: translateX(100%); }
-  to   { transform: translateX(-100%); }
+  from { transform: translateX(0); }
+  to   { transform: translateX(-50%); }
 }
 
 /* ══════════════════════════════════════════════════════════════════

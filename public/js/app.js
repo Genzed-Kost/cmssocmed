@@ -1522,7 +1522,7 @@ function renderDashTicker() {
   const inner  = $('dashTickerInner');
   if (!ticker || !inner) return;
 
-  const todayStr = new Date().toISOString().slice(0, 10);
+  const todayStr = scYmd(new Date());   // tanggal lokal (bukan UTC)
   const items    = [];
 
   // 1. Bank of Contents: semua item yang belum lewat atau hari ini
@@ -1548,30 +1548,47 @@ function renderDashTicker() {
     items.push(`${icon} <strong>${esc(c.title || 'Konten')}</strong>${crTxt ? ` · ${esc(crTxt)}` : ''} [${esc(c.format)}] — ${when}${c.publishTime ? ' ⏰ ' + esc(c.publishTime) : ''}`);
   });
 
-  // 3. Stock Contents: yang ada tanggal tayang (terdekat ke terjauh)
-  const todayStr2 = new Date().toISOString().slice(0, 10);
-  const scIcon = { 'Podcast PH':'🎙','Podcast JA':'🎙','Podcast Hangout':'🎙','Situation Room':'📡','Liputan PH':'📰','Liputan JA':'📰' };
-  [...(state.stockContents||[])].sort((a,b)=>{
-    if(!a.airDate&&!b.airDate)return 0; if(!a.airDate)return 1; if(!b.airDate)return -1;
-    return new Date(a.airDate)-new Date(b.airDate);
-  }).forEach(sc => {
+  // 3. Stock Contents (urutan program dari Daftar Program):
+  //    📅 tanggal tayang yang belum lewat + 🎬 jadwal produksi yang belum selesai
+  const whenTxt = ymd => {
+    const dl = Math.round((scParse(ymd) - scParse(todayStr)) / 86400000);
+    return dl === 0 ? 'Hari ini' : dl === 1 ? 'Besok' : fmtDate(ymd);
+  };
+  const scItems = [];
+  (state.stockContents || []).forEach(sc => {
     if (!sc.title) return;
-    const icon  = scIcon[sc.category] || '📋';
-    const when  = sc.airDate ? (sc.airDate < todayStr2 ? null : fmtDate(sc.airDate)) : null;
-    if (sc.airDate && sc.airDate < todayStr2) return; // skip yang sudah lewat
-    items.push(`${icon} <strong>${esc(sc.title)}</strong>${sc.category ? ` [${esc(sc.category)}]` : ''}${when ? ` — ${when}` : ''}`);
+    const cat = sc.category ? ` [${esc(sc.category)}]` : '';
+    if (sc.airDate && sc.airDate >= todayStr) {
+      scItems.push({ key: sc.airDate + ' 1', html:
+        `📅 <strong>${esc(sc.title)}</strong>${cat} — Tayang ${whenTxt(sc.airDate)}` });
+    }
+    const prodEnd = sc.prodDateEnd && sc.prodDateEnd >= (sc.prodDate || '') ? sc.prodDateEnd : sc.prodDate;
+    if (sc.prodDate && prodEnd >= todayStr) {
+      const start = sc.prodDate >= todayStr ? sc.prodDate : todayStr;   // produksi berjalan → tampil hari ini
+      const jam   = sc.prodDate >= todayStr && sc.prodTime ? ` ⏰ ${esc(sc.prodTime)}` : '';
+      const label = sc.prodDate < todayStr ? 'Produksi berlangsung s/d ' + whenTxt(prodEnd) : 'Produksi ' + whenTxt(start);
+      scItems.push({ key: start + ' 0 ' + (sc.prodDate >= todayStr ? sc.prodTime || '99' : '00'), html:
+        `🎬 <strong>${esc(sc.title)}</strong>${cat} — ${label}${jam}` });
+    }
   });
+  scItems.sort((x, y) => x.key < y.key ? -1 : x.key > y.key ? 1 : 0);
+  scItems.forEach(x => items.push(x.html));
 
   if (!items.length) {
     ticker.classList.add('hidden');
     return;
   }
 
-  // Sort by date (closest first) — crude but effective
+  // Isi digandakan agar berjalan mulus tanpa jeda kosong (animasi 0 → -50%)
   const separator = '&nbsp;&nbsp;&nbsp;·&nbsp;&nbsp;&nbsp;';
-  inner.innerHTML = items.join(separator);
-  inner.style.animationDuration = `${Math.max(18, items.length * 7)}s`;
+  const strip = items.join(separator) + separator;
+  inner.innerHTML = `<span>${strip}</span><span aria-hidden="true">${strip}</span>`;
   ticker.classList.remove('hidden');
+  // Kecepatan tetap ±70 px/detik, berapa pun jumlah item
+  requestAnimationFrame(() => {
+    const half = inner.scrollWidth / 2 || 1000;
+    inner.style.animationDuration = `${Math.max(15, Math.round(half / 70))}s`;
+  });
 }
 
 /* ══════════════════════════════════════════════════════════════════════════
