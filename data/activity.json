@@ -1,5 +1,13 @@
 [
   {
+    "id": "mwj2goqdynfv4",
+    "user": "Umar",
+    "role": "Publisher",
+    "action": "Kirim WA Stock Contents",
+    "target": "ke Umar — 27 item",
+    "timestamp": "2026-11-16T09:33:59.989Z"
+  },
+  {
     "id": "mwj2gmittjnbk",
     "user": "Umar",
     "role": "Publisher",
@@ -3990,13 +3998,5 @@
     "action": "login",
     "target": "masuk ke sistem sebagai TA Sesneg",
     "timestamp": "2026-06-25T18:00:29.122Z"
-  },
-  {
-    "id": "mqtt57wjt5riw",
-    "user": "Admin",
-    "role": "Admin",
-    "action": "logout",
-    "target": "keluar dari sistem",
-    "timestamp": "2026-06-25T18:00:22.339Z"
   }
 ]
