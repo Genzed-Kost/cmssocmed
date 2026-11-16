@@ -3864,10 +3864,3 @@ ul { list-style: none; }
   .chat-fab svg { width: 16px; height: 16px; }
   .chat-panel { inset: 0; transform: none; top: 0; right: 0; }
 }
-
-/* Planner: tabel tampil penuh (tanpa kotak gulir sendiri); halaman yang digulir */
-#page-planner .table-wrap { max-height: none; overflow: visible; }
-#page-planner .plan-table thead th { top: var(--topbar-h); }
-@media (min-width: 681px) {
-  #page-planner .table-wrap { overflow-x: auto; overflow-y: visible; }
-}
