@@ -1,5 +1,13 @@
 [
   {
+    "id": "mwj7v660ysup6",
+    "user": "Admin",
+    "role": "Admin",
+    "action": "update statistik",
+    "target": "Penjaga Harapan YouTube — Nov 2026",
+    "timestamp": "2026-11-16T12:05:13.848Z"
+  },
+  {
     "id": "mwj7luri4bzq1",
     "user": "Admin",
     "role": "Admin",
@@ -3990,13 +3998,5 @@
     "action": "Hapus Bank Konten",
     "target": "\"Go Prabowo\"",
     "timestamp": "2026-06-26T11:20:29.955Z"
-  },
-  {
-    "id": "mquuajvjiv8c1",
-    "user": "Umar",
-    "role": "Publisher",
-    "action": "login",
-    "target": "masuk ke sistem sebagai Publisher",
-    "timestamp": "2026-06-26T11:20:16.927Z"
   }
 ]
