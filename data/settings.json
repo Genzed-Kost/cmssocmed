@@ -962,11 +962,11 @@
       "color": "#2563eb"
     },
     {
-      "name": "Liputan PH",
-      "color": "#16a34a"
+      "name": "Podcast JA",
+      "color": "#7c3aed"
     },
     {
-      "name": "Podcast Hangout",
+      "name": "Productive Hangout",
       "color": "#db2777"
     },
     {
@@ -974,12 +974,8 @@
       "color": "#ea580c"
     },
     {
-      "name": "Belajar Koperasi",
-      "color": "#4f46e5"
-    },
-    {
-      "name": "Podcast JA",
-      "color": "#7c3aed"
+      "name": "Liputan PH",
+      "color": "#16a34a"
     },
     {
       "name": "Liputan JA",
@@ -992,6 +988,10 @@
     {
       "name": "Gimana Kabarnya",
       "color": "#dc2626"
+    },
+    {
+      "name": "Belajar Koperasi",
+      "color": "#4f46e5"
     }
   ]
 }
