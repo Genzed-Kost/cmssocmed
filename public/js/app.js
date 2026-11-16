@@ -3465,7 +3465,7 @@ function renderStockAgenda(byDay, canEdit) {
     const d = scParse(ymd);
     const mKey = ymd.slice(0, 7);
     const head = mKey !== lastMonth
-      ? `<div class="sc-agenda-month">${SC_MONTHS[d.getMonth()]} ${d.getFullYear()} <span class="sc-agenda-count">· ${scCountMonth(mKey)} item</span></div>` : '';
+      ? `<div class="sc-agenda-month">${SC_MONTHS[d.getMonth()]} ${d.getFullYear()} <span class="sc-agenda-count">· ${scMonthStats(mKey).total} item ${scStatsHtml(scMonthStats(mKey))}</span></div>` : '';
     lastMonth = mKey;
     const evs = byDay[ymd] || [];
     const cls = ['sc-day', 'sc-agenda-day',
@@ -3488,29 +3488,38 @@ function renderStockAgenda(byDay, canEdit) {
   });
 }
 
-/* Jumlah item yang punya jadwal (tayang atau produksi) di bulan ym "YYYY-MM". */
-function scCountMonth(ym) {
+/* Item yang punya jadwal (tayang atau produksi) di bulan ym "YYYY-MM". */
+function scItemsInMonth(ym) {
   return (state.stockContents || []).filter(it => {
     if (it.airDate && it.airDate.slice(0, 7) === ym) return true;
     if (!it.prodDate) return false;
     const end = it.prodDateEnd && it.prodDateEnd >= it.prodDate ? it.prodDateEnd : it.prodDate;
     return it.prodDate.slice(0, 7) <= ym && end.slice(0, 7) >= ym;
-  }).length;
+  });
+}
+/* Rincian: ✅ sudah tayang · ⏳ menunggu tayang · ❔ belum dijadwalkan */
+function scMonthStats(ym) {
+  const list  = scItemsInMonth(ym);
+  const today = scYmd(new Date());
+  const aired   = list.filter(it => it.airDate && it.airDate <= today).length;
+  const waiting = list.filter(it => it.airDate && it.airDate > today).length;
+  return { total: list.length, aired, waiting, nodate: list.length - aired - waiting };
+}
+function scStatsHtml(st) {
+  return `<span class="sc-total-part" title="Sudah tayang">✅ ${st.aired}</span>
+    <span class="sc-total-part" title="Menunggu tayang (sudah dijadwalkan)">⏳ ${st.waiting}</span>
+    <span class="sc-total-part" title="Belum ada tanggal tayang">❔ ${st.nodate}</span>`;
 }
 
-/* Total seluruh agenda + rincian singkat: ✅ sudah tayang · ⏳ menunggu tayang · ❔ belum dijadwalkan */
+/* Total per bulan: di komputer = bulan yang sedang dilihat, di HP = bulan berjalan */
 function scRenderTotal() {
   const el = $('scTotal');
   if (!el) return;
-  const items = (state.stockContents || []).filter(it => it.title || it.airDate || it.prodDate);
-  const today = scYmd(new Date());
-  const aired   = items.filter(it => it.airDate && it.airDate <= today).length;
-  const waiting = items.filter(it => it.airDate && it.airDate > today).length;
-  const nodate  = items.length - aired - waiting;
-  el.innerHTML = `Total: <strong>${items.length}</strong> item
-    <span class="sc-total-part" title="Sudah tayang">✅ ${aired}</span>
-    <span class="sc-total-part" title="Menunggu tayang (sudah dijadwalkan)">⏳ ${waiting}</span>
-    <span class="sc-total-part" title="Belum ada tanggal tayang">❔ ${nodate}</span>
+  const mobile = window.matchMedia?.('(max-width: 680px)').matches;
+  const m  = mobile || !state.scMonth ? new Date() : state.scMonth;
+  const st = scMonthStats(scYmd(m).slice(0, 7));
+  el.innerHTML = `Total ${SC_MONTHS[m.getMonth()]} ${m.getFullYear()}: <strong>${st.total}</strong> item
+    ${scStatsHtml(st)}
     <span class="sc-total-legend">✅ sudah tayang · ⏳ menunggu tayang · ❔ belum dijadwalkan</span>`;
 }
 

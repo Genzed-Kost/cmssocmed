@@ -3189,3 +3189,4 @@ ul { list-style: none; }
 .sc-total strong { color: var(--text); }
 .sc-total-part { font-weight: 700; color: var(--text); white-space: nowrap; }
 .sc-total-legend { flex-basis: 100%; font-size: .68rem; color: var(--muted-lt); }
+.sc-agenda-count .sc-total-part { font-size: .72rem; margin-left: 4px; }
