@@ -2213,6 +2213,7 @@ function buildAnlAcctSel() {
 }
 
 function renderAnalyticsPanel() {
+  rollupWeeklyAll();
   buildAnlAcctSel();
   const acctId  = state.anlActiveAcct || 'penjaga-harapan';
   const grid    = $('anlpGrid');
@@ -5760,6 +5761,7 @@ async function importMultiRowsDirectly(acctId, platId, rows) {
 
   state.analytics[acctId][storeKey] = [...existing, ...toAdd]
     .sort((a, b) => (a[rowKey]||'').localeCompare(b[rowKey]||''));
+  if (isWeeklyData) rollupWeekly(acctId, platId);
   _setAnalyticsMeta(state.analytics, acctId, platId);
   state.shas.analytics = await window.db.writeData('analytics', state.analytics,
     `Import CSV: update ${toUpdate.length} + tambah ${toAdd.length} bulan ${platId}`);
@@ -5880,6 +5882,100 @@ function _getAnalyticsMeta(acctId, platId) {
 }
 
 /* ── alias so existing references to renderStatTable still work ─────────── */
+/* ── Data Bulanan otomatis dari Data Mingguan ───────────────────────────────
+   Minggu masuk ke bulan tempat hari Kamisnya jatuh (standar ISO).
+   - Kolom jumlah            → dijumlah
+   - Kolom posisi akhir (EOM) → nilai minggu terakhir
+   - Kolom puncak            → nilai tertinggi
+   - Kolom rata-rata         → dihitung ulang dari total
+   - Kolom unik (viewers/reach) tidak bisa dijumlah → tetap manual
+   Angka bulanan yang diisi manual TIDAK ditimpa. Kolom hasil mingguan dicatat
+   di row._fromWeekly, jumlah minggu di row._weeks (mis. "4/4").            */
+const WK_EOM_KEYS    = new Set(['subsEOM','followersEOM','pageFollowers','followers']);
+const WK_MAX_KEYS    = new Set(['peakViews','maxViewsSingle']);
+const WK_UNIQUE_KEYS = new Set(['uniqueViewers','totalReach','totalViewers','newViewers','returningViewers']);
+const WK_AVG_RULES   = {
+  avgViewsPerVideo: ['totalViews', 'jmlVideo'],
+  avgViewsPerPost:  ['totalViews', 'totalPost'],
+  avgEngPerPost:    ['totalEngagement', 'totalPost'],
+  avgViews:         ['totalViews', 'jmlPost'],
+};
+function isoWeekThursday(wk) {
+  const m = /^(\d{4})-W(\d{1,2})$/.exec(wk || '');
+  if (!m) return null;
+  const jan4 = new Date(+m[1], 0, 4);
+  const mon1 = new Date(jan4); mon1.setDate(jan4.getDate() - (jan4.getDay() + 6) % 7);
+  const thu  = new Date(mon1); thu.setDate(mon1.getDate() + (parseInt(m[2], 10) - 1) * 7 + 3);
+  return thu;
+}
+function weekMonthKey(wk) { const t = isoWeekThursday(wk); return t ? scYmd(t).slice(0, 7) : ''; }
+function thursdaysInMonth(ym) {
+  const [y, mo] = ym.split('-').map(Number);
+  let n = 0;
+  for (let d = 1; d <= new Date(y, mo, 0).getDate(); d++) if (new Date(y, mo - 1, d).getDay() === 4) n++;
+  return n;
+}
+function _isEmptyVal(v) { return v === undefined || v === null || v === '' || v === 0 || v === '0'; }
+
+function rollupWeekly(acctId, platId) {
+  const platM = PLATFORM_FIELDS[platId];
+  const acct  = state.analytics?.[acctId];
+  if (!platM || !acct) return;
+  const weekly  = Array.isArray(acct[platId + '_w']) ? acct[platId + '_w'] : [];
+  const monthly = Array.isArray(acct[platId]) ? acct[platId] : (acct[platId] = []);
+
+  const byMonth = {};
+  weekly.forEach(w => { const ym = weekMonthKey(w.week); if (ym) (byMonth[ym] = byMonth[ym] || []).push(w); });
+  const months = new Set([...Object.keys(byMonth), ...monthly.filter(r => r._fromWeekly).map(r => r.month)]);
+
+  months.forEach(ym => {
+    const weeks = (byMonth[ym] || []).slice().sort((a, b) => a.week.localeCompare(b.week));
+    const derived = {};
+    platM.fields.forEach(f => {
+      if (f.auto === 'calc' || WK_UNIQUE_KEYS.has(f.key) || WK_AVG_RULES[f.key]) return;
+      const vals = weeks.map(w => w[f.key]).filter(v => v !== undefined && v !== null && v !== '' && !isNaN(+v)).map(Number);
+      if (!vals.length) return;
+      if (WK_EOM_KEYS.has(f.key))      derived[f.key] = vals[vals.length - 1];
+      else if (WK_MAX_KEYS.has(f.key)) derived[f.key] = Math.max(...vals);
+      else                              derived[f.key] = vals.reduce((a, b) => a + b, 0);
+    });
+    // Nilai 0 dari mingguan dianggap tidak ada data
+    Object.keys(derived).forEach(k => { if (!derived[k]) delete derived[k]; });
+
+    let row = monthly.find(r => r.month === ym);
+    if (!row) { if (!weeks.length) return; row = { month: ym }; monthly.push(row); }
+    const fromW = new Set(row._fromWeekly || []);
+    // Kolom yang dulu dari mingguan tapi sekarang tidak ada sumbernya → kosongkan
+    [...fromW].forEach(k => { if (!(k in derived)) { delete row[k]; fromW.delete(k); } });
+    Object.entries(derived).forEach(([k, v]) => {
+      const manual = !_isEmptyVal(row[k]) && !fromW.has(k);
+      if (manual) return;                 // angka manual dipertahankan
+      row[k] = v; fromW.add(k);
+    });
+    // Rata-rata dihitung ulang dari total akhir baris bulanan (manual atau mingguan)
+    Object.entries(WK_AVG_RULES).forEach(([k, [num, den]]) => {
+      if (!platM.fields.some(f => f.key === k) || !weeks.length) return;
+      const manual = !_isEmptyVal(row[k]) && !fromW.has(k);
+      if (manual) return;
+      if (+row[num] && +row[den]) { row[k] = Math.round(row[num] / row[den]); fromW.add(k); }
+      else if (fromW.has(k)) { delete row[k]; fromW.delete(k); }
+    });
+    if (fromW.size) { row._fromWeekly = [...fromW]; row._weeks = `${weeks.length}/${thursdaysInMonth(ym)}`; }
+    else { delete row._fromWeekly; delete row._weeks; }
+    // Baris bulanan yang hanya berasal dari mingguan dan kini kosong → hapus
+    if (!weeks.length && Object.keys(row).filter(k => k !== 'month' && !k.startsWith('_')).length === 0) {
+      monthly.splice(monthly.indexOf(row), 1);
+    }
+  });
+  monthly.sort((a, b) => (a.month || '').localeCompare(b.month || ''));
+}
+function rollupWeeklyAll() {
+  Object.entries(state.analytics || {}).forEach(([acctId, v]) => {
+    if (!v || typeof v !== 'object' || acctId.startsWith('_')) return;
+    Object.keys(PLATFORM_FIELDS).forEach(pid => { if (Array.isArray(v[pid + '_w'])) rollupWeekly(acctId, pid); });
+  });
+}
+
 /* ── ER (Engagement Rate) otomatis ──────────────────────────────────────────
    ER % = Total Engagement ÷ Total Views × 100 (views = viewKey platform).
    Bila Total Engagement kosong, dijumlah dari likes/comments/shares/saves/reactions. */
@@ -5915,6 +6011,7 @@ function renderStatChart() {
   const platM  = PLATFORM_FIELDS[platId];
   if (!platM) return;
 
+  rollupWeekly(acctId, platId);  // Data Bulanan otomatis dari Data Mingguan
   applyAutoER(acctId, platId);   // ER % selalu dihitung otomatis
 
   const isWeekly = state.statViewMode === 'weekly';
@@ -6397,6 +6494,9 @@ function renderStatDataTable(acctId, platId, rows) {
       const style  = empty && !isAuto
         ? 'text-align:right;background:rgba(220,38,38,.12);color:var(--red)'
         : 'text-align:right';
+      if (!isWeekly && (r._fromWeekly || []).includes(f.key)) {
+        return `<td class="stat-td-wk" title="Otomatis dari Data Mingguan">${fmtStatVal(val, f.fmt)}</td>`;
+      }
       if (f.auto === 'calc') {
         return `<td class="stat-td-calc" title="Otomatis: Total Engagement ÷ Views × 100">${empty ? '—' : fmtStatVal(val, f.fmt)}</td>`;
       }
@@ -6405,8 +6505,10 @@ function renderStatDataTable(acctId, platId, rows) {
     }).join('');
     const key  = esc(r[rKey] || '');
     const lbl  = isWeekly ? fmtWeek(r.week||'') : fmtMonth(r.month||'');
+    const wkBadge = !isWeekly && r._weeks
+      ? `<span class="stat-wk-badge" title="Sebagian kolom dihitung otomatis dari Data Mingguan (${r._weeks} minggu)">mingguan ${esc(r._weeks)}</span>` : '';
     return `<tr>
-      <td style="white-space:nowrap;font-weight:500">${lbl}</td>
+      <td style="white-space:nowrap;font-weight:500">${lbl}${wkBadge}</td>
       ${cells}
       <td style="white-space:nowrap;text-align:center">
         <button class="btn-xs" title="Edit baris ini" onclick="openStatEdit('${key}')">✏️</button>
@@ -6583,6 +6685,7 @@ async function deleteStatRow(periodKey) {
       analytics[acctId][storeKey] = analytics[acctId][storeKey].filter(r => r[rKey] !== periodKey);
     }
     state.analytics = analytics;
+    if (isWeekly) rollupWeekly(acctId, platId);
     showFlagLoader(600);
     try {
       state.shas.analytics = await window.db.writeData(
@@ -7535,8 +7638,10 @@ function renderStatInputFields(acctId, platIdOverride, prefill) {
 
   // Edit: isi nilai yang ada. Tambah baru: kosong, nilai bulan terakhir hanya sebagai petunjuk.
   const last = (() => {
-    const rows = (state.analytics?.[acctId]?.[platId] || []).slice()
-      .sort((a, b) => (a.month || '').localeCompare(b.month || ''));
+    const wk   = state.statViewMode === 'weekly';
+    const rk   = wk ? 'week' : 'month';
+    const rows = (state.analytics?.[acctId]?.[wk ? platId + '_w' : platId] || []).slice()
+      .sort((a, b) => (a[rk] || '').localeCompare(b[rk] || ''));
     return rows[rows.length - 1] || null;
   })();
 
@@ -7546,8 +7651,9 @@ function renderStatInputFields(acctId, platIdOverride, prefill) {
     const hint = !prefill && last?.[f.key] != null && last[f.key] !== ''
       ? `sebelumnya ${fmtStatVal(last[f.key], f.fmt)}` : (f.fmt === 'pct' ? '0.00' : '0');
     const desc = STAT_FIELD_DESC[f.key] || '';
-    return `<label class="sef-row" title="${esc(desc)}">
-      <span class="sef-label">${esc(f.label)}${f.fmt === 'pct' && !f.label.includes('%') ? ' <i>%</i>' : ''}</span>
+    const fromWk = (prefill?._fromWeekly || []).includes(f.key);
+    return `<label class="sef-row${fromWk ? ' sef-wk' : ''}" title="${esc(fromWk ? 'Dari Data Mingguan — ubah angkanya untuk menjadikannya manual' : desc)}">
+      <span class="sef-label">${fromWk ? '<em class="sef-wk-tag">mingguan</em> ' : ''}${esc(f.label)}${f.fmt === 'pct' && !f.label.includes('%') ? ' <i>%</i>' : ''}</span>
       <input type="number" id="sif_${f.key}" class="sef-inp" inputmode="decimal"
         placeholder="${esc(hint)}" step="${f.fmt === 'pct' ? '0.01' : '1'}" min="0"
         value="${val ?? ''}" oninput="statEditCount()" />
@@ -7620,12 +7726,22 @@ async function saveAnalyticsEntry() {
   const er = calcER(platId, entry);
   if (er !== null) entry.erPct = er;
 
+  // Bulanan: kolom dari mingguan yang tidak diubah tetap dianggap 'dari mingguan';
+  // kolom yang diubah admin menjadi angka manual.
+  if (!isWeekly) {
+    const old = analytics[acctId][storeKey].find(r => r[rKey] === periodVal);
+    const keep = (old?._fromWeekly || []).filter(k => entry[k] !== undefined && +entry[k] === +old[k]);
+    if (keep.length) { entry._fromWeekly = keep; entry._weeks = old._weeks; }
+  }
   // Replace atau tambah — tidak mengganggu array lain
   analytics[acctId][storeKey] = analytics[acctId][storeKey].filter(r => r[rKey] !== periodVal);
   analytics[acctId][storeKey].push(entry);
   analytics[acctId][storeKey].sort((a,b) => (a[rKey]||'').localeCompare(b[rKey]||''));
   if (analytics[acctId][storeKey].length > 52)  // max 52 minggu / 36 bulan
     analytics[acctId][storeKey] = analytics[acctId][storeKey].slice(isWeekly ? -52 : -36);
+  state.analytics = analytics;
+  rollupWeekly(acctId, platId);   // perbarui Data Bulanan dari Data Mingguan
+  applyAutoER(acctId, platId);
   _setAnalyticsMeta(analytics, acctId, platId);
 
   state.analytics = analytics;
