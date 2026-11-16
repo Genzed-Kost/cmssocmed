@@ -16,6 +16,7 @@ window.APP_INFO = {
         '📊 Data Bulanan otomatis dari Data Mingguan & ER % otomatis',
         '📅 Stock Contents: kalender, jam produksi, Daftar Program',
         '📰 Info Presiden: berita berganti tiap refresh (jeda 5 menit)',
+        '🖨 PDF Laporan Planner lebih rapi + nomor halaman di setiap halaman',
       ],
     },
     {

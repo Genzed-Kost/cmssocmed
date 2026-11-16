@@ -8556,61 +8556,112 @@ function downloadPlannerPdf() {
   const exportDate  = new Date().toLocaleDateString('id-ID', { day:'2-digit', month:'long', year:'numeric' });
   const exportTime  = new Date().toLocaleTimeString('id-ID', { hour:'2-digit', minute:'2-digit' });
 
-  const statusBg = { Published:'#dcfce7', Approved:'#dbeafe', Review:'#fef9c3',
-    Scheduled:'#ede9fe', Draft:'#f1f5f9', Ide:'#fff7ed' };
+  const STATUS_STYLE = {
+    Plan:      ['#f1f5f9', '#475569'], Review: ['#fff7ed', '#c2410c'], Revisi: ['#fef2f2', '#dc2626'],
+    Ongoing:   ['#fef9c3', '#92400e'], ACC:    ['#f0fdf4', '#16a34a'], Done:   ['#ecfeff', '#0891b2'],
+    Published: ['#eff6ff', '#1d4ed8'], Drop:   ['#fef2f2', '#dc2626'], Hold:   ['#f8fafc', '#94a3b8'],
+  };
+  const PLAT_SHORT = { instagram: 'IG', tiktok: 'TikTok', twitter: 'X', facebook: 'FB', youtube: 'YT' };
+  const fmtD = iso => {
+    const d = iso ? new Date(iso + 'T00:00:00') : null;
+    return d && !isNaN(d) ? d.toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' }) : '—';
+  };
+  const fmtDay = iso => {
+    const d = iso ? new Date(iso + 'T00:00:00') : null;
+    return d && !isNaN(d) ? d.toLocaleDateString('id-ID', { weekday: 'long' }) : '';
+  };
 
-  const html = `<div style="font-family:Arial,sans-serif;padding:24px;color:#0f172a">
-    <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:16px;border-bottom:2px solid #e2e8f0;padding-bottom:12px">
+  // Ringkasan jumlah per status
+  const counts = {};
+  filtered.forEach(c => { counts[c.status || '—'] = (counts[c.status || '—'] || 0) + 1; });
+  const summaryChips = Object.entries(counts).sort((a, b) => b[1] - a[1]).map(([st, n]) => {
+    const [bg, fg] = STATUS_STYLE[st] || ['#f1f5f9', '#475569'];
+    return `<span style="display:inline-block;margin:0 6px 6px 0;padding:3px 10px;border-radius:999px;background:${bg};color:${fg};font-size:10px;font-weight:700">${esc(st)} · ${n}</span>`;
+  }).join('');
+
+  const TH = 'padding:8px 9px;text-align:left;font-size:9.5px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:#475569;background:#f1f5f9;border-bottom:1.5px solid #cbd5e1';
+  const TD = 'padding:7px 9px;border-bottom:1px solid #e2e8f0;vertical-align:top';
+  const COLS = `<colgroup><col style="width:4%"><col style="width:12%"><col style="width:33%"><col style="width:9%">
+    <col style="width:10%"><col style="width:12%"><col style="width:12%"><col style="width:8%"></colgroup>`;
+  const thead = `<thead><tr>
+    <th style="${TH}">No</th><th style="${TH}">Tanggal</th><th style="${TH}">Judul Konten</th><th style="${TH}">Tipe</th>
+    <th style="${TH}">Status</th><th style="${TH}">Akun</th><th style="${TH}">Creator</th><th style="${TH}">Platform</th>
+  </tr></thead>`;
+  const rowHtml = (c, i) => {
+    const [bg, fg] = STATUS_STYLE[c.status] || ['#f1f5f9', '#475569'];
+    const creators = Array.isArray(c.creator) ? c.creator.join(', ') : (c.creator || '—');
+    return `<tr style="page-break-inside:avoid;background:${i % 2 ? '#fafbfc' : '#fff'}">
+      <td style="${TD};color:#94a3b8">${i + 1}</td>
+      <td style="${TD};white-space:nowrap">${fmtD(c.publishDate)}<div style="font-size:9px;color:#94a3b8">${fmtDay(c.publishDate)}${c.publishTime ? ' · ' + esc(c.publishTime) : ''}</div></td>
+      <td style="${TD};font-weight:700;color:#0f172a">${esc(c.title || '—')}${c.theme ? `<div style="font-weight:400;font-size:9px;color:#64748b;margin-top:2px">${esc(c.theme)}</div>` : ''}</td>
+      <td style="${TD}">${esc(c.format || '—')}</td>
+      <td style="${TD}"><span style="display:inline-block;padding:2px 8px;border-radius:999px;background:${bg};color:${fg};font-size:9.5px;font-weight:700">${esc(c.status || '—')}</span></td>
+      <td style="${TD}">${esc(getAcctName(c.account) || '—')}</td>
+      <td style="${TD}">${esc(creators)}</td>
+      <td style="${TD};font-size:9.5px;color:#475569">${(c.platforms || []).map(p => PLAT_SHORT[p] || p).join(', ') || '—'}</td>
+    </tr>`;
+  };
+
+  // Baris dibagi per halaman agar judul kolom muncul lagi di setiap halaman
+  const FIRST_PAGE_ROWS = 9, PAGE_ROWS = 11;   // disesuaikan agar baris 2 baris (judul + tema) tidak tumpah
+  const chunks = [];
+  for (let i = 0; i < filtered.length; ) {
+    const n = chunks.length ? PAGE_ROWS : FIRST_PAGE_ROWS;
+    chunks.push(filtered.slice(i, i + n).map((c, k) => rowHtml(c, i + k)));
+    i += n;
+  }
+  const tables = chunks.map((rows, pi) => `
+    ${pi ? '<div class="html2pdf__page-break"></div>' : ''}
+    <table style="width:100%;border-collapse:collapse;table-layout:fixed;font-size:10.5px;color:#334155">
+      ${COLS}${thead}<tbody>${rows.join('')}</tbody>
+    </table>`).join('');
+
+  const html = `<div style="font-family:Inter,Arial,sans-serif;color:#0f172a;padding:2px 2px 0">
+    <div style="display:flex;justify-content:space-between;align-items:center;gap:16px;padding-bottom:12px;margin-bottom:12px;border-bottom:2px solid #0f172a">
       <div style="display:flex;align-items:center;gap:14px">
-        <img src="${location.origin}/img/logo-dark.png" alt="Penjaga Harapan" style="height:46px;width:auto" crossorigin="anonymous" />
-        <div>
-        <div style="font-size:20px;font-weight:800;color:#1e293b">Laporan Planner Konten</div>
-        <div style="font-size:12px;color:#64748b;margin-top:3px">Penjaga Harapan CMS</div>
+        <img src="${location.origin}/img/logo-dark.png" alt="Penjaga Harapan" style="height:42px;width:auto" crossorigin="anonymous" />
+        <div style="border-left:1px solid #cbd5e1;padding-left:14px">
+          <div style="font-size:18px;font-weight:800;letter-spacing:-.01em">Laporan Planner Konten</div>
+          <div style="font-size:10.5px;color:#64748b;margin-top:2px">Penjaga Harapan CMS</div>
         </div>
       </div>
-      <div style="text-align:right;font-size:11px;color:#64748b;line-height:1.7">
-        <div>Diekspor oleh: <strong>${esc(downloader)}</strong></div>
-        <div>${exportDate}, ${exportTime}</div>
-        <div>Filter: <em>${esc(filterDesc)}</em></div>
-        <div>${filtered.length} konten</div>
-      </div>
+      <table style="font-size:10px;color:#475569;border-collapse:collapse">
+        <tr><td style="padding:1px 8px 1px 0;color:#94a3b8">Diekspor oleh</td><td style="font-weight:700;color:#0f172a">${esc(downloader)}</td></tr>
+        <tr><td style="padding:1px 8px 1px 0;color:#94a3b8">Tanggal</td><td>${exportDate}, ${exportTime}</td></tr>
+        <tr><td style="padding:1px 8px 1px 0;color:#94a3b8">Filter</td><td>${esc(filterDesc)}</td></tr>
+      </table>
     </div>
-    <table style="width:100%;border-collapse:collapse;font-size:11px">
-      <thead><tr style="background:#1e293b;color:#fff">
-        <th style="padding:8px 10px;text-align:left;border:1px solid #334155">No</th>
-        <th style="padding:8px 10px;text-align:left;border:1px solid #334155">Tanggal</th>
-        <th style="padding:8px 10px;text-align:left;border:1px solid #334155">Judul Konten</th>
-        <th style="padding:8px 10px;text-align:left;border:1px solid #334155">Tipe</th>
-        <th style="padding:8px 10px;text-align:left;border:1px solid #334155">Status</th>
-        <th style="padding:8px 10px;text-align:left;border:1px solid #334155">Akun</th>
-        <th style="padding:8px 10px;text-align:left;border:1px solid #334155">Creator</th>
-        <th style="padding:8px 10px;text-align:left;border:1px solid #334155">Platform</th>
-      </tr></thead>
-      <tbody>${filtered.map((c,i)=>`<tr style="background:${i%2===0?'#fff':'#f8fafc'}">
-        <td style="padding:7px 10px;border:1px solid #e2e8f0;color:#94a3b8">${i+1}</td>
-        <td style="padding:7px 10px;border:1px solid #e2e8f0">${fmtDate(c.publishDate)}</td>
-        <td style="padding:7px 10px;border:1px solid #e2e8f0;font-weight:600">${esc(c.title)}</td>
-        <td style="padding:7px 10px;border:1px solid #e2e8f0;font-size:10px">${esc(c.format||'—')}</td>
-        <td style="padding:7px 10px;border:1px solid #e2e8f0">
-          <span style="background:${statusBg[c.status]||'#f1f5f9'};border-radius:4px;padding:2px 7px;font-size:10px;font-weight:700">${esc(c.status)}</span>
-        </td>
-        <td style="padding:7px 10px;border:1px solid #e2e8f0">${esc(getAcctName(c.account))}</td>
-        <td style="padding:7px 10px;border:1px solid #e2e8f0">${esc(Array.isArray(c.creator) ? c.creator.join(', ') : (c.creator||'—'))}</td>
-        <td style="padding:7px 10px;border:1px solid #e2e8f0;font-size:10px">${(c.platforms||[]).join(', ')||'—'}</td>
-      </tr>`).join('')}</tbody>
-    </table>
-    ${filtered.length===0 ? '<p style="text-align:center;color:#94a3b8;padding:24px 0">Tidak ada konten sesuai filter</p>' : ''}
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+      <div><span style="font-size:22px;font-weight:900">${filtered.length}</span> <span style="font-size:11px;color:#64748b">konten</span></div>
+      <div style="text-align:right;max-width:70%">${summaryChips}</div>
+    </div>
+    ${filtered.length ? tables : '<p style="text-align:center;color:#94a3b8;padding:40px 0;font-size:12px">Tidak ada konten sesuai filter</p>'}
   </div>`;
 
   if (window.html2pdf) {
     const div = document.createElement('div');
     div.innerHTML = html;
+    const footerLeft = `Penjaga Harapan CMS · Laporan Planner Konten · ${exportDate}`;
     html2pdf().from(div).set({
-      margin: 8,
+      margin: [10, 10, 14, 10],   // atas, kiri, bawah (ruang footer), kanan — mm
       filename: `planner-${downloader.replace(/\s+/g,'-')}-${new Date().toISOString().slice(0,10)}.pdf`,
-      image: { type:'jpeg', quality: 1.0 },
-      html2canvas: { scale: 3, useCORS: true, logging: false },
-      jsPDF: { unit:'mm', format:'a4', orientation:'landscape' }
+      image: { type: 'jpeg', quality: 0.98 },
+      html2canvas: { scale: 2, useCORS: true, logging: false },
+      jsPDF: { unit: 'mm', format: 'a4', orientation: 'landscape' },
+      pagebreak: { mode: ['css', 'legacy'], avoid: 'tr' },
+    }).toPdf().get('pdf').then(pdf => {
+      // Footer di setiap halaman: keterangan + nomor halaman
+      const total = pdf.internal.getNumberOfPages();
+      const W = pdf.internal.pageSize.getWidth(), H = pdf.internal.pageSize.getHeight();
+      for (let i = 1; i <= total; i++) {
+        pdf.setPage(i);
+        pdf.setDrawColor(226, 232, 240); pdf.setLineWidth(0.2);
+        pdf.line(10, H - 10, W - 10, H - 10);
+        pdf.setFontSize(8); pdf.setTextColor(148, 163, 184);
+        pdf.text(footerLeft, 10, H - 6);
+        pdf.setTextColor(71, 85, 105);
+        pdf.text(`Halaman ${i} dari ${total}`, W - 10, H - 6, { align: 'right' });
+      }
     }).save();
   } else {
     const w = window.open('', '_blank');
