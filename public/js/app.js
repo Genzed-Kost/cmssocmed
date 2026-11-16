@@ -8690,15 +8690,20 @@ function initSidebarNav() {
     else sb.classList.remove('collapsed', 'peek');
     document.body.classList.toggle('sb-mobile-open', !isDesk() && sb.classList.contains('mobile-open'));
   };
-  let t;
-  const open  = () => { clearTimeout(t); t = setTimeout(() => { sb.classList.add('peek'); sb.classList.remove('collapsed'); }, 90); };
-  const close = () => { clearTimeout(t); t = setTimeout(() => { sb.classList.remove('peek'); sb.classList.add('collapsed'); }, 220); };
-  sb.addEventListener('mouseenter', () => { if (isDesk()) open(); });
-  sb.addEventListener('mouseleave', () => { if (isDesk()) close(); });
-  sb.addEventListener('focusin',   () => { if (isDesk()) open(); });
-  sb.addEventListener('focusout',  e => { if (isDesk() && !sb.contains(e.relatedTarget)) close(); });
-  // Klik menu: sidebar kembali ramping setelah pindah halaman
-  sb.addEventListener('click', e => { if (isDesk() && e.target.closest('.nav-item')) close(); });
+  // Nama menu sebagai tooltip saat sidebar ramping
+  sb.querySelectorAll('.nav-item').forEach(a => { if (!a.title) a.title = a.textContent.trim(); });
+  // Komputer: KLIK sidebar ramping untuk membuka (bukan otomatis saat kursor lewat).
+  // Ikon menu di jalur ramping tetap bisa diklik langsung untuk pindah halaman.
+  const open  = () => { sb.classList.add('peek'); sb.classList.remove('collapsed'); };
+  const close = () => { sb.classList.remove('peek'); sb.classList.add('collapsed'); };
+  sb.addEventListener('click', e => {
+    if (!isDesk()) return;
+    if (e.target.closest('.nav-item')) { close(); return; }        // pilih menu → kembali ramping
+    if (sb.classList.contains('collapsed')) open();                  // klik area sidebar → buka
+  });
+  // Klik di luar sidebar / tombol Esc → tutup
+  document.addEventListener('click', e => { if (isDesk() && sb.classList.contains('peek') && !sb.contains(e.target)) close(); });
+  document.addEventListener('keydown', e => { if (e.key === 'Escape' && sb.classList.contains('peek')) close(); });
 
   // HP: tab tepi kiri + latar gelap + usap
   const setMobile = on => { sb.classList.toggle('mobile-open', on); document.body.classList.toggle('sb-mobile-open', on); };

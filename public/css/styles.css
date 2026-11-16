@@ -3923,3 +3923,11 @@ ul { list-style: none; }
   .sb-backdrop { position: fixed; inset: 0; z-index: 99; background: rgba(2,6,23,.45); }
   body.sb-mobile-open .sb-backdrop { display: block; }
 }
+
+/* Sidebar dibuka dengan klik (bukan hover) */
+@media (min-width: 681px) {
+  .sidebar.collapsed { cursor: pointer; }
+  .sidebar.collapsed:hover { background: #111c33; }
+  .sidebar.collapsed:hover::after { background: rgba(255,255,255,.45); }
+  .sidebar.collapsed .nav-item[title] { position: relative; }
+}
