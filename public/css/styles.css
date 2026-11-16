@@ -3158,20 +3158,23 @@ ul { list-style: none; }
 .sc-detail-row { display: flex; justify-content: space-between; gap: 12px; font-size: .82rem; border-top: 1px solid var(--bd); padding-top: 8px; }
 .sc-detail-row span { color: var(--muted); }
 
-/* Layar kecil: kalender bulanan yang sama dengan desktop, dibuat ringkas */
+/* Layar kecil: kalender vertikal — semua tanggal bulan ini tersusun ke bawah */
 @media (max-width: 680px) {
-  .sc-cal-wrap { padding: 8px; }
+  .sc-cal-wrap { padding: 10px; }
   .sc-cal-head { gap: 6px 10px; }
   .sc-cal-title { min-width: 0; font-size: .95rem; }
   .sc-legend { margin-left: 0; gap: 2px 8px; font-size: .64rem; }
-  .sc-cal-dow span { font-size: .56rem; padding: 0 2px 3px; letter-spacing: 0; text-align: center; }
-  .sc-day { min-height: 54px; padding: 2px 1px; gap: 1px; }
-  .sc-day-num { font-size: .62rem; padding: 0 2px; }
-  .sc-day-out .sc-day-num { font-size: .56rem; }
-  .sc-day-items { gap: 1px; }
-  .sc-chip { font-size: .56rem; padding: 1px 3px; border-radius: 3px; line-height: 1.25; }
-  .sc-chip-prod { border-left-width: 2px; }
-  .sc-chip small { display: none; }
+  .sc-cal-dow { display: none; }
+  .sc-cal-grid { display: flex; flex-direction: column; border-left: 1px solid var(--bd); border-top: 1px solid var(--bd); border-radius: 8px; overflow: hidden; }
+  .sc-day-out { display: none; }
+  .sc-day { min-height: 38px; flex-direction: row; align-items: flex-start; gap: 8px; padding: 5px 6px; }
+  .sc-day-num { width: 42px; flex-shrink: 0; text-align: center; font-size: .9rem; line-height: 1.1; padding: 1px 0; }
+  .sc-day-dow { display: block; font-size: .58rem; font-weight: 600; color: var(--muted); text-transform: uppercase; }
+  .sc-day-today .sc-day-num { align-self: flex-start; padding: 2px 0; }
+  .sc-day-today .sc-day-dow { color: #fff; }
+  .sc-day-today { background: var(--blue-lt); }
+  .sc-day-items { flex: 1; min-width: 0; gap: 3px; }
+  .sc-chip { white-space: normal; font-size: .74rem; padding: 3px 6px; }
 }
 .sc-total { display: inline-flex; align-items: center; flex-wrap: wrap; gap: 4px 10px; font-size: .8rem; color: var(--muted); }
 .sc-total strong { color: var(--text); }
