@@ -25,7 +25,7 @@ function tag(block, name) {
   const m = block.match(new RegExp(`<${name}[^>]*>([\\s\\S]*?)<\\/${name}>`, 'i'));
   return m ? decode(m[1]) : '';
 }
-function parseRss(xml, max = 7) {
+function parseRss(xml, max = 30) {
   const items = [];
   const re = /<item>([\s\S]*?)<\/item>/g;
   let m;
@@ -49,7 +49,9 @@ async function getText(url) {
 }
 
 export async function onRequestGet({ request }) {
-  const q = new URL(request.url).searchParams.get('q') || DEFAULT_Q;
+  const params = new URL(request.url).searchParams;
+  const q = params.get('q') || DEFAULT_Q;
+  const n = Math.min(Math.max(parseInt(params.get('n'), 10) || 7, 1), 40);
   const sources = [
     `https://news.google.com/rss/search?q=${encodeURIComponent(q)}&hl=id&gl=ID&ceid=ID:id`,
     `https://www.bing.com/news/search?q=${encodeURIComponent(q)}&format=rss&setlang=id&cc=ID`,
@@ -57,7 +59,7 @@ export async function onRequestGet({ request }) {
   const errors = [];
   for (const url of sources) {
     try {
-      const items = parseRss(await getText(url));
+      const items = parseRss(await getText(url), n);
       if (items.length) return new Response(JSON.stringify({ items }), { headers: HEADERS });
       errors.push(`${new URL(url).hostname}: kosong`);
     } catch (e) {

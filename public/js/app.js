@@ -7938,7 +7938,7 @@ async function refreshNews() {
   const r = await fetchNews();
   // Catat ke Activity Log (hanya refresh yang benar-benar memuat berita / gagal)
   if (r) logActivity(currentUser(), 'refresh berita Info Presiden',
-    r.ok ? `${r.count} berita (sumber: ${r.source})` : 'gagal memuat berita');
+    r.ok ? `${r.count} berita, ${r.fresh} baru (sumber: ${r.source})` : 'gagal memuat berita');
 }
 function openNewsWait() {
   const pop = $('newsWaitPop');
@@ -7973,6 +7973,46 @@ function setCachedNews(text) { localStorage.setItem(NEWS_KEY, JSON.stringify({ t
    2. Netlify Function           /.netlify/functions/news-proxy (bila pindah ke Netlify)
    3. Gemini + Google Search     (butuh Gemini API Key di perangkat ini)            */
 const NEWS_QUERY = 'Prabowo Subianto kebijakan pemerintah';
+/* Supaya tiap refresh menampilkan berita yang berbeda:
+   - kata kunci bergantian tiap refresh (sumber berita lebih beragam),
+   - server mengirim hingga 30 berita, lalu dipilih 7 yang BELUM pernah
+     ditampilkan di perangkat ini (terbaru lebih dulu).                      */
+const NEWS_QUERIES  = [
+  'Prabowo Subianto kebijakan pemerintah',
+  'Presiden Prabowo hari ini',
+  'Istana Kepresidenan Prabowo',
+  'Prabowo program pemerintah',
+  'Prabowo kunjungan kerja',
+];
+const NEWS_SHOW      = 7;
+const NEWS_SEEN_KEY  = 'cmsph_news_seen_v1';
+const NEWS_QIDX_KEY  = 'cmsph_news_qidx_v1';
+function newsKeyOf(it) { return String(it.title || '').toLowerCase().replace(/\s+-\s+[^-]+$/, '').replace(/[^a-z0-9]+/g, ' ').trim(); }
+function newsSeen() { try { return JSON.parse(localStorage.getItem(NEWS_SEEN_KEY) || '[]'); } catch { return []; } }
+function nextNewsQuery() {
+  let i = 0;
+  try { i = (parseInt(localStorage.getItem(NEWS_QIDX_KEY), 10) || 0) % NEWS_QUERIES.length;
+        localStorage.setItem(NEWS_QIDX_KEY, String((i + 1) % NEWS_QUERIES.length)); } catch {}
+  return NEWS_QUERIES[i];
+}
+function pickNews(items) {
+  const seen = new Set(newsSeen());
+  const time = it => { const t = Date.parse(it.pubDate || ''); return isNaN(t) ? 0 : t; };
+  const uniq = [];
+  const keys = new Set();
+  items.forEach(it => { const k = newsKeyOf(it); if (k && !keys.has(k)) { keys.add(k); uniq.push(it); } });
+  // Belum pernah tampil → terbaru dulu; sudah pernah tampil → yang paling lama tidak tampil dulu
+  const order = newsSeen();
+  const fresh = uniq.filter(it => !seen.has(newsKeyOf(it))).sort((a, b) => time(b) - time(a));
+  const old   = uniq.filter(it =>  seen.has(newsKeyOf(it)))
+    .sort((a, b) => order.indexOf(newsKeyOf(b)) - order.indexOf(newsKeyOf(a)));
+  const pick  = [...fresh, ...old].slice(0, NEWS_SHOW).sort((a, b) => time(b) - time(a));
+  try {
+    const list = [...pick.map(newsKeyOf), ...newsSeen().filter(k => !pick.some(p => newsKeyOf(p) === k))].slice(0, 300);
+    localStorage.setItem(NEWS_SEEN_KEY, JSON.stringify(list));
+  } catch {}
+  return { pick, freshCount: Math.min(fresh.length, NEWS_SHOW) };
+}
 
 async function fetchNewsFromServer(url) {
   const res = await fetch(url, { headers: { Accept: 'application/json' } });
@@ -7986,11 +8026,12 @@ async function fetchNewsFromServer(url) {
   return json.items;
 }
 
-async function fetchNewsFromGemini() {
+async function fetchNewsFromGemini(query = NEWS_QUERY) {
   if (!getGeminiKey()) throw new Error('Gemini API Key belum diisi di perangkat ini');
+  const avoid = newsSeen().slice(0, 20);
   const today = new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
-  const prompt = `Hari ini ${today}. Cari 7 berita terbaru (maksimal 3 hari terakhir) dari media Indonesia tentang
-"${NEWS_QUERY}". Jawab HANYA dengan array JSON tanpa teks lain, format:
+  const prompt = `Hari ini ${today}. Cari 10 berita terbaru (maksimal 3 hari terakhir) dari media Indonesia tentang
+"${query}".${avoid.length ? ` Jangan ulangi berita dengan judul seperti ini: ${avoid.join(' | ')}.` : ''} Jawab HANYA dengan array JSON tanpa teks lain, format:
 [{"title":"judul berita","source":"nama media","pubDate":"YYYY-MM-DD","desc":"ringkasan 1-2 kalimat","link":"URL artikel"}]`;
   let lastErr = 'Gemini gagal';
   for (const model of GEMINI_MODELS.filter(m => !m.startsWith('gemini-1.5'))) {
@@ -8006,7 +8047,7 @@ async function fetchNewsFromGemini() {
       if (data.error) { lastErr = data.error.message; continue; }
       const text = (data.candidates?.[0]?.content?.parts || []).map(p => p.text || '').join('');
       const arr  = JSON.parse((text.match(/\[[\s\S]*\]/) || ['[]'])[0]);
-      const items = arr.filter(x => x && x.title).slice(0, 7).map(x => ({
+      const items = arr.filter(x => x && x.title).slice(0, 10).map(x => ({
         title:   String(x.title),
         source:  String(x.source || ''),
         pubDate: String(x.pubDate || ''),
@@ -8030,20 +8071,21 @@ async function fetchNews() {
   try { return await _fetchNewsInner(); } finally { _newsLoading = false; }
 }
 async function _fetchNewsInner() {
-  const q = encodeURIComponent(NEWS_QUERY);
+  const query = nextNewsQuery();
+  const q = encodeURIComponent(query);
   const local = ['localhost', '127.0.0.1'].includes(window.location.hostname);
   const attempts = [
-    ['Server', () => fetchNewsFromServer(`/api/news?q=${q}`)],
+    ['Server', () => fetchNewsFromServer(`/api/news?q=${q}&n=30`)],
     ['Server (Netlify)', () => fetchNewsFromServer(`${local ? 'http://localhost:8888' : ''}/.netlify/functions/news-proxy?q=${q}`)],
-    ['Gemini AI', fetchNewsFromGemini],
+    ['Gemini AI', () => fetchNewsFromGemini(query)],
   ];
   const errors = [];
   for (const [name, run] of attempts) {
     try {
-      const items = await run();
-      setCachedNews(JSON.stringify(items));
-      renderNewsItems(items, Date.now());
-      return { ok: true, source: name, count: items.length };
+      const { pick, freshCount } = pickNews(await run());
+      setCachedNews(JSON.stringify(pick));
+      renderNewsItems(pick, Date.now());
+      return { ok: true, source: name, count: pick.length, fresh: freshCount };
     } catch (e) { errors.push(`${name}: ${e.message}`); }
   }
   $('newsContent').innerHTML = `<div style="color:var(--red);font-size:.82rem;padding:12px 0">
