@@ -3481,13 +3481,19 @@ function scChipHtml(ev, canEdit) {
 }
 
 /* Item yang punya jadwal (tayang atau produksi) di bulan ym "YYYY-MM". */
+/* Bulan hitungan total sebuah item: bulan tayang; bila belum ada tanggal tayang,
+   bulan mulai produksi; bila keduanya kosong, tidak dihitung ('' ). */
+function scCountMonthOf(it) {
+  return (it.airDate || it.prodDate || '').slice(0, 7);
+}
 function scItemsInMonth(ym) {
-  return (state.stockContents || []).filter(it => {
-    if (it.airDate && it.airDate.slice(0, 7) === ym) return true;
-    if (!it.prodDate) return false;
-    const end = it.prodDateEnd && it.prodDateEnd >= it.prodDate ? it.prodDateEnd : it.prodDate;
-    return it.prodDate.slice(0, 7) <= ym && end.slice(0, 7) >= ym;
-  });
+  return (state.stockContents || []).filter(it => scCountMonthOf(it) === ym);
+}
+function scCountMonthText(it) {
+  const ym = scCountMonthOf(it);
+  if (!ym) return 'Belum masuk total (belum ada tanggal)';
+  const [y, m] = ym.split('-').map(Number);
+  return `${SC_MONTHS[m - 1]} ${y}` + (it.airDate ? ' (bulan tayang)' : ' (bulan produksi, belum ada tanggal tayang)');
 }
 /* Rincian: ✅ sudah tayang · ⏳ menunggu tayang · ❔ belum dijadwalkan */
 function scMonthStats(ym) {
@@ -3687,7 +3693,8 @@ function scOpenModal(id = null, date = '') {
       <div><span class="sc-badge" style="--c:${col}">${esc(it.category || 'Tanpa kelompok')}</span></div>
       <div style="font-weight:700;font-size:1rem">${esc(it.title || '(tanpa judul)')}</div>
       <div class="sc-detail-row"><span>🎬 Produksi</span><b>${esc(prod)}</b></div>
-      <div class="sc-detail-row"><span>📅 Tayang</span><b>${esc(it.airDate ? scFmtLong(it.airDate) : 'Belum dijadwalkan')}</b></div>`;
+      <div class="sc-detail-row"><span>📅 Tayang</span><b>${esc(it.airDate ? scFmtLong(it.airDate) : 'Belum dijadwalkan')}</b></div>
+      <div class="sc-detail-row"><span>📊 Dihitung di total</span><b>${esc(scCountMonthText(it))}</b></div>`;
     foot.innerHTML = `<button type="button" class="btn-sm" onclick="scCloseModal()">Tutup</button>`;
   } else {
     setTxt('scModalTitle', it ? 'Ubah Stock Content' : 'Tambah Stock Content');
@@ -3719,7 +3726,11 @@ function scOpenModal(id = null, date = '') {
       <div class="form-group">
         <label class="form-label" for="scfAir">📅 Tanggal Tayang</label>
         <input id="scfAir" type="date" class="form-inp" value="${esc(v.airDate || '')}" />
-      </div>`;
+      </div>
+      <div class="sc-detail-row"><span>📊 Dihitung di total</span><b id="scfCountMonth"></b></div>`;
+    const upd = () => setTxt('scfCountMonth', scCountMonthText({ airDate: $('scfAir').value, prodDate: $('scfProd').value }));
+    ['scfAir', 'scfProd'].forEach(id => $(id).addEventListener('input', upd));
+    upd();
     foot.innerHTML = `
       ${it ? `<button type="button" class="btn-sm red" style="margin-right:auto" onclick="scDeleteItem('${esc(it.id)}')">Hapus</button>` : ''}
       <button type="button" class="btn-sm" onclick="scCloseModal()">Batal</button>
