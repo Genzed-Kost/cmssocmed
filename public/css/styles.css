@@ -3978,3 +3978,14 @@ ul { list-style: none; }
 @keyframes sbFlashSame { 0%, 60% { background: rgba(96,165,250,.18); } 100% { background: transparent; } }
 @keyframes sbBlink { 50% { opacity: .2; } }
 @media (prefers-reduced-motion: reduce) { .sb-live, .sb-rate[class*="flash-"], .sb-rate[class*="flash-"] .sb-rate-value { animation: none !important; } }
+
+/* Login: kotak "Pembaruan terbaru" bisa digulir */
+.lg-news { display: flex; flex-direction: column; max-height: min(46vh, 380px); min-height: 0; padding-right: 10px; }
+.lg-news-scroll { overflow-y: auto; min-height: 0; flex: 1; padding-right: 8px; margin-right: -4px; overscroll-behavior: contain;
+  scrollbar-width: thin; scrollbar-color: rgba(255,255,255,.35) transparent;
+  -webkit-mask-image: linear-gradient(to bottom, #000 calc(100% - 18px), transparent); mask-image: linear-gradient(to bottom, #000 calc(100% - 18px), transparent); }
+.lg-news-scroll::-webkit-scrollbar { width: 6px; }
+.lg-news-scroll::-webkit-scrollbar-thumb { background: rgba(255,255,255,.3); border-radius: 6px; }
+.lg-news-scroll::-webkit-scrollbar-track { background: transparent; }
+.lg-news-scroll .lg-older:last-child { padding-bottom: 14px; }
+@media (max-width: 860px) { .lg-news { max-height: 320px; } }
