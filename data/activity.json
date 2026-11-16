@@ -1,5 +1,13 @@
 [
   {
+    "id": "mwjibizmvoamf",
+    "user": "Admin",
+    "role": "Admin",
+    "action": "tambah anggota",
+    "target": "Sehan (Designer)",
+    "timestamp": "2026-11-16T16:57:53.122Z"
+  },
+  {
     "id": "mwji9n0bfrz7m",
     "user": "Admin",
     "role": "Admin",
@@ -3990,13 +3998,5 @@
     "action": "update statistik",
     "target": "33 Official TikTok — Jun 2026",
     "timestamp": "2026-06-29T04:16:27.452Z"
-  },
-  {
-    "id": "mqyp1cq5odafm",
-    "user": "Admin",
-    "role": "Admin",
-    "action": "update statistik",
-    "target": "33 Official Facebook — Jun 2026",
-    "timestamp": "2026-06-29T04:04:14.381Z"
   }
 ]
