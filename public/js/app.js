@@ -6534,7 +6534,7 @@ function addStatRowFromTable() {
   if (lbl) lbl.textContent = isWeekly ? 'Minggu' : 'Bulan';
   renderStatInputFields(state.statActiveAcct);
   const title = $('statInputTitle');
-  if (title) title.textContent = `📊 Input ${isWeekly?'Mingguan':''} ${platM?.label||''} — ${getAcctName(state.statActiveAcct)}`;
+  if (title) title.textContent = `Tambah data ${isWeekly ? 'mingguan' : 'bulanan'}`;
   $('statInputCard')?.classList.remove('hidden');
   $('statInputCard')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
@@ -7489,7 +7489,7 @@ function openStatEdit(periodKey) {
   const inp = $('statMonth');
   if (inp) { inp.type = isWeekly ? 'week' : 'month'; inp.value = periodKey; }
   const title = $('statInputTitle');
-  if (title) title.textContent = `✏️ Edit ${platM?.label} — ${lbl}`;
+  if (title) title.textContent = `Edit data ${lbl}`;
 
   renderStatInputFields(acctId, platId, existing);
   $('statInputCard')?.classList.remove('hidden');
@@ -7503,23 +7503,44 @@ function renderStatInputFields(acctId, platIdOverride, prefill) {
   const platM  = PLATFORM_FIELDS[platId];
   if (!platM) return;
 
-  // Auto-prefill from last record if not editing
-  const existing = prefill || (() => {
-    const rows = (state.analytics?.[acctId]?.[platId] || [])
-      .slice().sort((a,b)=>a.month.localeCompare(b.month));
-    return rows[rows.length-1] || null;
+  // Edit: isi nilai yang ada. Tambah baru: kosong, nilai bulan terakhir hanya sebagai petunjuk.
+  const last = (() => {
+    const rows = (state.analytics?.[acctId]?.[platId] || []).slice()
+      .sort((a, b) => (a.month || '').localeCompare(b.month || ''));
+    return rows[rows.length - 1] || null;
   })();
 
-  // Group fields into columns of 3 for readability
-  container.innerHTML = `<div class="stat-inp-grid">
-    ${platM.fields.map(f => `
-      <div class="stat-inp-field">
-        <label class="form-label" style="font-size:.7rem">${f.label}</label>
-        <input type="number" id="sif_${f.key}" class="inp-sm" style="width:100%"
-          placeholder="0" step="${f.fmt==='pct'?'0.01':'1'}" min="0"
-          value="${existing?.[f.key] ?? ''}" />
-      </div>`).join('')}
-  </div>`;
+  const field = f => {
+    const v0   = prefill?.[f.key];
+    const val  = v0 === 0 || v0 === '0' ? '' : v0;   // 0 = belum diisi (sama seperti tabel)
+    const hint = !prefill && last?.[f.key] != null && last[f.key] !== ''
+      ? `sebelumnya ${fmtStatVal(last[f.key], f.fmt)}` : (f.fmt === 'pct' ? '0.00' : '0');
+    const desc = STAT_FIELD_DESC[f.key] || '';
+    return `<label class="sef-row" title="${esc(desc)}">
+      <span class="sef-label">${esc(f.label)}${f.fmt === 'pct' && !f.label.includes('%') ? ' <i>%</i>' : ''}</span>
+      <input type="number" id="sif_${f.key}" class="sef-inp" inputmode="decimal"
+        placeholder="${esc(hint)}" step="${f.fmt === 'pct' ? '0.01' : '1'}" min="0"
+        value="${val ?? ''}" oninput="statEditCount()" />
+    </label>`;
+  };
+  const manual = platM.fields.filter(f => !f.auto);
+  const auto   = platM.fields.filter(f => f.auto);
+  container.innerHTML = `
+    <div class="sef-group-title">Isi manual</div>
+    <div class="sef-grid">${manual.map(field).join('')}</div>
+    ${auto.length ? `<details class="sef-auto"${prefill && auto.some(f => prefill[f.key]) ? ' open' : ''}>
+      <summary>Data otomatis <span>(${auto.length} kolom · boleh dikosongkan, terisi dari sinkronisasi)</span></summary>
+      <div class="sef-grid">${auto.map(field).join('')}</div>
+    </details>` : ''}`;
+  setTxt('statEditSub', `${platM.label} · ${getAcctName(acctId)}`);
+  statEditCount();
+}
+
+function statEditCount() {
+  const inputs = [...document.querySelectorAll('#statInputFields .sef-inp')];
+  const filled = inputs.filter(i => i.value !== '').length;
+  setTxt('statLastSaved', `${filled}/${inputs.length} kolom terisi`);
+  inputs.forEach(i => i.closest('.sef-row')?.classList.toggle('is-filled', i.value !== ''));
 }
 
 async function saveAnalyticsEntry() {
@@ -7567,8 +7588,6 @@ async function saveAnalyticsEntry() {
     );
     await logActivity(currentUser(), 'update statistik', `${getAcctName(acctId)} ${platM.label} — ${lbl2}`);
     toast(`Data ${platM.label} ${lbl2} disimpan ✓`, 'success');
-    const lbl = $('statLastSaved');
-    if (lbl) lbl.textContent = `Tersimpan: ${lbl2}`;
     renderStatTable();
     $('statInputCard')?.classList.add('hidden');
   } catch (e) {
@@ -8698,6 +8717,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   window.scSaveModal            = scSaveModal;
   window.scDeleteItem           = scDeleteItem;
   window.closeNewsWait          = closeNewsWait;
+  window.statEditCount          = statEditCount;
   window.addProgram             = addProgram;
   window.updateProgram          = updateProgram;
   window.moveProgram            = moveProgram;

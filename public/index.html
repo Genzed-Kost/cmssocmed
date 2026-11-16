@@ -690,26 +690,30 @@
         <div id="statGoodBadWrap"></div>
 
         <!-- Input form (collapsible, admin only) -->
-        <div class="card hidden" style="margin-top:20px" id="statInputCard">
-          <div class="card-head">
-            <span class="card-title" id="statInputTitle">📊 Input Data Statistik</span>
-            <div style="display:flex;gap:8px;align-items:center">
-              <span id="statLastSaved" class="card-sub"></span>
-              <button class="icon-btn" id="btnCloseStatInput" title="Tutup">
-                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 6L6 18M6 6l12 12"/></svg>
+        <!-- Edit / tambah data statistik (Admin) — modal ringkas -->
+        <div class="modal-overlay hidden" id="statInputCard" onclick="if(event.target===this) this.classList.add('hidden')">
+          <div class="modal stat-edit-modal" role="dialog" aria-labelledby="statInputTitle">
+            <div class="stat-edit-head">
+              <div>
+                <div class="stat-edit-title" id="statInputTitle">Input Data Statistik</div>
+                <div class="stat-edit-sub" id="statEditSub"></div>
+              </div>
+              <button class="modal-close-btn" id="btnCloseStatInput" title="Tutup" aria-label="Tutup">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 6L6 18M6 6l12 12"/></svg>
               </button>
             </div>
-          </div>
-          <div class="form-group" style="max-width:200px;margin-bottom:16px">
-            <label class="form-label"><span id="statInputLabel">Bulan</span></label>
-            <input type="month" id="statMonth" class="form-inp" />
-          </div>
-          <div class="stat-input-grid" id="statInputFields"></div>
-          <div class="form-actions-row" style="margin-top:16px">
-            <button class="btn-sm blue" id="btnSaveStats">
-              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/></svg>
-              Simpan
-            </button>
+            <div class="stat-edit-body">
+              <label class="stat-edit-period">
+                <span id="statInputLabel">Bulan</span>
+                <input type="month" id="statMonth" class="form-inp" />
+              </label>
+              <div id="statInputFields"></div>
+            </div>
+            <div class="stat-edit-foot">
+              <span id="statLastSaved" class="stat-edit-count"></span>
+              <button class="btn-sm" type="button" onclick="$('statInputCard').classList.add('hidden')">Batal</button>
+              <button class="btn-sm blue" id="btnSaveStats">Simpan</button>
+            </div>
           </div>
         </div>
 
