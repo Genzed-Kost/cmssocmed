@@ -229,7 +229,18 @@
         "totalComments": 1136,
         "totalEngagement": 8696,
         "watchHours": 18183,
-        "erPct": 0.8
+        "erPct": 0.8,
+        "impressions": 836534,
+        "adImpressions": 23977,
+        "peakViews": 48143,
+        "_fromWeekly": [
+          "impressions",
+          "adImpressions",
+          "peakViews",
+          "avgViewsPerVideo"
+        ],
+        "_weeks": "4/4",
+        "avgViewsPerVideo": 5990
       },
       {
         "month": "2026-07",
@@ -238,13 +249,22 @@
         "uniqueViewers": 0,
         "subsEOM": 75538,
         "subsGained": 5933,
-        "totalComments": 0,
+        "totalComments": 4464,
         "totalEngagement": 37545,
         "erPct": 0.87,
         "watchHours": 31700,
-        "impressions": 0,
+        "impressions": 895560,
         "adImpressions": 0,
-        "peakViews": 0
+        "peakViews": 0,
+        "totalLikes": 30614,
+        "_fromWeekly": [
+          "totalLikes",
+          "totalComments",
+          "impressions",
+          "avgViewsPerVideo"
+        ],
+        "_weeks": "5/5",
+        "avgViewsPerVideo": 28462
       },
       {
         "month": "2026-08",
@@ -258,9 +278,15 @@
         "totalEngagement": 23957,
         "erPct": 2.28,
         "watchHours": 18743,
-        "impressions": 0,
+        "impressions": 102262,
         "adImpressions": 87371,
-        "peakViews": 0
+        "peakViews": 0,
+        "avgViewsPerVideo": 11411,
+        "_fromWeekly": [
+          "impressions",
+          "avgViewsPerVideo"
+        ],
+        "_weeks": "1/4"
       },
       {
         "month": "2026-09",
@@ -595,6 +621,30 @@
         "totalShares": 1765,
         "totalEngagement": 33215,
         "erPct": 5.45
+      },
+      {
+        "month": "2026-11",
+        "jmlVideo": 30,
+        "totalVideoViews": 209363,
+        "profileViews": 546,
+        "followersEOM": 43410,
+        "followersGained": 112,
+        "totalLikes": 11146,
+        "totalComments": 603,
+        "totalShares": 953,
+        "totalEngagement": 12702,
+        "_fromWeekly": [
+          "jmlVideo",
+          "totalVideoViews",
+          "profileViews",
+          "followersEOM",
+          "followersGained",
+          "totalLikes",
+          "totalComments",
+          "totalShares",
+          "totalEngagement"
+        ],
+        "_weeks": "1/4"
       }
     ],
     "facebook": [
@@ -788,14 +838,34 @@
         "followersGained": 4324,
         "totalPost": 196,
         "totalViews": 3761227,
-        "totalEngagement": 128230
+        "totalEngagement": 128230,
+        "totalReactions": 29856,
+        "maxViewsSingle": 202377,
+        "_fromWeekly": [
+          "totalReactions",
+          "maxViewsSingle",
+          "avgViewsPerPost",
+          "avgEngPerPost"
+        ],
+        "_weeks": "4/4",
+        "avgViewsPerPost": 19190,
+        "avgEngPerPost": 654
       },
       {
         "month": "2026-07",
         "pageFollowers": 163307,
         "followersGained": 3847,
         "totalViews": 3347102,
-        "totalEngagement": 119600
+        "totalEngagement": 119600,
+        "totalPost": 197,
+        "_fromWeekly": [
+          "totalPost",
+          "avgViewsPerPost",
+          "avgEngPerPost"
+        ],
+        "_weeks": "5/5",
+        "avgViewsPerPost": 16990,
+        "avgEngPerPost": 607
       },
       {
         "month": "2026-08",
@@ -1071,7 +1141,14 @@
         "totalViews": 1407138,
         "totalReach": 439514,
         "followersGained": 3365,
-        "totalEngagement": 95781
+        "totalEngagement": 95781,
+        "peakViews": 19686,
+        "_fromWeekly": [
+          "peakViews",
+          "avgViews"
+        ],
+        "_weeks": "4/4",
+        "avgViews": 6092
       },
       {
         "month": "2026-07",
@@ -1080,7 +1157,12 @@
         "totalViews": 3031634,
         "totalReach": 480242,
         "followersGained": 1736,
-        "totalEngagement": 87789
+        "totalEngagement": 87789,
+        "_fromWeekly": [
+          "avgViews"
+        ],
+        "_weeks": "4/5",
+        "avgViews": 12901
       },
       {
         "month": "2026-08",
@@ -1110,7 +1192,7 @@
         "updatedBy": "Admin"
       },
       "youtube": {
-        "updatedAt": "2026-11-16T12:05:11.666Z",
+        "updatedAt": "2026-11-17T08:45:46.126Z",
         "updatedBy": "Admin"
       },
       "tiktok": {
@@ -1383,6 +1465,21 @@
         "impressions": 167972,
         "peakViews": 0,
         "erPct": 2.76
+      },
+      {
+        "week": "2026-W32",
+        "jmlVideo": 36,
+        "totalViews": 248854,
+        "uniqueViewers": 96612,
+        "subsEOM": 76400,
+        "subsGained": 512,
+        "totalLikes": 848,
+        "totalComments": 74,
+        "totalEngagement": 1116,
+        "watchHours": 2836,
+        "impressions": 102262,
+        "adImpressions": 13546,
+        "erPct": 0.45
       }
     ],
     "tiktok_w": [
@@ -1746,7 +1843,12 @@
         "totalReach": 242731,
         "followersGained": 185,
         "totalEngagement": 22388,
-        "imageViews": 0
+        "imageViews": 0,
+        "_fromWeekly": [
+          "avgViews"
+        ],
+        "_weeks": "4/4",
+        "avgViews": 6707
       },
       {
         "month": "2026-07",
@@ -1754,7 +1856,14 @@
         "totalViews": 1712202,
         "followersGained": 373,
         "totalEngagement": 23212,
-        "imageViews": 0
+        "imageViews": 0,
+        "jmlPost": 47,
+        "_fromWeekly": [
+          "jmlPost",
+          "avgViews"
+        ],
+        "_weeks": "3/5",
+        "avgViews": 36430
       }
     ],
     "_meta": {
@@ -1945,7 +2054,20 @@
         "totalVideoViews": 116914,
         "profileViews": 308,
         "followersEOM": 7593,
-        "totalEngagement": 2583
+        "totalEngagement": 2583,
+        "jmlVideo": 9,
+        "followersGained": 3,
+        "totalLikes": 528,
+        "totalComments": 7,
+        "totalShares": 13,
+        "_fromWeekly": [
+          "jmlVideo",
+          "followersGained",
+          "totalLikes",
+          "totalComments",
+          "totalShares"
+        ],
+        "_weeks": "4/4"
       },
       {
         "month": "2026-07",
@@ -1953,7 +2075,18 @@
         "profileViews": 450,
         "followersEOM": 7595,
         "followersGained": 0,
-        "totalEngagement": 3872
+        "totalEngagement": 3872,
+        "jmlVideo": 26,
+        "totalLikes": 3568,
+        "totalComments": 72,
+        "totalShares": 416,
+        "_fromWeekly": [
+          "jmlVideo",
+          "totalLikes",
+          "totalComments",
+          "totalShares"
+        ],
+        "_weeks": "5/5"
       }
     ],
     "tiktok_w": [
@@ -2152,14 +2285,32 @@
         "pageFollowers": 2301,
         "followersGained": 70,
         "totalViews": 307271,
-        "totalEngagement": 4040
+        "totalEngagement": 4040,
+        "totalPost": 38,
+        "_fromWeekly": [
+          "totalPost",
+          "avgViewsPerPost",
+          "avgEngPerPost"
+        ],
+        "_weeks": "4/4",
+        "avgViewsPerPost": 8086,
+        "avgEngPerPost": 106
       },
       {
         "month": "2026-07",
         "pageFollowers": 2680,
         "followersGained": 395,
         "totalViews": 1531712,
-        "totalEngagement": 11619
+        "totalEngagement": 11619,
+        "totalPost": 23,
+        "_fromWeekly": [
+          "totalPost",
+          "avgViewsPerPost",
+          "avgEngPerPost"
+        ],
+        "_weeks": "3/5",
+        "avgViewsPerPost": 66596,
+        "avgEngPerPost": 505
       }
     ],
     "facebook_w": [
