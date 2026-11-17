@@ -1,5 +1,13 @@
 [
   {
+    "id": "mwkcpmvxnkbwk",
+    "user": "Admin",
+    "role": "Admin",
+    "action": "login",
+    "target": "masuk ke sistem sebagai Admin",
+    "timestamp": "2026-11-17T07:08:39.837Z"
+  },
+  {
     "id": "mwkbsoyklo31t",
     "user": "Admin",
     "role": "Admin",
@@ -3990,13 +3998,5 @@
     "action": "login",
     "target": "masuk ke sistem sebagai Admin",
     "timestamp": "2026-07-01T02:52:00.501Z"
-  },
-  {
-    "id": "mqyyiytaj5jef",
-    "user": "Admin",
-    "role": "Admin",
-    "action": "hapus konten",
-    "target": "Published Liputan CKG Pemalang",
-    "timestamp": "2026-06-29T08:29:52.702Z"
   }
 ]
