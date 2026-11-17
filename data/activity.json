@@ -1,5 +1,13 @@
 [
   {
+    "id": "mwkesnvuqnuw4",
+    "user": "Umar",
+    "role": "Publisher",
+    "action": "refresh berita Info Presiden",
+    "target": "7 berita, 7 baru (sumber: Server)",
+    "timestamp": "2026-11-17T08:07:00.330Z"
+  },
+  {
     "id": "mwkecxx2l64mc",
     "user": "Umar",
     "role": "Publisher",
@@ -3990,13 +3998,5 @@
     "action": "Tambah Bank Konten",
     "target": "baris baru",
     "timestamp": "2026-07-03T06:27:32.851Z"
-  },
-  {
-    "id": "mr4jv6adnyzpu",
-    "user": "Umar",
-    "role": "Publisher",
-    "action": "login",
-    "target": "masuk ke sistem sebagai Publisher",
-    "timestamp": "2026-07-03T06:26:05.077Z"
   }
 ]
