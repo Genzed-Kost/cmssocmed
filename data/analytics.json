@@ -301,8 +301,16 @@
         "totalEngagement": 16852,
         "watchHours": 11797,
         "adImpressions": 107141,
-        "peakViews": 0,
-        "erPct": 2.11
+        "peakViews": 50211,
+        "erPct": 2.11,
+        "impressions": 140619,
+        "avgViewsPerVideo": 12123,
+        "_fromWeekly": [
+          "impressions",
+          "peakViews",
+          "avgViewsPerVideo"
+        ],
+        "_weeks": "1/4"
       },
       {
         "month": "2026-10",
@@ -1193,7 +1201,7 @@
         "updatedBy": "Admin"
       },
       "youtube": {
-        "updatedAt": "2026-11-17T08:55:30.228Z",
+        "updatedAt": "2026-11-17T08:59:01.818Z",
         "updatedBy": "Admin"
       },
       "tiktok": {
@@ -1527,6 +1535,22 @@
         "adImpressions": 19640,
         "peakViews": 43413,
         "erPct": 2.14
+      },
+      {
+        "week": "2026-W36",
+        "jmlVideo": 25,
+        "totalViews": 192529,
+        "uniqueViewers": 57755,
+        "subsEOM": 84754,
+        "subsGained": 2847,
+        "totalLikes": 12767,
+        "totalComments": 121,
+        "totalEngagement": 13070,
+        "watchHours": 2822,
+        "impressions": 140619,
+        "adImpressions": 20983,
+        "peakViews": 50211,
+        "erPct": 6.79
       }
     ],
     "tiktok_w": [
