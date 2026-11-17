@@ -1,5 +1,13 @@
 [
   {
+    "id": "mwkd8m96k7pjy",
+    "user": "Admin",
+    "role": "Admin",
+    "action": "ubah status",
+    "target": "\"Penjara Bukan Sekadar Menghukum, Korban Juga Harus Dipulihkan\" menjadi Published",
+    "timestamp": "2026-11-17T07:23:25.482Z"
+  },
+  {
     "id": "mwkcpmvxnkbwk",
     "user": "Admin",
     "role": "Admin",
@@ -3990,13 +3998,5 @@
     "action": "login",
     "target": "masuk ke sistem sebagai Admin",
     "timestamp": "2026-07-03T05:53:32.053Z"
-  },
-  {
-    "id": "mr1hc60ldab80",
-    "user": "Admin",
-    "role": "Admin",
-    "action": "login",
-    "target": "masuk ke sistem sebagai Admin",
-    "timestamp": "2026-07-01T02:52:00.501Z"
   }
 ]
