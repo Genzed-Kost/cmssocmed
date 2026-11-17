@@ -1,5 +1,13 @@
 [
   {
+    "id": "mwk5jubehvikt",
+    "user": "Umar",
+    "role": "Publisher",
+    "action": "logout",
+    "target": "keluar dari sistem",
+    "timestamp": "2026-11-17T03:48:12.218Z"
+  },
+  {
     "id": "mwk5g180pejpx",
     "user": "Admin",
     "role": "Admin",
@@ -3990,13 +3998,5 @@
     "action": "update statistik",
     "target": "Penjaga Harapan TikTok — 22-28 Jun '26",
     "timestamp": "2026-06-29T06:48:17.273Z"
-  },
-  {
-    "id": "mqyusmsb7aa0u",
-    "user": "Admin",
-    "role": "Admin",
-    "action": "update statistik",
-    "target": "Penjaga Harapan YouTube — 22-28 Jun '26",
-    "timestamp": "2026-06-29T06:45:25.211Z"
   }
 ]
