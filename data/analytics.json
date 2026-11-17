@@ -303,13 +303,13 @@
         "adImpressions": 107141,
         "peakViews": 50211,
         "erPct": 2.11,
-        "impressions": 244202,
+        "impressions": 357194,
         "_fromWeekly": [
           "impressions",
           "peakViews",
           "avgViewsPerVideo"
         ],
-        "_weeks": "2/4",
+        "_weeks": "3/4",
         "avgViewsPerVideo": 12123
       },
       {
@@ -1201,7 +1201,7 @@
         "updatedBy": "Admin"
       },
       "youtube": {
-        "updatedAt": "2026-11-17T09:02:16.511Z",
+        "updatedAt": "2026-11-17T09:05:38.982Z",
         "updatedBy": "Admin"
       },
       "tiktok": {
@@ -1567,6 +1567,22 @@
         "adImpressions": 26887,
         "peakViews": 46532,
         "erPct": 1.64
+      },
+      {
+        "week": "2026-W38",
+        "jmlVideo": 11,
+        "totalViews": 159746,
+        "uniqueViewers": 48282,
+        "subsEOM": 92606,
+        "subsGained": 3724,
+        "totalLikes": 2465,
+        "totalComments": 72,
+        "totalEngagement": 2656,
+        "watchHours": 2889,
+        "impressions": 112992,
+        "adImpressions": 20235,
+        "peakViews": 46148,
+        "erPct": 1.66
       }
     ],
     "tiktok_w": [
