@@ -1,5 +1,13 @@
 [
   {
+    "id": "mwkbbrvbxxvrv",
+    "user": "Admin",
+    "role": "Admin",
+    "action": "refresh berita Info Presiden",
+    "target": "7 berita, 6 baru (sumber: Server)",
+    "timestamp": "2026-11-17T06:29:53.495Z"
+  },
+  {
     "id": "mwkb2nqg1rd3k",
     "user": "Admin",
     "role": "Admin",
@@ -3990,13 +3998,5 @@
     "action": "update statistik",
     "target": "Penjaga Harapan TikTok — 15-21 Jun '26",
     "timestamp": "2026-06-29T06:51:11.197Z"
-  },
-  {
-    "id": "mqyuz76v6fxts",
-    "user": "Admin",
-    "role": "Admin",
-    "action": "update statistik",
-    "target": "Penjaga Harapan TikTok — 15-21 Jun '26",
-    "timestamp": "2026-06-29T06:50:31.591Z"
   }
 ]
