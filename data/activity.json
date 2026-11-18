@@ -1,5 +1,13 @@
 [
   {
+    "id": "mwllujl153jj1",
+    "user": "Umar",
+    "role": "Publisher",
+    "action": "ubah status",
+    "target": "\"Siapa yang Berhak Menentukan Pengganti Wakil Presiden?\" menjadi Done",
+    "timestamp": "2026-11-18T04:12:11.557Z"
+  },
+  {
     "id": "mwllt5mg04jcv",
     "user": "Umar",
     "role": "Publisher",
@@ -3990,13 +3998,5 @@
     "action": "Hapus Bank Konten",
     "target": "\"tanpa judul\"",
     "timestamp": "2026-07-03T06:28:07.527Z"
-  },
-  {
-    "id": "mr4jxpx7a1r3x",
-    "user": "Umar",
-    "role": "Publisher",
-    "action": "Hapus Bank Konten",
-    "target": "\"tanpa judul\"",
-    "timestamp": "2026-07-03T06:28:03.835Z"
   }
 ]
