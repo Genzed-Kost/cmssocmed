@@ -650,15 +650,15 @@
       },
       {
         "month": "2026-11",
-        "jmlVideo": 30,
-        "totalVideoViews": 209363,
-        "profileViews": 546,
-        "followersEOM": 43410,
-        "followersGained": 112,
-        "totalLikes": 11146,
-        "totalComments": 603,
-        "totalShares": 953,
-        "totalEngagement": 12702,
+        "jmlVideo": 60,
+        "totalVideoViews": 421512,
+        "profileViews": 1138,
+        "followersEOM": 43500,
+        "followersGained": 202,
+        "totalLikes": 18070,
+        "totalComments": 968,
+        "totalShares": 1501,
+        "totalEngagement": 20539,
         "_fromWeekly": [
           "jmlVideo",
           "totalVideoViews",
@@ -670,8 +670,8 @@
           "totalShares",
           "totalEngagement"
         ],
-        "_weeks": "1/4",
-        "erPct": 6.07
+        "_weeks": "2/4",
+        "erPct": 4.87
       }
     ],
     "facebook": [
@@ -1223,7 +1223,7 @@
         "updatedBy": "Admin"
       },
       "tiktok": {
-        "updatedAt": "2026-11-18T08:59:25.058Z",
+        "updatedAt": "2026-11-18T09:03:35.222Z",
         "updatedBy": "Admin"
       }
     },
@@ -2068,6 +2068,22 @@
         "totalShares": 953,
         "totalEngagement": 12702,
         "erPct": 6.07
+      },
+      {
+        "week": "2026-W46",
+        "jmlVideo": 30,
+        "totalVideoViews": 212149,
+        "profileViews": 592,
+        "followersEOM": 43500,
+        "followersGained": 90,
+        "totalViewers": 184854,
+        "newViewers": 118343,
+        "returningViewers": 66511,
+        "totalLikes": 6924,
+        "totalComments": 365,
+        "totalShares": 548,
+        "totalEngagement": 7837,
+        "erPct": 3.69
       }
     ]
   },
