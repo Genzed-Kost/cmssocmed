@@ -578,38 +578,6 @@
             </div>
           </section>
 
-          <!-- 3b. Posting Otomatis -->
-          <section class="np-card" id="autoPostCard">
-            <div class="np-card-head"><span class="np-step">⚡</span><div><b>Posting Otomatis</b><i>Sistem memposting sendiri saat jadwal tiba</i></div></div>
-            <label class="check-item ap-toggle"><input type="checkbox" id="apEnabled" /> Aktifkan posting otomatis untuk konten ini</label>
-            <div id="apFields" class="hidden">
-              <div class="form-row-2">
-                <div class="form-group">
-                  <label class="form-label" for="apTime">Jam Tayang (WIB) <span class="req-star">*</span></label>
-                  <input type="time" id="apTime" class="form-inp" />
-                </div>
-                <div class="form-group">
-                  <label class="form-label" for="apMediaType">Jenis File</label>
-                  <select id="apMediaType" class="form-inp">
-                    <option value="video">Video (Reels / Shorts)</option>
-                    <option value="image">Gambar (Flayer)</option>
-                  </select>
-                </div>
-              </div>
-              <div class="form-group">
-                <label class="form-label" for="apMediaUrl">Link File Final <span class="req-star">*</span></label>
-                <input type="url" id="apMediaUrl" class="form-inp" placeholder="https://drive.google.com/file/d/…" />
-                <p class="form-hint">Link <b>file</b> (bukan folder) di Google Drive dengan akses <code>Siapa saja yang memiliki link</code>.</p>
-              </div>
-              <div class="form-group">
-                <label class="form-label" for="apYtTitle">Judul YouTube</label>
-                <input type="text" id="apYtTitle" class="form-inp" maxlength="100" placeholder="Kosongkan = pakai Judul Konten" />
-              </div>
-              <p class="form-hint">Hanya diposting jika status <b>ACC</b> atau <b>Done</b>. Caption diambil dari kolom Caption Medsos — bagian <code>=== INSTAGRAM ===</code>, <code>=== TIKTOK ===</code>, dst. dipakai untuk platform masing-masing. Didukung: Instagram, Facebook, YouTube, TikTok (X belum).</p>
-              <div id="apResults" class="ap-results"></div>
-            </div>
-          </section>
-
           <!-- 4. Naskah & Caption -->
           <section class="np-card">
             <div class="np-card-head"><span class="np-step">4</span><div><b>Naskah &amp; Caption</b><i>Bisa dibantu AI</i></div></div>

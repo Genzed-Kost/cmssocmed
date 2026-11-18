@@ -2742,7 +2742,7 @@ function renderTodoList() {
       <span class="badge ${STATUS_CLASS[c.status] || 'badge-ide'} todo-status-badge">${esc(c.status || 'Plan')}</span>
       <span class="todo-planner-body">
         <span class="todo-planner-title">${formatIcon ? formatIcon + ' ' : ''}${esc(c.title || '(Tanpa Judul)')}${tagHtml}</span>
-        <span class="todo-planner-meta">${esc(c.format || '—')} · ${dateStr}${c.publishTime ? ' · ⏰ ' + esc(c.publishTime) : ''}${c.autoPost?.enabled ? '<span class="ap-badge" title="Posting otomatis aktif">⚡ Auto</span>' : ''}</span>
+        <span class="todo-planner-meta">${esc(c.format || '—')} · ${dateStr}${c.publishTime ? ' · ⏰ ' + esc(c.publishTime) : ''}</span>
       </span>
       <span class="todo-planner-arrow">›</span>
     </li>`;
@@ -3411,7 +3411,6 @@ function renderNewPostForm(content) {
     sv('postCaption',    content.caption     || '');
     sv('postOutputLink', content.outputLink  || '');
     sv('postNotes',      content.notes       || '');
-    fillAutoPostForm(content);
     $$('#platformChecks input').forEach(cb => {
       cb.checked = (content.platforms||[]).includes(cb.value);
     });
@@ -3437,7 +3436,6 @@ function renderNewPostForm(content) {
     sv('postStatus','Plan'); sv('postCreator',''); sv('postEditor',''); sv('postAccount',''); sv('postFormat','Flayer');
     onFormatChange('Flayer');  // reset editor row visibility
     $$('#platformChecks input').forEach(cb => { cb.checked = false; });
-    fillAutoPostForm(null);
 
     try {
       const saved = JSON.parse(localStorage.getItem(DRAFT_KEY) || 'null');
@@ -3520,15 +3518,6 @@ async function savePost() {
     return;
   }
 
-  // Validasi Posting Otomatis
-  const autoPost = readAutoPostForm(id);
-  if (autoPost?.enabled) {
-    if (!autoPost.time) { toast('Jam tayang wajib diisi untuk posting otomatis', 'error'); $('apTime')?.focus(); return; }
-    if (!autoPost.mediaUrl) { toast('Link file final wajib diisi untuk posting otomatis', 'error'); $('apMediaUrl')?.focus(); return; }
-    if (/drive\.google\.com\/drive\/folders/.test(autoPost.mediaUrl)) { toast('Link file final harus link FILE, bukan folder Drive', 'error'); $('apMediaUrl')?.focus(); return; }
-    if (!platforms.some(p => AUTOPOST_PLATFORMS.includes(p))) { toast('Posting otomatis butuh minimal 1 platform: Instagram, Facebook, YouTube, atau TikTok', 'error'); return; }
-  }
-
   const title   = gv('postTitle');
   const theme   = gv('postTheme');
   const acctId  = gv('postAccount');
@@ -3547,8 +3536,7 @@ async function savePost() {
   const data = {
     title, platforms,
     publishDate: gv('postDate'),
-    publishTime: autoPost?.enabled ? autoPost.time
-               : FORMATS_DUAL_ROLE.includes(gv('postFormat')) ? (gv('postTime') || '') : '',
+    publishTime: FORMATS_DUAL_ROLE.includes(gv('postFormat')) ? (gv('postTime') || '') : '',
     creator,
     editor:      gv('postEditor') || '',
     account:     acctId,
@@ -3558,8 +3546,7 @@ async function savePost() {
     script:      gv('postScript'),
     caption:     gv('postCaption'),
     outputLink:  gv('postOutputLink'),
-    notes:       gv('postNotes'),
-    ...(autoPost ? { autoPost } : {})
+    notes:       gv('postNotes')
   };
 
   if (id) {
@@ -3584,92 +3571,10 @@ async function savePost() {
       await notifyAdministratorBudget(savedContent);
     }
     clearNewPostDraft();
-    if (autoPost?.enabled && !['ACC','Done','Published'].includes(data.status)) {
-      toast('Tersimpan. Catatan: posting otomatis baru jalan setelah status ACC/Done', 'info', 5000);
-    } else
     toast(`Konten berhasil ${id ? 'diperbarui' : 'disimpan'}`, 'success');
     navigate('planner');
   } catch (e) { toast('Gagal simpan: ' + e.message, 'error'); }
 }
-
-/* ══════════════════════════════════════════════════════════════════════════
-   POSTING OTOMATIS (dijalankan GitHub Actions: .github/workflows/auto-post.yml)
-   ══════════════════════════════════════════════════════════════════════════ */
-const AUTOPOST_PLATFORMS = ['instagram', 'facebook', 'youtube', 'tiktok'];
-const AP_PLATFORM_LABEL  = { instagram: 'Instagram', facebook: 'Facebook', youtube: 'YouTube', tiktok: 'TikTok' };
-const AP_STATUS_LABEL    = {
-  done: '✅ Tayang', error: '⚠️ Gagal', processing: '⏳ Sedang diposting',
-  'needs-check': '❗ Perlu dicek', skipped: '⏭️ Dilewati'
-};
-let _apResultsDraft = null;   // salinan hasil yang bisa di-reset lewat tombol "Coba lagi"
-
-function fillAutoPostForm(content) {
-  const ap = content?.autoPost || {};
-  const en = $('apEnabled'); if (en) en.checked = !!ap.enabled;
-  sv('apTime',      ap.time || content?.publishTime || '');
-  sv('apMediaUrl',  ap.mediaUrl || content?.outputLink || '');
-  sv('apMediaType', ap.mediaType || (/flayer|carousel/i.test(content?.format || '') ? 'image' : 'video'));
-  sv('apYtTitle',   ap.youtubeTitle || '');
-  _apResultsDraft = ap.results ? JSON.parse(JSON.stringify(ap.results)) : {};
-  $('apFields')?.classList.toggle('hidden', !ap.enabled);
-  renderAutoPostResults();
-}
-
-function readAutoPostForm(id) {
-  const prev = id ? state.contents.find(x => x.id === id)?.autoPost : null;
-  const enabled = !!$('apEnabled')?.checked;
-  if (!enabled && !prev) return null;            // tidak pernah dipakai → jangan tambah field
-  return {
-    enabled,
-    time:         gv('apTime'),
-    mediaUrl:     gv('apMediaUrl'),
-    mediaType:    gv('apMediaType') || 'video',
-    youtubeTitle: gv('apYtTitle'),
-    results:      _apResultsDraft || prev?.results || {}
-  };
-}
-
-function renderAutoPostResults() {
-  const box = $('apResults');
-  if (!box) return;
-  const res = _apResultsDraft || {};
-  const keys = Object.keys(res);
-  if (!keys.length) { box.innerHTML = ''; return; }
-  box.innerHTML = '<div class="form-label" style="margin-bottom:2px">Status posting</div>' + keys.map(p => {
-    const r = res[p] || {};
-    const when = r.at ? new Date(r.at).toLocaleString('id-ID', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' }) : '';
-    const msg = r.status === 'done'
-      ? (r.url ? `<a href="${esc(r.url)}" target="_blank" rel="noopener">Buka postingan ↗</a>` : 'Berhasil') + (r.note ? ` · ${esc(r.note)}` : '')
-      : esc(r.error || (r.status === 'processing' ? 'Sedang diproses sistem…' : ''));
-    const canRetry = ['error', 'needs-check', 'skipped'].includes(r.status);
-    return `<div class="ap-res ${esc(r.status || '')}">
-      <b>${esc(AP_PLATFORM_LABEL[p] || p)}</b>
-      <span class="ap-msg">${esc(AP_STATUS_LABEL[r.status] || r.status || '')}${when ? ' · ' + esc(when) : ''}<br>${msg}</span>
-      ${canRetry ? `<button type="button" class="ap-retry" data-ap-retry="${esc(p)}" title="Hapus status gagal agar sistem mencoba lagi (simpan konten setelahnya)">Coba lagi</button>` : ''}
-    </div>`;
-  }).join('');
-}
-
-document.addEventListener('change', e => {
-  if (e.target?.id !== 'apEnabled') return;
-  const on = e.target.checked;
-  $('apFields')?.classList.toggle('hidden', !on);
-  if (on) {
-    if (!gv('apTime') && gv('postTime')) sv('apTime', gv('postTime'));
-    if (!gv('apMediaUrl') && gv('postOutputLink')) sv('apMediaUrl', gv('postOutputLink'));
-  }
-});
-
-document.addEventListener('click', e => {
-  const btn = e.target?.closest?.('[data-ap-retry]');
-  if (!btn) return;
-  const p = btn.dataset.apRetry;
-  if (_apResultsDraft?.[p]?.status === 'needs-check' &&
-      !confirm(`Pastikan konten BELUM tayang di ${AP_PLATFORM_LABEL[p] || p} supaya tidak terposting dua kali. Lanjut?`)) return;
-  if (_apResultsDraft) delete _apResultsDraft[p];
-  renderAutoPostResults();
-  toast(`${AP_PLATFORM_LABEL[p] || p} akan dicoba lagi setelah konten disimpan`, 'info');
-});
 
 /* ══════════════════════════════════════════════════════════════════════════
    STOCK CONTENTS
