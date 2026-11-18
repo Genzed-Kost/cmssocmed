@@ -5,13 +5,16 @@
  *  1. Halaman https://www.youtube.com/@<handle>/videos → channelId + daftar video (judul)
  *  2. RSS https://www.youtube.com/feeds/videos.xml?channel_id=<id> → 15 video terbaru
  *     lengkap dengan tanggal terbit & deskripsi
- * Hasil di-cache di edge 5 menit; ?fresh=1 mengambil ulang langsung dari YouTube.
+ * Hasil di-cache di edge 30 menit.
+ *
+ * GET /api/youtube?transcript=<videoId> → { ok, transcript } teks subtitle/transkrip video
+ * (subtitle manual diutamakan, lalu otomatis; bahasa Indonesia diutamakan). Cache 7 hari.
  * Salinan identik ada di public/functions/api/youtube.js (lihat catatan di news.js).
  */
 const HEADERS = {
   'Content-Type': 'application/json; charset=utf-8',
   'Access-Control-Allow-Origin': '*',
-  'Cache-Control': 'no-cache',
+  'Cache-Control': 'public, max-age=900',
 };
 const UA = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0 Safari/537.36';
 const YT_HEADERS = { 'User-Agent': UA, 'Accept-Language': 'id-ID,id;q=0.9,en;q=0.8', Cookie: 'CONSENT=YES+cb; SOCS=CAI' };
@@ -82,8 +85,76 @@ function pageVideos(data) {
   return out.map(v => ({ ...v, publishedApprox: approxDate(v.publishedText), url: `https://www.youtube.com/watch?v=${v.id}` }));
 }
 
+/* ── Transkrip ─────────────────────────────────────────────────────────── */
+function arrayAfter(text, marker) {
+  const i = text.indexOf(marker);
+  if (i < 0) return null;
+  const start = text.indexOf('[', i);
+  let depth = 0, inStr = false, esc = false;
+  for (let j = start; j < text.length; j++) {
+    const c = text[j];
+    if (inStr) { if (esc) esc = false; else if (c === '\\') esc = true; else if (c === '"') inStr = false; continue; }
+    if (c === '"') inStr = true;
+    else if (c === '[') depth++;
+    else if (c === ']' && --depth === 0) { try { return JSON.parse(text.slice(start, j + 1)); } catch { return null; } }
+  }
+  return null;
+}
+function pickTrack(tracks) {
+  if (!Array.isArray(tracks) || !tracks.length) return null;
+  const isId = t => /^id|^in/.test(t.languageCode || '');
+  const manual = t => t.kind !== 'asr';
+  return tracks.find(t => isId(t) && manual(t)) || tracks.find(isId) || tracks.find(manual) || tracks[0];
+}
+async function trackText(baseUrl) {
+  if (!baseUrl) return '';
+  const res = await fetch(baseUrl.replace(/&fmt=[^&]*/, ''), { headers: YT_HEADERS });
+  if (!res.ok) return '';
+  const xml = await res.text();
+  return (xml.match(/<(?:text|p)\b[^>]*>[\s\S]*?<\/(?:text|p)>/g) || [])
+    .map(t => decodeXml(decodeXml(t.replace(/<[^>]+>/g, ' '))))   // teks subtitle di-escape dua kali
+    .join(' ').replace(/\s+/g, ' ').trim();
+}
+async function fetchTranscript(id) {
+  // 1. Halaman tonton → captionTracks
+  try {
+    const res = await fetch(`https://www.youtube.com/watch?v=${id}&hl=id`, { headers: YT_HEADERS });
+    if (res.ok) {
+      const t = await trackText(pickTrack(arrayAfter(await res.text(), '"captionTracks":'))?.baseUrl);
+      if (t) return t;
+    }
+  } catch (_) {}
+  // 2. Cadangan: API pemutar (klien Android)
+  try {
+    const res = await fetch('https://www.youtube.com/youtubei/v1/player?prettyPrint=false', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'User-Agent': 'com.google.android.youtube/19.09.37 (Linux; U; Android 12) gzip' },
+      body: JSON.stringify({ videoId: id, context: { client: { clientName: 'ANDROID', clientVersion: '19.09.37', androidSdkVersion: 31, hl: 'id', gl: 'ID' } } }),
+    });
+    if (res.ok) {
+      const j = await res.json();
+      return await trackText(pickTrack(j?.captions?.playerCaptionsTracklistRenderer?.captionTracks)?.baseUrl);
+    }
+  } catch (_) {}
+  return '';
+}
+async function transcriptResponse(id) {
+  if (!/^[\w-]{11}$/.test(id)) return new Response(JSON.stringify({ ok: false, error: 'id tidak valid' }), { status: 400, headers: HEADERS });
+  const cache = caches.default;
+  const key = new Request(`https://yt-cache.local/tr/${id}`);
+  const hit = await cache.match(key);
+  if (hit) return new Response(hit.body, { headers: HEADERS });
+  const transcript = (await fetchTranscript(id)).slice(0, 30000);
+  const body = JSON.stringify({ ok: true, id, transcript });
+  // Ada transkrip: simpan 7 hari. Belum ada (subtitle otomatis biasanya menyusul): 3 jam.
+  await cache.put(key, new Response(body, { headers: { ...HEADERS, 'Cache-Control': `public, max-age=${transcript ? 604800 : 10800}` } }));
+  return new Response(body, { headers: HEADERS });
+}
+
 export async function onRequestGet({ request }) {
   const u = new URL(request.url);
+  const vid = (u.searchParams.get('transcript') || '').trim();
+  if (vid) return transcriptResponse(vid);
   const handle = (u.searchParams.get('handle') || 'PenjagaHarapan').replace(/[^\w.-]/g, '').slice(0, 60);
   const cache = caches.default;
   const key = new Request(`https://yt-cache.local/${handle.toLowerCase()}`);
@@ -116,7 +187,7 @@ export async function onRequestGet({ request }) {
       else byId.set(v.id, v);
     });
     const body = JSON.stringify({ ok: true, handle, channelId, fetchedAt: new Date().toISOString(), videos: [...byId.values()] });
-    const resp = new Response(body, { headers: { ...HEADERS, 'Cache-Control': 'public, max-age=300' } });
+    const resp = new Response(body, { headers: { ...HEADERS, 'Cache-Control': 'public, max-age=1800' } });
     await cache.put(key, resp.clone());
     return new Response(body, { headers: HEADERS });
   } catch (e) {

@@ -3670,12 +3670,22 @@ function scYtScore(it, v) {
   if (scYtTokens(it.category).some(w => have.has(w))) score += 0.1; // nama program disebut
   return score;
 }
-function scYtMatch(items, videos) {
+/* Skor dari transkrip: porsi kata judul konten yang diucapkan/tertulis di transkrip video */
+function scYtTrScore(it, v, tr) {
+  const want = [...new Set(scYtTokens(it.title))];
+  if (!want.length || !tr) return 0;
+  const have = new Set(scYtTokens(`${v.title} ${v.description || ''} ${tr}`));
+  return want.filter(w => have.has(w)).length / want.length;
+}
+function scYtMatch(items, videos, transcripts = {}) {
   const used = new Set(items.filter(it => it.ytUrl).map(it => (it.ytUrl.match(/[?&]v=([\w-]{11})|youtu\.be\/([\w-]{11})|shorts\/([\w-]{11})/) || []).slice(1).find(Boolean)).filter(Boolean));
   const pairs = [];
   items.forEach(it => videos.forEach(v => {
     if (used.has(v.id)) return;
     let s = scYtScore(it, v);
+    // Judul & deskripsi kurang cocok → cek transkrip (semua kata judul konten harus ada).
+    // Prioritas di bawah kecocokan judul/deskripsi.
+    if (s < 0.6 && transcripts[v.id] && scYtTrScore(it, v, transcripts[v.id]) >= 1) s = 0.6;
     if (v.published) {
       const pub = scYmd(new Date(v.published));            // tanggal lokal (WIB)
       const diff = scDiffDays(it.airDate, pub);
@@ -3695,31 +3705,39 @@ function scYtMatch(items, videos) {
   });
   return out;
 }
-/* Ambil daftar video semua channel. Disimpan di memori 3 menit; fresh = langsung dari YouTube. */
-async function scYtVideos(fresh = false) {
-  const now = Date.now();
-  if (!fresh && window._scYtCache && now - window._scYtCache.at < 3 * 60 * 1000) return window._scYtCache.videos;
-  const lists = await Promise.all(SC_YT_CHANNELS.map(ch =>
-    fetch(`/api/youtube?handle=${encodeURIComponent(ch.handle)}${fresh ? '&fresh=1' : ''}`, { headers: { Accept: 'application/json' }, cache: 'no-store' })
-      .then(r => r.json()).catch(() => ({}))
-      .then(j => (Array.isArray(j.videos) ? j.videos : []).map(v => ({ ...v, channel: ch.name })))));
-  const videos = lists.flat();
-  if (videos.length) window._scYtCache = { at: now, videos };
-  return videos;
-}
-/* Cocokkan konten yang sudah tayang & belum punya link. Dipanggil setiap Stock Contents
-   dirender / disimpan, jadi konten yang baru ditambahkan langsung dicek. */
-async function scAutoYoutube(fresh = false) {
+async function scAutoYoutube(force = false) {
   const today = scYmd(new Date());
   const due = (state.stockContents || []).filter(it => it.airDate && it.airDate <= today && !it.ytUrl && !it.ytSkip && it.title);
-  if (!due.length) return { due: 0, found: [] };
-  if (window._scYtBusy) { window._scYtAgain = true; return null; }   // dicek ulang setelah yang berjalan selesai
-  window._scYtBusy = true;
+  if (!due.length) return;
+  const now = Date.now();
+  if (!force && window._scYtAt && now - window._scYtAt < 10 * 60 * 1000) return;
+  if (window._scYtBusy) return;
+  window._scYtBusy = true; window._scYtAt = now;
   try {
-    const videos = await scYtVideos(fresh);
-    if (!videos.length) return { due: due.length, found: [], noVideos: true };
-    const found = scYtMatch(due, videos);
-    if (!found.length) return { due: due.length, found };
+    const lists = await Promise.all(SC_YT_CHANNELS.map(ch =>
+      fetch(`/api/youtube?handle=${encodeURIComponent(ch.handle)}`, { headers: { Accept: 'application/json' } })
+        .then(r => r.json()).catch(() => ({}))
+        .then(j => (Array.isArray(j.videos) ? j.videos : []).map(v => ({ ...v, channel: ch.name })))));
+    const videos = lists.flat();
+    if (!videos.length) return;
+    let found = scYtMatch(due, videos);
+    // Yang belum ketemu: baca transkrip video yang tanggal terbitnya dekat tanggal tayang
+    const left = due.filter(it => !found.some(f => f.it === it));
+    if (left.length) {
+      const taken = new Set(found.map(f => f.v.id));
+      const near = videos.filter(v => !taken.has(v.id) && left.some(it => {
+        const pub = v.published || v.publishedApprox;
+        if (!pub) return false;
+        const diff = scDiffDays(it.airDate, scYmd(new Date(pub)));
+        return v.published ? diff >= -3 && diff <= 10 : diff >= -10 && diff <= 20;
+      })).slice(0, 12);
+      const trc = window._scYtTr = window._scYtTr || {};
+      await Promise.all(near.filter(v => !(v.id in trc)).map(v =>
+        fetch(`/api/youtube?transcript=${v.id}`).then(r => r.json()).catch(() => ({}))
+          .then(j => { if (j.ok) trc[v.id] = j.transcript || ''; })));
+      if (near.some(v => trc[v.id])) found = scYtMatch(due, videos, trc);
+    }
+    if (!found.length) return;
     const before = found.map(({ it }) => ({ it, prev: { ...it } }));
     found.forEach(({ it, v }) => Object.assign(it, { ytUrl: v.url, ytTitle: v.title || '', ytChannel: v.channel || '', ytAuto: true }));
     if (isAdmin()) {
@@ -3727,28 +3745,11 @@ async function scAutoYoutube(fresh = false) {
         state.shas.stockContents = await window.db.writeData('stockContents', state.stockContents,
           `Stock: link YouTube otomatis (${found.length})`);
         logActivity(currentUser(), 'Tautkan link YouTube otomatis', found.map(f => `"${f.it.title}"`).join(', ')).catch(() => {});
-      } catch (e) { before.forEach(({ it, prev }) => { Object.keys(it).forEach(k => delete it[k]); Object.assign(it, prev); }); return null; }
+      } catch (e) { before.forEach(({ it, prev }) => { Object.keys(it).forEach(k => delete it[k]); Object.assign(it, prev); }); return; }
     }
     if (state.currentPage === 'stockcontents') renderStockCalendar();
-    return { due: due.length, found };
-  } catch (_) { return null; /* diam: fitur tambahan */ }
-  finally {
-    window._scYtBusy = false;
-    if (window._scYtAgain) { window._scYtAgain = false; setTimeout(() => scAutoYoutube(), 0); }
-  }
-}
-/* Tombol Admin "Cek YouTube": ambil langsung dari YouTube & laporkan hasilnya */
-async function scYtCheckNow() {
-  const btn = $('scYtCheckBtn');
-  if (btn) { btn.disabled = true; btn.textContent = '⏳ Mengecek…'; }
-  try {
-    const r = await scAutoYoutube(true);
-    if (!r) toast('Sedang mengecek / gagal menghubungi YouTube, coba lagi sebentar', 'error');
-    else if (!r.due) toast('Semua konten yang sudah tayang sudah punya link YouTube', 'success');
-    else if (r.noVideos) toast('Gagal membaca daftar video YouTube', 'error');
-    else if (r.found.length) toast(`${r.found.length} konten ditautkan ke YouTube` + (r.due > r.found.length ? ` · ${r.due - r.found.length} belum ketemu videonya` : ''), 'success');
-    else toast(`${r.due} konten sudah tayang belum ketemu videonya — pastikan judul/narasumber ada di judul atau deskripsi video, atau isi link manual`, 'info');
-  } finally { if (btn) { btn.disabled = false; btn.textContent = '▶️ Cek YouTube'; } }
+  } catch (_) { /* diam: fitur tambahan */ }
+  finally { window._scYtBusy = false; }
 }
 function scYtRow(it) {
   if (!it?.ytUrl) return '';
@@ -9496,7 +9497,6 @@ document.addEventListener('DOMContentLoaded', async () => {
   window.updateBudgetRow     = updateBudgetRow;
   window.saveBudget          = saveBudget;
   window.onStatPeriodChange     = onStatPeriodChange;
-  window.scYtCheckNow           = scYtCheckNow;
   window.setStatViewMode        = setStatViewMode;
   window.renderStockContents    = renderStockContents;
   window.scSendWa               = scSendWa;

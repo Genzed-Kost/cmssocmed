@@ -15,8 +15,8 @@ window.APP_INFO = {
         '▶️ Stock Contents: setelah tanggal tayang, link video YouTube (Penjaga Harapan & Jaga Asa) otomatis muncul di detail konten (ikon ▶ di kalender)',
       ],
       adminItems: [
-        '▶️ Link YouTube otomatis: konten yang sudah lewat tanggal tayang dicocokkan dengan video channel @PenjagaHarapan dan @JagaAsaPodcast berdasarkan judul & deskripsi video serta tanggal terbit',
-        '⚡ Link YouTube lebih cepat terdeteksi: konten baru langsung dicek, video baru terbaca ±5 menit; tombol "▶️ Cek YouTube" untuk cek seketika',
+        '▶️ Link YouTube otomatis: konten yang sudah lewat tanggal tayang dicocokkan dengan video channel @PenjagaHarapan dan @JagaAsaPodcast berdasarkan judul, deskripsi & transkrip video serta tanggal terbit',
+        '📝 Pencocokan link YouTube kini juga membaca transkrip/subtitle video (judul & deskripsi tetap diutamakan)',
         '✍️ Link YouTube bisa diubah manual di form Ubah Stock Content; dikosongkan = tidak ditautkan otomatis lagi',
         '💡 Agar cocok otomatis, sertakan judul konten (atau nama narasumber) di judul/deskripsi video YouTube',
       ],
