@@ -5,13 +5,13 @@
  *  1. Halaman https://www.youtube.com/@<handle>/videos → channelId + daftar video (judul)
  *  2. RSS https://www.youtube.com/feeds/videos.xml?channel_id=<id> → 15 video terbaru
  *     lengkap dengan tanggal terbit & deskripsi
- * Hasil di-cache di edge 30 menit.
+ * Hasil di-cache di edge 5 menit; ?fresh=1 mengambil ulang langsung dari YouTube.
  * Salinan identik ada di public/functions/api/youtube.js (lihat catatan di news.js).
  */
 const HEADERS = {
   'Content-Type': 'application/json; charset=utf-8',
   'Access-Control-Allow-Origin': '*',
-  'Cache-Control': 'public, max-age=900',
+  'Cache-Control': 'no-cache',
 };
 const UA = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0 Safari/537.36';
 const YT_HEADERS = { 'User-Agent': UA, 'Accept-Language': 'id-ID,id;q=0.9,en;q=0.8', Cookie: 'CONSENT=YES+cb; SOCS=CAI' };
@@ -116,7 +116,7 @@ export async function onRequestGet({ request }) {
       else byId.set(v.id, v);
     });
     const body = JSON.stringify({ ok: true, handle, channelId, fetchedAt: new Date().toISOString(), videos: [...byId.values()] });
-    const resp = new Response(body, { headers: { ...HEADERS, 'Cache-Control': 'public, max-age=1800' } });
+    const resp = new Response(body, { headers: { ...HEADERS, 'Cache-Control': 'public, max-age=300' } });
     await cache.put(key, resp.clone());
     return new Response(body, { headers: HEADERS });
   } catch (e) {
