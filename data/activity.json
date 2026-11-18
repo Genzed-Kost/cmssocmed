@@ -1,11 +1,11 @@
 [
   {
-    "id": "mwlq2rhivpbmw",
-    "user": "Umar",
-    "role": "Publisher",
-    "action": "login",
-    "target": "masuk ke sistem sebagai Publisher",
-    "timestamp": "2026-11-18T06:10:33.510Z"
+    "id": "mwlsrhqdwliua",
+    "user": "Admin",
+    "role": "Admin",
+    "action": "ubah status",
+    "target": "\"Siapa yang Berhak Menentukan Pengganti Wakil Presiden?\" menjadi Published",
+    "timestamp": "2026-11-18T07:25:46.501Z"
   },
   {
     "id": "mwlmnsiglrewi",
