@@ -1,5 +1,13 @@
 [
   {
+    "id": "mwlk2gumivmpu",
+    "user": "Umar",
+    "role": "Publisher",
+    "action": "login",
+    "target": "masuk ke sistem sebagai Publisher",
+    "timestamp": "2026-11-18T03:22:22.030Z"
+  },
+  {
     "id": "mwksaz5ccffyv",
     "user": "Umar",
     "role": "Publisher",
@@ -3990,13 +3998,5 @@
     "action": "Tambah Bank Konten",
     "target": "baris baru",
     "timestamp": "2026-07-03T06:27:39.689Z"
-  },
-  {
-    "id": "mr4jx3i4ytq51",
-    "user": "Umar",
-    "role": "Publisher",
-    "action": "Tambah Bank Konten",
-    "target": "baris baru",
-    "timestamp": "2026-07-03T06:27:34.780Z"
   }
 ]
