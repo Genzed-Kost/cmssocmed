@@ -1,5 +1,13 @@
 [
   {
+    "id": "mwlkeiilff1ac",
+    "user": "Umar",
+    "role": "Publisher",
+    "action": "tambah konten",
+    "target": "berjudul \"Mengapa Tidak Pemilu Ulang? Ini Alasan Konstitusionalnya\" (tema: Podcast Pakar HTN) untuk akun 33 Official dijadwalkan 23 Nov 2026",
+    "timestamp": "2026-11-18T03:31:44.061Z"
+  },
+  {
     "id": "mwlkdbro9nstw",
     "user": "Umar",
     "role": "Publisher",
@@ -3990,13 +3998,5 @@
     "action": "Hapus Bank Konten",
     "target": "\"tanpa judul\"",
     "timestamp": "2026-07-03T06:27:55.654Z"
-  },
-  {
-    "id": "mr4jxh37p7p66",
-    "user": "Umar",
-    "role": "Publisher",
-    "action": "Hapus Bank Konten",
-    "target": "\"tanpa judul\"",
-    "timestamp": "2026-07-03T06:27:52.387Z"
   }
 ]
