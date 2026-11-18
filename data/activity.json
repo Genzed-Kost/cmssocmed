@@ -1,5 +1,13 @@
 [
   {
+    "id": "mwlyg0v1mcqbk",
+    "user": "Admin",
+    "role": "Admin",
+    "action": "tambah konten",
+    "target": "berjudul \"Uang Anggota Harus Kembali Menolong Anggota!\" (tema: Belajar Koperasi) untuk akun 33 Official dijadwalkan 20 Nov 2026",
+    "timestamp": "2026-11-18T10:04:49.117Z"
+  },
+  {
     "id": "mwlyf37pcx171",
     "user": "Admin",
     "role": "Admin",
@@ -3990,13 +3998,5 @@
     "action": "Kirim WA Stock Contents",
     "target": "ke Idham — 11 item",
     "timestamp": "2026-07-04T01:44:33.387Z"
-  },
-  {
-    "id": "mr5p88wsvxhxq",
-    "user": "Admin",
-    "role": "Admin",
-    "action": "login",
-    "target": "masuk ke sistem sebagai Admin",
-    "timestamp": "2026-07-04T01:43:59.260Z"
   }
 ]
