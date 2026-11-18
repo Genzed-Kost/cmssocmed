@@ -3645,7 +3645,11 @@ function renderStockContents() {
    video terbaru channel @PenjagaHarapan (lewat /api/youtube): judul & deskripsi
    video dibandingkan dengan judul + kelompok konten, dan tanggal terbit harus
    dekat dengan tanggal tayang. Admin: hasil disimpan ke data; user lain: tampil saja. */
-const SC_YT_HANDLE = 'PenjagaHarapan';
+// Channel YouTube yang dicek (handle tanpa @) — video semua channel digabung lalu dicocokkan
+const SC_YT_CHANNELS = [
+  { handle: 'PenjagaHarapan', name: 'Penjaga Harapan' },
+  { handle: 'JagaAsaPodcast', name: 'Jaga Asa' },
+];
 const SC_YT_STOP = new Set(('dan yang di ke dari untuk dengan ini itu atau pada dalam akan juga kita kami saya anda kamu ' +
   'para sang si nya lah pun the and of to in on for with a an is are podcast eps episode full part video official ' +
   'penjaga harapan live shorts short ft feat bersama bareng tentang').split(' '));
@@ -3700,14 +3704,16 @@ async function scAutoYoutube(force = false) {
   if (window._scYtBusy) return;
   window._scYtBusy = true; window._scYtAt = now;
   try {
-    const res = await fetch(`/api/youtube?handle=${SC_YT_HANDLE}`, { headers: { Accept: 'application/json' } });
-    const j = await res.json().catch(() => ({}));
-    const videos = Array.isArray(j.videos) ? j.videos : [];
+    const lists = await Promise.all(SC_YT_CHANNELS.map(ch =>
+      fetch(`/api/youtube?handle=${encodeURIComponent(ch.handle)}`, { headers: { Accept: 'application/json' } })
+        .then(r => r.json()).catch(() => ({}))
+        .then(j => (Array.isArray(j.videos) ? j.videos : []).map(v => ({ ...v, channel: ch.name })))));
+    const videos = lists.flat();
     if (!videos.length) return;
     const found = scYtMatch(due, videos);
     if (!found.length) return;
     const before = found.map(({ it }) => ({ it, prev: { ...it } }));
-    found.forEach(({ it, v }) => Object.assign(it, { ytUrl: v.url, ytTitle: v.title || '', ytAuto: true }));
+    found.forEach(({ it, v }) => Object.assign(it, { ytUrl: v.url, ytTitle: v.title || '', ytChannel: v.channel || '', ytAuto: true }));
     if (isAdmin()) {
       try {
         state.shas.stockContents = await window.db.writeData('stockContents', state.stockContents,
@@ -3721,7 +3727,7 @@ async function scAutoYoutube(force = false) {
 }
 function scYtRow(it) {
   if (!it?.ytUrl) return '';
-  return `<div class="sc-detail-row sc-yt-row"><span>▶️ YouTube</span>
+  return `<div class="sc-detail-row sc-yt-row"><span>▶️ YouTube${it.ytChannel ? ` <small>· ${esc(it.ytChannel)}</small>` : ''}</span>
     <a href="${esc(it.ytUrl)}" target="_blank" rel="noopener" title="${esc(it.ytUrl)}">${esc(it.ytTitle || it.ytUrl)}</a>
     ${it.ytAuto ? '<em class="sc-yt-auto">otomatis</em>' : ''}</div>`;
 }
@@ -4042,7 +4048,7 @@ function scOpenModal(id = null, date = '') {
       <div class="form-group">
         <label class="form-label" for="scfYt">▶️ Link YouTube <span style="font-weight:400;color:var(--muted)">(otomatis setelah tayang — bisa diubah manual)</span></label>
         <input id="scfYt" type="url" class="form-inp" value="${esc(v.ytUrl || '')}" placeholder="https://www.youtube.com/watch?v=…" />
-        ${v.ytUrl ? `<div class="sc-yt-hint">${v.ytAuto ? '🤖 Ditautkan otomatis' : '✍️ Diisi manual'}${v.ytTitle ? ': ' + esc(v.ytTitle) : ''} · <a href="${esc(v.ytUrl)}" target="_blank" rel="noopener">buka ↗</a></div>` : ''}
+        ${v.ytUrl ? `<div class="sc-yt-hint">${v.ytAuto ? '🤖 Ditautkan otomatis' + (v.ytChannel ? ` (${esc(v.ytChannel)})` : '') : '✍️ Diisi manual'}${v.ytTitle ? ': ' + esc(v.ytTitle) : ''} · <a href="${esc(v.ytUrl)}" target="_blank" rel="noopener">buka ↗</a></div>` : ''}
       </div>
       <div class="sc-detail-row"><span>📊 Dihitung di total</span><b id="scfCountMonth"></b></div>`;
     const upd = () => setTxt('scfCountMonth', scCountMonthText({ airDate: $('scfAir').value, prodDate: $('scfProd').value }));

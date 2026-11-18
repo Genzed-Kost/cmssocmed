@@ -1,6 +1,6 @@
 /**
  * Cloudflare Pages Function: GET /api/youtube[?handle=PenjagaHarapan]
- * Daftar video terbaru channel YouTube (tanpa API key) untuk mencocokkan
+ * Daftar video terbaru satu channel YouTube (handle: PenjagaHarapan, JagaAsaPodcast, …) (tanpa API key) untuk mencocokkan
  * Stock Contents yang sudah tayang dengan videonya.
  *  1. Halaman https://www.youtube.com/@<handle>/videos → channelId + daftar video (judul)
  *  2. RSS https://www.youtube.com/feeds/videos.xml?channel_id=<id> → 15 video terbaru
