@@ -1,5 +1,13 @@
 [
   {
+    "id": "mwmfpr1t8872s",
+    "user": "Admin",
+    "role": "Admin",
+    "action": "Tautkan link YouTube otomatis",
+    "target": "\"Podcast Mba Yuyut\"",
+    "timestamp": "2026-11-18T18:08:16.433Z"
+  },
+  {
     "id": "mwme21dxe5q1v",
     "user": "Admin",
     "role": "Admin",
@@ -3990,13 +3998,5 @@
     "action": "login",
     "target": "masuk ke sistem sebagai Admin",
     "timestamp": "2026-07-07T06:15:03.714Z"
-  },
-  {
-    "id": "mr8vtlxdaiiaf",
-    "user": "Admin",
-    "role": "Admin",
-    "action": "update statistik",
-    "target": "33 Official TikTok — 22-28 Jun '26",
-    "timestamp": "2026-07-06T07:11:52.129Z"
   }
 ]
