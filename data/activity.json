@@ -1,5 +1,13 @@
 [
   {
+    "id": "mwltfqjw7ewye",
+    "user": "Admin",
+    "role": "Admin",
+    "action": "update statistik",
+    "target": "Penjaga Harapan YouTube — 28 Sep-4 Okt '26",
+    "timestamp": "2026-11-18T07:44:37.676Z"
+  },
+  {
     "id": "mwltbsgj7uh1h",
     "user": "Admin",
     "role": "Admin",
@@ -3990,13 +3998,5 @@
     "action": "Kirim WA Stock Contents",
     "target": "ke Umar — 11 item",
     "timestamp": "2026-07-03T07:05:58.749Z"
-  },
-  {
-    "id": "mr4kscq6hvm1o",
-    "user": "Admin",
-    "role": "Admin",
-    "action": "Kirim WA Stock Contents",
-    "target": "ke Umar — 8 item",
-    "timestamp": "2026-07-03T06:51:53.070Z"
   }
 ]
