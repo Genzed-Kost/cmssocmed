@@ -1223,7 +1223,7 @@
         "updatedBy": "Admin"
       },
       "tiktok": {
-        "updatedAt": "2026-11-18T08:29:33.328Z",
+        "updatedAt": "2026-11-18T08:33:14.406Z",
         "updatedBy": "Admin"
       }
     },
@@ -1924,6 +1924,22 @@
         "totalShares": 1224,
         "totalEngagement": 12093,
         "erPct": 5.19
+      },
+      {
+        "week": "2026-W37",
+        "jmlVideo": 26,
+        "totalVideoViews": 285049,
+        "profileViews": 567,
+        "followersEOM": 42762,
+        "followersGained": 208,
+        "totalViewers": 259969,
+        "newViewers": 113176,
+        "returningViewers": 146793,
+        "totalLikes": 16031,
+        "totalComments": 1437,
+        "totalShares": 1059,
+        "totalEngagement": 18527,
+        "erPct": 6.5
       },
       {
         "week": "2026-W40",
