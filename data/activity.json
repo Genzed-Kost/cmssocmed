@@ -1,5 +1,13 @@
 [
   {
+    "id": "mwm3x3lfs48vt",
+    "user": "Admin",
+    "role": "Admin",
+    "action": "logout",
+    "target": "keluar dari sistem",
+    "timestamp": "2026-11-18T12:38:03.891Z"
+  },
+  {
     "id": "mwm3wyrq12l2q",
     "user": "Admin",
     "role": "Admin",
@@ -3990,13 +3998,5 @@
     "action": "update statistik",
     "target": "33 Official Facebook — 22-28 Jun '26",
     "timestamp": "2026-07-06T07:03:42.976Z"
-  },
-  {
-    "id": "mr8vgkf0j6ofq",
-    "user": "Admin",
-    "role": "Admin",
-    "action": "update statistik",
-    "target": "33 Official Facebook — 29 Jun-5 Jul '26",
-    "timestamp": "2026-07-06T07:01:43.644Z"
   }
 ]
