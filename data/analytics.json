@@ -1223,7 +1223,7 @@
         "updatedBy": "Admin"
       },
       "tiktok": {
-        "updatedAt": "2026-11-18T08:54:16.482Z",
+        "updatedAt": "2026-11-18T08:56:45.227Z",
         "updatedBy": "Admin"
       }
     },
@@ -1975,7 +1975,7 @@
       },
       {
         "week": "2026-W40",
-        "jmlVideo": 30,
+        "jmlVideo": 29,
         "totalVideoViews": 593314,
         "profileViews": 1183,
         "followersEOM": 43128,
