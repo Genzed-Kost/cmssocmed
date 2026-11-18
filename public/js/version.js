@@ -7,16 +7,15 @@
 window.APP_INFO = {
   name: 'Penjaga Harapan CMS',
   tagline: 'Platform manajemen konten tim',
-  version: '2.6.4',
+  version: '2.6.3',
   changelog: [
     {
-      version: '2.6.4', date: '2026-11-18',
+      version: '2.6.3', date: '2026-11-18',
       items: [
         '▶️ Stock Contents: setelah tanggal tayang, link video YouTube (Penjaga Harapan & Jaga Asa) otomatis muncul di detail konten (ikon ▶ di kalender)',
       ],
       adminItems: [
-        '▶️ Link YouTube otomatis: konten yang sudah lewat tanggal tayang dicocokkan dengan video channel @PenjagaHarapan dan @JagaAsaPodcast berdasarkan judul, deskripsi & hashtag video (boleh mirip, tidak harus sama persis) serta tanggal terbit',
-        '🔎 Pencocokan link YouTube lebih toleran: judul konten dicocokkan dengan judul, deskripsi, hashtag & nama channel video walau penulisannya sedikit berbeda (mis. Mba/Mbak, imbuhan -nya/-kan, salah ketik ringan)',
+        '▶️ Link YouTube otomatis: konten yang sudah lewat tanggal tayang dicocokkan dengan video channel @PenjagaHarapan dan @JagaAsaPodcast berdasarkan judul & deskripsi video serta tanggal terbit',
         '✍️ Link YouTube bisa diubah manual di form Ubah Stock Content; dikosongkan = tidak ditautkan otomatis lagi',
         '💡 Agar cocok otomatis, sertakan judul konten (atau nama narasumber) di judul/deskripsi video YouTube',
       ],

@@ -6,7 +6,6 @@
  *  2. RSS https://www.youtube.com/feeds/videos.xml?channel_id=<id> → 15 video terbaru
  *     lengkap dengan tanggal terbit & deskripsi
  * Hasil di-cache di edge 30 menit.
-
  * Salinan identik ada di public/functions/api/youtube.js (lihat catatan di news.js).
  */
 const HEADERS = {
