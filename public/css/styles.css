@@ -4108,3 +4108,6 @@ ul { list-style: none; }
   .rot-item + .rot-item { border-left: 0; border-top: 1px dashed #fcd34d; }
   .rot-count { margin: 4px 10px 0 auto; }
 }
+
+/* Followers mingguan otomatis (followers minggu lalu + Follows) */
+.sef-cum-auto .sef-inp { background: #f5f3ff; color: #6d28d9; font-weight: 700; cursor: not-allowed; }

@@ -262,9 +262,10 @@ const PLATFORM_FIELDS = {
       { key:'totalViewers',     label:'Viewers',             fmt:'num' },
       { key:'totalEngagement',  label:'Total Eng/Reactions', fmt:'num' },
       { key:'profileVisits',    label:'Visits Profile',      fmt:'num' },
-      { key:'pageFollowers',    label:'Followers',           fmt:'num' },
-      // Mingguan: otomatis = followers minggu ini − minggu sebelumnya. Bulanan: diisi manual.
-      { key:'followersGained',  label:'Follows',             fmt:'num', weeklyAuto:'gain' },
+      // Followers = total pengikut s/d akhir periode. Mingguan: otomatis = followers minggu lalu + Follows.
+      { key:'pageFollowers',    label:'Followers',           fmt:'num', weeklyAuto:'cum' },
+      // Follows = pengikut baru selama periode yang dipilih (selalu diisi manual)
+      { key:'followersGained',  label:'Follows',             fmt:'num' },
       { key:'erPct',            label:'ER %',                fmt:'pct', auto:'calc' },
     ]
   },
@@ -276,8 +277,8 @@ const PLATFORM_FIELDS = {
       { key:'totalReach',       label:'Reach',               fmt:'num' },
       { key:'totalEngagement',  label:'Total Eng/Reactions', fmt:'num' },
       { key:'profileVisits',    label:'Visits Profile',      fmt:'num' },
-      { key:'followersEOM',     label:'Followers',           fmt:'num' },
-      { key:'followersGained',  label:'Follows',             fmt:'num', weeklyAuto:'gain' },
+      { key:'followersEOM',     label:'Followers',           fmt:'num', weeklyAuto:'cum' },
+      { key:'followersGained',  label:'Follows',             fmt:'num' },
       { key:'jmlPost',          label:'Jumlah Konten',       fmt:'num' },
       { key:'erPct',            label:'ER %',                fmt:'pct', auto:'calc' },
     ]
@@ -5381,7 +5382,7 @@ function getCurrentYM() {
 /* ── Deskripsi tiap field statistik (tampil di tooltip info icon) ─────────── */
 const STAT_FIELD_DESC = {
   profileVisits:    'Jumlah kunjungan ke profil/halaman akun pada periode ini.',
-  followersGained:  'Pertambahan followers pada periode ini. Data mingguan dihitung otomatis dari followers minggu sebelumnya; data bulanan diisi manual.',
+  followersGained:  'Follows: jumlah akun yang mulai mengikuti SELAMA periode yang dipilih. Selalu diisi manual.',
   // YouTube
   jmlVideo:         'Jumlah video yang diunggah dalam periode ini.',
   totalViews:       'Total tayangan semua video dalam periode ini.',
@@ -5396,13 +5397,12 @@ const STAT_FIELD_DESC = {
   // TikTok
   totalVideoViews:  'Total tayangan semua video TikTok dalam periode ini.',
   profileViews:     'Jumlah kunjungan ke halaman profil TikTok.',
-  followersEOM:     'Jumlah followers di akhir bulan (End of Month).',
-  followersGained:  'Pertambahan (atau penurunan) followers dalam periode ini.',
+  followersEOM:     'Followers: total pengikut HINGGA akhir periode yang dipilih. Mingguan: otomatis = followers minggu sebelumnya + Follows minggu ini.',
   totalViewers:     'Jumlah akun unik yang menonton video dalam periode ini.',
   newViewers:       'Penonton baru yang belum pernah menonton konten sebelumnya.',
   returningViewers: 'Penonton lama yang kembali menonton dalam periode ini.',
   // Facebook
-  pageFollowers:    'Total pengikut halaman Facebook saat ini.',
+  pageFollowers:    'Followers: total pengikut HINGGA akhir periode yang dipilih. Mingguan: otomatis = followers minggu sebelumnya + Follows minggu ini.',
   totalPost:        'Jumlah postingan yang diterbitkan dalam periode ini.',
   totalReach:       'Jumlah akun unik yang melihat konten (berbeda dari Views — ini unik).',
   totalReactions:   'Total reaksi (Like, Love, Haha, dll.) pada semua postingan.',
@@ -6196,7 +6196,7 @@ function rollupWeekly(acctId, platId) {
     const weeks = (byMonth[ym] || []).slice().sort((a, b) => a.week.localeCompare(b.week));
     const derived = {};
     platM.fields.forEach(f => {
-      if (f.auto === 'calc' || f.weeklyAuto || WK_UNIQUE_KEYS.has(f.key) || WK_AVG_RULES[f.key]) return;
+      if (f.auto === 'calc' || WK_UNIQUE_KEYS.has(f.key) || WK_AVG_RULES[f.key]) return;
       const vals = weeks.map(w => w[f.key]).filter(v => v !== undefined && v !== null && v !== '' && !isNaN(+v)).map(Number);
       if (!vals.length) return;
       if (WK_EOM_KEYS.has(f.key))      derived[f.key] = vals[vals.length - 1];
@@ -6248,17 +6248,21 @@ function statFields(platId, weekly) {
   if (!platM) return [];
   return platM.fields.map(f => weekly && f.weeklyAuto ? { ...f, auto: 'calc', calcKind: f.weeklyAuto } : f);
 }
-/* Follows mingguan = followers minggu ini − followers minggu sebelumnya (otomatis) */
-function applyWeeklyGain(acctId, platId) {
+/* Followers mingguan (otomatis) = followers minggu sebelumnya + Follows minggu ini.
+   Minggu tanpa data minggu sebelumnya / tanpa Follows: angka yang tersimpan dipakai (titik awal). */
+function prevWeekFollowers(rows, week, fk) {
+  return (rows || []).filter(r => (r.week || '') < week && +r[fk])
+    .sort((a, b) => a.week.localeCompare(b.week)).pop() || null;
+}
+function applyWeeklyFollowers(acctId, platId) {
   const platM = PLATFORM_FIELDS[platId];
-  const gainF = platM?.fields.find(f => f.weeklyAuto === 'gain');
   const rows  = state.analytics?.[acctId]?.[platId + '_w'];
-  if (!gainF || !Array.isArray(rows)) return;
+  if (!platM?.fields.some(f => f.weeklyAuto === 'cum') || !Array.isArray(rows)) return;
   const fk = platM.followerKey;
-  rows.slice().sort((a, b) => (a.week || '').localeCompare(b.week || '')).forEach((r, i, arr) => {
-    const prev = arr[i - 1];
-    const cur = +r[fk] || 0, pf = +(prev?.[fk]) || 0;
-    if (cur && pf) r[gainF.key] = cur - pf;   // tanpa followers minggu ini/sebelumnya: nilai lama dibiarkan
+  rows.slice().sort((a, b) => (a.week || '').localeCompare(b.week || '')).forEach(r => {
+    const prev = prevWeekFollowers(rows, r.week || '', fk);
+    const gain = r.followersGained;
+    if (prev && gain !== undefined && gain !== null && gain !== '' && !isNaN(+gain)) r[fk] = +prev[fk] + +gain;
   });
 }
 
@@ -6297,7 +6301,7 @@ function renderStatChart() {
   const platM  = PLATFORM_FIELDS[platId];
   if (!platM) return;
 
-  applyWeeklyGain(acctId, platId); // Follows mingguan otomatis
+  applyWeeklyFollowers(acctId, platId); // Followers mingguan otomatis
   rollupWeekly(acctId, platId);  // Data Bulanan otomatis dari Data Mingguan
   applyAutoER(acctId, platId);   // ER % selalu dihitung otomatis
 
@@ -6771,7 +6775,7 @@ function renderStatDataTable(acctId, platId, rows) {
   const sorted   = [...rows].sort((a, b) => (b[rKey]||'').localeCompare(a[rKey]||''));
 
   const headerCells = FIELDS.map(f => f.auto === 'calc'
-    ? `<th class="stat-th-calc" title="${f.calcKind === 'gain' ? 'Dihitung otomatis dari followers minggu sebelumnya' : 'Dihitung otomatis: Total Engagement ÷ Views × 100'}">${f.label} <span class="stat-calc-tag">AUTO</span></th>`
+    ? `<th class="stat-th-calc" title="${f.calcKind === 'cum' ? 'Dihitung otomatis: followers minggu sebelumnya + Follows minggu ini' : 'Dihitung otomatis: Total Engagement ÷ Views × 100'}">${f.label} <span class="stat-calc-tag">AUTO</span></th>`
     : `<th>${f.label}</th>`).join('');
   const bodyRows = sorted.map(r => {
     const cells = FIELDS.map(f => {
@@ -6786,7 +6790,7 @@ function renderStatDataTable(acctId, platId, rows) {
         return `<td class="stat-td-wk" title="Otomatis dari Data Mingguan">${fmtStatVal(val, f.fmt)}</td>`;
       }
       if (f.auto === 'calc') {
-        return `<td class="stat-td-calc" title="${f.calcKind === 'gain' ? 'Otomatis: followers minggu ini − minggu sebelumnya' : 'Otomatis: Total Engagement ÷ Views × 100'}">${empty ? '—' : fmtStatVal(val, f.fmt)}</td>`;
+        return `<td class="stat-td-calc" title="${f.calcKind === 'cum' ? 'Otomatis: followers minggu sebelumnya + Follows minggu ini (minggu pertama diisi manual)' : 'Otomatis: Total Engagement ÷ Views × 100'}">${empty ? '—' : fmtStatVal(val, f.fmt)}</td>`;
       }
       const display = empty && !isAuto ? '—' : fmtStatVal(val, f.fmt);
       return `<td style="${style}" title="${!isAuto && empty ? 'Isi manual' : ''}">${display}</td>`;
@@ -7942,16 +7946,16 @@ function renderStatInputFields(acctId, platIdOverride, prefill) {
     const desc = STAT_FIELD_DESC[f.key] || '';
     const fromWk = (prefill?._fromWeekly || []).includes(f.key);
     return `<label class="sef-row${fromWk ? ' sef-wk' : ''}" title="${esc(fromWk ? 'Dari Data Mingguan — ubah angkanya untuk menjadikannya manual' : desc)}">
-      <span class="sef-label">${fromWk ? '<em class="sef-wk-tag">mingguan</em> ' : ''}${esc(f.label)}${f.fmt === 'pct' && !f.label.includes('%') ? ' <i>%</i>' : ''}</span>
+      <span class="sef-label">${fromWk ? '<em class="sef-wk-tag">mingguan</em> ' : ''}${esc(f.label)}${f.calcKind === 'cum' ? ' <em class="sef-auto-tag" id="sif_cum_tag" hidden>otomatis</em>' : ''}${f.fmt === 'pct' && !f.label.includes('%') ? ' <i>%</i>' : ''}</span>
       <input type="number" id="sif_${f.key}" class="sef-inp" inputmode="decimal"
         placeholder="${esc(hint)}" step="${f.fmt === 'pct' ? '0.01' : '1'}" min="0"
-        value="${val ?? ''}" oninput="statEditCount()" />
+        value="${val ?? ''}" oninput="statEditCount()"${f.calcKind === 'cum' ? ' data-cum="1"' : ''} />
     </label>`;
   };
-  const manual = FIELDS.filter(f => !f.auto);
-  const calc   = FIELDS.filter(f => f.auto === 'calc');
-  const auto   = FIELDS.filter(f => f.auto && f.auto !== 'calc');
-  const calcRow = f => `<div class="sef-row sef-calc" title="${f.calcKind === 'gain' ? 'Dihitung otomatis: followers minggu ini − followers minggu sebelumnya' : `Dihitung otomatis: Total Engagement ÷ ${esc(platM.fields.find(x => x.key === platM.viewKey)?.label || 'Views')} × 100`}">
+  const manual = FIELDS.filter(f => !f.auto || f.calcKind === 'cum');
+  const calc   = FIELDS.filter(f => f.auto === 'calc' && f.calcKind !== 'cum');
+  const auto   = FIELDS.filter(f => f.auto && f.auto !== 'calc' && f.calcKind !== 'cum');
+  const calcRow = f => `<div class="sef-row sef-calc" title="${`Dihitung otomatis: Total Engagement ÷ ${esc(platM.fields.find(x => x.key === platM.viewKey)?.label || 'Views')} × 100`}">
       <span class="sef-label">${esc(f.label)} <em class="sef-auto-tag">otomatis</em></span>
       <output id="sif_${f.key}_calc" class="sef-inp sef-out">—</output>
     </div>`;
@@ -7978,16 +7982,22 @@ function statEditCount() {
     const er = calcER(platId, row);
     out.textContent = er === null ? '—' : er.toFixed(2) + '%';
   }
-  // Follows mingguan: followers isian − followers minggu sebelumnya
-  const gainOut = $('sif_followersGained_calc');
-  if (gainOut && platId) {
-    const pm   = PLATFORM_FIELDS[platId];
-    const cur  = +($('sif_' + pm.followerKey)?.value || 0);
-    const wk   = $('statMonth')?.value || '';
-    const prev = (state.analytics?.[state.statActiveAcct]?.[platId + '_w'] || [])
-      .filter(r => (r.week || '') < wk && +r[pm.followerKey]).sort((a, b) => a.week.localeCompare(b.week)).pop();
-    gainOut.textContent = cur && prev ? (cur - prev[pm.followerKey]).toLocaleString('id-ID') : '—';
-    gainOut.title = prev ? `Dibanding ${fmtWeek(prev.week)}: ${(+prev[pm.followerKey]).toLocaleString('id-ID')}` : 'Belum ada data minggu sebelumnya';
+  // Followers mingguan: followers minggu sebelumnya + Follows isian (otomatis).
+  // Tanpa minggu sebelumnya / Follows kosong → Followers diisi manual (titik awal).
+  const cumInp = document.querySelector('#statInputFields input[data-cum]');
+  if (cumInp && platId) {
+    const pm    = PLATFORM_FIELDS[platId];
+    const prev  = prevWeekFollowers(state.analytics?.[state.statActiveAcct]?.[platId + '_w'], $('statMonth')?.value || '', pm.followerKey);
+    const gRaw  = $('sif_followersGained')?.value ?? '';
+    const isAuto = !!prev && gRaw !== '';
+    if (isAuto) cumInp.value = +prev[pm.followerKey] + +gRaw;
+    else if (cumInp.readOnly) cumInp.value = '';
+    cumInp.readOnly = isAuto;
+    cumInp.closest('.sef-row')?.classList.toggle('sef-cum-auto', isAuto);
+    const tag = $('sif_cum_tag'); if (tag) tag.hidden = !isAuto;
+    cumInp.closest('.sef-row').title = prev
+      ? `Otomatis: followers ${fmtWeek(prev.week)} (${(+prev[pm.followerKey]).toLocaleString('id-ID')}) + Follows minggu ini` + (isAuto ? '' : ' — isi Follows dulu, atau isi Followers manual')
+      : 'Belum ada data minggu sebelumnya — isi Followers manual sebagai titik awal';
   }
   const inputs = [...document.querySelectorAll('#statInputFields input.sef-inp')];
   const filled = inputs.filter(i => i.value !== '').length;
@@ -8040,7 +8050,7 @@ async function saveAnalyticsEntry() {
   if (analytics[acctId][storeKey].length > 52)  // max 52 minggu / 36 bulan
     analytics[acctId][storeKey] = analytics[acctId][storeKey].slice(isWeekly ? -52 : -36);
   state.analytics = analytics;
-  applyWeeklyGain(acctId, platId);
+  applyWeeklyFollowers(acctId, platId);
   rollupWeekly(acctId, platId);   // perbarui Data Bulanan dari Data Mingguan
   applyAutoER(acctId, platId);
   _setAnalyticsMeta(analytics, acctId, platId);
