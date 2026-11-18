@@ -1,5 +1,13 @@
 [
   {
+    "id": "mwltz0v3br6ni",
+    "user": "Admin",
+    "role": "Admin",
+    "action": "update statistik",
+    "target": "Penjaga Harapan YouTube — 26 Okt-1 Nov '26",
+    "timestamp": "2026-11-18T07:59:37.503Z"
+  },
+  {
     "id": "mwltv85rd6mio",
     "user": "Admin",
     "role": "Admin",
@@ -3990,13 +3998,5 @@
     "action": "update statistik",
     "target": "Penjaga Harapan Instagram — Jun 2026",
     "timestamp": "2026-07-03T07:57:21.204Z"
-  },
-  {
-    "id": "mr4n1xqpvgffb",
-    "user": "Admin",
-    "role": "Admin",
-    "action": "update statistik",
-    "target": "Penjaga Harapan Facebook — Jun 2026",
-    "timestamp": "2026-07-03T07:55:19.441Z"
   }
 ]
