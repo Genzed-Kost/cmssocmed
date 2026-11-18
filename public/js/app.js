@@ -3654,38 +3654,67 @@ const SC_YT_STOP = new Set(('dan yang di ke dari untuk dengan ini itu atau pada 
   'para sang si nya lah pun the and of to in on for with a an is are podcast eps episode full part video official ' +
   'penjaga harapan live shorts short ft feat bersama bareng tentang').split(' '));
 function scYtTokens(str) {
-  return (str || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+  return (str || '').replace(/([a-z])([A-Z])/g, '$1 $2')          // #KonsultasiHukum → Konsultasi Hukum
+    .toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '')
     .replace(/[^a-z0-9]+/g, ' ').split(' ').filter(w => w.length >= 3 && !SC_YT_STOP.has(w));
 }
-/* Skor 0..1: porsi kata judul konten yang muncul di judul/deskripsi video */
+/* Kata dasar sederhana (imbuhan umum bahasa Indonesia) */
+function scYtStem(w) {
+  let x = w.replace(/(nya|lah|kah|pun)$/, '');
+  if (x.length > 5) x = x.replace(/(kan|an|i)$/, '');
+  if (x.length > 5) x = x.replace(/^(meng|meny|mem|men|me|peng|peny|pem|pen|pe|ber|ter|di|ke|se)/, '');
+  return x.length >= 3 ? x : w;
+}
+function scYtLev(a, b, max) {
+  if (Math.abs(a.length - b.length) > max) return max + 1;
+  let prev = Array.from({ length: b.length + 1 }, (_, i) => i);
+  for (let i = 1; i <= a.length; i++) {
+    const cur = [i];
+    for (let j = 1; j <= b.length; j++)
+      cur[j] = Math.min(prev[j] + 1, cur[j - 1] + 1, prev[j - 1] + (a[i - 1] === b[j - 1] ? 0 : 1));
+    prev = cur;
+  }
+  return prev[b.length];
+}
+/* Seberapa cocok satu kata judul konten dengan kata-kata video: 1 sama/kata dasar sama,
+   0.9 awalan (Mba ↔ Mbak), 0.8 salah ketik ringan / tergabung (#DewiKartika) */
+function scYtWordHit(w, words, compact) {
+  if (words.has(w)) return 1;
+  const sw = scYtStem(w);
+  let best = 0;
+  for (const h of words) {
+    if (scYtStem(h) === sw) return 1;
+    const [s1, l1] = w.length <= h.length ? [w, h] : [h, w];
+    if (s1.length >= 3 && l1.startsWith(s1) && l1.length - s1.length <= 2) best = Math.max(best, 0.9);
+    else if (w.length >= 5 && scYtLev(w, h, w.length >= 8 ? 2 : 1) <= (w.length >= 8 ? 2 : 1)) best = Math.max(best, 0.8);
+  }
+  if (!best && w.length >= 5 && compact.includes(w)) best = 0.8;
+  return best;
+}
+/* Skor ±0..1.3: seberapa banyak kata judul konten ditemukan (persis/mirip) di judul,
+   deskripsi, hashtag, atau nama channel video */
 function scYtScore(it, v) {
   const want = [...new Set(scYtTokens(it.title))];
   if (!want.length) return 0;
-  const have = new Set(scYtTokens(`${v.title} ${v.description || ''}`));
+  const all = `${v.title} ${v.description || ''} ${v.channel || ''}`;
+  const have = new Set(scYtTokens(all));
   const titleHave = new Set(scYtTokens(v.title));
+  const compact = all.toLowerCase().replace(/[^a-z0-9]+/g, '');
+  const titleCompact = (v.title || '').toLowerCase().replace(/[^a-z0-9]+/g, '');
   let hit = 0, inTitle = 0;
-  want.forEach(w => { if (have.has(w)) hit++; if (titleHave.has(w)) inTitle++; });
+  want.forEach(w => { hit += scYtWordHit(w, have, compact); inTitle += scYtWordHit(w, titleHave, titleCompact); });
   let score = hit / want.length;
-  if (inTitle === want.length) score += 0.15;                       // semua kata ada di judul video
-  if (scYtTokens(it.category).some(w => have.has(w))) score += 0.1; // nama program disebut
+  if (inTitle / want.length >= 0.9) score += 0.15;                  // (hampir) semua kata ada di judul video
+  const cat = scYtTokens(it.category);
+  if (cat.length && cat.some(w => scYtWordHit(w, have, compact) >= 0.9)) score += 0.1; // nama program disebut
   return score;
 }
-/* Skor dari transkrip: porsi kata judul konten yang diucapkan/tertulis di transkrip video */
-function scYtTrScore(it, v, tr) {
-  const want = [...new Set(scYtTokens(it.title))];
-  if (!want.length || !tr) return 0;
-  const have = new Set(scYtTokens(`${v.title} ${v.description || ''} ${tr}`));
-  return want.filter(w => have.has(w)).length / want.length;
-}
-function scYtMatch(items, videos, transcripts = {}) {
+function scYtMatch(items, videos) {
   const used = new Set(items.filter(it => it.ytUrl).map(it => (it.ytUrl.match(/[?&]v=([\w-]{11})|youtu\.be\/([\w-]{11})|shorts\/([\w-]{11})/) || []).slice(1).find(Boolean)).filter(Boolean));
   const pairs = [];
   items.forEach(it => videos.forEach(v => {
     if (used.has(v.id)) return;
     let s = scYtScore(it, v);
-    // Judul & deskripsi kurang cocok → cek transkrip (semua kata judul konten harus ada).
-    // Prioritas di bawah kecocokan judul/deskripsi.
-    if (s < 0.6 && transcripts[v.id] && scYtTrScore(it, v, transcripts[v.id]) >= 1) s = 0.6;
     if (v.published) {
       const pub = scYmd(new Date(v.published));            // tanggal lokal (WIB)
       const diff = scDiffDays(it.airDate, pub);
@@ -3720,23 +3749,7 @@ async function scAutoYoutube(force = false) {
         .then(j => (Array.isArray(j.videos) ? j.videos : []).map(v => ({ ...v, channel: ch.name })))));
     const videos = lists.flat();
     if (!videos.length) return;
-    let found = scYtMatch(due, videos);
-    // Yang belum ketemu: baca transkrip video yang tanggal terbitnya dekat tanggal tayang
-    const left = due.filter(it => !found.some(f => f.it === it));
-    if (left.length) {
-      const taken = new Set(found.map(f => f.v.id));
-      const near = videos.filter(v => !taken.has(v.id) && left.some(it => {
-        const pub = v.published || v.publishedApprox;
-        if (!pub) return false;
-        const diff = scDiffDays(it.airDate, scYmd(new Date(pub)));
-        return v.published ? diff >= -3 && diff <= 10 : diff >= -10 && diff <= 20;
-      })).slice(0, 12);
-      const trc = window._scYtTr = window._scYtTr || {};
-      await Promise.all(near.filter(v => !(v.id in trc)).map(v =>
-        fetch(`/api/youtube?transcript=${v.id}`).then(r => r.json()).catch(() => ({}))
-          .then(j => { if (j.ok) trc[v.id] = j.transcript || ''; })));
-      if (near.some(v => trc[v.id])) found = scYtMatch(due, videos, trc);
-    }
+    const found = scYtMatch(due, videos);
     if (!found.length) return;
     const before = found.map(({ it }) => ({ it, prev: { ...it } }));
     found.forEach(({ it, v }) => Object.assign(it, { ytUrl: v.url, ytTitle: v.title || '', ytChannel: v.channel || '', ytAuto: true }));
