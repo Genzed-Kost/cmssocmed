@@ -1,5 +1,13 @@
 [
   {
+    "id": "mwlkdbro9nstw",
+    "user": "Umar",
+    "role": "Publisher",
+    "action": "tambah konten",
+    "target": "berjudul \"Presiden Punya Hak Prerogatif Mengusulkan Dua Nama\" (tema: Podcast Pakar HTN) untuk akun 33 Official dijadwalkan 22 Nov 2026",
+    "timestamp": "2026-11-18T03:30:48.660Z"
+  },
+  {
     "id": "mwlkc194fzoab",
     "user": "Umar",
     "role": "Publisher",
@@ -3990,13 +3998,5 @@
     "action": "Hapus Bank Konten",
     "target": "\"tanpa judul\"",
     "timestamp": "2026-07-03T06:27:52.387Z"
-  },
-  {
-    "id": "mr4jxe377s1fv",
-    "user": "Umar",
-    "role": "Publisher",
-    "action": "Tambah Bank Konten",
-    "target": "baris baru",
-    "timestamp": "2026-07-03T06:27:48.499Z"
   }
 ]
