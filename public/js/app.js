@@ -1621,8 +1621,8 @@ function renderDashTicker() {
     return;
   }
 
-  // Bukan teks berjalan: tampil 2 Stock Contents sekaligus, berganti setiap 1 menit
-  const PER = 2, EVERY = 60 * 1000;
+  // Bukan teks berjalan: tampil 2 Stock Contents sekaligus, berganti setiap 30 detik
+  const PER = 2, EVERY = 30 * 1000;   // berganti tiap 30 detik
   const pages = Math.ceil(items.length / PER);
   let page = Math.min(window._dashTickPage || 0, pages - 1);
   ticker.classList.add('dash-rotator');
@@ -1631,7 +1631,7 @@ function renderDashTicker() {
     const slice = items.slice(page * PER, page * PER + PER);
     inner.classList.remove('rot-in'); void inner.offsetWidth;
     inner.innerHTML = slice.map(h => `<span class="rot-item">${h}</span>`).join('') +
-      (pages > 1 ? `<span class="rot-count" title="Berganti setiap 1 menit">${page + 1}/${pages}</span>` : '');
+      (pages > 1 ? `<span class="rot-count" title="Berganti setiap 30 detik">${page + 1}/${pages}</span>` : '');
     inner.classList.add('rot-in');
     window._dashTickPage = page;
   };
