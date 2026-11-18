@@ -16,7 +16,7 @@ window.APP_INFO = {
         '✨ Tampilan baru yang lebih modern: Dashboard, Planner, Statistik, Aset, New Post & Login',
         '🎨 Logo resmi Penjaga Harapan di login, sidebar, dan ikon browser',
         '📅 Stock Contents tampil sebagai kalender, lengkap dengan jam produksi',
-        '✍️ Auto-Caption AI bergaya berita + SEO (headline, 5W1H, hashtag, versi X & judul YouTube)',
+        '✍️ Auto-Caption AI bergaya berita + SEO, dibuat terpisah sesuai platform distribusi yang dipilih',
         '📰 Info Presiden: berita lebih baru & berganti setiap refresh (jeda 5 menit)',
         '🖨 PDF Laporan Planner lebih rapi dengan nomor halaman',
         '📈 Kurs USD/IDR & IHSG live di sidebar',

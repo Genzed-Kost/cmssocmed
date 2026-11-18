@@ -8388,15 +8388,43 @@ async function generateCaption() {
     const theme   = gv('postTheme');
     const format  = gv('postFormat');
     const pubDate = gv('postDate');
-    const PLAT_NAME = { instagram: 'Instagram', tiktok: 'TikTok', twitter: 'X (Twitter)', facebook: 'Facebook', youtube: 'YouTube' };
-    const platNames = plats.length ? plats.map(p => PLAT_NAME[p] || p) : ['Instagram', 'TikTok'];
-    const hasX   = plats.includes('twitter');
-    const hasYT  = plats.includes('youtube');
     const dateTx = pubDate ? new Date(pubDate + 'T00:00:00').toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }) : '';
 
+    /* Aturan caption per platform — hanya platform yang dipilih user yang dikirim ke AI */
+    const PLATFORM_RULES = {
+      instagram: { name: 'INSTAGRAM', rule: `- Baris pertama (≤ 125 karakter) = headline berisi kata kunci utama; bagian ini yang tampil sebelum "selengkapnya".
+- Lead 5W1H, lalu 2–3 paragraf pendek (piramida terbalik) + 3–5 poin penting berpoin emoji.
+- Paragraf dipisah baris kosong; emoji secukupnya (maks. 1 per paragraf).
+- CTA: ajak komentar (pertanyaan terbuka), simpan, dan bagikan.
+- Panjang 900–1.800 karakter (batas 2.200).
+- Baris terakhir: #PenjagaHarapan lalu 8–12 hashtag relevan (topik, tokoh/instansi bila ada di data, hashtag berita umum).` },
+      tiktok: { name: 'TIKTOK', rule: `- Singkat & to the point: 150–350 karakter.
+- Kalimat pertama memuat kata kunci utama (TikTok memakai caption untuk pencarian) dan membuat penasaran.
+- 1–2 kalimat inti berita + ajakan menonton sampai habis / berkomentar.
+- Bahasa lebih santai namun tetap sopan dan berimbang; emoji 1–3.
+- Akhiri dengan #PenjagaHarapan + 3–5 hashtag relevan (gabungan topik spesifik & umum).` },
+      twitter: { name: 'X (TWITTER)', rule: `- MAKSIMAL 270 karakter termasuk hashtag dan spasi (wajib dihitung).
+- Satu kalimat berita padat (apa + siapa + dampak), gaya headline.
+- 1–2 hashtag saja: #PenjagaHarapan + 1 hashtag topik. Tanpa emoji berlebihan (maks. 1).` },
+      facebook: { name: 'FACEBOOK', rule: `- Gaya bercerita/artikel singkat: 400–900 karakter.
+- Paragraf pembuka berisi inti berita, lalu 1–2 paragraf konteks & dampak bagi masyarakat; kutipan langsung bila ada.
+- Tutup dengan pertanyaan yang memancing diskusi di kolom komentar.
+- Emoji sedikit (0–2). Hashtag 2–4 saja di akhir, #PenjagaHarapan pertama.` },
+      youtube: { name: 'YOUTUBE', rule: `Tulis dengan sub-bagian berlabel persis seperti ini:
+JUDUL: maks. 90 karakter, kata kunci utama di depan, informatif (bukan clickbait).
+DESKRIPSI: 2 baris pertama (≤ 150 karakter) merangkum isi dengan kata kunci utama; lalu 2–3 paragraf penjelasan,
+  daftar poin yang dibahas, dan ajakan like, subscribe, serta komentar. Panjang 800–1.500 karakter.
+  Baris terakhir deskripsi: 3 hashtag (#PenjagaHarapan + 2 topik) — YouTube menampilkan 3 hashtag pertama di atas judul.
+TAGS: 10–15 kata kunci dipisah koma (gabungan kata kunci utama, turunan, nama tokoh/instansi bila ada di data).` },
+    };
+    const selected = (plats.length ? plats : ['instagram', 'tiktok']).filter(p => PLATFORM_RULES[p]);
+    const multi    = selected.length > 1;
+    const platBlocks = selected.map(p => `### ${PLATFORM_RULES[p].name}\n${PLATFORM_RULES[p].rule}`).join('\n\n');
+    const outFormat = selected.map(p => multi ? `=== ${PLATFORM_RULES[p].name} ===\n[caption ${PLATFORM_RULES[p].name.toLowerCase()} sesuai aturannya]` : `[caption ${PLATFORM_RULES[p].name.toLowerCase()} sesuai aturannya]`).join('\n\n');
+
     const prompt = `Kamu adalah editor berita digital & spesialis SEO media sosial untuk akun "${acct}" (Indonesia).
-Tugasmu: menulis caption bergaya BERITA yang akurat, informatif, dan dioptimalkan SEO agar mudah ditemukan lewat pencarian
-di ${platNames.join(', ')} maupun Google.
+Tugasmu: menulis caption bergaya BERITA yang akurat, informatif, dan dioptimalkan SEO, DISESUAIKAN untuk setiap platform
+yang dipilih: ${selected.map(p => PLATFORM_RULES[p].name).join(', ')}.${multi ? ' Tulis caption terpisah untuk masing-masing platform — jangan disalin sama persis.' : ''}
 
 DATA KONTEN
 - Judul: ${title || '-'}
@@ -8405,33 +8433,20 @@ DATA KONTEN
 - Akun: ${acct}
 ${dateTx ? `- Tanggal tayang: ${dateTx}` : ''}
 ${scriptExcerpt ? `- Naskah/ringkasan (sumber fakta utama):\n"""\n${scriptExcerpt}\n"""` : ''}
-${hasDialog ? '- Naskah berformat dialog/wawancara: kutip 1–2 pernyataan terkuat secara langsung (pakai tanda kutip dan sebut pembicaranya).' : ''}
+${hasDialog ? '- Naskah berformat dialog/wawancara: kutip pernyataan terkuat secara langsung (pakai tanda kutip dan sebut pembicaranya) bila ruang caption cukup.' : ''}
 
-ATURAN FAKTA
+ATURAN FAKTA (berlaku untuk semua platform)
 - Gunakan HANYA fakta dari judul, tema, dan naskah di atas. Jangan menambah angka, nama, kutipan, atau klaim yang tidak ada.
 - Bila informasi 5W1H tidak tersedia, jangan dikarang — lewati saja.
+- Bahasa Indonesia baku namun mudah dibaca, netral dan berimbang seperti media berita, tidak provokatif.
+- Kata kunci utama sama di semua platform agar konsisten untuk SEO; #PenjagaHarapan selalu menjadi hashtag pertama.
 
-STRUKTUR CAPTION (piramida terbalik)
-1. HEADLINE/HOOK (baris pertama, ≤ 125 karakter): memuat KATA KUNCI UTAMA di awal kalimat, kuat dan jelas — baris ini yang
-   terlihat sebelum "selengkapnya", jadi harus membuat orang berhenti menggulir. Boleh 1 emoji di awal.
-2. LEAD (1 paragraf): rangkum inti berita — apa, siapa, kapan, di mana, mengapa, bagaimana (yang tersedia).
-3. ISI (2–3 paragraf pendek, 2–3 kalimat per paragraf): detail penting, konteks/latar belakang, dampak bagi masyarakat,
-   dan kutipan langsung bila ada. Sisipkan kata kunci turunan secara alami (jangan diulang berlebihan).
-4. POIN PENTING: 3–5 butir ringkas diawali emoji yang relevan (✅ 📌 💡 dsb.).
-5. CTA: ajak audiens berdiskusi di kolom komentar (pertanyaan terbuka), simpan, dan bagikan; sebut ${acct} untuk info lainnya.
-6. HASHTAG di baris terakhir: #PenjagaHarapan WAJIB pertama, lalu 8–12 hashtag campuran:
-   kata kunci utama, topik spesifik, tokoh/instansi terkait (bila ada di data), dan 2–3 hashtag umum berita Indonesia.
-   Tanpa spasi di dalam hashtag, tanpa hashtag yang tidak berhubungan.
-
-GAYA
-- Bahasa Indonesia baku namun mudah dibaca (bukan kaku), netral dan berimbang seperti media berita, tidak provokatif.
-- Kalimat aktif, paragraf pendek dengan baris kosong di antaranya agar nyaman dibaca di HP.
-- Emoji secukupnya (maks. 1 per paragraf). Hindari huruf kapital semua kecuali singkatan.
-- Panjang caption utama 900–1.800 karakter (batas Instagram/TikTok 2.200).
+ATURAN PER PLATFORM
+${platBlocks}
 
 FORMAT JAWABAN (tulis langsung, tanpa penjelasan tambahan, tanpa markdown tebal/miring):
-[caption utama lengkap sesuai struktur di atas]
-${hasX ? `\n---\nVersi X (Twitter) — maks. 270 karakter termasuk 2–3 hashtag, #PenjagaHarapan disertakan:\n[tulis versi pendeknya]` : ''}${hasYT ? `\n---\nJudul YouTube (maks. 90 karakter, kata kunci utama di depan):\n[tulis judulnya]` : ''}
+${outFormat}
+
 ---
 Kata kunci SEO: [kata kunci utama], [4–6 kata kunci turunan dipisah koma]`;
 
