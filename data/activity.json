@@ -1,5 +1,13 @@
 [
   {
+    "id": "mwm44kb4ph77k",
+    "user": "Idham",
+    "role": "Creator",
+    "action": "refresh berita Info Presiden",
+    "target": "7 berita, 7 baru (sumber: Server)",
+    "timestamp": "2026-11-18T12:43:52.144Z"
+  },
+  {
     "id": "mwm42c3mguutm",
     "user": "Idham",
     "role": "Creator",
@@ -3990,13 +3998,5 @@
     "action": "update statistik",
     "target": "33 Official TikTok — 22-28 Jun '26",
     "timestamp": "2026-07-06T07:08:01.596Z"
-  },
-  {
-    "id": "mr8vjwxgahyi4",
-    "user": "Admin",
-    "role": "Admin",
-    "action": "update statistik",
-    "target": "33 Official Facebook — 22-28 Jun '26",
-    "timestamp": "2026-07-06T07:04:19.828Z"
   }
 ]
