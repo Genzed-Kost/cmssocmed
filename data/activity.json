@@ -1,5 +1,13 @@
 [
   {
+    "id": "mwlkfbs5zeb6l",
+    "user": "Umar",
+    "role": "Publisher",
+    "action": "tambah konten",
+    "target": "berjudul \"Kompromi Politik Dibutuhkan untuk Menjalankan Agenda Negara\" (tema: Podcast Pakar HTN) untuk akun 33 Official dijadwalkan 24 Nov 2026",
+    "timestamp": "2026-11-18T03:32:21.989Z"
+  },
+  {
     "id": "mwlkeiilff1ac",
     "user": "Umar",
     "role": "Publisher",
@@ -3990,13 +3998,5 @@
     "action": "Hapus Bank Konten",
     "target": "\"tanpa judul\"",
     "timestamp": "2026-07-03T06:27:57.482Z"
-  },
-  {
-    "id": "mr4jxjlyqqrv5",
-    "user": "Umar",
-    "role": "Publisher",
-    "action": "Hapus Bank Konten",
-    "target": "\"tanpa judul\"",
-    "timestamp": "2026-07-03T06:27:55.654Z"
   }
 ]
