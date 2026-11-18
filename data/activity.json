@@ -1,5 +1,13 @@
 [
   {
+    "id": "mwlk5vdzw873n",
+    "user": "Umar",
+    "role": "Publisher",
+    "action": "tambah konten",
+    "target": "berjudul \"Prabowo Butuh Wapres yang Satu Frekuensi dengan Pemerintahannya\" (tema: Podcast Pakar HTN) untuk akun 33 Official dijadwalkan 19 Nov 2026",
+    "timestamp": "2026-11-18T03:25:00.839Z"
+  },
+  {
     "id": "mwlk4i8jr2hh6",
     "user": "Umar",
     "role": "Publisher",
@@ -3990,13 +3998,5 @@
     "action": "Tambah Bank Konten",
     "target": "baris baru",
     "timestamp": "2026-07-03T06:27:46.544Z"
-  },
-  {
-    "id": "mr4jxa0ugew2z",
-    "user": "Umar",
-    "role": "Publisher",
-    "action": "Tambah Bank Konten",
-    "target": "baris baru",
-    "timestamp": "2026-07-03T06:27:43.230Z"
   }
 ]
