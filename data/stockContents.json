@@ -27,7 +27,11 @@
     "prodTime": "",
     "prodDateEnd": "",
     "prodTimeEnd": "",
-    "airDate": "2026-11-08"
+    "airDate": "2026-11-08",
+    "ytUrl": "https://www.youtube.com/watch?v=_KrLfY2Rjtc",
+    "ytTitle": "KHK | Jebakan Kata 'Terserah', Jangan Jawab Ini Kalau Rumah Tangga Mau Aman!",
+    "ytChannel": "Jaga Asa",
+    "ytAuto": true
   },
   {
     "id": "sc_1794840822609",
@@ -37,7 +41,11 @@
     "prodTime": "",
     "prodDateEnd": "",
     "prodTimeEnd": "",
-    "airDate": "2026-11-15"
+    "airDate": "2026-11-15",
+    "ytUrl": "https://www.youtube.com/watch?v=BfZ3oZj1mQQ",
+    "ytTitle": "KHK Eps 2 | Over Sharing Demi Cuan Keluarga, Emang Boleh?",
+    "ytChannel": "Jaga Asa",
+    "ytAuto": true
   },
   {
     "id": "sc_1794820849565",
@@ -195,7 +203,11 @@
     "title": "Podcast Taufik Cimande",
     "prodDate": "",
     "prodDateEnd": "",
-    "airDate": "2026-11-17"
+    "airDate": "2026-11-17",
+    "ytUrl": "https://www.youtube.com/watch?v=7CX_yNe9alc",
+    "ytTitle": "REPARASI PATAH TULANG CIMANDE | ADAT, TRADISI & MINYAK BALUR KHAS CIMANDE",
+    "ytChannel": "Jaga Asa",
+    "ytAuto": true
   },
   {
     "id": "sc_1794818168877",
