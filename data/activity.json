@@ -1,5 +1,13 @@
 [
   {
+    "id": "mwlkgxk74simp",
+    "user": "Umar",
+    "role": "Publisher",
+    "action": "tambah konten",
+    "target": "berjudul \"Petani dan Mahasiswa Bisa Menggugat Undang-Undang ke MK\" (tema: Podcast Pakar HTN) untuk akun 33 Official dijadwalkan 25 Nov 2026",
+    "timestamp": "2026-11-18T03:33:36.871Z"
+  },
+  {
     "id": "mwlkfbs5zeb6l",
     "user": "Umar",
     "role": "Publisher",
@@ -3990,13 +3998,5 @@
     "action": "Hapus Bank Konten",
     "target": "\"tanpa judul\"",
     "timestamp": "2026-07-03T06:28:01.746Z"
-  },
-  {
-    "id": "mr4jxl0qmuhf1",
-    "user": "Umar",
-    "role": "Publisher",
-    "action": "Hapus Bank Konten",
-    "target": "\"tanpa judul\"",
-    "timestamp": "2026-07-03T06:27:57.482Z"
   }
 ]
