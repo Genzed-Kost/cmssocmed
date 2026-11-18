@@ -1,5 +1,13 @@
 [
   {
+    "id": "mwlkaooc0ye3i",
+    "user": "Umar",
+    "role": "Publisher",
+    "action": "tambah konten",
+    "target": "berjudul \"Mekanisme MPR, Benarkah Suara Rakyat Tetap Terwakili?\" (tema: Podcast Pakar HTN) untuk akun 33 Official dijadwalkan 20 Nov 2026",
+    "timestamp": "2026-11-18T03:28:45.420Z"
+  },
+  {
     "id": "mwlk5vdzw873n",
     "user": "Umar",
     "role": "Publisher",
@@ -3990,13 +3998,5 @@
     "action": "Tambah Bank Konten",
     "target": "baris baru",
     "timestamp": "2026-07-03T06:27:47.495Z"
-  },
-  {
-    "id": "mr4jxckwy9c1g",
-    "user": "Umar",
-    "role": "Publisher",
-    "action": "Tambah Bank Konten",
-    "target": "baris baru",
-    "timestamp": "2026-07-03T06:27:46.544Z"
   }
 ]
