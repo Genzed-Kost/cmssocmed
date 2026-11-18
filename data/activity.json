@@ -1,5 +1,13 @@
 [
   {
+    "id": "mwm2ratht0cyn",
+    "user": "Admin",
+    "role": "Admin",
+    "action": "refresh berita Info Presiden",
+    "target": "7 berita, 7 baru (sumber: Server)",
+    "timestamp": "2026-11-18T12:05:33.701Z"
+  },
+  {
     "id": "mwm2pgzf23ok3",
     "user": "Admin",
     "role": "Admin",
@@ -3990,13 +3998,5 @@
     "action": "update statistik",
     "target": "Penjaga Harapan YouTube — 29 Jun-5 Jul '26",
     "timestamp": "2026-07-06T06:57:58.062Z"
-  },
-  {
-    "id": "mr8v7g4wfpapi",
-    "user": "Admin",
-    "role": "Admin",
-    "action": "update statistik",
-    "target": "Penjaga Harapan Instagram — 29 Jun-5 Jul '26",
-    "timestamp": "2026-07-06T06:54:38.192Z"
   }
 ]
