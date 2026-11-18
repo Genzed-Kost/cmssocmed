@@ -4128,3 +4128,11 @@ ul { list-style: none; }
 .page-gap { padding: 0 4px; color: var(--muted); font-size: .8rem; }
 .page-btn.page-arrow { font-weight: 800; padding: 4px 9px; }
 .page-btn:disabled { opacity: .4; cursor: default; }
+
+/* Stock Contents: link YouTube */
+.sc-yt-row a { color: #dc2626; font-weight: 700; text-decoration: none; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; flex: 1; text-align: right; }
+.sc-yt-row a:hover { text-decoration: underline; }
+.sc-yt-auto { font-style: normal; font-size: .58rem; font-weight: 800; text-transform: uppercase; color: #6d28d9; background: #ede9fe; padding: 1px 5px; border-radius: 5px; flex-shrink: 0; }
+.sc-yt-hint { font-size: .72rem; color: var(--muted); margin-top: 4px; }
+.sc-yt-hint a { color: #dc2626; }
+.sc-chip-yt { color: #dc2626; font-size: .7em; margin-left: 3px; }

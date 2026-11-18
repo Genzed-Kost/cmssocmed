@@ -3637,6 +3637,93 @@ function renderStockContents() {
   }
 
   renderStockCalendar();
+  scAutoYoutube();
+}
+
+/* ── Stock Contents: link YouTube otomatis ─────────────────────────────────
+   Konten yang tanggal tayangnya sudah lewat (atau hari ini) dicocokkan dengan
+   video terbaru channel @PenjagaHarapan (lewat /api/youtube): judul & deskripsi
+   video dibandingkan dengan judul + kelompok konten, dan tanggal terbit harus
+   dekat dengan tanggal tayang. Admin: hasil disimpan ke data; user lain: tampil saja. */
+const SC_YT_HANDLE = 'PenjagaHarapan';
+const SC_YT_STOP = new Set(('dan yang di ke dari untuk dengan ini itu atau pada dalam akan juga kita kami saya anda kamu ' +
+  'para sang si nya lah pun the and of to in on for with a an is are podcast eps episode full part video official ' +
+  'penjaga harapan live shorts short ft feat bersama bareng tentang').split(' '));
+function scYtTokens(str) {
+  return (str || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^a-z0-9]+/g, ' ').split(' ').filter(w => w.length >= 3 && !SC_YT_STOP.has(w));
+}
+/* Skor 0..1: porsi kata judul konten yang muncul di judul/deskripsi video */
+function scYtScore(it, v) {
+  const want = [...new Set(scYtTokens(it.title))];
+  if (!want.length) return 0;
+  const have = new Set(scYtTokens(`${v.title} ${v.description || ''}`));
+  const titleHave = new Set(scYtTokens(v.title));
+  let hit = 0, inTitle = 0;
+  want.forEach(w => { if (have.has(w)) hit++; if (titleHave.has(w)) inTitle++; });
+  let score = hit / want.length;
+  if (inTitle === want.length) score += 0.15;                       // semua kata ada di judul video
+  if (scYtTokens(it.category).some(w => have.has(w))) score += 0.1; // nama program disebut
+  return score;
+}
+function scYtMatch(items, videos) {
+  const used = new Set(items.filter(it => it.ytUrl).map(it => (it.ytUrl.match(/[?&]v=([\w-]{11})|youtu\.be\/([\w-]{11})|shorts\/([\w-]{11})/) || []).slice(1).find(Boolean)).filter(Boolean));
+  const pairs = [];
+  items.forEach(it => videos.forEach(v => {
+    if (used.has(v.id)) return;
+    let s = scYtScore(it, v);
+    if (v.published) {
+      const pub = scYmd(new Date(v.published));            // tanggal lokal (WIB)
+      const diff = scDiffDays(it.airDate, pub);
+      if (diff < -3 || diff > 10) return;                   // terbit jauh dari tanggal tayang → bukan videonya
+      if (diff === 0) s += 0.1;
+    } else if (v.publishedApprox) {                         // tanggal perkiraan ("10 hari yang lalu")
+      const diff = scDiffDays(it.airDate, scYmd(new Date(v.publishedApprox)));
+      if (diff < -10 || diff > 20 || s < 0.7) return;
+    } else if (s < 0.85) return;                            // tanpa tanggal terbit: harus sangat mirip
+    if (s >= 0.6) pairs.push({ it, v, s });
+  }));
+  pairs.sort((a, b) => b.s - a.s);
+  const done = new Set(), out = [];
+  pairs.forEach(p => {
+    if (done.has(p.it.id) || used.has(p.v.id)) return;
+    done.add(p.it.id); used.add(p.v.id); out.push(p);
+  });
+  return out;
+}
+async function scAutoYoutube(force = false) {
+  const today = scYmd(new Date());
+  const due = (state.stockContents || []).filter(it => it.airDate && it.airDate <= today && !it.ytUrl && !it.ytSkip && it.title);
+  if (!due.length) return;
+  const now = Date.now();
+  if (!force && window._scYtAt && now - window._scYtAt < 10 * 60 * 1000) return;
+  if (window._scYtBusy) return;
+  window._scYtBusy = true; window._scYtAt = now;
+  try {
+    const res = await fetch(`/api/youtube?handle=${SC_YT_HANDLE}`, { headers: { Accept: 'application/json' } });
+    const j = await res.json().catch(() => ({}));
+    const videos = Array.isArray(j.videos) ? j.videos : [];
+    if (!videos.length) return;
+    const found = scYtMatch(due, videos);
+    if (!found.length) return;
+    const before = found.map(({ it }) => ({ it, prev: { ...it } }));
+    found.forEach(({ it, v }) => Object.assign(it, { ytUrl: v.url, ytTitle: v.title || '', ytAuto: true }));
+    if (isAdmin()) {
+      try {
+        state.shas.stockContents = await window.db.writeData('stockContents', state.stockContents,
+          `Stock: link YouTube otomatis (${found.length})`);
+        logActivity(currentUser(), 'Tautkan link YouTube otomatis', found.map(f => `"${f.it.title}"`).join(', ')).catch(() => {});
+      } catch (e) { before.forEach(({ it, prev }) => { Object.keys(it).forEach(k => delete it[k]); Object.assign(it, prev); }); return; }
+    }
+    if (state.currentPage === 'stockcontents') renderStockCalendar();
+  } catch (_) { /* diam: fitur tambahan */ }
+  finally { window._scYtBusy = false; }
+}
+function scYtRow(it) {
+  if (!it?.ytUrl) return '';
+  return `<div class="sc-detail-row sc-yt-row"><span>▶️ YouTube</span>
+    <a href="${esc(it.ytUrl)}" target="_blank" rel="noopener" title="${esc(it.ytUrl)}">${esc(it.ytTitle || it.ytUrl)}</a>
+    ${it.ytAuto ? '<em class="sc-yt-auto">otomatis</em>' : ''}</div>`;
 }
 
 /* ── Stock Contents: tampilan KALENDER ─────────────────────────────────────
@@ -3701,7 +3788,7 @@ function scChipHtml(ev, canEdit) {
   const tip   = `${it.category || 'Tanpa kelompok'} — ${it.title || '(tanpa judul)'} · ` +
     (ev.kind === 'air' ? 'Tayang' : 'Produksi ' + scProdText(it));
   return `<div class="sc-chip sc-chip-${ev.kind}" style="--c:${col}" data-id="${esc(it.id)}" data-kind="${ev.kind}"
-    ${canEdit ? 'draggable="true"' : ''} title="${esc(tip)}">${label} ${timeHtml}${esc(it.title || '(tanpa judul)')}${extra}</div>`;
+    ${canEdit ? 'draggable="true"' : ''} title="${esc(tip)}${ev.kind === 'air' && it.ytUrl ? ' · ▶ ada di YouTube' : ''}">${label} ${timeHtml}${esc(it.title || '(tanpa judul)')}${extra}${ev.kind === 'air' && it.ytUrl ? '<span class="sc-chip-yt" aria-label="Ada di YouTube">▶</span>' : ''}</div>`;
 }
 
 /* Item yang punya jadwal (tayang atau produksi) di bulan ym "YYYY-MM". */
@@ -3918,7 +4005,8 @@ function scOpenModal(id = null, date = '') {
       <div style="font-weight:700;font-size:1rem">${esc(it.title || '(tanpa judul)')}</div>
       <div class="sc-detail-row"><span>🎬 Produksi</span><b>${esc(prod)}</b></div>
       <div class="sc-detail-row"><span>📅 Tayang</span><b>${esc(it.airDate ? scFmtLong(it.airDate) : 'Belum dijadwalkan')}</b></div>
-      <div class="sc-detail-row"><span>📊 Dihitung di total</span><b>${esc(scCountMonthText(it))}</b></div>`;
+      <div class="sc-detail-row"><span>📊 Dihitung di total</span><b>${esc(scCountMonthText(it))}</b></div>
+      ${scYtRow(it)}`;
     foot.innerHTML = `<button type="button" class="btn-sm" onclick="scCloseModal()">Tutup</button>`;
   } else {
     setTxt('scModalTitle', it ? 'Ubah Stock Content' : 'Tambah Stock Content');
@@ -3951,6 +4039,11 @@ function scOpenModal(id = null, date = '') {
         <label class="form-label" for="scfAir">📅 Tanggal Tayang</label>
         <input id="scfAir" type="date" class="form-inp" value="${esc(v.airDate || '')}" />
       </div>
+      <div class="form-group">
+        <label class="form-label" for="scfYt">▶️ Link YouTube <span style="font-weight:400;color:var(--muted)">(otomatis setelah tayang — bisa diubah manual)</span></label>
+        <input id="scfYt" type="url" class="form-inp" value="${esc(v.ytUrl || '')}" placeholder="https://www.youtube.com/watch?v=…" />
+        ${v.ytUrl ? `<div class="sc-yt-hint">${v.ytAuto ? '🤖 Ditautkan otomatis' : '✍️ Diisi manual'}${v.ytTitle ? ': ' + esc(v.ytTitle) : ''} · <a href="${esc(v.ytUrl)}" target="_blank" rel="noopener">buka ↗</a></div>` : ''}
+      </div>
       <div class="sc-detail-row"><span>📊 Dihitung di total</span><b id="scfCountMonth"></b></div>`;
     const upd = () => setTxt('scfCountMonth', scCountMonthText({ airDate: $('scfAir').value, prodDate: $('scfProd').value }));
     ['scfAir', 'scfProd'].forEach(id => $(id).addEventListener('input', upd));
@@ -3978,6 +4071,13 @@ async function scSaveModal(id) {
     prodTimeEnd: $('scfProdTimeEnd').value,
     airDate:     $('scfAir').value,
   };
+  const ytIn = ($('scfYt')?.value || '').trim();
+  if (ytIn && !/^https?:\/\/(www\.|m\.)?(youtube\.com|youtu\.be)\//i.test(ytIn)) { toast('Link YouTube tidak valid', 'error'); $('scfYt').focus(); return; }
+  const oldIt = id ? state.stockContents.find(x => x.id === id) : null;
+  if (ytIn !== (oldIt?.ytUrl || '')) {
+    if (ytIn) Object.assign(data, { ytUrl: ytIn, ytTitle: '', ytAuto: false, ytSkip: false });
+    else Object.assign(data, { ytUrl: '', ytTitle: '', ytAuto: false, ytSkip: true });   // dikosongkan → jangan ditautkan otomatis lagi
+  }
   if (!data.title) { toast('Judul wajib diisi', 'error'); $('scfTitle').focus(); return; }
   if (data.prodDateEnd && !data.prodDate) { data.prodDate = data.prodDateEnd; data.prodDateEnd = ''; }
   if (data.prodDateEnd && data.prodDateEnd < data.prodDate) { toast('Tanggal akhir produksi sebelum tanggal mulai', 'error'); return; }
