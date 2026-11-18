@@ -1,5 +1,13 @@
 [
   {
+    "id": "mwmg5qadw5kr1",
+    "user": "Admin",
+    "role": "Admin",
+    "action": "Tautkan link YouTube otomatis",
+    "target": "\"Koperasi Asli VS Koperasi Palsu\"",
+    "timestamp": "2026-11-18T18:20:41.941Z"
+  },
+  {
     "id": "mwmg4dzy11dbg",
     "user": "Admin",
     "role": "Admin",
@@ -3990,13 +3998,5 @@
     "action": "login",
     "target": "masuk ke sistem sebagai Admin",
     "timestamp": "2026-07-09T08:56:02.803Z"
-  },
-  {
-    "id": "mrc7vg1thvtpp",
-    "user": "Admin",
-    "role": "Admin",
-    "action": "login",
-    "target": "masuk ke sistem sebagai Admin",
-    "timestamp": "2026-07-08T15:12:31.745Z"
   }
 ]
