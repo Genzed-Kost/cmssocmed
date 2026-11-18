@@ -7,8 +7,23 @@
 window.APP_INFO = {
   name: 'Penjaga Harapan CMS',
   tagline: 'Platform manajemen konten tim',
-  version: '2.6.0',
+  version: '2.6.1',
   changelog: [
+    {
+      version: '2.6.1', date: '2026-11-18',
+      items: [
+        '📊 Statistik: filter periode Mingguan (4/8/12 minggu) kini benar-benar mengubah grafik & ringkasan',
+        '👥 Facebook & Instagram: Follows (pengikut baru selama periode) dan Followers (total pengikut hingga akhir periode) kini dibedakan',
+        '📘 Statistik Facebook & Instagram disederhanakan: Views, Viewers/Reach, Total Eng/Reactions, Visits Profile, Followers, Follows (+ Jumlah Konten untuk IG)',
+      ],
+      adminItems: [
+        '👥 Follows = pengikut baru selama periode (isi manual); Followers = total pengikut hingga akhir periode',
+        '🔁 Followers mingguan terisi otomatis: Followers minggu lalu + Follows minggu ini (minggu pertama diisi manual sebagai titik awal)',
+        '📅 Data Bulanan dari mingguan: Follows dijumlah, Followers diambil dari minggu terakhir — angka manual tetap tidak ditimpa',
+        '📊 Filter Mingguan 4/8/12 minggu kini memfilter grafik, ringkasan, dan analisis (berdasarkan minggu terakhir yang ada datanya)',
+        '🔔 Pop up pembaruan ini muncul lagi setiap ada pembaruan baru, selain sekali sehari',
+      ],
+    },
     {
       version: '2.6.0', date: '2026-11-16',
       items: [

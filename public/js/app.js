@@ -1107,8 +1107,12 @@ function showAdminUpdates(force = false) {
   const latest = (info.changelog || []).find(v => (v.adminItems || []).length);
   if (!latest) return;
   const today = scYmd(new Date());   // tanggal lokal
-  const KEY = 'cms_admin_updates_seen';
-  try { if (!force && localStorage.getItem(KEY) === today) return; } catch {}
+  const KEY = 'cms_admin_updates_seen', SIG_KEY = 'cms_admin_updates_sig';
+  // Tanda isi pembaruan: jika ada pembaruan baru, pop up muncul lagi walau hari ini sudah dilihat
+  const sig = latest.version + '|' + latest.adminItems.join('|');
+  try {
+    if (!force && localStorage.getItem(KEY) === today && localStorage.getItem(SIG_KEY) === sig) return;
+  } catch {}
   if ($('adminUpdModal')) return;
   const fmt = d => d ? new Date(d + 'T00:00:00').toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' }) : '';
   const ov = document.createElement('div');
@@ -1122,11 +1126,11 @@ function showAdminUpdates(force = false) {
       </div>
       <ul class="adm-upd-list">${latest.adminItems.map(t => `<li>${esc(t)}</li>`).join('')}</ul>
       <div class="adm-upd-foot">
-        <span>Ditampilkan sekali sehari</span>
+        <span>Muncul sekali sehari & setiap ada pembaruan baru</span>
         <button type="button" class="btn-sm blue" id="admUpdOk">Mengerti</button>
       </div>
     </div>`;
-  const close = () => { ov.remove(); try { localStorage.setItem(KEY, today); } catch {} };
+  const close = () => { ov.remove(); try { localStorage.setItem(KEY, today); localStorage.setItem(SIG_KEY, sig); } catch {} };
   ov.addEventListener('click', e => { if (e.target === ov) close(); });
   document.body.appendChild(ov);
   $('admUpdOk').onclick = close;
@@ -6334,13 +6338,19 @@ function renderStatChart() {
 
   let fromM = $('statFromMonth')?.value || '';
   let toM   = $('statToMonth')?.value   || '';
-  if (fromM || toM) {
-    const periodVal = $('statPeriodSel')?.value || '';
-    const isWeeklyCustom = periodVal === 'customw';
+  const nWk = isWeekly ? parseInt(periodSel, 10) : 0;
+  if (isWeekly && nWk > 0) {
+    // N minggu terakhir = N minggu terakhir yang punya data
+    displayRows = rows.slice(-nWk);
+    fromM = displayRows[0]?.week || ''; toM = displayRows[displayRows.length - 1]?.week || '';
+  } else if (isWeekly && periodSel === 'allw') {
+    fromM = toM = '';
+  } else if (fromM || toM) {
     displayRows = rows.filter(r => {
+      // Mingguan kustom: input berupa minggu (YYYY-Www); jika browser memberi bulan, bandingkan per bulan
       const key = isWeekly
-        ? (isWeeklyCustom ? (r.week||'') : isoWeekToMonth(r.week||''))
-        : (r.month||'');
+        ? (/W/.test(fromM || toM) ? (r.week || '') : isoWeekToMonth(r.week || ''))
+        : (r.month || '');
       return (!fromM || key >= fromM) && (!toM || key <= toM);
     });
   }
