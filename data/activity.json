@@ -1,5 +1,13 @@
 [
   {
+    "id": "mwm3wyrq12l2q",
+    "user": "Admin",
+    "role": "Admin",
+    "action": "edit user",
+    "target": "Idham → Idham (Creator)",
+    "timestamp": "2026-11-18T12:37:57.638Z"
+  },
+  {
     "id": "mwm3waiw2ceeu",
     "user": "Admin",
     "role": "Admin",
@@ -3990,13 +3998,5 @@
     "action": "update statistik",
     "target": "33 Official Facebook — 29 Jun-5 Jul '26",
     "timestamp": "2026-07-06T07:01:43.644Z"
-  },
-  {
-    "id": "mr8vcdzo6loyd",
-    "user": "Admin",
-    "role": "Admin",
-    "action": "update statistik",
-    "target": "Penjaga Harapan YouTube — 29 Jun-5 Jul '26",
-    "timestamp": "2026-07-06T06:58:28.692Z"
   }
 ]
