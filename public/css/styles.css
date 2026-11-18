@@ -4088,3 +4088,23 @@ ul { list-style: none; }
   .anl-body { flex: 1; overflow-y: auto; scrollbar-width: thin; }
 }
 .anlp-header, .anl-head { min-height: 62px; box-sizing: border-box; }
+
+/* Dashboard: pengganti teks berjalan — 2 Stock Contents bergantian tiap 1 menit */
+.dash-rotator .dash-ticker-inner { animation: none !important; transform: none !important; display: flex; align-items: center; gap: 0; width: 100%; min-width: 0; white-space: nowrap; }
+.dash-rotator .dash-ticker-track::before, .dash-rotator .dash-ticker-track::after { display: none; }
+.dash-rotator::before, .dash-rotator::after { display: none; }
+.rot-item { flex: 1 1 0; min-width: 0; overflow: hidden; text-overflow: ellipsis; padding: 0 12px; font-size: .78rem; color: #92400e; }
+.rot-item + .rot-item { border-left: 1px solid #fcd34d; }
+.rot-item strong { color: #78350f; }
+.rot-count { flex-shrink: 0; margin: 0 10px 0 4px; padding: 1px 7px; border-radius: 999px; background: rgba(251,191,36,.25); color: #92400e; font-size: .64rem; font-weight: 800; font-variant-numeric: tabular-nums; }
+.dash-ticker-inner.rot-in .rot-item { animation: rotIn .5s ease both; }
+.dash-ticker-inner.rot-in .rot-item + .rot-item { animation-delay: .08s; }
+@keyframes rotIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+@media (max-width: 680px) {
+  /* HP: dua item ditumpuk ke bawah */
+  .dash-ticker.dash-rotator { height: auto; border-radius: 14px; padding: 6px 0; }
+  .dash-rotator .dash-ticker-inner { flex-wrap: wrap; white-space: normal; }
+  .rot-item { flex: 1 1 100%; padding: 3px 10px; white-space: nowrap; }
+  .rot-item + .rot-item { border-left: 0; border-top: 1px dashed #fcd34d; }
+  .rot-count { margin: 4px 10px 0 auto; }
+}

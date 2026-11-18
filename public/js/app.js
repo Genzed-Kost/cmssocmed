@@ -1615,21 +1615,28 @@ function renderDashTicker() {
   scItems.sort((x, y) => x.key < y.key ? -1 : x.key > y.key ? 1 : 0);
   scItems.forEach(x => items.push(x.html));
 
+  clearInterval(window._dashTickTimer);
   if (!items.length) {
     ticker.classList.add('hidden');
     return;
   }
 
-  // Isi digandakan agar berjalan mulus tanpa jeda kosong (animasi 0 → -50%)
-  const separator = '&nbsp;&nbsp;&nbsp;·&nbsp;&nbsp;&nbsp;';
-  const strip = items.join(separator) + separator;
-  inner.innerHTML = `<span>${strip}</span><span aria-hidden="true">${strip}</span>`;
+  // Bukan teks berjalan: tampil 2 Stock Contents sekaligus, berganti setiap 1 menit
+  const PER = 2, EVERY = 60 * 1000;
+  const pages = Math.ceil(items.length / PER);
+  let page = Math.min(window._dashTickPage || 0, pages - 1);
+  ticker.classList.add('dash-rotator');
   ticker.classList.remove('hidden');
-  // Kecepatan tetap ±70 px/detik, berapa pun jumlah item
-  requestAnimationFrame(() => {
-    const half = inner.scrollWidth / 2 || 1000;
-    inner.style.animationDuration = `${Math.max(15, Math.round(half / 70))}s`;
-  });
+  const show = () => {
+    const slice = items.slice(page * PER, page * PER + PER);
+    inner.classList.remove('rot-in'); void inner.offsetWidth;
+    inner.innerHTML = slice.map(h => `<span class="rot-item">${h}</span>`).join('') +
+      (pages > 1 ? `<span class="rot-count" title="Berganti setiap 1 menit">${page + 1}/${pages}</span>` : '');
+    inner.classList.add('rot-in');
+    window._dashTickPage = page;
+  };
+  show();
+  if (pages > 1) window._dashTickTimer = setInterval(() => { page = (page + 1) % pages; show(); }, EVERY);
 }
 
 /* ══════════════════════════════════════════════════════════════════════════
