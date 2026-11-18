@@ -1,5 +1,13 @@
 [
   {
+    "id": "mwlydwa4k4wah",
+    "user": "Admin",
+    "role": "Admin",
+    "action": "tambah konten",
+    "target": "berjudul \"Koperasi Desa Merah Putih: Bukan Sekadar Bangun Gedung!\" (tema: Belajar Koperasi) untuk akun 33 Official dijadwalkan 18 Nov 2026",
+    "timestamp": "2026-11-18T10:03:09.868Z"
+  },
+  {
     "id": "mwlwib9wmenb5",
     "user": "Admin",
     "role": "Admin",
@@ -3990,13 +3998,5 @@
     "action": "login",
     "target": "masuk ke sistem sebagai Admin",
     "timestamp": "2026-07-03T11:24:08.610Z"
-  },
-  {
-    "id": "mr4uic6wdumho",
-    "user": "Umar",
-    "role": "Publisher",
-    "action": "logout",
-    "target": "keluar dari sistem",
-    "timestamp": "2026-07-03T11:24:01.976Z"
   }
 ]
