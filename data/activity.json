@@ -1,5 +1,13 @@
 [
   {
+    "id": "mwme21dxe5q1v",
+    "user": "Admin",
+    "role": "Admin",
+    "action": "ubah status",
+    "target": "\"Koperasi Desa Merah Putih: Bukan Sekadar Bangun Gedung!\" menjadi Published",
+    "timestamp": "2026-11-18T17:21:50.469Z"
+  },
+  {
     "id": "mwm6vs45mio1w",
     "user": "Idham",
     "role": "Creator",
@@ -3990,13 +3998,5 @@
     "action": "update statistik",
     "target": "33 Official TikTok — 22-28 Jun '26",
     "timestamp": "2026-07-06T07:11:52.129Z"
-  },
-  {
-    "id": "mr8vp1dscf1pd",
-    "user": "Admin",
-    "role": "Admin",
-    "action": "update statistik",
-    "target": "33 Official TikTok — 29 Jun-5 Jul '26",
-    "timestamp": "2026-07-06T07:08:18.880Z"
   }
 ]
