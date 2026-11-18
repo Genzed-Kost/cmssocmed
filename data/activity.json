@@ -1,5 +1,13 @@
 [
   {
+    "id": "mwlm98c1kvohl",
+    "user": "Umar",
+    "role": "Publisher",
+    "action": "Kirim WA Planner",
+    "target": "ke  — \"Petani dan Mahasiswa Bisa Menggugat Undang-Undang ke MK\" (Plan)",
+    "timestamp": "2026-11-18T04:23:36.817Z"
+  },
+  {
     "id": "mwllv7its8j5l",
     "user": "Umar",
     "role": "Publisher",
@@ -3990,13 +3998,5 @@
     "action": "logout",
     "target": "keluar dari sistem",
     "timestamp": "2026-07-03T06:28:31.330Z"
-  },
-  {
-    "id": "mr4jxvwjij82b",
-    "user": "Umar",
-    "role": "Publisher",
-    "action": "Hapus Bank Konten",
-    "target": "\"tanpa judul\"",
-    "timestamp": "2026-07-03T06:28:11.587Z"
   }
 ]
