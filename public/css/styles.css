@@ -4088,3 +4088,20 @@ ul { list-style: none; }
   .anl-body { flex: 1; overflow-y: auto; scrollbar-width: thin; }
 }
 .anlp-header, .anl-head { min-height: 62px; box-sizing: border-box; }
+
+/* ── Posting Otomatis ─────────────────────────────────────────────── */
+.ap-toggle { width: 100%; margin-bottom: 12px; }
+#apFields .form-hint { margin-bottom: 8px; }
+.ap-results { display: flex; flex-direction: column; gap: 6px; margin-top: 8px; }
+.ap-res { display: flex; align-items: flex-start; gap: 8px; padding: 8px 10px; border-radius: 8px;
+  border: 1px solid var(--border, #e5e7eb); font-size: .78rem; background: var(--bg, #f8fafc); }
+.ap-res b { min-width: 74px; }
+.ap-res .ap-msg { flex: 1; color: var(--muted, #64748b); word-break: break-word; }
+.ap-res a { color: var(--blue, #2563eb); }
+.ap-res.done { border-color: #bbf7d0; background: #f0fdf4; }
+.ap-res.error, .ap-res.needs-check { border-color: #fecaca; background: #fef2f2; }
+.ap-res.processing { border-color: #bfdbfe; background: #eff6ff; }
+.ap-res.retry-pending { opacity: .6; }
+.ap-retry { font-size: .72rem; padding: 2px 8px; border-radius: 6px; border: 1px solid currentColor;
+  background: transparent; color: var(--red, #dc2626); cursor: pointer; white-space: nowrap; }
+.ap-badge { font-size: .68rem; font-weight: 700; padding: 1px 6px; border-radius: 6px; background: #ede9fe; color: #6d28d9; margin-left: 4px; }
