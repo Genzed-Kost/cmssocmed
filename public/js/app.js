@@ -2941,6 +2941,20 @@ function populateCreatorFilter(selectId) {
 
 const ACT_PAGE_SIZE = 20;
 
+/* Tombol halaman ringkas: ‹ 1 2 3 … 23 24 25 › (halaman aktif & tetangganya selalu tampil) */
+function pagerHtml(cur, total, fn) {
+  const show = new Set();
+  [1, 2, 3, total - 2, total - 1, total, cur - 1, cur, cur + 1].forEach(n => { if (n >= 1 && n <= total) show.add(n); });
+  const nums = [...show].sort((a, b) => a - b);
+  let html = `<button class="page-btn page-arrow" ${cur <= 1 ? 'disabled' : `onclick="${fn}(${cur - 1})"`} aria-label="Sebelumnya">‹</button>`;
+  nums.forEach((n, i) => {
+    if (i && n - nums[i - 1] > 1) html += `<span class="page-gap">…</span>`;
+    html += `<button class="page-btn ${n === cur ? 'active' : ''}" onclick="${fn}(${n})">${n}</button>`;
+  });
+  html += `<button class="page-btn page-arrow" ${cur >= total ? 'disabled' : `onclick="${fn}(${cur + 1})"`} aria-label="Berikutnya">›</button>`;
+  return html;
+}
+
 function renderActivity(page) {
   if (page !== undefined) state.actPage = page;
   const search  = gv('actSearch').toLowerCase();
@@ -2982,12 +2996,14 @@ function renderActivity(page) {
       const roleBadge = a.role
         ? ` <span style="font-size:.6rem;padding:1px 5px;border-radius:3px;background:${roleColor}18;color:${roleColor};border:1px solid ${roleColor}30;vertical-align:middle">${esc(a.role)}</span>`
         : '';
+      // 2 baris: (1) user + role · waktu, (2) aksi + target
+      const desc = `${esc(a.action)} ${a.target ? `<strong>${esc(a.target)}</strong>` : ''}`;
       return `<li class="activity-item">
         <div class="act-icon-lg">${icons[iconType]}</div>
         <div class="act-body-lg">
-          <span class="act-user">${esc(a.user||'—')}</span>${roleBadge}
-          <div class="act-desc">${esc(a.action)} ${a.target?`<strong>${esc(a.target)}</strong>`:''}</div>
-          <div class="act-ts">${fmtDate(a.timestamp)} · ${relTime(a.timestamp)}</div>
+          <div class="act-line1"><span class="act-user">${esc(a.user||'—')}</span>${roleBadge}
+            <span class="act-ts" title="${esc(fmtDate(a.timestamp))}">${relTime(a.timestamp)}</span></div>
+          <div class="act-desc" title="${esc((a.action || '') + ' ' + (a.target || ''))}">${desc}</div>
         </div>
       </li>`;
     }).join('');
@@ -2997,9 +3013,7 @@ function renderActivity(page) {
   setTxt('actCount', `${filtered.length} aktivitas`);
   const pagEl = $('actPagination');
   if (pagEl) {
-    pagEl.innerHTML = total <= 1 ? '' : Array.from({length: total}, (_, i) =>
-      `<button class="page-btn ${i+1===state.actPage?'active':''}" onclick="renderActivity(${i+1})">${i+1}</button>`
-    ).join('');
+    pagEl.innerHTML = total <= 1 ? '' : pagerHtml(state.actPage, total, 'renderActivity');
   }
 }
 

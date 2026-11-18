@@ -12,6 +12,7 @@ window.APP_INFO = {
     {
       version: '2.6.1', date: '2026-11-18',
       items: [
+        '🗒 Activity Log lebih ringkas: 2 kolom, tiap aktivitas 2 baris, nomor halaman ‹ 1 2 3 … 23 24 25 ›',
         '📊 Statistik: filter periode Mingguan (4/8/12 minggu) kini benar-benar mengubah grafik & ringkasan',
         '👥 Facebook & Instagram: Follows (pengikut baru selama periode) dan Followers (total pengikut hingga akhir periode) kini dibedakan',
         '📘 Statistik Facebook & Instagram disederhanakan: Views, Viewers/Reach, Total Eng/Reactions, Visits Profile, Followers, Follows (+ Jumlah Konten untuk IG)',

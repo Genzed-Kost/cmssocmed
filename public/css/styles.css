@@ -4111,3 +4111,20 @@ ul { list-style: none; }
 
 /* Followers mingguan otomatis (followers minggu lalu + Follows) */
 .sef-cum-auto .sef-inp { background: #f5f3ff; color: #6d28d9; font-weight: 700; cursor: not-allowed; }
+
+/* Activity Log: 2 kolom, tiap item 2 baris */
+#activityList.activity-list { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px 14px; }
+#activityList .activity-item { align-items: center; padding: 9px 12px; border: 1px solid var(--bd); border-radius: 12px; background: var(--surface); min-width: 0; }
+#activityList .activity-item:last-child { border-bottom: 1px solid var(--bd); }
+#activityList .act-icon-lg { width: 32px; height: 32px; font-size: .9rem; }
+#activityList .act-body-lg { min-width: 0; }
+#activityList .act-line1 { display: flex; align-items: center; gap: 6px; min-width: 0; }
+#activityList .act-line1 .act-user { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+#activityList .act-line1 .act-ts { margin: 0 0 0 auto; flex-shrink: 0; white-space: nowrap; }
+#activityList .act-desc { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-top: 2px; }
+#activityList .act-empty { grid-column: 1 / -1; }
+@media (max-width: 760px) { #activityList.activity-list { grid-template-columns: 1fr; } }
+.pagination { flex-wrap: wrap; align-items: center; }
+.page-gap { padding: 0 4px; color: var(--muted); font-size: .8rem; }
+.page-btn.page-arrow { font-weight: 800; padding: 4px 9px; }
+.page-btn:disabled { opacity: .4; cursor: default; }
