@@ -1,5 +1,13 @@
 [
   {
+    "id": "mwlw9c3vhgcso",
+    "user": "Admin",
+    "role": "Admin",
+    "action": "update statistik",
+    "target": "Penjaga Harapan TikTok — 9-15 Nov '26",
+    "timestamp": "2026-11-18T09:03:37.867Z"
+  },
+  {
     "id": "mwlw3yog68nxc",
     "user": "Admin",
     "role": "Admin",
@@ -3990,13 +3998,5 @@
     "action": "login",
     "target": "masuk ke sistem sebagai Publisher",
     "timestamp": "2026-07-03T10:36:05.675Z"
-  },
-  {
-    "id": "mr4ssjhsd4j2b",
-    "user": "Admin",
-    "role": "Admin",
-    "action": "logout",
-    "target": "keluar dari sistem",
-    "timestamp": "2026-07-03T10:35:58.768Z"
   }
 ]
