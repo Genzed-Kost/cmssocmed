@@ -1,5 +1,13 @@
 [
   {
+    "id": "mwlvxc6z8v3xj",
+    "user": "Admin",
+    "role": "Admin",
+    "action": "update statistik",
+    "target": "Penjaga Harapan TikTok — 21-27 Sep '26",
+    "timestamp": "2026-11-18T08:54:18.107Z"
+  },
+  {
     "id": "mwlvtnec0riyi",
     "user": "Admin",
     "role": "Admin",
@@ -3990,13 +3998,5 @@
     "action": "update statistik",
     "target": "Penjaga Harapan TikTok — Nov 2025",
     "timestamp": "2026-07-03T08:17:09.249Z"
-  },
-  {
-    "id": "mr4ntfyo3nx2o",
-    "user": "Admin",
-    "role": "Admin",
-    "action": "update statistik",
-    "target": "Penjaga Harapan TikTok — Mar 2026",
-    "timestamp": "2026-07-03T08:16:42.768Z"
   }
 ]
