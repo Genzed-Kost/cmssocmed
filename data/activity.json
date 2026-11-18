@@ -1,5 +1,13 @@
 [
   {
+    "id": "mwllt5mg04jcv",
+    "user": "Umar",
+    "role": "Publisher",
+    "action": "login",
+    "target": "masuk ke sistem sebagai Publisher",
+    "timestamp": "2026-11-18T04:11:06.808Z"
+  },
+  {
     "id": "mwlkgxk74simp",
     "user": "Umar",
     "role": "Publisher",
@@ -3990,13 +3998,5 @@
     "action": "Hapus Bank Konten",
     "target": "\"tanpa judul\"",
     "timestamp": "2026-07-03T06:28:03.835Z"
-  },
-  {
-    "id": "mr4jxob66it4h",
-    "user": "Umar",
-    "role": "Publisher",
-    "action": "Hapus Bank Konten",
-    "target": "\"tanpa judul\"",
-    "timestamp": "2026-07-03T06:28:01.746Z"
   }
 ]
