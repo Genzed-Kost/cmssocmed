@@ -1,5 +1,13 @@
 [
   {
+    "id": "mwm2p0wlbk4yo",
+    "user": "Umar",
+    "role": "Publisher",
+    "action": "login",
+    "target": "masuk ke sistem sebagai Publisher",
+    "timestamp": "2026-11-18T12:03:47.541Z"
+  },
+  {
     "id": "mwlyh8xduufk8",
     "user": "Admin",
     "role": "Admin",
@@ -3990,13 +3998,5 @@
     "action": "update statistik",
     "target": "Penjaga Harapan TikTok — 29 Jun-5 Jul '26",
     "timestamp": "2026-07-06T06:50:57.299Z"
-  },
-  {
-    "id": "mr8pwfwplcvmn",
-    "user": "Admin",
-    "role": "Admin",
-    "action": "login",
-    "target": "masuk ke sistem sebagai Admin",
-    "timestamp": "2026-07-06T04:26:06.601Z"
   }
 ]
