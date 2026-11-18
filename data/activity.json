@@ -1,5 +1,13 @@
 [
   {
+    "id": "mwlyf37pcx171",
+    "user": "Admin",
+    "role": "Admin",
+    "action": "tambah konten",
+    "target": "berjudul \"Koperasi Harus Bikin Petani Untung, Bukan Tengkulak!\" (tema: Belajar Koperasi) untuk akun 33 Official dijadwalkan 19 Nov 2026",
+    "timestamp": "2026-11-18T10:04:05.509Z"
+  },
+  {
     "id": "mwlydwa4k4wah",
     "user": "Admin",
     "role": "Admin",
@@ -3990,13 +3998,5 @@
     "action": "login",
     "target": "masuk ke sistem sebagai Admin",
     "timestamp": "2026-07-04T01:43:59.260Z"
-  },
-  {
-    "id": "mr4uihb6z6ckm",
-    "user": "Admin",
-    "role": "Admin",
-    "action": "login",
-    "target": "masuk ke sistem sebagai Admin",
-    "timestamp": "2026-07-03T11:24:08.610Z"
   }
 ]
