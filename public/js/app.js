@@ -258,42 +258,28 @@ const PLATFORM_FIELDS = {
     label: 'Facebook', color: '#1877f2',
     followerKey: 'pageFollowers', viewKey: 'totalViews',
     fields: [
-      { key:'pageFollowers',    label:'Page Followers',   fmt:'num', auto:true },
-      { key:'followersGained',  label:'Follows Monthly',  fmt:'num' },
-      { key:'totalPost',        label:'Total Post',       fmt:'num' },
-      { key:'totalViews',       label:'Total Views',      fmt:'num' },
-      { key:'totalReach',       label:'Total Reach',      fmt:'num' },
-      { key:'totalReactions',   label:'Total Reactions',  fmt:'num' },
-      { key:'totalComments',    label:'Total Comments',   fmt:'num' },
-      { key:'totalShares',      label:'Total Shares',     fmt:'num' },
-      { key:'totalEngagement',  label:'Total Eng.',       fmt:'num' },
-      { key:'avgViewsPerPost',  label:'Avg Views/Post',   fmt:'num' },
-      { key:'avgEngPerPost',    label:'Avg Eng/Post',     fmt:'num' },
-      { key:'maxViewsSingle',   label:'Max Views Single', fmt:'num' },
-      { key:'erPct',            label:'ER %',             fmt:'pct', auto:'calc' },
+      { key:'totalViews',       label:'Views',               fmt:'num' },
+      { key:'totalViewers',     label:'Viewers',             fmt:'num' },
+      { key:'totalEngagement',  label:'Total Eng/Reactions', fmt:'num' },
+      { key:'profileVisits',    label:'Visits Profile',      fmt:'num' },
+      { key:'pageFollowers',    label:'Followers',           fmt:'num' },
+      // Mingguan: otomatis = followers minggu ini − minggu sebelumnya. Bulanan: diisi manual.
+      { key:'followersGained',  label:'Follows',             fmt:'num', weeklyAuto:'gain' },
+      { key:'erPct',            label:'ER %',                fmt:'pct', auto:'calc' },
     ]
   },
   instagram: {
     label: 'Instagram', color: '#e1306c',
     followerKey: 'followersEOM', viewKey: 'totalViews',
     fields: [
-      { key:'followersEOM',     label:'Followers (EOM)',  fmt:'num', auto:true },
-      { key:'jmlPost',          label:'Jml Post',         fmt:'num' },
-      { key:'totalViews',       label:'Total Views',      fmt:'num' },
-      { key:'totalReach',       label:'Total Reach',      fmt:'num' },
-      { key:'followersGained',  label:'Followers Gained', fmt:'num' },
-      { key:'totalLikes',       label:'Total Likes',      fmt:'num' },
-      { key:'totalComments',    label:'Total Comments',   fmt:'num' },
-      { key:'totalShares',      label:'Total Shares',     fmt:'num' },
-      { key:'totalSaves',       label:'Total Saves',      fmt:'num' },
-      { key:'totalEngagement',  label:'Total Eng.',       fmt:'num' },
-      { key:'erPct',            label:'ER %',             fmt:'pct', auto:'calc' },
-      { key:'avgViews',         label:'Avg Views',        fmt:'num' },
-      { key:'peakViews',        label:'Peak Views',       fmt:'num' },
-      { key:'avgEng',           label:'Avg Eng',          fmt:'num' },
-      { key:'reelViews',        label:'Reel Views',       fmt:'num' },
-      { key:'carouselViews',    label:'Carousel Views',   fmt:'num' },
-      { key:'imageViews',       label:'Image Views',      fmt:'num' },
+      { key:'totalViews',       label:'Views',               fmt:'num' },
+      { key:'totalReach',       label:'Reach',               fmt:'num' },
+      { key:'totalEngagement',  label:'Total Eng/Reactions', fmt:'num' },
+      { key:'profileVisits',    label:'Visits Profile',      fmt:'num' },
+      { key:'followersEOM',     label:'Followers',           fmt:'num' },
+      { key:'followersGained',  label:'Follows',             fmt:'num', weeklyAuto:'gain' },
+      { key:'jmlPost',          label:'Jumlah Konten',       fmt:'num' },
+      { key:'erPct',            label:'ER %',                fmt:'pct', auto:'calc' },
     ]
   },
   twitter: {
@@ -381,7 +367,10 @@ const PLATFORM_CSV_ALIASES = {
     'newfollows':                     'followersGained',
     'follows':                        'followersGained',
     'followersgained':                'followersGained',
-    'profilevisits':                  '_profileViews',
+    'profilevisits':                  'profileVisits',
+    'instagramprofilevisits':         'profileVisits',
+    'jumlahkonten':                   'jmlPost',
+    'posts':                          'jmlPost',
     'likes':                          'totalLikes',
     'likecounts':                     'totalLikes',
     'comments':                       'totalComments',
@@ -419,10 +408,16 @@ const PLATFORM_CSV_ALIASES = {
     'totalengagements':               'totalEngagement',
     'engagement':                     'totalEngagement',
     'pageviewstotal':                 'totalViews',
-    'reactions':                      'totalReactions',
-    'pagereactions':                  'totalReactions',
-    'totalreactions':                 'totalReactions',
-    'likes':                          'totalReactions',  // FB "likes" = reactions
+    'reactions':                      'totalEngagement',
+    'pagereactions':                  'totalEngagement',
+    'totalreactions':                 'totalEngagement',
+    'viewers':                        'totalViewers',
+    'uniqueviewers':                  'totalViewers',
+    'pagevisits':                     'profileVisits',
+    'profilevisits':                  'profileVisits',
+    'facebookvisits':                 'profileVisits',
+    'newfollows':                     'followersGained',
+    'follows':                        'followersGained',
     'comments':                       'totalComments',
     'shares':                         'totalShares',
     'posts':                          'totalPost',
@@ -5385,6 +5380,8 @@ function getCurrentYM() {
 
 /* ── Deskripsi tiap field statistik (tampil di tooltip info icon) ─────────── */
 const STAT_FIELD_DESC = {
+  profileVisits:    'Jumlah kunjungan ke profil/halaman akun pada periode ini.',
+  followersGained:  'Pertambahan followers pada periode ini. Data mingguan dihitung otomatis dari followers minggu sebelumnya; data bulanan diisi manual.',
   // YouTube
   jmlVideo:         'Jumlah video yang diunggah dalam periode ini.',
   totalViews:       'Total tayangan semua video dalam periode ini.',
@@ -6199,7 +6196,7 @@ function rollupWeekly(acctId, platId) {
     const weeks = (byMonth[ym] || []).slice().sort((a, b) => a.week.localeCompare(b.week));
     const derived = {};
     platM.fields.forEach(f => {
-      if (f.auto === 'calc' || WK_UNIQUE_KEYS.has(f.key) || WK_AVG_RULES[f.key]) return;
+      if (f.auto === 'calc' || f.weeklyAuto || WK_UNIQUE_KEYS.has(f.key) || WK_AVG_RULES[f.key]) return;
       const vals = weeks.map(w => w[f.key]).filter(v => v !== undefined && v !== null && v !== '' && !isNaN(+v)).map(Number);
       if (!vals.length) return;
       if (WK_EOM_KEYS.has(f.key))      derived[f.key] = vals[vals.length - 1];
@@ -6243,6 +6240,28 @@ function rollupWeeklyAll() {
   });
 }
 
+/* ── Kolom efektif per mode tampilan ──
+   Field ber-weeklyAuto (mis. Follows) menjadi kolom otomatis saat mode Mingguan,
+   dan kolom isian manual biasa saat mode Bulanan. */
+function statFields(platId, weekly) {
+  const platM = PLATFORM_FIELDS[platId];
+  if (!platM) return [];
+  return platM.fields.map(f => weekly && f.weeklyAuto ? { ...f, auto: 'calc', calcKind: f.weeklyAuto } : f);
+}
+/* Follows mingguan = followers minggu ini − followers minggu sebelumnya (otomatis) */
+function applyWeeklyGain(acctId, platId) {
+  const platM = PLATFORM_FIELDS[platId];
+  const gainF = platM?.fields.find(f => f.weeklyAuto === 'gain');
+  const rows  = state.analytics?.[acctId]?.[platId + '_w'];
+  if (!gainF || !Array.isArray(rows)) return;
+  const fk = platM.followerKey;
+  rows.slice().sort((a, b) => (a.week || '').localeCompare(b.week || '')).forEach((r, i, arr) => {
+    const prev = arr[i - 1];
+    const cur = +r[fk] || 0, pf = +(prev?.[fk]) || 0;
+    if (cur && pf) r[gainF.key] = cur - pf;   // tanpa followers minggu ini/sebelumnya: nilai lama dibiarkan
+  });
+}
+
 /* ── ER (Engagement Rate) otomatis ──────────────────────────────────────────
    ER % = Total Engagement ÷ Total Views × 100 (views = viewKey platform).
    Bila Total Engagement kosong, dijumlah dari likes/comments/shares/saves/reactions. */
@@ -6278,6 +6297,7 @@ function renderStatChart() {
   const platM  = PLATFORM_FIELDS[platId];
   if (!platM) return;
 
+  applyWeeklyGain(acctId, platId); // Follows mingguan otomatis
   rollupWeekly(acctId, platId);  // Data Bulanan otomatis dari Data Mingguan
   applyAutoER(acctId, platId);   // ER % selalu dihitung otomatis
 
@@ -6350,16 +6370,16 @@ function renderStatChart() {
       { key:'followersEOM',    label:'Followers (EOM)',     eom:true  },
     ],
     facebook:  [
-      { key:'totalPost',       label:'Total Post',          eom:false },
-      { key:'totalViews',      label:'Total Views',         eom:false },
-      { key:'totalEngagement', label:'Total Engagement',    eom:false },
-      { key:'pageFollowers',   label:'Page Followers (EOM)',eom:true  },
+      { key:'totalViews',      label:'Views',               eom:false },
+      { key:'totalEngagement', label:'Total Eng/Reactions', eom:false },
+      { key:'profileVisits',   label:'Visits Profile',      eom:false },
+      { key:'pageFollowers',   label:'Followers',           eom:true  },
     ],
     instagram: [
-      { key:'jmlPost',         label:'Total Post',          eom:false },
-      { key:'totalViews',      label:'Total Views',         eom:false },
-      { key:'totalEngagement', label:'Total Engagement',    eom:false },
-      { key:'followersEOM',    label:'Followers (EOM)',     eom:true  },
+      { key:'totalViews',      label:'Views',               eom:false },
+      { key:'totalReach',      label:'Reach',               eom:false },
+      { key:'totalEngagement', label:'Total Eng/Reactions', eom:false },
+      { key:'followersEOM',    label:'Followers',           eom:true  },
     ],
     twitter:   [
       { key:'followers',       label:'Followers',           eom:true  },
@@ -6746,14 +6766,15 @@ function renderStatDataTable(acctId, platId, rows) {
   if (!platM) { wrap.innerHTML = ''; return; }
 
   const isWeekly = state.statViewMode === 'weekly';
+  const FIELDS   = statFields(platId, isWeekly);
   const rKey     = isWeekly ? 'week' : 'month';
   const sorted   = [...rows].sort((a, b) => (b[rKey]||'').localeCompare(a[rKey]||''));
 
-  const headerCells = platM.fields.map(f => f.auto === 'calc'
-    ? `<th class="stat-th-calc" title="Dihitung otomatis: Total Engagement ÷ Views × 100">${f.label} <span class="stat-calc-tag">AUTO</span></th>`
+  const headerCells = FIELDS.map(f => f.auto === 'calc'
+    ? `<th class="stat-th-calc" title="${f.calcKind === 'gain' ? 'Dihitung otomatis dari followers minggu sebelumnya' : 'Dihitung otomatis: Total Engagement ÷ Views × 100'}">${f.label} <span class="stat-calc-tag">AUTO</span></th>`
     : `<th>${f.label}</th>`).join('');
   const bodyRows = sorted.map(r => {
-    const cells = platM.fields.map(f => {
+    const cells = FIELDS.map(f => {
       const val    = r[f.key];
       const empty  = val === undefined || val === null || val === 0 || val === '';
       const isAuto = !!f.auto;
@@ -6765,7 +6786,7 @@ function renderStatDataTable(acctId, platId, rows) {
         return `<td class="stat-td-wk" title="Otomatis dari Data Mingguan">${fmtStatVal(val, f.fmt)}</td>`;
       }
       if (f.auto === 'calc') {
-        return `<td class="stat-td-calc" title="Otomatis: Total Engagement ÷ Views × 100">${empty ? '—' : fmtStatVal(val, f.fmt)}</td>`;
+        return `<td class="stat-td-calc" title="${f.calcKind === 'gain' ? 'Otomatis: followers minggu ini − minggu sebelumnya' : 'Otomatis: Total Engagement ÷ Views × 100'}">${empty ? '—' : fmtStatVal(val, f.fmt)}</td>`;
       }
       const display = empty && !isAuto ? '—' : fmtStatVal(val, f.fmt);
       return `<td style="${style}" title="${!isAuto && empty ? 'Isi manual' : ''}">${display}</td>`;
@@ -6789,7 +6810,7 @@ function renderStatDataTable(acctId, platId, rows) {
   const avgKeys  = new Set(['avgViewsPerVideo','avgViewsPerPost','avgEngPerPost','avgViews','avgEng']);
   const maxKeys  = new Set(['peakViews','maxViewsSingle']);
   const latest   = sorted[0]; // sorted descending → [0] = terbaru
-  const totCells = platM.fields.map(f => {
+  const totCells = FIELDS.map(f => {
     const vals = sorted.map(r => +(r[f.key] ?? 0)).filter(v => !isNaN(v));
     if (!vals.length) return `<td style="text-align:right;color:var(--muted-lt)">—</td>`;
     let agg, hint;
@@ -6816,7 +6837,7 @@ function renderStatDataTable(acctId, platId, rows) {
 
   // Tabel data dibungkus dropdown (lipat/buka); status buka diingat per browser
   const unit = isWeekly ? 'minggu' : 'bulan';
-  const incomplete = sorted.filter(r => platM.fields.some(f => !f.auto &&
+  const incomplete = sorted.filter(r => FIELDS.some(f => !f.auto &&
     (r[f.key] === undefined || r[f.key] === null || r[f.key] === 0 || r[f.key] === ''))).length;
   let open = false;
   try { open = localStorage.getItem('cms_stat_table_open') === '1'; } catch {}
@@ -7902,6 +7923,7 @@ function renderStatInputFields(acctId, platIdOverride, prefill) {
   const platId = platIdOverride || state.statActivePlat || 'youtube';
   const platM  = PLATFORM_FIELDS[platId];
   if (!platM) return;
+  const FIELDS = statFields(platId, state.statViewMode === 'weekly');
 
   // Edit: isi nilai yang ada. Tambah baru: kosong, nilai bulan terakhir hanya sebagai petunjuk.
   const last = (() => {
@@ -7926,10 +7948,10 @@ function renderStatInputFields(acctId, platIdOverride, prefill) {
         value="${val ?? ''}" oninput="statEditCount()" />
     </label>`;
   };
-  const manual = platM.fields.filter(f => !f.auto);
-  const calc   = platM.fields.filter(f => f.auto === 'calc');
-  const auto   = platM.fields.filter(f => f.auto && f.auto !== 'calc');
-  const calcRow = f => `<div class="sef-row sef-calc" title="Dihitung otomatis: Total Engagement ÷ ${esc(platM.fields.find(x => x.key === platM.viewKey)?.label || 'Views')} × 100">
+  const manual = FIELDS.filter(f => !f.auto);
+  const calc   = FIELDS.filter(f => f.auto === 'calc');
+  const auto   = FIELDS.filter(f => f.auto && f.auto !== 'calc');
+  const calcRow = f => `<div class="sef-row sef-calc" title="${f.calcKind === 'gain' ? 'Dihitung otomatis: followers minggu ini − followers minggu sebelumnya' : `Dihitung otomatis: Total Engagement ÷ ${esc(platM.fields.find(x => x.key === platM.viewKey)?.label || 'Views')} × 100`}">
       <span class="sef-label">${esc(f.label)} <em class="sef-auto-tag">otomatis</em></span>
       <output id="sif_${f.key}_calc" class="sef-inp sef-out">—</output>
     </div>`;
@@ -7955,6 +7977,17 @@ function statEditCount() {
     box.querySelectorAll('input.sef-inp').forEach(i => { if (i.value !== '') row[i.id.replace('sif_', '')] = +i.value; });
     const er = calcER(platId, row);
     out.textContent = er === null ? '—' : er.toFixed(2) + '%';
+  }
+  // Follows mingguan: followers isian − followers minggu sebelumnya
+  const gainOut = $('sif_followersGained_calc');
+  if (gainOut && platId) {
+    const pm   = PLATFORM_FIELDS[platId];
+    const cur  = +($('sif_' + pm.followerKey)?.value || 0);
+    const wk   = $('statMonth')?.value || '';
+    const prev = (state.analytics?.[state.statActiveAcct]?.[platId + '_w'] || [])
+      .filter(r => (r.week || '') < wk && +r[pm.followerKey]).sort((a, b) => a.week.localeCompare(b.week)).pop();
+    gainOut.textContent = cur && prev ? (cur - prev[pm.followerKey]).toLocaleString('id-ID') : '—';
+    gainOut.title = prev ? `Dibanding ${fmtWeek(prev.week)}: ${(+prev[pm.followerKey]).toLocaleString('id-ID')}` : 'Belum ada data minggu sebelumnya';
   }
   const inputs = [...document.querySelectorAll('#statInputFields input.sef-inp')];
   const filled = inputs.filter(i => i.value !== '').length;
@@ -8007,6 +8040,7 @@ async function saveAnalyticsEntry() {
   if (analytics[acctId][storeKey].length > 52)  // max 52 minggu / 36 bulan
     analytics[acctId][storeKey] = analytics[acctId][storeKey].slice(isWeekly ? -52 : -36);
   state.analytics = analytics;
+  applyWeeklyGain(acctId, platId);
   rollupWeekly(acctId, platId);   // perbarui Data Bulanan dari Data Mingguan
   applyAutoER(acctId, platId);
   _setAnalyticsMeta(analytics, acctId, platId);
@@ -9190,6 +9224,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   /* ── Statistics ─────────────────────────────────────────────── */
   $('btnCloseStatInput')?.addEventListener('click', () => $('statInputCard')?.classList.add('hidden'));
   $('btnSaveStats')?.addEventListener('click', saveAnalyticsEntry);
+  $('statMonth')?.addEventListener('input', () => statEditCount());   // Follows mingguan ikut periode
   // statMetric removed — platform tabs handle switching now
 
   /* ── Bank Konten ─────────────────────────────────────────────── */

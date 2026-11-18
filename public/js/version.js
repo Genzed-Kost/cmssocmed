@@ -25,6 +25,7 @@ window.APP_INFO = {
       adminItems: [
         '📊 Statistik: Data Bulanan terisi otomatis dari Data Mingguan — angka yang diisi manual tidak ditimpa',
         '🧮 ER % dihitung otomatis (Total Engagement ÷ Views); kolom ditandai AUTO',
+        '📘 Statistik Facebook & Instagram disederhanakan (Views, Viewers/Reach, Total Eng/Reactions, Visits Profile, Followers, Follows, Jumlah Konten); Follows mingguan otomatis',
         '🗂 Tabel Data Bulanan kini berupa dropdown; form edit data jadi pop up ringkas',
         '🎙 Daftar Program (kelompok Stock Contents) bisa diatur di API Setup',
         '💬 Fitur Pesan berjalan di Cloudflare (D1 + R2); pesan & file tidak masuk repo GitHub',
