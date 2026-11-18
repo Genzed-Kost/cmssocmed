@@ -1,5 +1,13 @@
 [
   {
+    "id": "mwm6vs45mio1w",
+    "user": "Idham",
+    "role": "Creator",
+    "action": "login",
+    "target": "masuk ke sistem sebagai Creator",
+    "timestamp": "2026-11-18T14:01:01.205Z"
+  },
+  {
     "id": "mwm44kb4ph77k",
     "user": "Idham",
     "role": "Creator",
@@ -3990,13 +3998,5 @@
     "action": "update statistik",
     "target": "33 Official TikTok — 29 Jun-5 Jul '26",
     "timestamp": "2026-07-06T07:08:18.880Z"
-  },
-  {
-    "id": "mr8voo1o2e07x",
-    "user": "Admin",
-    "role": "Admin",
-    "action": "update statistik",
-    "target": "33 Official TikTok — 22-28 Jun '26",
-    "timestamp": "2026-07-06T07:08:01.596Z"
   }
 ]
