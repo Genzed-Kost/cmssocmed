@@ -670,7 +670,8 @@
           "totalShares",
           "totalEngagement"
         ],
-        "_weeks": "1/4"
+        "_weeks": "1/4",
+        "erPct": 6.07
       }
     ],
     "facebook": [
@@ -1222,7 +1223,7 @@
         "updatedBy": "Admin"
       },
       "tiktok": {
-        "updatedAt": "2026-11-16T12:59:51.225Z",
+        "updatedAt": "2026-11-18T08:16:55.157Z",
         "updatedBy": "Admin"
       }
     },
@@ -1843,6 +1844,22 @@
         "totalShares": 3321,
         "totalEngagement": 44314,
         "erPct": 4.81
+      },
+      {
+        "week": "2026-W32",
+        "jmlVideo": 33,
+        "totalVideoViews": 457917,
+        "profileViews": 1146,
+        "followersEOM": 41466,
+        "followersGained": 310,
+        "totalViewers": 342910,
+        "newViewers": 123011,
+        "returningViewers": 219899,
+        "totalLikes": 20307,
+        "totalComments": 2040,
+        "totalShares": 1339,
+        "totalEngagement": 23686,
+        "erPct": 5.17
       },
       {
         "week": "2026-W40",
