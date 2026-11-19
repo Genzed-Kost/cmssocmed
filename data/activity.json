@@ -1,5 +1,13 @@
 [
   {
+    "id": "mwn475y514t4x",
+    "user": "Admin",
+    "role": "Admin",
+    "action": "tambah Stock Contents",
+    "target": "\"Bedu & Bopak\" — Gimana Kabarnya",
+    "timestamp": "2026-11-19T05:33:39.677Z"
+  },
+  {
     "id": "mwn46opleek2r",
     "user": "Admin",
     "role": "Admin",
@@ -3990,13 +3998,5 @@
     "action": "login",
     "target": "masuk ke sistem sebagai Admin",
     "timestamp": "2026-07-10T17:51:51.225Z"
-  },
-  {
-    "id": "mreolme356mgb",
-    "user": "Admin",
-    "role": "Admin",
-    "action": "Kirim WA Stock Contents",
-    "target": "ke Umar — 17 item",
-    "timestamp": "2026-07-10T08:36:19.227Z"
   }
 ]
