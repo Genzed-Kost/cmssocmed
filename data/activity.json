@@ -1,5 +1,13 @@
 [
   {
+    "id": "mwn4c666ukheb",
+    "user": "Admin",
+    "role": "Admin",
+    "action": "tambah Stock Contents",
+    "target": "\"Makam Mbah Beji\" — Liputan JA",
+    "timestamp": "2026-11-19T05:37:33.246Z"
+  },
+  {
     "id": "mwn4bia6hah2k",
     "user": "Admin",
     "role": "Admin",
@@ -3990,13 +3998,5 @@
     "action": "update statistik",
     "target": "Penjaga Harapan YouTube — Jul 2026",
     "timestamp": "2026-07-13T05:22:32.178Z"
-  },
-  {
-    "id": "mrirvymefrx1p",
-    "user": "Admin",
-    "role": "Admin",
-    "action": "login",
-    "target": "masuk ke sistem sebagai Admin",
-    "timestamp": "2026-07-13T05:19:25.190Z"
   }
 ]
