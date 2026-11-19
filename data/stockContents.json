@@ -23,9 +23,10 @@
     "prodTimeEnd": "",
     "airDate": "2026-11-08",
     "ytUrl": "https://youtu.be/iZlR4L3gOJ0",
-    "ytTitle": "",
+    "ytTitle": "Satu Data Nasional untuk Masa Depan Indonesia - Productive Hangout Eps. 39",
     "ytAuto": false,
-    "ytSkip": false
+    "ytSkip": false,
+    "ytChannel": "Penjaga Harapan"
   },
   {
     "id": "sc_1795026399136",
@@ -37,9 +38,10 @@
     "prodTimeEnd": "",
     "airDate": "2026-11-03",
     "ytUrl": "https://youtu.be/lD_mKMR0lE8",
-    "ytTitle": "",
+    "ytTitle": "MSCI Bikin IHSG Bergejolak? Indonesia Tak Akan Gentar Hadapi MSCI!",
     "ytAuto": false,
-    "ytSkip": false
+    "ytSkip": false,
+    "ytChannel": "Penjaga Harapan"
   },
   {
     "id": "sc_1795026229976",
@@ -61,9 +63,10 @@
     "prodTimeEnd": "",
     "airDate": "2026-11-10",
     "ytUrl": "https://youtu.be/pUNylYErcJ8",
-    "ytTitle": "",
+    "ytTitle": "Hukum Harus Tajam ke Atas, Bukan Menindas Rakyat Kecil",
     "ytAuto": false,
-    "ytSkip": false
+    "ytSkip": false,
+    "ytChannel": "Penjaga Harapan"
   },
   {
     "id": "sc_1795026081750",
@@ -75,9 +78,10 @@
     "prodTimeEnd": "",
     "airDate": "2026-11-04",
     "ytUrl": "https://youtu.be/vFNbzriYBNM",
-    "ytTitle": "",
+    "ytTitle": "Mengungkap Cara Penjajah Menguasai Alam Nusantara",
     "ytAuto": false,
-    "ytSkip": false
+    "ytSkip": false,
+    "ytChannel": "Penjaga Harapan"
   },
   {
     "id": "sc_1795026038069",
@@ -394,7 +398,8 @@
     "prodTimeEnd": "",
     "ytUrl": "https://www.youtube.com/watch?v=vFqtlLd3Wgw",
     "ytTitle": "Generasi Sandwich: Kenapa Gaji Naik, Hidup Tetap Tidak Cukup?",
-    "ytAuto": true
+    "ytAuto": true,
+    "ytChannel": "Penjaga Harapan"
   },
   {
     "id": "sc_1794817823622",
@@ -407,6 +412,7 @@
     "prodTimeEnd": "",
     "ytUrl": "https://www.youtube.com/watch?v=4Fpsx49Igao",
     "ytTitle": "Mengapa Pengganti Wapres Tidak Lewat Pemilu Ulang? Ini Aturan Konstitusinya",
-    "ytAuto": true
+    "ytAuto": true,
+    "ytChannel": "Penjaga Harapan"
   }
 ]
