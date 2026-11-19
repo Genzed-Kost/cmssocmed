@@ -1,5 +1,21 @@
 [
   {
+    "id": "mwn4ef1rvp58t",
+    "user": "Admin",
+    "role": "Admin",
+    "action": "lengkapi judul video YouTube",
+    "target": "1 Stock Content",
+    "timestamp": "2026-11-19T05:39:18.063Z"
+  },
+  {
+    "id": "mwn4edwv7nlf9",
+    "user": "Admin",
+    "role": "Admin",
+    "action": "ubah Stock Contents",
+    "target": "\"Bedu & Bopak\" — Gimana Kabarnya",
+    "timestamp": "2026-11-19T05:39:16.591Z"
+  },
+  {
     "id": "mwn4dz969hq4h",
     "user": "Admin",
     "role": "Admin",
@@ -3982,21 +3998,5 @@
     "action": "update statistik",
     "target": "Penjaga Harapan Instagram — 13-19 Jul '26",
     "timestamp": "2026-07-13T05:53:25.776Z"
-  },
-  {
-    "id": "mrit0hmbl7v4g",
-    "user": "Admin",
-    "role": "Admin",
-    "action": "update statistik",
-    "target": "Penjaga Harapan Facebook — 6-12 Jul '26",
-    "timestamp": "2026-07-13T05:50:56.051Z"
-  },
-  {
-    "id": "mrisxmqjf822x",
-    "user": "Admin",
-    "role": "Admin",
-    "action": "update statistik",
-    "target": "Penjaga Harapan TikTok — 6-12 Jul '26",
-    "timestamp": "2026-07-13T05:48:42.715Z"
   }
 ]
