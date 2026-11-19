@@ -16,6 +16,7 @@ window.APP_INFO = {
       ],
       adminItems: [
         '▶️ Link YouTube otomatis: konten yang sudah lewat tanggal tayang dicocokkan dengan video channel @PenjagaHarapan dan @JagaAsaPodcast berdasarkan judul & deskripsi video serta tanggal terbit',
+        '🗒 Activity Log kini mencatat seluruh aktivitas: Stock Contents, Aset, link platform, pengaturan (API, token, URL, KPI, Daftar Program, akun), import & unduhan statistik, serta fitur AI',
         '🏷 Link YouTube yang diisi manual kini otomatis menampilkan judul video & nama channel',
         '✍️ Link YouTube bisa diubah manual di form Ubah Stock Content; dikosongkan = tidak ditautkan otomatis lagi',
         '💡 Agar cocok otomatis, sertakan judul konten (atau nama narasumber) di judul/deskripsi video YouTube',

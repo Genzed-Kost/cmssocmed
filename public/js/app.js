@@ -1355,10 +1355,20 @@ async function logActivity(user, action, target) {
   if (!Array.isArray(state.activity)) state.activity = [];  // guard: jika terhapus/rusak
   state.activity.unshift(item);
   if (state.activity.length > 500) state.activity = state.activity.slice(0, 500);
-  try {
-    state.shas.activity = await window.db.writeData('activity', state.activity, `Aktivitas: ${action}`);
-    saveDataCache(); // keep cache fresh so Activity Log always reflects latest
-  } catch { /* non-critical */ }
+  if (state.currentPage === 'activity') renderActivity();
+  // Tulis berurutan (antre) agar beberapa aktivitas beruntun tidak saling menimpa
+  const run = async () => {
+    try {
+      state.shas.activity = await window.db.writeData('activity', state.activity, `Aktivitas: ${action}`);
+      saveDataCache(); // keep cache fresh so Activity Log always reflects latest
+    } catch { /* non-critical */ }
+  };
+  window._actQueue = (window._actQueue || Promise.resolve()).then(run, run);
+  return window._actQueue;
+}
+/* Catat aktivitas user saat ini tanpa menunggu (untuk aksi yang tidak perlu ditahan) */
+function actLog(action, target = '') {
+  try { logActivity(currentUser(), action, target).catch(() => {}); } catch (_) {}
 }
 
 /* ── Activity Log: fetch fresh from GitHub then render ───────────────────── */
@@ -1371,6 +1381,7 @@ async function loadAndRenderActivity() {
     </li>`;
 
   try {
+    await (window._actQueue || Promise.resolve());   // tunggu aktivitas yang masih antre ditulis
     const r = await window.db.read('activity');
     if (r) {
       state.activity   = r.data || [];
@@ -1530,6 +1541,7 @@ async function openPlannerWa(id) {
     const clean  = String(t.user.phone).replace(/\D/g, '');
     const target = clean.startsWith('0') ? '62' + clean.slice(1) : clean;
     window.open(`https://wa.me/${target}?text=${encodeURIComponent(msg)}`, '_blank');
+    actLog('buka WA Planner (manual)', `ke ${t.name} — "${c.title || 'tanpa judul'}"`);
   }
 }
 
@@ -1878,6 +1890,7 @@ async function checkBankKontenReminders() {
   try {
     state.shas.bankKonten = await window.db.writeData('contentBank', state.bankKonten, 'Bank Konten: catat reminder terkirim');
   } catch { /* non-critical */ }
+  if (sentCount > 0 || failCount > 0) actLog('kirim pengingat WA Bank Konten', `${sentCount} terkirim${failCount ? `, ${failCount} gagal` : ''}`);
 
   if (sentCount > 0 && failCount === 0) {
     toast(`✓ Reminder WA terkirim ke ${sentCount} creator`, 'success');
@@ -2555,6 +2568,7 @@ function debouncePlatformLink(contentId, platform, url) {
     c.updatedAt = new Date().toISOString();
     try {
       state.shas.contents = await window.db.writeData('contents', state.contents, `Platform link: ${c.title} — ${platform}`);
+      actLog('ubah link platform', `"${c.title}" — ${platform}`);
       saveDataCache();
       // Update the ↗ anchor without re-rendering the full card
       const anchor = document.querySelector(`[data-plat-anchor="${contentId}_${platform}"]`);
@@ -3384,6 +3398,7 @@ async function saveLinkFromModal(contentId, mode, platform) {
     c.updatedAt = new Date().toISOString();
     state.shas.contents = await window.db.writeData('contents', state.contents,
       mode === 'upcoming' ? `Output link: ${c.title}` : `Platform link ${platform}: ${c.title}`);
+    actLog(mode === 'upcoming' ? 'simpan link output' : 'simpan link platform', `"${c.title}"${mode === 'upcoming' ? '' : ' — ' + platform}`);
     saveDataCache();
     toast('Link disimpan ✓', 'success');
     closeLinkModal();
@@ -3752,6 +3767,7 @@ async function scYtFillTitles() {
     if (isAdmin()) {
       try {
         state.shas.stockContents = await window.db.writeData('stockContents', state.stockContents, `Stock: judul video YouTube (${changed})`);
+        actLog('lengkapi judul video YouTube', `${changed} Stock Content`);
       } catch (_) { /* tetap tampil di sesi ini */ }
     }
     if (state.currentPage === 'stockcontents') renderStockCalendar();
@@ -4011,14 +4027,16 @@ function scBindCalendar(grid, ul, canEdit) {
     }
     const what = data.kind === 'air' ? 'Tayang' : 'Produksi';
     await scPersist(`Stock: pindah ${what.toLowerCase()} "${it.title}"`, () => Object.assign(it, before),
-      `${what} "${it.title || 'item'}" dipindah ke ${scFmtLong(to)} ✓`);
+      `${what} "${it.title || 'item'}" dipindah ke ${scFmtLong(to)} ✓`,
+      ['pindah jadwal Stock Contents', `"${it.title || 'item'}" — ${what.toLowerCase()} ke ${scFmtLong(to)}`]);
   };
 }
 
 /* Simpan ke GitHub; jika gagal, kembalikan perubahan lewat undo(). */
-async function scPersist(commitMsg, undo, okMsg = 'Tersimpan ✓') {
+async function scPersist(commitMsg, undo, okMsg = 'Tersimpan ✓', act = null) {
   try {
     state.shas.stockContents = await window.db.writeData('stockContents', state.stockContents, commitMsg);
+    actLog(act?.[0] || commitMsg.replace(/^Stock:\s*/, 'Stock Contents: '), act?.[1] || '');
     toast(okMsg, 'success');
   } catch (e) {
     if (undo) undo();
@@ -4141,7 +4159,8 @@ async function scSaveModal(id) {
   scCloseModal();
   const jump = scParse(data.airDate || data.prodDate);
   if (jump) state.scMonth = new Date(jump.getFullYear(), jump.getMonth(), 1);
-  await scPersist(id ? 'Stock: update item' : 'Stock: tambah item', undo, id ? 'Perubahan tersimpan ✓' : 'Item ditambahkan ✓');
+  await scPersist(id ? 'Stock: update item' : 'Stock: tambah item', undo, id ? 'Perubahan tersimpan ✓' : 'Item ditambahkan ✓',
+    [id ? 'ubah Stock Contents' : 'tambah Stock Contents', `"${data.title}"${data.category ? ' — ' + data.category : ''}`]);
 }
 
 async function scDeleteItem(id) {
@@ -4151,7 +4170,7 @@ async function scDeleteItem(id) {
   const prev = state.stockContents;
   state.stockContents = prev.filter(x => x.id !== id);
   scCloseModal();
-  await scPersist('Stock: delete item', () => { state.stockContents = prev; }, 'Dihapus');
+  await scPersist('Stock: delete item', () => { state.stockContents = prev; }, 'Dihapus', ['hapus Stock Contents', `"${it.title || 'item'}"`]);
 }
 
 async function scSendWa() {
@@ -4433,6 +4452,7 @@ async function saveAssetFile() {
   renderAssets();
   try {
     state.shas.assets = await window.db.writeData('assets', state.assets, `Aset: ${editId ? 'edit' : 'tambah'} "${name}"`);
+    actLog(editId ? 'edit aset' : 'tambah aset', `"${name}"`);
     saveDataCache();
     toast(editId ? 'File diperbarui ✓' : 'File ditambahkan ✓', 'success');
   } catch(e) { toast('Gagal simpan: ' + e.message, 'error'); }
@@ -4445,6 +4465,7 @@ async function deleteAssetFile(fileId) {
   renderAssets();
   try {
     state.shas.assets = await window.db.writeData('assets', state.assets, `Aset: hapus "${f.name}"`);
+    actLog('hapus aset', `"${f.name}"`);
     saveDataCache();
     toast('File dihapus');
   } catch(e) { toast('Gagal hapus: ' + e.message, 'error'); }
@@ -4589,6 +4610,7 @@ async function _saveApiKeysToSettings(updates) {
     }
     state.settings = settings;
     state.shas.settings = await window.db.writeData('settings', settings, 'API keys: update');
+    actLog('ubah API keys', Object.keys(updates || {}).join(', '));
     saveDataCache();
   } catch (e) {
     // Gagal simpan ke cloud — key tetap aman di perangkat ini
@@ -4678,6 +4700,7 @@ async function createDeviceInvite(pin) {
   Object.keys(invites).forEach(k => { if (invites[k].expires < Date.now()) delete invites[k]; });
   invites[id] = { encrypted, expires };
   await window.db.writeData('_invites', invites, `Invite: buat akses perangkat baru`);
+  actLog('buat link akses perangkat baru', '');
 
   return `${window.location.origin}/loginuser?invite=${id}`;
 }
@@ -4742,6 +4765,7 @@ async function saveTeamTokenFromForm() {
   try {
     state.settings = settings;
     state.shas.settings = await window.db.writeData('settings', settings, 'Token akses tim: update');
+    actLog('ubah token akses tim', '');
     saveDataCache();
     sv('cfgTeamToken', '');          // kosongkan field setelah simpan
     updateTeamTokenStatus();
@@ -4762,6 +4786,7 @@ function deleteTeamToken() {
       try {
         state.settings = settings;
         state.shas.settings = await window.db.writeData('settings', settings, 'Token akses tim: hapus');
+        actLog('hapus token akses tim', '');
         saveDataCache();
         sv('cfgTeamToken', '');
         updateTeamTokenStatus();
@@ -5056,6 +5081,7 @@ async function saveUrls() {
   state.settings = settings; state.tempUrls = {};
   try {
     state.shas.settings = await window.db.writeData('settings', settings, 'Update platform URLs');
+    actLog('ubah URL platform', '');
     toast('URL platform disimpan', 'success');
     renderAnalyticsCompact();
   } catch (e) { toast('Gagal: ' + e.message, 'error'); }
@@ -5259,6 +5285,7 @@ async function saveKpi() {
   state.settings = settings;
   try {
     state.shas.settings = await window.db.writeData('settings', settings, 'Update KPI targets');
+    actLog('ubah target KPI', '');
     toast('Target KPI disimpan', 'success');
     if (state.currentPage === 'dashboard') renderDashboard();
   } catch (e) { toast('Gagal: ' + e.message, 'error'); }
@@ -5292,6 +5319,7 @@ async function saveProgramsList(list, msg, okMsg, renamed) {
   state.settings = settings;
   try {
     state.shas.settings = await window.db.writeData('settings', settings, msg);
+    actLog('ubah Daftar Program', String(msg || '').replace(/^[^:]*:\s*/, ''));
     // Nama program diubah → ikut ubah item Stock Contents yang memakainya
     if (renamed) {
       let n = 0;
@@ -5385,6 +5413,7 @@ async function addCustomAccount() {
   state.settings = settings;
   try {
     state.shas.settings = await window.db.writeData('settings', settings, `Tambah akun: ${name}`);
+    actLog('tambah akun', name);
     nameInp.value = '';
     toast(`Akun "${name}" ditambahkan ✓`, 'success');
     renderCustomAccountsAdmin();
@@ -5399,16 +5428,19 @@ async function updateCustomAcctColor(id, color) {
   a.color = color;
   try {
     state.shas.settings = await window.db.writeData('settings', settings, `Update warna akun ${id}`);
+    actLog('ubah warna akun', getAcctName(id));
   } catch(e) { toast('Gagal simpan warna: ' + e.message, 'error'); }
 }
 
 async function deleteCustomAccount(id) {
   if (!confirm('Hapus akun ini? Data statistik yang sudah tersimpan tidak ikut terhapus.')) return;
   const settings = state.settings || {};
-  settings.customAccounts = (settings.customAccounts||[]).filter(a => a.id !== id);
+  const a = (settings.customAccounts||[]).find(x => x.id === id);
+  settings.customAccounts = (settings.customAccounts||[]).filter(x => x.id !== id);
   state.settings = settings;
   try {
     state.shas.settings = await window.db.writeData('settings', settings, `Hapus akun: ${id}`);
+    actLog('hapus akun', a?.name || id);
     toast('Akun dihapus', 'success');
     renderCustomAccountsAdmin();
     renderKpiInputs();
@@ -6144,6 +6176,7 @@ function downloadStatTemplate() {
   a.href = url; a.download = `template-${platId}.csv`; a.click();
   URL.revokeObjectURL(url);
   toast(`Template ${platM.label} diunduh ✓`, 'success');
+  actLog('unduh template statistik', platM.label);
 }
 
 /* Simpan banyak baris CSV langsung ke state & GitHub */
@@ -6185,6 +6218,7 @@ async function importMultiRowsDirectly(acctId, platId, rows) {
   _setAnalyticsMeta(state.analytics, acctId, platId);
   state.shas.analytics = await window.db.writeData('analytics', state.analytics,
     `Import CSV: update ${toUpdate.length} + tambah ${toAdd.length} bulan ${platId}`);
+  actLog('import statistik', `${getAcctName(acctId)} ${PLATFORM_FIELDS[platId]?.label || platId} — update ${toUpdate.length}, tambah ${toAdd.length} bulan`);
   saveDataCache();
 }
 
@@ -7100,6 +7134,7 @@ function exportStatCSV(acctId, platId) {
   a.href = url; a.download = `${getAcctName(acctId)}_${platM.label}_${isW?'weekly':'monthly'}.csv`;
   a.click(); URL.revokeObjectURL(url);
   toast('CSV berhasil diexport ✓', 'success');
+  actLog('unduh CSV statistik', `${getAcctName(acctId)} ${platM.label} (${isW ? 'mingguan' : 'bulanan'})`);
 }
 
 function addStatRowFromTable() {
@@ -7309,6 +7344,7 @@ function downloadStatJpg() {
   link.click();
   document.body.removeChild(link);
   toast('Grafik berhasil didownload ✓', 'success');
+  actLog('unduh grafik statistik', `${getAcctName(acctId)} ${PLATFORM_FIELDS[platId]?.label || platId} — ${fileTag}`);
 }
 
 function downloadStatTableJpg() {
@@ -7461,6 +7497,7 @@ function downloadStatTableJpg() {
   link.click();
   document.body.removeChild(link);
   toast('Tabel berhasil didownload ✓', 'success');
+  actLog('unduh tabel statistik', `${getAcctName(acctId)} ${PLATFORM_FIELDS[platId]?.label || platId} — ${fileTag}`);
 }
 
 /* ── Top 3 per-bulan — semua user bisa edit ─────────────────────────────── */
@@ -7906,6 +7943,7 @@ async function downloadBudgetFile() {
     a.href     = URL.createObjectURL(blob);
     a.download = _budgetFileRef.name;
     a.click();
+    actLog('unduh file budget', _budgetFileRef.name);
     setTimeout(() => URL.revokeObjectURL(a.href), 5000);
   } catch { toast('Gagal mengunduh file', 'error'); }
   finally { if (btn) btn.textContent = orig; }
@@ -8489,6 +8527,7 @@ async function analyzeContentWithAI() {
   try {
     const text = await callAI(prompt);
     showAiAnalysisModal(text, acctId, platId);
+    actLog('Analisis AI statistik', `${getAcctName(acctId)} ${PLATFORM_FIELDS[platId]?.label || platId}`);
   } catch (e) {
     toast('Analisis gagal: ' + e.message, 'error');
   } finally {
@@ -8572,6 +8611,7 @@ async function generateDraft() {
     );
     sv('postScript', text);
     incAiCount(key, 'draft');
+    actLog('generate naskah AI', `"${title}"`);
     const remaining = AI_MAX - (count + 1);
     toast(`Draft berhasil digenerate ✨ (sisa ${remaining}× lagi)`, 'success');
     updateAiLimitDisplay();
@@ -8666,6 +8706,7 @@ Kata kunci SEO: [kata kunci utama], [4–6 kata kunci turunan dipisah koma]`;
     const text = await callAI(prompt);
     sv('postCaption', text);
     incAiCount(key, 'caption');
+    actLog('generate caption AI', `"${title || 'tanpa judul'}" — ${selected.map(p => PLATFORM_RULES[p].name).join(', ')}`);
     const remaining = AI_MAX - (count + 1);
     toast(`Caption berhasil digenerate ✨ (sisa ${remaining}× lagi)`, 'success');
     updateAiLimitDisplay();
