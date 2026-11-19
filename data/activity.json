@@ -1,5 +1,13 @@
 [
   {
+    "id": "mwn6ej34jr455",
+    "user": "Admin",
+    "role": "Admin",
+    "action": "ubah status",
+    "target": "\"Koperasi Harus Bikin Petani Untung, Bukan Tengkulak!\" menjadi Published",
+    "timestamp": "2026-11-19T06:35:22.528Z"
+  },
+  {
     "id": "mwn4ef1rvp58t",
     "user": "Admin",
     "role": "Admin",
@@ -3990,13 +3998,5 @@
     "action": "update statistik",
     "target": "Penjaga Harapan TikTok — Jul 2026",
     "timestamp": "2026-07-13T05:56:38.049Z"
-  },
-  {
-    "id": "mrit3p5cdjkfp",
-    "user": "Admin",
-    "role": "Admin",
-    "action": "update statistik",
-    "target": "Penjaga Harapan Instagram — 13-19 Jul '26",
-    "timestamp": "2026-07-13T05:53:25.776Z"
   }
 ]
