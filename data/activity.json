@@ -1,5 +1,13 @@
 [
   {
+    "id": "mwn4bia6hah2k",
+    "user": "Admin",
+    "role": "Admin",
+    "action": "Tautkan link YouTube otomatis",
+    "target": "\"Makam Nyonya Kompi\"",
+    "timestamp": "2026-11-19T05:37:02.286Z"
+  },
+  {
     "id": "mwn4baru5s5l5",
     "user": "Admin",
     "role": "Admin",
@@ -3990,13 +3998,5 @@
     "action": "login",
     "target": "masuk ke sistem sebagai Admin",
     "timestamp": "2026-07-13T05:19:25.190Z"
-  },
-  {
-    "id": "mrf8gzf63x34j",
-    "user": "Umar",
-    "role": "Publisher",
-    "action": "login",
-    "target": "masuk ke sistem sebagai Publisher",
-    "timestamp": "2026-07-10T17:52:35.154Z"
   }
 ]
