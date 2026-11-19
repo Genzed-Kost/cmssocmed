@@ -8796,7 +8796,18 @@ const NEWS_QUERIES  = [
   'Prabowo program pemerintah',
   'Prabowo kunjungan kerja',
 ];
-const NEWS_SHOW      = 7;
+const NEWS_SHOW      = 15;   // berita presiden
+/* + 5 berita teknologi global, prioritas China (ditampilkan di bagian terpisah) */
+const TECH_SHOW      = 5;
+const TECH_QUERIES   = [
+  'teknologi China terbaru',
+  'inovasi teknologi Tiongkok AI robot',
+  'China chip semikonduktor kendaraan listrik teknologi',
+  'Huawei BYD Xiaomi DeepSeek teknologi terbaru',
+];
+const TECH_GLOBAL_Q  = 'teknologi canggih dunia terbaru AI';
+const TECH_QIDX_KEY  = 'cmsph_tech_qidx_v1';
+const CHINA_RE = /\b(china|cina|tiongkok|chinese|beijing|shanghai|shenzhen|hong ?kong|huawei|byd|xiaomi|deepseek|alibaba|tencent|baidu|bytedance|tiktok|oppo|vivo|lenovo|catl|nio|xpeng|zte|smic|dji|unitree)\b/i;
 const NEWS_SEEN_KEY  = 'cmsph_news_seen_v1';
 const NEWS_QIDX_KEY  = 'cmsph_news_qidx_v1';
 function newsKeyOf(it) { return String(it.title || '').toLowerCase().replace(/\s+-\s+[^-]+$/, '').replace(/[^a-z0-9]+/g, ' ').trim(); }
@@ -8807,7 +8818,7 @@ function nextNewsQuery() {
         localStorage.setItem(NEWS_QIDX_KEY, String((i + 1) % NEWS_QUERIES.length)); } catch {}
   return NEWS_QUERIES[i];
 }
-function pickNews(items) {
+function pickNews(items, count = NEWS_SHOW, prefer = null) {
   const seen = new Set(newsSeen());
   const time = it => { const t = Date.parse(it.pubDate || ''); return isNaN(t) ? 0 : t; };
   const uniq = [];
@@ -8815,15 +8826,19 @@ function pickNews(items) {
   items.forEach(it => { const k = newsKeyOf(it); if (k && !keys.has(k)) { keys.add(k); uniq.push(it); } });
   // Belum pernah tampil → terbaru dulu; sudah pernah tampil → yang paling lama tidak tampil dulu
   const order = newsSeen();
-  const fresh = uniq.filter(it => !seen.has(newsKeyOf(it))).sort((a, b) => time(b) - time(a));
+  // prefer(it) = true → didahulukan (mis. berita teknologi China)
+  const pri   = it => (prefer && prefer(it) ? 0 : 1);
+  const fresh = uniq.filter(it => !seen.has(newsKeyOf(it))).sort((a, b) => pri(a) - pri(b) || time(b) - time(a));
   const old   = uniq.filter(it =>  seen.has(newsKeyOf(it)))
-    .sort((a, b) => order.indexOf(newsKeyOf(b)) - order.indexOf(newsKeyOf(a)));
-  const pick  = [...fresh, ...old].slice(0, NEWS_SHOW).sort((a, b) => time(b) - time(a));
+    .sort((a, b) => pri(a) - pri(b) || order.indexOf(newsKeyOf(b)) - order.indexOf(newsKeyOf(a)));
+  const pick  = (prefer
+    ? [...fresh.filter(it => pri(it) === 0), ...old.filter(it => pri(it) === 0), ...fresh.filter(it => pri(it) === 1), ...old.filter(it => pri(it) === 1)]
+    : [...fresh, ...old]).slice(0, count).sort((a, b) => pri(a) - pri(b) || time(b) - time(a));
   try {
     const list = [...pick.map(newsKeyOf), ...newsSeen().filter(k => !pick.some(p => newsKeyOf(p) === k))].slice(0, 300);
     localStorage.setItem(NEWS_SEEN_KEY, JSON.stringify(list));
   } catch {}
-  return { pick, freshCount: Math.min(fresh.length, NEWS_SHOW) };
+  return { pick, freshCount: Math.min(fresh.length, count) };
 }
 
 async function fetchNewsFromServer(url) {
@@ -8875,6 +8890,19 @@ async function fetchNewsFromGemini(query = NEWS_QUERY) {
   throw new Error(lastErr);
 }
 
+/* 5 berita teknologi global: kata kunci China bergantian + teknologi dunia sebagai cadangan */
+async function fetchTechNews() {
+  let i = 0;
+  try { i = (parseInt(localStorage.getItem(TECH_QIDX_KEY), 10) || 0) % TECH_QUERIES.length;
+        localStorage.setItem(TECH_QIDX_KEY, String((i + 1) % TECH_QUERIES.length)); } catch {}
+  const lists = await Promise.all([TECH_QUERIES[i], TECH_GLOBAL_Q].map(q =>
+    fetchNewsFromServer(`/api/news?q=${encodeURIComponent(q)}&n=50`).catch(() => [])));
+  const items = lists.flat();
+  if (!items.length) return [];
+  const isChina = it => CHINA_RE.test(`${it.title} ${it.desc || ''}`);
+  return pickNews(items, TECH_SHOW, isChina).pick.map(it => ({ ...it, _sec: 'tech', _cn: isChina(it) }));
+}
+
 let _newsLoading = false;
 async function fetchNews() {
   $('newsContent').innerHTML = `<div class="news-loading"><div class="spinner"></div><span>Mengambil berita terkini…</span></div>`;
@@ -8890,12 +8918,14 @@ async function _fetchNewsInner() {
     ['Gemini AI', () => fetchNewsFromGemini(query)],
   ];
   const errors = [];
+  const techP = fetchTechNews().catch(() => []);
   for (const [name, run] of attempts) {
     try {
       const { pick, freshCount } = pickNews(await run());
-      setCachedNews(JSON.stringify(pick));
-      renderNewsItems(pick, Date.now());
-      return { ok: true, source: name, count: pick.length, fresh: freshCount };
+      const all = [...pick, ...(await techP)];
+      setCachedNews(JSON.stringify(all));
+      renderNewsItems(all, Date.now());
+      return { ok: true, source: name, count: all.length, fresh: freshCount };
     } catch (e) { errors.push(`${name}: ${e.message}`); }
   }
   $('newsContent').innerHTML = `<div style="color:var(--red);font-size:.82rem;padding:12px 0">
@@ -8960,16 +8990,21 @@ function renderNewsItems(items, ts) {
     if (isNaN(dt)) return d;
     return dt.toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' });
   };
-  $('newsContent').innerHTML = items.length
-    ? items.map((it, i) => `
-      <div class="news-item">
+  const pres = items.filter(it => it._sec !== 'tech'), tech = items.filter(it => it._sec === 'tech');
+  const row = (it, i) => `
+      <div class="news-item${it._sec === 'tech' ? ' news-item-tech' : ''}">
         <div class="news-item-num">${i + 1}</div>
         <div class="news-item-content">
           <a class="news-item-title news-item-link" href="${esc(it.link)}" target="_blank" rel="noopener">${esc(it.title)}</a>
           ${it.pubDate ? `<div class="news-item-date">${fmtDate(it.pubDate)}${it.source ? ` · ${esc(it.source)}` : ''}</div>` : ''}
           ${it.desc ? `<div class="news-item-body">${esc(it.desc)}</div>` : ''}
         </div>
-      </div>`).join('')
+      </div>`;
+  $('newsContent').innerHTML = items.length
+    ? (tech.length ? `<div class="news-sec-title">🇮🇩 Info Presiden <span>${pres.length}</span></div>` : '') +
+      pres.map(row).join('') +
+      (tech.length ? `<div class="news-sec-title news-sec-tech">🌏 Teknologi Global <small>prioritas China</small> <span>${tech.length}</span></div>` +
+        tech.map(row).join('') : '')
     : `<div style="color:var(--muted);font-size:.82rem;padding:12px 0">Tidak ada berita ditemukan.</div>`;
 
   if (ts) {

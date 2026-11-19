@@ -7,8 +7,14 @@
 window.APP_INFO = {
   name: 'Penjaga Harapan CMS',
   tagline: 'Platform manajemen konten tim',
-  version: '2.6.4',
+  version: '2.6.5',
   changelog: [
+    {
+      version: '2.6.5', date: '2026-11-19',
+      items: [
+        '📰 Info Presiden kini 20 berita: 15 berita presiden + 5 berita teknologi global (prioritas China)',
+      ],
+    },
     {
       version: '2.6.4', date: '2026-11-18',
       items: [
