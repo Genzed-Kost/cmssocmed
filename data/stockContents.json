@@ -31,7 +31,11 @@
     "prodTime": "",
     "prodDateEnd": "",
     "prodTimeEnd": "",
-    "airDate": "2026-11-03"
+    "airDate": "2026-11-03",
+    "ytUrl": "https://youtu.be/pUNylYErcJ8",
+    "ytTitle": "",
+    "ytAuto": false,
+    "ytSkip": false
   },
   {
     "id": "sc_1795026229976",
