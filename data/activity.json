@@ -1,5 +1,13 @@
 [
   {
+    "id": "mwnb8s4kisraf",
+    "user": "Admin",
+    "role": "Admin",
+    "action": "ubah status",
+    "target": "\"Prabowo Butuh Wapres yang Satu Frekuensi dengan Pemerintahannya\" menjadi Published",
+    "timestamp": "2026-11-19T08:50:52.388Z"
+  },
+  {
     "id": "mwn8j2e9s5mcp",
     "user": "Admin",
     "role": "Admin",
@@ -3990,13 +3998,5 @@
     "action": "login",
     "target": "masuk ke sistem sebagai Publisher",
     "timestamp": "2026-07-15T11:59:04.767Z"
-  },
-  {
-    "id": "mrlmee970egmm",
-    "user": "Luthfi",
-    "role": "Creator",
-    "action": "login",
-    "target": "masuk ke sistem sebagai Creator",
-    "timestamp": "2026-07-15T05:09:06.091Z"
   }
 ]
