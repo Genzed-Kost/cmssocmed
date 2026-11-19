@@ -1,5 +1,13 @@
 [
   {
+    "id": "mwn8j2e9s5mcp",
+    "user": "Admin",
+    "role": "Admin",
+    "action": "refresh berita Info Presiden",
+    "target": "7 berita, 7 baru (sumber: Server)",
+    "timestamp": "2026-11-19T07:34:53.409Z"
+  },
+  {
     "id": "mwn8a86mr7kjk",
     "user": "Admin",
     "role": "Admin",
@@ -3990,13 +3998,5 @@
     "action": "login",
     "target": "masuk ke sistem sebagai Creator",
     "timestamp": "2026-07-15T05:09:06.091Z"
-  },
-  {
-    "id": "mritffdxwlk65",
-    "user": "Admin",
-    "role": "Admin",
-    "action": "update statistik",
-    "target": "Penjaga Harapan Instagram — Jul 2026",
-    "timestamp": "2026-07-13T06:02:32.997Z"
   }
 ]
