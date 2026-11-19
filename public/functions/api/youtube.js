@@ -6,6 +6,9 @@
  *  2. RSS https://www.youtube.com/feeds/videos.xml?channel_id=<id> → 15 video terbaru
  *     lengkap dengan tanggal terbit & deskripsi
  * Hasil di-cache di edge 30 menit.
+ *
+ * GET /api/youtube?video=<videoId> → { ok, title, channel } judul & channel satu video
+ * (oEmbed YouTube) — dipakai untuk link YouTube yang diisi manual. Cache 7 hari.
  * Salinan identik ada di public/functions/api/youtube.js (lihat catatan di news.js).
  */
 const HEADERS = {
@@ -82,8 +85,30 @@ function pageVideos(data) {
   return out.map(v => ({ ...v, publishedApprox: approxDate(v.publishedText), url: `https://www.youtube.com/watch?v=${v.id}` }));
 }
 
+/* Judul & channel satu video lewat oEmbed */
+async function videoInfo(id) {
+  if (!/^[\w-]{11}$/.test(id)) return new Response(JSON.stringify({ ok: false, error: 'id tidak valid' }), { status: 400, headers: HEADERS });
+  const cache = caches.default;
+  const key = new Request(`https://yt-cache.local/video/${id}`);
+  const hit = await cache.match(key);
+  if (hit) return new Response(hit.body, { headers: HEADERS });
+  try {
+    const res = await fetch(`https://www.youtube.com/oembed?format=json&url=${encodeURIComponent('https://www.youtube.com/watch?v=' + id)}`,
+      { headers: { 'User-Agent': UA } });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const j = await res.json();
+    const body = JSON.stringify({ ok: true, id, title: j.title || '', channel: j.author_name || '' });
+    await cache.put(key, new Response(body, { headers: { ...HEADERS, 'Cache-Control': 'public, max-age=604800' } }));
+    return new Response(body, { headers: HEADERS });
+  } catch (e) {
+    return new Response(JSON.stringify({ ok: false, error: e.message }), { status: 502, headers: HEADERS });
+  }
+}
+
 export async function onRequestGet({ request }) {
   const u = new URL(request.url);
+  const vid = (u.searchParams.get('video') || '').trim();
+  if (vid) return videoInfo(vid);
   const handle = (u.searchParams.get('handle') || 'PenjagaHarapan').replace(/[^\w.-]/g, '').slice(0, 60);
   const cache = caches.default;
   const key = new Request(`https://yt-cache.local/${handle.toLowerCase()}`);

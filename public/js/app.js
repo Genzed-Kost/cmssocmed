@@ -3638,6 +3638,7 @@ function renderStockContents() {
 
   renderStockCalendar();
   scAutoYoutube();
+  scYtFillTitles();
 }
 
 /* ── Stock Contents: link YouTube otomatis ─────────────────────────────────
@@ -3724,6 +3725,37 @@ async function scAutoYoutube(force = false) {
     if (state.currentPage === 'stockcontents') renderStockCalendar();
   } catch (_) { /* diam: fitur tambahan */ }
   finally { window._scYtBusy = false; }
+}
+/* Link YouTube tanpa judul/channel (mis. diisi manual): ambil judul & channel videonya agar tampil seperti yang otomatis */
+function scYtId(url) {
+  return ((url || '').match(/[?&]v=([\w-]{11})|youtu\.be\/([\w-]{11})|(?:shorts|live|embed)\/([\w-]{11})/) || []).slice(1).find(Boolean) || '';
+}
+async function scYtFillTitles() {
+  const todo = (state.stockContents || []).filter(it => it.ytUrl && (!it.ytTitle || !it.ytChannel) && scYtId(it.ytUrl));
+  const tried = window._scYtTitleTried = window._scYtTitleTried || new Set();
+  const list = todo.filter(it => !tried.has(it.ytUrl));
+  if (!list.length || window._scYtTitleBusy) return;
+  window._scYtTitleBusy = true;
+  try {
+    let changed = 0;
+    await Promise.all(list.map(async it => {
+      tried.add(it.ytUrl);
+      const j = await fetch(`/api/youtube?video=${scYtId(it.ytUrl)}`).then(r => r.json()).catch(() => ({}));
+      if (!j.ok || !j.title) return;
+      const norm = x => (x || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+      const ch = SC_YT_CHANNELS.find(c => norm(j.channel).startsWith(norm(c.name)) || norm(j.channel) === norm(c.handle));
+      if (!it.ytTitle) it.ytTitle = j.title;
+      if (!it.ytChannel) it.ytChannel = ch?.name || j.channel || '';
+      changed++;
+    }));
+    if (!changed) return;
+    if (isAdmin()) {
+      try {
+        state.shas.stockContents = await window.db.writeData('stockContents', state.stockContents, `Stock: judul video YouTube (${changed})`);
+      } catch (_) { /* tetap tampil di sesi ini */ }
+    }
+    if (state.currentPage === 'stockcontents') renderStockCalendar();
+  } finally { window._scYtTitleBusy = false; }
 }
 function scYtRow(it) {
   if (!it?.ytUrl) return '';
@@ -4048,7 +4080,7 @@ function scOpenModal(id = null, date = '') {
       <div class="form-group">
         <label class="form-label" for="scfYt">▶️ Link YouTube <span style="font-weight:400;color:var(--muted)">(otomatis setelah tayang — bisa diubah manual)</span></label>
         <input id="scfYt" type="url" class="form-inp" value="${esc(v.ytUrl || '')}" placeholder="https://www.youtube.com/watch?v=…" />
-        ${v.ytUrl ? `<div class="sc-yt-hint">${v.ytAuto ? '🤖 Ditautkan otomatis' + (v.ytChannel ? ` (${esc(v.ytChannel)})` : '') : '✍️ Diisi manual'}${v.ytTitle ? ': ' + esc(v.ytTitle) : ''} · <a href="${esc(v.ytUrl)}" target="_blank" rel="noopener">buka ↗</a></div>` : ''}
+        ${v.ytUrl ? `<div class="sc-yt-hint">${v.ytAuto ? '🤖 Ditautkan otomatis' + (v.ytChannel ? ` (${esc(v.ytChannel)})` : '') : '✍️ Diisi manual' + (v.ytChannel ? ` (${esc(v.ytChannel)})` : '')}${v.ytTitle ? ': ' + esc(v.ytTitle) : ''} · <a href="${esc(v.ytUrl)}" target="_blank" rel="noopener">buka ↗</a></div>` : ''}
       </div>
       <div class="sc-detail-row"><span>📊 Dihitung di total</span><b id="scfCountMonth"></b></div>`;
     const upd = () => setTxt('scfCountMonth', scCountMonthText({ airDate: $('scfAir').value, prodDate: $('scfProd').value }));
@@ -4081,8 +4113,8 @@ async function scSaveModal(id) {
   if (ytIn && !/^https?:\/\/(www\.|m\.)?(youtube\.com|youtu\.be)\//i.test(ytIn)) { toast('Link YouTube tidak valid', 'error'); $('scfYt').focus(); return; }
   const oldIt = id ? state.stockContents.find(x => x.id === id) : null;
   if (ytIn !== (oldIt?.ytUrl || '')) {
-    if (ytIn) Object.assign(data, { ytUrl: ytIn, ytTitle: '', ytAuto: false, ytSkip: false });
-    else Object.assign(data, { ytUrl: '', ytTitle: '', ytAuto: false, ytSkip: true });   // dikosongkan → jangan ditautkan otomatis lagi
+    if (ytIn) Object.assign(data, { ytUrl: ytIn, ytTitle: '', ytChannel: '', ytAuto: false, ytSkip: false });
+    else Object.assign(data, { ytUrl: '', ytTitle: '', ytChannel: '', ytAuto: false, ytSkip: true });   // dikosongkan → jangan ditautkan otomatis lagi
   }
   if (!data.title) { toast('Judul wajib diisi', 'error'); $('scfTitle').focus(); return; }
   if (data.prodDateEnd && !data.prodDate) { data.prodDate = data.prodDateEnd; data.prodDateEnd = ''; }
