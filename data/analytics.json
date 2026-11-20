@@ -867,18 +867,7 @@
         "totalPost": 196,
         "totalViews": 3761227,
         "totalEngagement": 128230,
-        "totalReactions": 29856,
-        "maxViewsSingle": 202377,
-        "_fromWeekly": [
-          "totalReactions",
-          "maxViewsSingle",
-          "avgViewsPerPost",
-          "avgEngPerPost"
-        ],
-        "_weeks": "4/4",
-        "erPct": 3.41,
-        "avgViewsPerPost": 19190,
-        "avgEngPerPost": 654
+        "erPct": 3.41
       },
       {
         "month": "2026-07",
@@ -886,16 +875,7 @@
         "followersGained": 3847,
         "totalViews": 3347102,
         "totalEngagement": 119600,
-        "totalPost": 197,
-        "_fromWeekly": [
-          "totalPost",
-          "avgViewsPerPost",
-          "avgEngPerPost"
-        ],
-        "_weeks": "5/5",
-        "erPct": 3.57,
-        "avgViewsPerPost": 16990,
-        "avgEngPerPost": 607
+        "erPct": 3.57
       },
       {
         "month": "2026-08",
@@ -905,13 +885,11 @@
         "totalViews": 1587233,
         "totalEngagement": 77902,
         "erPct": 4.91,
-        "avgViewsPerPost": 9859,
-        "avgEngPerPost": 484,
+        "profileVisits": 719,
         "_fromWeekly": [
-          "avgViewsPerPost",
-          "avgEngPerPost"
+          "profileVisits"
         ],
-        "_weeks": "1/4"
+        "_weeks": "2/4"
       },
       {
         "month": "2026-09",
@@ -1181,14 +1159,7 @@
         "totalReach": 439514,
         "followersGained": 3365,
         "totalEngagement": 95781,
-        "peakViews": 19686,
-        "_fromWeekly": [
-          "peakViews",
-          "avgViews"
-        ],
-        "_weeks": "4/4",
-        "erPct": 6.81,
-        "avgViews": 6092
+        "erPct": 6.81
       },
       {
         "month": "2026-07",
@@ -1198,12 +1169,7 @@
         "totalReach": 480242,
         "followersGained": 1736,
         "totalEngagement": 87789,
-        "_fromWeekly": [
-          "avgViews"
-        ],
-        "_weeks": "4/5",
-        "erPct": 2.9,
-        "avgViews": 12901
+        "erPct": 2.9
       },
       {
         "month": "2026-08",
@@ -1230,7 +1196,7 @@
         "updatedBy": "Admin"
       },
       "facebook": {
-        "updatedAt": "2026-11-18T09:10:34.709Z",
+        "updatedAt": "2026-11-20T06:24:31.656Z",
         "updatedBy": "Admin"
       },
       "youtube": {
@@ -1345,7 +1311,7 @@
       },
       {
         "week": "2026-W25",
-        "pageFollowers": 159919,
+        "pageFollowers": 160117,
         "followersGained": 1554,
         "totalPost": 43,
         "totalViews": 1291802,
@@ -1354,7 +1320,7 @@
       },
       {
         "week": "2026-W26",
-        "pageFollowers": 160139,
+        "pageFollowers": 160577,
         "followersGained": 460,
         "totalPost": 53,
         "totalViews": 539222,
@@ -1363,7 +1329,7 @@
       },
       {
         "week": "2026-W27",
-        "pageFollowers": 160721,
+        "pageFollowers": 161372,
         "followersGained": 795,
         "totalPost": 41,
         "totalViews": 629482,
@@ -1372,7 +1338,7 @@
       },
       {
         "week": "2026-W28",
-        "pageFollowers": 161411,
+        "pageFollowers": 162265,
         "followersGained": 893,
         "totalPost": 42,
         "totalViews": 736255,
@@ -1381,7 +1347,7 @@
       },
       {
         "week": "2026-W29",
-        "pageFollowers": 162155,
+        "pageFollowers": 163160,
         "followersGained": 895,
         "totalPost": 37,
         "totalViews": 751394,
@@ -1390,7 +1356,7 @@
       },
       {
         "week": "2026-W30",
-        "pageFollowers": 163307,
+        "pageFollowers": 163806,
         "followersGained": 646,
         "totalPost": 37,
         "totalViews": 563025,
@@ -1399,7 +1365,7 @@
       },
       {
         "week": "2026-W31",
-        "pageFollowers": 163307,
+        "pageFollowers": 164832,
         "followersGained": 1026,
         "totalPost": 40,
         "totalViews": 985509,
@@ -1412,7 +1378,18 @@
         "totalPost": 38,
         "totalViews": 494217,
         "totalEngagement": 19669,
-        "erPct": 3.98
+        "erPct": 3.98,
+        "pageFollowers": 165457
+      },
+      {
+        "week": "2026-W33",
+        "totalViews": 184064,
+        "totalViewers": 97454,
+        "totalEngagement": 8207,
+        "profileVisits": 719,
+        "pageFollowers": 165658,
+        "followersGained": 201,
+        "erPct": 4.46
       }
     ],
     "youtube_w": [
@@ -2276,12 +2253,7 @@
         "totalReach": 242731,
         "followersGained": 185,
         "totalEngagement": 22388,
-        "imageViews": 0,
-        "_fromWeekly": [
-          "avgViews"
-        ],
-        "_weeks": "4/4",
-        "avgViews": 6707
+        "imageViews": 0
       },
       {
         "month": "2026-07",
@@ -2292,11 +2264,9 @@
         "imageViews": 0,
         "jmlPost": 47,
         "_fromWeekly": [
-          "jmlPost",
-          "avgViews"
+          "jmlPost"
         ],
-        "_weeks": "3/5",
-        "avgViews": 36430
+        "_weeks": "3/5"
       }
     ],
     "_meta": {
@@ -2718,32 +2688,14 @@
         "pageFollowers": 2301,
         "followersGained": 70,
         "totalViews": 307271,
-        "totalEngagement": 4040,
-        "totalPost": 38,
-        "_fromWeekly": [
-          "totalPost",
-          "avgViewsPerPost",
-          "avgEngPerPost"
-        ],
-        "_weeks": "4/4",
-        "avgViewsPerPost": 8086,
-        "avgEngPerPost": 106
+        "totalEngagement": 4040
       },
       {
         "month": "2026-07",
         "pageFollowers": 2680,
         "followersGained": 395,
         "totalViews": 1531712,
-        "totalEngagement": 11619,
-        "totalPost": 23,
-        "_fromWeekly": [
-          "totalPost",
-          "avgViewsPerPost",
-          "avgEngPerPost"
-        ],
-        "_weeks": "3/5",
-        "avgViewsPerPost": 66596,
-        "avgEngPerPost": 505
+        "totalEngagement": 11619
       }
     ],
     "facebook_w": [
