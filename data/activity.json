@@ -1,5 +1,13 @@
 [
   {
+    "id": "mwolym2ycpeht",
+    "user": "Admin",
+    "role": "Admin",
+    "action": "update statistik",
+    "target": "Penjaga Harapan Facebook — 14-20 Sep '26",
+    "timestamp": "2026-11-20T06:38:39.946Z"
+  },
+  {
     "id": "mwolxb5hsl0y7",
     "user": "Admin",
     "role": "Admin",
@@ -3990,13 +3998,5 @@
     "action": "update statistik",
     "target": "33 Official Instagram — 22-28 Jun '26",
     "timestamp": "2026-07-21T02:21:12.199Z"
-  },
-  {
-    "id": "mru0vjwxn3kbs",
-    "user": "Admin",
-    "role": "Admin",
-    "action": "update statistik",
-    "target": "33 Official TikTok — 6-12 Jul '26",
-    "timestamp": "2026-07-21T02:16:30.609Z"
   }
 ]
