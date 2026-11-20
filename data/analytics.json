@@ -904,18 +904,18 @@
       {
         "month": "2026-09",
         "totalEngagement": 69219,
-        "totalViews": 247556,
-        "profileVisits": 1084,
-        "pageFollowers": 166916,
-        "followersGained": 343,
+        "totalViews": 523100,
+        "profileVisits": 2325,
+        "pageFollowers": 167367,
+        "followersGained": 794,
         "_fromWeekly": [
           "totalViews",
           "profileVisits",
           "pageFollowers",
           "followersGained"
         ],
-        "_weeks": "1/4",
-        "erPct": 27.96
+        "_weeks": "2/4",
+        "erPct": 13.23
       },
       {
         "month": "2026-10",
@@ -1218,7 +1218,7 @@
         "updatedBy": "Admin"
       },
       "facebook": {
-        "updatedAt": "2026-11-20T06:36:41.844Z",
+        "updatedAt": "2026-11-20T06:37:37.346Z",
         "updatedBy": "Admin"
       },
       "youtube": {
@@ -1452,6 +1452,16 @@
         "pageFollowers": 166916,
         "followersGained": 343,
         "erPct": 6.63
+      },
+      {
+        "week": "2026-W37",
+        "totalViews": 275544,
+        "totalViewers": 148029,
+        "totalEngagement": 20669,
+        "profileVisits": 1241,
+        "pageFollowers": 167367,
+        "followersGained": 451,
+        "erPct": 7.5
       }
     ],
     "youtube_w": [
