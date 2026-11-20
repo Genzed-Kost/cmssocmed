@@ -1251,7 +1251,7 @@
     ],
     "_meta": {
       "instagram": {
-        "updatedAt": "2026-11-20T07:01:35.049Z",
+        "updatedAt": "2026-11-20T07:01:52.996Z",
         "updatedBy": "Admin"
       },
       "facebook": {
@@ -1389,6 +1389,7 @@
         "profileVisits": 345,
         "followersEOM": 62745,
         "followersGained": 486,
+        "jmlPost": 79,
         "erPct": 5.04
       }
     ],
