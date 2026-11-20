@@ -1231,11 +1231,11 @@
         "followersGained": 1365,
         "totalEngagement": 169236,
         "erPct": 5.32,
-        "profileVisits": 838,
+        "profileVisits": 1459,
         "_fromWeekly": [
           "profileVisits"
         ],
-        "_weeks": "1/4"
+        "_weeks": "2/4"
       },
       {
         "month": "2026-09",
@@ -1248,7 +1248,7 @@
     ],
     "_meta": {
       "instagram": {
-        "updatedAt": "2026-11-20T06:51:38.569Z",
+        "updatedAt": "2026-11-20T06:54:44.583Z",
         "updatedBy": "Admin"
       },
       "facebook": {
@@ -1355,6 +1355,17 @@
         "followersGained": 258,
         "jmlPost": 65,
         "erPct": 3.73
+      },
+      {
+        "week": "2026-W33",
+        "totalViews": 506728,
+        "totalReach": 175381,
+        "totalEngagement": 24864,
+        "profileVisits": 621,
+        "followersEOM": 61961,
+        "followersGained": 246,
+        "jmlPost": 67,
+        "erPct": 4.91
       }
     ],
     "facebook_w": [
