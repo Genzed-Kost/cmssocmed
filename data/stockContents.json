@@ -370,7 +370,11 @@
     "prodDateEnd": "",
     "airDate": "2026-11-20",
     "prodTime": "10:00",
-    "prodTimeEnd": "11:00"
+    "prodTimeEnd": "11:00",
+    "ytUrl": "https://www.youtube.com/watch?v=9AYKSFbDROY",
+    "ytTitle": "Menelusuri Jejak Syekh Abdul Karim, \"Ulama Kharismatik Betawi di Kebon Jeruk\"",
+    "ytChannel": "Jaga Asa",
+    "ytAuto": true
   },
   {
     "id": "sc_1794818208149",
