@@ -1,5 +1,13 @@
 [
   {
+    "id": "mwomcib31q1o4",
+    "user": "Admin",
+    "role": "Admin",
+    "action": "update statistik",
+    "target": "Penjaga Harapan Facebook — 9-15 Nov '26",
+    "timestamp": "2026-11-20T06:49:28.239Z"
+  },
+  {
     "id": "mwombbatfrzhw",
     "user": "Admin",
     "role": "Admin",
@@ -3990,13 +3998,5 @@
     "action": "update statistik",
     "target": "Jaga Asa YouTube — Jun 2026",
     "timestamp": "2026-07-21T02:35:53.149Z"
-  },
-  {
-    "id": "mru1hqv386kuw",
-    "user": "Admin",
-    "role": "Admin",
-    "action": "update statistik",
-    "target": "Jaga Asa YouTube — Jul 2026",
-    "timestamp": "2026-07-21T02:33:46.047Z"
   }
 ]
