@@ -1,5 +1,13 @@
 [
   {
+    "id": "mwoljc3qbpdif",
+    "user": "Admin",
+    "role": "Admin",
+    "action": "update statistik",
+    "target": "Penjaga Harapan Facebook — 1-7 Jun '26",
+    "timestamp": "2026-11-20T06:26:47.174Z"
+  },
+  {
     "id": "mwoliy6eyh13u",
     "user": "Admin",
     "role": "Admin",
@@ -3990,13 +3998,5 @@
     "action": "login",
     "target": "masuk ke sistem sebagai Admin",
     "timestamp": "2026-07-17T05:02:15.860Z"
-  },
-  {
-    "id": "mrocw5uemzil2",
-    "user": "Admin",
-    "role": "Admin",
-    "action": "Hapus Bank Konten",
-    "target": "\"tanpa judul\"",
-    "timestamp": "2026-07-17T03:06:17.366Z"
   }
 ]
