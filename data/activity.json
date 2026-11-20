@@ -1,5 +1,13 @@
 [
   {
+    "id": "mwomqzvr639mp",
+    "user": "Admin",
+    "role": "Admin",
+    "action": "hapus statistik",
+    "target": "Penjaga Harapan instagram — 2026-W47",
+    "timestamp": "2026-11-20T07:00:44.199Z"
+  },
+  {
     "id": "mwomlgwwxzgwl",
     "user": "Admin",
     "role": "Admin",
@@ -3990,13 +3998,5 @@
     "action": "login",
     "target": "masuk ke sistem sebagai Admin",
     "timestamp": "2026-07-22T07:40:27.991Z"
-  },
-  {
-    "id": "mrvmv9v9f2vlk",
-    "user": "Admin",
-    "role": "Admin",
-    "action": "login",
-    "target": "masuk ke sistem sebagai Admin",
-    "timestamp": "2026-07-22T05:19:55.317Z"
   }
 ]
