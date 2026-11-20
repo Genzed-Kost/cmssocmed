@@ -4144,3 +4144,20 @@ ul { list-style: none; }
 .news-sec-tech { margin-top: 10px; }
 .news-sec-tech span { background: #ecfeff; color: #0e7490; }
 .news-item-tech .news-item-num { background: #0e7490; }
+
+/* Stock Contents: slot tayang otomatis per program */
+.sc-chip-slot { background: transparent; color: var(--c); border: 1.5px dashed var(--c); font-weight: 700; cursor: pointer; }
+.sc-chip-slot small { font-weight: 500; opacity: .8; }
+.sc-chip-slot:hover { background: color-mix(in srgb, var(--c) 10%, transparent); }
+.sc-slot-past { opacity: .45; }
+.program-row .program-day { flex: 0 0 auto; width: 150px; padding-top: 6px; padding-bottom: 6px; }
+.sc-slot-head { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.sc-pick-title { font-size: .72rem; font-weight: 800; text-transform: uppercase; letter-spacing: .04em; color: var(--muted); margin-top: 6px; }
+.sc-pick-list { display: flex; flex-direction: column; gap: 6px; max-height: 280px; overflow-y: auto; }
+.sc-pick-row { display: flex; flex-direction: column; align-items: flex-start; gap: 2px; text-align: left; padding: 9px 12px; border: 1px solid var(--bd); border-radius: 10px; background: var(--surface); cursor: pointer; font: inherit; color: var(--text); }
+.sc-pick-row:hover { border-color: var(--blue); background: var(--blue-lt, #eff6ff); }
+.sc-pick-row b { font-size: .84rem; }
+.sc-pick-row small { font-size: .72rem; color: var(--muted); }
+.sc-pick-empty { font-size: .78rem; color: var(--muted); margin: 0; }
+.sc-pick-more summary { cursor: pointer; font-size: .76rem; color: var(--muted); margin: 6px 0; }
+@media (max-width: 680px) { .program-row { flex-wrap: wrap; } .program-row .program-day { width: 100%; } }

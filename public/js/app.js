@@ -3631,6 +3631,18 @@ function scPrograms() {
   return Array.isArray(p) ? p : SC_DEFAULT_PROGRAMS;
 }
 function scProgramNames() { return scPrograms().map(p => p.name); }
+/* Hari tayang rutin per program (0 = Minggu … 6 = Sabtu). Disimpan di settings.programs[].airDays;
+   bila belum diatur Admin, pakai jadwal bawaan berikut. */
+const SC_DOW = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
+const SC_DEFAULT_AIRDAYS = {
+  'Podcast PH': [2], 'Productive Hangout': [6], 'Situation Room': [3], 'Liputan PH': [4],
+  'Podcast JA': [2], 'Belajar Koperasi': [3], 'Gimana Kabarnya': [4],
+  'Konsultasi Hukum Keluarga': [0], 'Liputan JA': [5],
+};
+function scAirDays(p) {
+  if (Array.isArray(p?.airDays)) return p.airDays;
+  return SC_DEFAULT_AIRDAYS[p?.name] || [];
+}
 function scCatOrder(cat) { const i = scProgramNames().indexOf(cat); return i === -1 ? 99 : i; }
 
 function renderStockContents() {
@@ -3828,6 +3840,11 @@ function scProdText(it, fmt = scFmtLong) {
 }
 
 function scChipHtml(ev, canEdit) {
+  if (ev.kind === 'slot') {
+    const past = ev.date < scYmd(new Date());
+    return `<div class="sc-chip sc-chip-slot${past ? ' sc-slot-past' : ''}" style="--c:${scColor(ev.cat)}" data-slot="${esc(ev.cat)}" data-date="${ev.date}"
+      title="${esc(`Jadwal tayang ${ev.cat} (${SC_DOW[new Date(ev.date + 'T00:00:00').getDay()]})`)} — ${canEdit ? 'klik untuk memilih konten' : 'konten belum dipilih'}">📺 ${esc(ev.cat)}${canEdit ? ' <small>· pilih konten</small>' : ''}</div>`;
+  }
   const it = ev.it, col = scColor(it.category);
   const label = ev.kind === 'air' ? '📅' : '🎬';
   // Jam produksi: hari pertama = jam mulai (dan jam selesai bila 1 hari), hari terakhir = jam selesai
@@ -3917,6 +3934,20 @@ function renderStockCalendar() {
       for (let i = 0; i <= span; i++) push(scAddDays(it.prodDate, i), { it, kind: 'prod', i, span });
     }
   });
+  // Slot tayang otomatis: program yang jadwalnya hari itu tapi belum ada konten tayang
+  {
+    const progs = scPrograms().map(p => ({ name: p.name, days: scAirDays(p) })).filter(p => p.days.length);
+    const m0 = state.scMonth;
+    const last = new Date(m0.getFullYear(), m0.getMonth() + 1, 0).getDate();
+    for (let day = 1; day <= last; day++) {
+      const dt = new Date(m0.getFullYear(), m0.getMonth(), day), ymd = scYmd(dt), dow = dt.getDay();
+      progs.forEach(pr => {
+        if (!pr.days.includes(dow)) return;
+        if ((byDay[ymd] || []).some(ev => ev.kind === 'air' && ev.it.category === pr.name)) return;
+        push(ymd, { kind: 'slot', cat: pr.name, date: ymd });
+      });
+    }
+  }
   // Urutan dalam satu hari: yang berjam lebih dulu, dari jam paling awal;
   // lalu yang tanpa jam (tayang dulu, kemudian produksi, per urutan program).
   const evTime = ev => (ev.kind === 'prod' && ev.i === 0 && ev.it.prodTime) || '';
@@ -3924,8 +3955,9 @@ function renderStockCalendar() {
     const ta = evTime(a), tb = evTime(b);
     if (ta && tb && ta !== tb) return ta < tb ? -1 : 1;
     if (!!ta !== !!tb) return ta ? -1 : 1;
-    return (a.kind === b.kind ? 0 : a.kind === 'air' ? -1 : 1) ||
-      (scCatOrder(a.it.category) - scCatOrder(b.it.category));
+    const kOrd = { air: 0, slot: 1, prod: 2 };
+    return (kOrd[a.kind] - kOrd[b.kind]) ||
+      (scCatOrder(a.it?.category ?? a.cat) - scCatOrder(b.it?.category ?? b.cat));
   }));
 
   // Grid mulai Senin
@@ -3979,6 +4011,7 @@ function scBindCalendar(grid, ul, canEdit) {
   const wrap = $('scCalWrap');
   wrap.onclick = e => {
     const chip = e.target.closest('.sc-chip');
+    if (chip?.dataset.slot) { if (canEdit) scOpenSlotPicker(chip.dataset.slot, chip.dataset.date); return; }
     if (chip) { scOpenModal(chip.dataset.id); return; }
     const day = e.target.closest('.sc-day');
     if (day && canEdit) scOpenModal(null, day.dataset.date);
@@ -3987,7 +4020,7 @@ function scBindCalendar(grid, ul, canEdit) {
 
   wrap.ondragstart = e => {
     const chip = e.target.closest('.sc-chip');
-    if (!chip) return;
+    if (!chip || chip.dataset.slot) return;
     e.dataTransfer.effectAllowed = 'move';
     e.dataTransfer.setData('text/plain', JSON.stringify({
       id: chip.dataset.id, kind: chip.dataset.kind,
@@ -4045,7 +4078,7 @@ async function scPersist(commitMsg, undo, okMsg = 'Tersimpan ✓', act = null) {
   renderStockContents();
 }
 
-function scOpenModal(id = null, date = '') {
+function scOpenModal(id = null, date = '', cat = '') {
   const canEdit = isAdmin();
   const it = id ? (state.stockContents || []).find(x => x.id === id) : null;
   if (id && !it) return;
@@ -4066,7 +4099,7 @@ function scOpenModal(id = null, date = '') {
     foot.innerHTML = `<button type="button" class="btn-sm" onclick="scCloseModal()">Tutup</button>`;
   } else {
     setTxt('scModalTitle', it ? 'Ubah Stock Content' : 'Tambah Stock Content');
-    const v = it || { category: '', title: '', prodDate: '', prodTime: '', prodDateEnd: '', prodTimeEnd: '', airDate: date };
+    const v = it || { category: cat, title: '', prodDate: '', prodTime: '', prodDateEnd: '', prodTimeEnd: '', airDate: date };
     body.innerHTML = `
       <div class="form-group">
         <label class="form-label" for="scfCategory">Kelompok</label>
@@ -4111,6 +4144,41 @@ function scOpenModal(id = null, date = '') {
   }
   $('scModal').classList.remove('hidden');
   setTimeout(() => $('scfTitle')?.focus(), 30);
+}
+
+/* Slot tayang: Admin memilih konten dari stok program tersebut */
+function scOpenSlotPicker(cat, date) {
+  if (!isAdmin()) return;
+  const all   = (state.stockContents || []).filter(it => it.category === cat);
+  const free  = all.filter(it => !it.airDate);
+  const other = all.filter(it => it.airDate && it.airDate !== date).sort((a, b) => b.airDate.localeCompare(a.airDate));
+  const row = it => `<button type="button" class="sc-pick-row" onclick="scPickForSlot('${esc(it.id)}','${date}')">
+      <b>${esc(it.title || '(tanpa judul)')}</b>
+      <small>${it.airDate ? `sekarang tayang ${esc(scFmtLong(it.airDate))} — pindahkan` : (it.prodDate ? '🎬 ' + esc(scProdText(it)) : 'belum dijadwalkan')}</small>
+    </button>`;
+  setTxt('scModalTitle', `Pilih konten tayang`);
+  $('scModalBody').innerHTML = `
+    <div class="sc-slot-head"><span class="sc-badge" style="--c:${scColor(cat)}">${esc(cat)}</span>
+      <b>${esc(scFmtLong(date))}</b></div>
+    <div class="sc-pick-title">Stok belum dijadwalkan (${free.length})</div>
+    <div class="sc-pick-list">${free.length ? free.map(row).join('') : '<p class="sc-pick-empty">Tidak ada stok program ini yang belum dijadwalkan.</p>'}</div>
+    ${other.length ? `<details class="sc-pick-more"><summary>Konten ${esc(cat)} yang sudah terjadwal (${other.length})</summary>
+      <div class="sc-pick-list">${other.map(row).join('')}</div></details>` : ''}`;
+  $('scModalFoot').innerHTML = `
+    <button type="button" class="btn-sm" style="margin-right:auto" onclick="scOpenModal(null,'${date}','${esc(cat).replace(/'/g, "\\'")}')">+ Konten baru</button>
+    <button type="button" class="btn-sm" onclick="scCloseModal()">Tutup</button>`;
+  $('scModal').classList.remove('hidden');
+}
+async function scPickForSlot(id, date) {
+  if (!isAdmin()) return;
+  const it = (state.stockContents || []).find(x => x.id === id);
+  if (!it) return;
+  const before = it.airDate;
+  it.airDate = date;
+  scCloseModal();
+  await scPersist(`Stock: jadwalkan tayang "${it.title}"`, () => { it.airDate = before; },
+    `"${it.title || 'item'}" dijadwalkan tayang ${scFmtLong(date)} ✓`,
+    ['jadwalkan tayang Stock Contents', `"${it.title || 'item'}" — ${it.category} ${scFmtLong(date)}`]);
 }
 
 function scCloseModal() { $('scModal')?.classList.add('hidden'); }
@@ -5304,6 +5372,11 @@ function renderProgramsAdmin() {
         onchange="updateProgram(${i}, { color: this.value })" />
       <input type="text" class="form-inp" value="${esc(p.name)}" title="Ubah nama lalu tekan Enter"
         onchange="updateProgram(${i}, { name: this.value })" />
+      <select class="form-inp program-day" title="Hari tayang rutin (slot otomatis di kalender Stock Contents)"
+        onchange="updateProgram(${i}, { airDays: this.value === '' ? [] : [+this.value] })">
+        <option value="">— Tanpa jadwal —</option>
+        ${SC_DOW.map((d, k) => `<option value="${k}" ${scAirDays(p)[0] === k ? 'selected' : ''}>📺 ${d}</option>`).join('')}
+      </select>
       <span class="program-used" title="Jumlah Stock Contents yang memakai program ini">${used(p.name)} item</span>
       <button type="button" class="btn-xs" title="Naikkan" onclick="moveProgram(${i}, -1)" ${i === 0 ? 'disabled' : ''}>▲</button>
       <button type="button" class="btn-xs" title="Turunkan" onclick="moveProgram(${i}, 1)" ${i === list.length - 1 ? 'disabled' : ''}>▼</button>
@@ -5362,6 +5435,13 @@ async function updateProgram(i, patch) {
     list[i].name = name;
   }
   if ('color' in patch) list[i].color = patch.color;
+  if ('airDays' in patch) {
+    list[i].airDays = patch.airDays;
+    const d = patch.airDays.length ? 'setiap ' + SC_DOW[patch.airDays[0]] : 'tanpa jadwal';
+    await saveProgramsList(list, `Program: hari tayang "${list[i].name}" ${d}`, `Hari tayang ${list[i].name}: ${d} ✓`);
+    if (state.currentPage === 'stockcontents') renderStockCalendar();
+    return;
+  }
   await saveProgramsList(list,
     renamed ? `Program: ganti nama "${renamed.from}" → "${renamed.to}"` : `Program: ubah warna "${list[i].name}"`,
     renamed ? 'Nama program diubah ✓' : 'Warna disimpan ✓', renamed);
@@ -9584,6 +9664,8 @@ document.addEventListener('DOMContentLoaded', async () => {
   window.scSendWa               = scSendWa;
   window.scShiftMonth           = scShiftMonth;
   window.scOpenModal            = scOpenModal;
+  window.scOpenSlotPicker       = scOpenSlotPicker;
+  window.scPickForSlot          = scPickForSlot;
   window.scCloseModal           = scCloseModal;
   window.scSaveModal            = scSaveModal;
   window.scDeleteItem           = scDeleteItem;
