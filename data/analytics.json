@@ -939,7 +939,7 @@
         "totalEngagement": 86832,
         "profileVisits": 14896,
         "pageFollowers": 180635,
-        "followersGained": 5798,
+        "followersGained": 3416,
         "_fromWeekly": [
           "totalViews",
           "totalEngagement",
@@ -1247,7 +1247,7 @@
         "updatedBy": "Admin"
       },
       "facebook": {
-        "updatedAt": "2026-11-20T06:48:30.393Z",
+        "updatedAt": "2026-11-20T06:49:26.300Z",
         "updatedBy": "Admin"
       },
       "youtube": {
@@ -1579,6 +1579,7 @@
         "totalEngagement": 16449,
         "profileVisits": 2288,
         "pageFollowers": 180635,
+        "followersGained": -2382,
         "erPct": 2.51
       }
     ],
