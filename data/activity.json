@@ -1,5 +1,13 @@
 [
   {
+    "id": "mwovsrrqmj5py",
+    "user": "Admin",
+    "role": "Admin",
+    "action": "ubah Stock Contents",
+    "target": "\"Podcast Dirbio PLN\" — Situation Room",
+    "timestamp": "2026-11-20T11:14:03.542Z"
+  },
+  {
     "id": "mwovlr245vkib",
     "user": "Umar",
     "role": "Publisher",
@@ -3990,13 +3998,5 @@
     "action": "login",
     "target": "masuk ke sistem sebagai Admin",
     "timestamp": "2026-07-24T04:29:57.557Z"
-  },
-  {
-    "id": "mrvvoioxo4xvl",
-    "user": "Admin",
-    "role": "Admin",
-    "action": "update statistik",
-    "target": "Penjaga Harapan YouTube — Feb 2026",
-    "timestamp": "2026-07-22T09:26:36.705Z"
   }
 ]
