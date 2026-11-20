@@ -1,5 +1,13 @@
 [
   {
+    "id": "mwov9qc0ajtcg",
+    "user": "Admin",
+    "role": "Admin",
+    "action": "ubah status",
+    "target": "\"Uang Anggota Harus Kembali Menolong Anggota!\" menjadi Published",
+    "timestamp": "2026-11-20T10:59:15.216Z"
+  },
+  {
     "id": "mwon1rl7hxgtj",
     "user": "Admin",
     "role": "Admin",
@@ -3990,13 +3998,5 @@
     "action": "update statistik",
     "target": "Penjaga Harapan YouTube — Mar 2026",
     "timestamp": "2026-07-22T09:24:21.301Z"
-  },
-  {
-    "id": "mrvvknlmkw2sx",
-    "user": "Admin",
-    "role": "Admin",
-    "action": "update statistik",
-    "target": "Penjaga Harapan YouTube — Apr 2026",
-    "timestamp": "2026-07-22T09:23:36.442Z"
   }
 ]
