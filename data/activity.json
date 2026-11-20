@@ -1,5 +1,13 @@
 [
   {
+    "id": "mwom8h6j60zei",
+    "user": "Admin",
+    "role": "Admin",
+    "action": "update statistik",
+    "target": "Penjaga Harapan Facebook — 2-8 Nov '26",
+    "timestamp": "2026-11-20T06:46:20.155Z"
+  },
+  {
     "id": "mwom79hum1m90",
     "user": "Admin",
     "role": "Admin",
@@ -3990,13 +3998,5 @@
     "action": "update statistik",
     "target": "33 Official Facebook — 13-19 Jul '26",
     "timestamp": "2026-07-21T02:28:01.986Z"
-  },
-  {
-    "id": "mru18ukj1y9k3",
-    "user": "Admin",
-    "role": "Admin",
-    "action": "update statistik",
-    "target": "33 Official Instagram — 13-19 Jul '26",
-    "timestamp": "2026-07-21T02:26:50.947Z"
   }
 ]
