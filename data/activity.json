@@ -1,5 +1,13 @@
 [
   {
+    "id": "mwovjrdg3ehas",
+    "user": "Admin",
+    "role": "Admin",
+    "action": "jadwalkan tayang Stock Contents",
+    "target": "\"Liputan SMA Tarnus Cimahi\" — Liputan PH Kamis, 12 November 2026",
+    "timestamp": "2026-11-20T11:07:03.124Z"
+  },
+  {
     "id": "mwovjhwb9slvf",
     "user": "Admin",
     "role": "Admin",
@@ -3990,13 +3998,5 @@
     "action": "update statistik",
     "target": "Penjaga Harapan YouTube — Jan 2026",
     "timestamp": "2026-07-22T09:25:44.258Z"
-  },
-  {
-    "id": "mrvvmb3phj1mk",
-    "user": "Admin",
-    "role": "Admin",
-    "action": "update statistik",
-    "target": "Penjaga Harapan YouTube — Feb 2026",
-    "timestamp": "2026-07-22T09:24:53.557Z"
   }
 ]
