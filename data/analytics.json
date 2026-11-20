@@ -868,7 +868,7 @@
         "totalViews": 3761227,
         "totalEngagement": 128230,
         "erPct": 3.41,
-        "profileVisits": 8666,
+        "profileVisits": 10839,
         "_fromWeekly": [
           "profileVisits"
         ],
@@ -1201,7 +1201,7 @@
         "updatedBy": "Admin"
       },
       "facebook": {
-        "updatedAt": "2026-11-20T06:28:33.847Z",
+        "updatedAt": "2026-11-20T06:29:17.483Z",
         "updatedBy": "Admin"
       },
       "youtube": {
@@ -1328,16 +1328,17 @@
       },
       {
         "week": "2026-W26",
-        "pageFollowers": 160762,
-        "followersGained": 460,
-        "totalPost": 53,
-        "totalViews": 539222,
-        "totalEngagement": 20081,
+        "totalViews": 540802,
+        "totalViewers": 349532,
+        "totalEngagement": 20121,
+        "profileVisits": 2173,
+        "pageFollowers": 160765,
+        "followersGained": 463,
         "erPct": 3.72
       },
       {
         "week": "2026-W27",
-        "pageFollowers": 161557,
+        "pageFollowers": 161560,
         "followersGained": 795,
         "totalPost": 41,
         "totalViews": 629482,
@@ -1346,7 +1347,7 @@
       },
       {
         "week": "2026-W28",
-        "pageFollowers": 162450,
+        "pageFollowers": 162453,
         "followersGained": 893,
         "totalPost": 42,
         "totalViews": 736255,
@@ -1355,7 +1356,7 @@
       },
       {
         "week": "2026-W29",
-        "pageFollowers": 163345,
+        "pageFollowers": 163348,
         "followersGained": 895,
         "totalPost": 37,
         "totalViews": 751394,
@@ -1364,7 +1365,7 @@
       },
       {
         "week": "2026-W30",
-        "pageFollowers": 163991,
+        "pageFollowers": 163994,
         "followersGained": 646,
         "totalPost": 37,
         "totalViews": 563025,
@@ -1373,7 +1374,7 @@
       },
       {
         "week": "2026-W31",
-        "pageFollowers": 165017,
+        "pageFollowers": 165020,
         "followersGained": 1026,
         "totalPost": 40,
         "totalViews": 985509,
@@ -1386,7 +1387,7 @@
         "totalViewers": 258610,
         "totalEngagement": 19669,
         "profileVisits": 1903,
-        "pageFollowers": 165642,
+        "pageFollowers": 165645,
         "followersGained": 625,
         "erPct": 3.98
       },
@@ -1396,7 +1397,7 @@
         "totalViewers": 97454,
         "totalEngagement": 8207,
         "profileVisits": 719,
-        "pageFollowers": 165843,
+        "pageFollowers": 165846,
         "followersGained": 201,
         "erPct": 4.46
       }
