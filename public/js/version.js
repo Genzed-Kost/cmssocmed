@@ -13,12 +13,14 @@ window.APP_INFO = {
       version: '2.6.5', date: '2026-11-19',
       items: [
         '📺 Stock Contents: slot tayang tiap program otomatis muncul di kalender sesuai hari tayangnya',
+        '📋 Stock Contents: Daftar Tayang & Daftar Produksi bulan berjalan di bawah kalender',
         '📰 Info Presiden kini 20 berita: 15 berita presiden + 5 berita teknologi global (prioritas China)',
       ],
       adminItems: [
         '📺 Slot tayang otomatis di kalender Stock Contents (Podcast PH & JA Selasa, Situation Room & Belajar Koperasi Rabu, Liputan PH & Gimana Kabarnya Kamis, Liputan JA Jumat, Productive Hangout Sabtu, Konsultasi Hukum Keluarga Minggu)',
         '👆 Klik slot untuk memilih konten tayang dari stok program itu, atau buat konten baru',
-        '🗓 Hari tayang tiap program bisa diubah di API Setup → Daftar Program',
+        '🗓 Hari tayang & pola minggu (setiap minggu / 2 minggu sekali) tiap program bisa diubah di API Setup → Daftar Program; Rabu: Belajar Koperasi & Situation Room selang-seling',
+        '🔒 Konten yang sudah tayang tidak bisa dipindah tanggal tayangnya',
       ],
     },
     {

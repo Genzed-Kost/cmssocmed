@@ -3643,6 +3643,31 @@ function scAirDays(p) {
   if (Array.isArray(p?.airDays)) return p.airDays;
   return SC_DEFAULT_AIRDAYS[p?.name] || [];
 }
+/* Pola minggu: 'all' = setiap minggu; 'even'/'odd' = 2 minggu sekali (selang-seling).
+   Bawaan Rabu: Belajar Koperasi & Situation Room bergantian (11 Nov 2026 = Belajar Koperasi). */
+const SC_DEFAULT_AIRWEEKS = { 'Belajar Koperasi': 'even', 'Situation Room': 'odd' };
+function scAirWeeks(p) { return p?.airWeeks || SC_DEFAULT_AIRWEEKS[p?.name] || 'all'; }
+function scWeekParity(ymd) {   // paritas minggu (Senin–Minggu) sejak Senin 5 Jan 1970
+  const [y, m, d] = ymd.split('-').map(Number);
+  return Math.floor((Date.UTC(y, m - 1, d) - Date.UTC(1970, 0, 5)) / 604800000) % 2 === 0 ? 'even' : 'odd';
+}
+function scAirsOn(p, ymd) {
+  const dow = new Date(ymd + 'T00:00:00').getDay();
+  if (!scAirDays(p).includes(dow)) return false;
+  const w = scAirWeeks(p);
+  return w === 'all' || scWeekParity(ymd) === w;
+}
+/* Tanggal tayang berikutnya (mulai hari ini) untuk hari & pola minggu tertentu */
+function scNextAir(day, weeks) {
+  let d = new Date(); d.setHours(0, 0, 0, 0);
+  for (let i = 0; i < 21; i++, d.setDate(d.getDate() + 1)) {
+    const ymd = scYmd(d);
+    if (d.getDay() === day && (weeks === 'all' || scWeekParity(ymd) === weeks)) return ymd;
+  }
+  return '';
+}
+/* Konten yang tanggal tayangnya sudah lewat tidak bisa dipindah */
+function scAired(it) { return !!it?.airDate && it.airDate < scYmd(new Date()); }
 function scCatOrder(cat) { const i = scProgramNames().indexOf(cat); return i === -1 ? 99 : i; }
 
 function renderStockContents() {
@@ -3858,8 +3883,9 @@ function scChipHtml(ev, canEdit) {
   const extra = ev.kind === 'prod' && ev.span > 0 ? ` <small>(${ev.i + 1}/${ev.span + 1})</small>` : '';
   const tip   = `${it.category || 'Tanpa kelompok'} — ${it.title || '(tanpa judul)'} · ` +
     (ev.kind === 'air' ? 'Tayang' : 'Produksi ' + scProdText(it));
-  return `<div class="sc-chip sc-chip-${ev.kind}" style="--c:${col}" data-id="${esc(it.id)}" data-kind="${ev.kind}"
-    ${canEdit ? 'draggable="true"' : ''} title="${esc(tip)}${ev.kind === 'air' && it.ytUrl ? ' · ▶ ada di YouTube' : ''}">${label} ${timeHtml}${esc(it.title || '(tanpa judul)')}${extra}${ev.kind === 'air' && it.ytUrl ? '<span class="sc-chip-yt" aria-label="Ada di YouTube">▶</span>' : ''}</div>`;
+  const locked = ev.kind === 'air' && scAired(it);
+  return `<div class="sc-chip sc-chip-${ev.kind}${locked ? ' sc-chip-locked' : ''}" style="--c:${col}" data-id="${esc(it.id)}" data-kind="${ev.kind}"
+    ${canEdit && !locked ? 'draggable="true"' : ''} title="${esc(tip)}${locked ? ' · sudah tayang (tidak bisa dipindah)' : ''}${ev.kind === 'air' && it.ytUrl ? ' · ▶ ada di YouTube' : ''}">${label} ${timeHtml}${esc(it.title || '(tanpa judul)')}${extra}${ev.kind === 'air' && it.ytUrl ? '<span class="sc-chip-yt" aria-label="Ada di YouTube">▶</span>' : ''}</div>`;
 }
 
 /* Item yang punya jadwal (tayang atau produksi) di bulan ym "YYYY-MM". */
@@ -3936,13 +3962,13 @@ function renderStockCalendar() {
   });
   // Slot tayang otomatis: program yang jadwalnya hari itu tapi belum ada konten tayang
   {
-    const progs = scPrograms().map(p => ({ name: p.name, days: scAirDays(p) })).filter(p => p.days.length);
+    const progs = scPrograms().filter(p => scAirDays(p).length);
     const m0 = state.scMonth;
     const last = new Date(m0.getFullYear(), m0.getMonth() + 1, 0).getDate();
     for (let day = 1; day <= last; day++) {
-      const dt = new Date(m0.getFullYear(), m0.getMonth(), day), ymd = scYmd(dt), dow = dt.getDay();
+      const ymd = scYmd(new Date(m0.getFullYear(), m0.getMonth(), day));
       progs.forEach(pr => {
-        if (!pr.days.includes(dow)) return;
+        if (!scAirsOn(pr, ymd)) return;
         if ((byDay[ymd] || []).some(ev => ev.kind === 'air' && ev.it.category === pr.name)) return;
         push(ymd, { kind: 'slot', cat: pr.name, date: ymd });
       });
@@ -3990,6 +4016,8 @@ function renderStockCalendar() {
   grid.innerHTML = html.join('') +
     (hasEvents ? '' : `<div class="sc-cal-empty">Belum ada jadwal produksi / tayang di bulan ini.</div>`);
 
+  scRenderMonthLists(items, byDay, canEdit);
+
   // Belum ada tanggal tayang
   const unsched = items.filter(it => !it.airDate)
     .sort((a, b) => scCatOrder(a.category) - scCatOrder(b.category));
@@ -4005,6 +4033,62 @@ function renderStockCalendar() {
     `<span class="sc-unsched-empty">${unsched.length ? 'Seret item ke kalender untuk menjadwalkan tayang.' : ''}</span>`);
 
   scBindCalendar(grid, ul, canEdit);
+}
+
+/* Daftar Tayang & Daftar Produksi untuk bulan yang sedang dilihat */
+function scRenderMonthLists(items, byDay, canEdit) {
+  const box = $('scMonthLists');
+  if (!box) return;
+  const m = state.scMonth, ym = scYmd(m).slice(0, 7), today = scYmd(new Date());
+  const monthName = `${SC_MONTHS[m.getMonth()]} ${m.getFullYear()}`;
+  const dShort = ymd => new Date(ymd + 'T00:00:00').toLocaleDateString('id-ID', { weekday: 'short', day: 'numeric', month: 'short' });
+  const badge = cat => `<span class="sc-ml-cat" style="--c:${scColor(cat)}">${esc(cat || 'Tanpa kelompok')}</span>`;
+
+  // Tayang: konten bertanggal tayang + slot kosong yang belum lewat
+  const air = items.filter(it => (it.airDate || '').startsWith(ym)).map(it => ({ date: it.airDate, it }));
+  Object.entries(byDay).forEach(([ymd, evs]) => evs.forEach(ev => {
+    if (ev.kind === 'slot' && ymd.startsWith(ym) && ymd >= today) air.push({ date: ymd, slot: ev.cat });
+  }));
+  air.sort((a, b) => a.date.localeCompare(b.date) || scCatOrder(a.it?.category ?? a.slot) - scCatOrder(b.it?.category ?? b.slot));
+  const airRow = r => {
+    if (r.slot) return `<div class="sc-ml-row sc-ml-slot" ${canEdit ? `data-slot="${esc(r.slot)}" data-date="${r.date}"` : ''}>
+        <span class="sc-ml-date">${dShort(r.date)}</span>${badge(r.slot)}<span class="sc-ml-title">📺 belum ada konten${canEdit ? ' — pilih' : ''}</span></div>`;
+    const st = r.date < today ? ['✅', 'sudah tayang'] : r.date === today ? ['🔴', 'tayang hari ini'] : ['⏳', 'akan tayang'];
+    return `<div class="sc-ml-row" data-id="${esc(r.it.id)}">
+        <span class="sc-ml-date">${dShort(r.date)}</span>${badge(r.it.category)}
+        <span class="sc-ml-title">${esc(r.it.title || '(tanpa judul)')}${r.it.ytUrl ? ' <span class="sc-chip-yt">▶</span>' : ''}</span>
+        <span class="sc-ml-st" title="${st[1]}">${st[0]}</span></div>`;
+  };
+
+  // Produksi: rentang produksi yang bersinggungan dengan bulan ini
+  const mStart = ym + '-01', mEnd = scYmd(new Date(m.getFullYear(), m.getMonth() + 1, 0));
+  const prod = items.filter(it => it.prodDate).map(it => ({ it, start: it.prodDate, end: it.prodDateEnd && it.prodDateEnd >= it.prodDate ? it.prodDateEnd : it.prodDate }))
+    .filter(r => r.start <= mEnd && r.end >= mStart)
+    .sort((a, b) => a.start.localeCompare(b.start) || (a.it.prodTime || '99').localeCompare(b.it.prodTime || '99'));
+  const prodRow = r => {
+    const st = r.end < today ? ['✅', 'produksi selesai'] : r.start <= today ? ['🎬', 'sedang produksi'] : ['⏳', 'akan produksi'];
+    const time = [r.it.prodTime, r.it.prodTimeEnd].filter(Boolean).join('–');
+    return `<div class="sc-ml-row" data-id="${esc(r.it.id)}">
+        <span class="sc-ml-date">${dShort(r.start)}${r.end !== r.start ? ' – ' + dShort(r.end) : ''}${time ? `<small>${esc(time)}</small>` : ''}</span>${badge(r.it.category)}
+        <span class="sc-ml-title">${esc(r.it.title || '(tanpa judul)')}</span>
+        <span class="sc-ml-st" title="${st[1]}">${st[0]}</span></div>`;
+  };
+  const airCount = air.filter(r => !r.slot).length;
+  box.innerHTML = `
+    <div class="sc-ml-col">
+      <div class="sc-ml-head">📅 Daftar Tayang · ${monthName} <span>${airCount}</span></div>
+      <div class="sc-ml-list">${air.length ? air.map(airRow).join('') : '<p class="sc-ml-empty">Belum ada jadwal tayang.</p>'}</div>
+    </div>
+    <div class="sc-ml-col">
+      <div class="sc-ml-head">🎬 Daftar Produksi · ${monthName} <span>${prod.length}</span></div>
+      <div class="sc-ml-list">${prod.length ? prod.map(prodRow).join('') : '<p class="sc-ml-empty">Belum ada jadwal produksi.</p>'}</div>
+    </div>`;
+  box.onclick = e => {
+    const row = e.target.closest('.sc-ml-row');
+    if (!row) return;
+    if (row.dataset.slot) { scOpenSlotPicker(row.dataset.slot, row.dataset.date); return; }
+    if (row.dataset.id) scOpenModal(row.dataset.id);
+  };
 }
 
 function scBindCalendar(grid, ul, canEdit) {
@@ -4050,6 +4134,7 @@ function scBindCalendar(grid, ul, canEdit) {
     const before = { ...it };
     if (data.kind === 'air') {
       if (it.airDate === to) return;
+      if (scAired(it)) { toast('Konten yang sudah tayang tidak bisa dipindah', 'error'); return; }
       it.airDate = to;
     } else {
       // Geser seluruh rentang produksi, durasi tetap
@@ -4126,7 +4211,8 @@ function scOpenModal(id = null, date = '', cat = '') {
       </div>
       <div class="form-group">
         <label class="form-label" for="scfAir">📅 Tanggal Tayang</label>
-        <input id="scfAir" type="date" class="form-inp" value="${esc(v.airDate || '')}" />
+        <input id="scfAir" type="date" class="form-inp" value="${esc(v.airDate || '')}" ${scAired(it) ? 'disabled title="Sudah tayang — tanggal tayang dikunci"' : ''} />
+        ${scAired(it) ? '<div class="sc-yt-hint">🔒 Sudah tayang — tanggal tayang tidak bisa dipindah.</div>' : ''}
       </div>
       <div class="form-group">
         <label class="form-label" for="scfYt">▶️ Link YouTube <span style="font-weight:400;color:var(--muted)">(otomatis setelah tayang — bisa diubah manual)</span></label>
@@ -4151,7 +4237,7 @@ function scOpenSlotPicker(cat, date) {
   if (!isAdmin()) return;
   const all   = (state.stockContents || []).filter(it => it.category === cat);
   const free  = all.filter(it => !it.airDate);
-  const other = all.filter(it => it.airDate && it.airDate !== date).sort((a, b) => b.airDate.localeCompare(a.airDate));
+  const other = all.filter(it => it.airDate && it.airDate !== date && !scAired(it)).sort((a, b) => a.airDate.localeCompare(b.airDate));
   const row = it => `<button type="button" class="sc-pick-row" onclick="scPickForSlot('${esc(it.id)}','${date}')">
       <b>${esc(it.title || '(tanpa judul)')}</b>
       <small>${it.airDate ? `sekarang tayang ${esc(scFmtLong(it.airDate))} — pindahkan` : (it.prodDate ? '🎬 ' + esc(scProdText(it)) : 'belum dijadwalkan')}</small>
@@ -4160,9 +4246,10 @@ function scOpenSlotPicker(cat, date) {
   $('scModalBody').innerHTML = `
     <div class="sc-slot-head"><span class="sc-badge" style="--c:${scColor(cat)}">${esc(cat)}</span>
       <b>${esc(scFmtLong(date))}</b></div>
+    ${date < scYmd(new Date()) ? '<p class="sc-pick-empty">⚠️ Tanggal ini sudah lewat — konten yang dipilih akan tercatat sudah tayang dan tidak bisa dipindah lagi.</p>' : ''}
     <div class="sc-pick-title">Stok belum dijadwalkan (${free.length})</div>
     <div class="sc-pick-list">${free.length ? free.map(row).join('') : '<p class="sc-pick-empty">Tidak ada stok program ini yang belum dijadwalkan.</p>'}</div>
-    ${other.length ? `<details class="sc-pick-more"><summary>Konten ${esc(cat)} yang sudah terjadwal (${other.length})</summary>
+    ${other.length ? `<details class="sc-pick-more"><summary>Konten ${esc(cat)} yang terjadwal & belum tayang (${other.length})</summary>
       <div class="sc-pick-list">${other.map(row).join('')}</div></details>` : ''}`;
   $('scModalFoot').innerHTML = `
     <button type="button" class="btn-sm" style="margin-right:auto" onclick="scOpenModal(null,'${date}','${esc(cat).replace(/'/g, "\\'")}')">+ Konten baru</button>
@@ -4173,6 +4260,7 @@ async function scPickForSlot(id, date) {
   if (!isAdmin()) return;
   const it = (state.stockContents || []).find(x => x.id === id);
   if (!it) return;
+  if (scAired(it)) { toast('Konten yang sudah tayang tidak bisa dipindah', 'error'); return; }
   const before = it.airDate;
   it.airDate = date;
   scCloseModal();
@@ -5377,6 +5465,14 @@ function renderProgramsAdmin() {
         <option value="">— Tanpa jadwal —</option>
         ${SC_DOW.map((d, k) => `<option value="${k}" ${scAirDays(p)[0] === k ? 'selected' : ''}>📺 ${d}</option>`).join('')}
       </select>
+      <select class="form-inp program-weeks" title="Setiap minggu, atau 2 minggu sekali (selang-seling dengan program lain di hari yang sama)"
+        onchange="updateProgram(${i}, { airWeeks: this.value })" ${scAirDays(p).length ? '' : 'disabled'}>
+        <option value="all" ${scAirWeeks(p) === 'all' ? 'selected' : ''}>Setiap minggu</option>
+        ${['even', 'odd'].map(w => {
+          const nx = scAirDays(p).length ? scNextAir(scAirDays(p)[0], w) : '';
+          return `<option value="${w}" ${scAirWeeks(p) === w ? 'selected' : ''}>2 minggu sekali${nx ? ' · mulai ' + new Date(nx + 'T00:00:00').toLocaleDateString('id-ID', { day: 'numeric', month: 'short' }) : ''}</option>`;
+        }).join('')}
+      </select>
       <span class="program-used" title="Jumlah Stock Contents yang memakai program ini">${used(p.name)} item</span>
       <button type="button" class="btn-xs" title="Naikkan" onclick="moveProgram(${i}, -1)" ${i === 0 ? 'disabled' : ''}>▲</button>
       <button type="button" class="btn-xs" title="Turunkan" onclick="moveProgram(${i}, 1)" ${i === list.length - 1 ? 'disabled' : ''}>▼</button>
@@ -5435,8 +5531,17 @@ async function updateProgram(i, patch) {
     list[i].name = name;
   }
   if ('color' in patch) list[i].color = patch.color;
+  if ('airWeeks' in patch) {
+    list[i].airWeeks = patch.airWeeks;
+    if (!Array.isArray(list[i].airDays)) list[i].airDays = scAirDays(list[i]);
+    const d = patch.airWeeks === 'all' ? 'setiap minggu' : '2 minggu sekali mulai ' + scFmtLong(scNextAir(list[i].airDays[0], patch.airWeeks));
+    await saveProgramsList(list, `Program: pola tayang "${list[i].name}" ${d}`, `${list[i].name}: ${d} ✓`);
+    if (state.currentPage === 'stockcontents') renderStockCalendar();
+    return;
+  }
   if ('airDays' in patch) {
     list[i].airDays = patch.airDays;
+    if (!list[i].airWeeks) list[i].airWeeks = scAirWeeks(list[i]);
     const d = patch.airDays.length ? 'setiap ' + SC_DOW[patch.airDays[0]] : 'tanpa jadwal';
     await saveProgramsList(list, `Program: hari tayang "${list[i].name}" ${d}`, `Hari tayang ${list[i].name}: ${d} ✓`);
     if (state.currentPage === 'stockcontents') renderStockCalendar();
