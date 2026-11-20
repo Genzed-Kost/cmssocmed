@@ -1239,7 +1239,23 @@
       },
       {
         "month": "2026-09",
-        "totalReach": 87217
+        "totalReach": 87217,
+        "totalViews": 404244,
+        "totalEngagement": 17602,
+        "profileVisits": 318,
+        "followersEOM": 63787,
+        "followersGained": 1042,
+        "jmlPost": 55,
+        "_fromWeekly": [
+          "totalViews",
+          "totalEngagement",
+          "profileVisits",
+          "followersEOM",
+          "followersGained",
+          "jmlPost"
+        ],
+        "_weeks": "1/4",
+        "erPct": 4.35
       },
       {
         "month": "2026-10",
@@ -1251,7 +1267,7 @@
     ],
     "_meta": {
       "instagram": {
-        "updatedAt": "2026-11-20T07:01:52.996Z",
+        "updatedAt": "2026-11-20T07:03:03.416Z",
         "updatedBy": "Admin"
       },
       "facebook": {
@@ -1391,6 +1407,17 @@
         "followersGained": 486,
         "jmlPost": 79,
         "erPct": 5.04
+      },
+      {
+        "week": "2026-W36",
+        "totalViews": 404244,
+        "totalReach": 34698,
+        "totalEngagement": 17602,
+        "profileVisits": 318,
+        "followersEOM": 63787,
+        "followersGained": 1042,
+        "jmlPost": 55,
+        "erPct": 4.35
       }
     ],
     "facebook_w": [
