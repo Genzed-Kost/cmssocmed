@@ -1247,21 +1247,6 @@
       },
       {
         "month": "2026-11",
-        "totalViews": 1140471,
-        "totalEngagement": 79394,
-        "profileVisits": 584,
-        "followersEOM": 62557,
-        "followersGained": 298,
-        "jmlPost": 70,
-        "_fromWeekly": [
-          "totalViews",
-          "totalEngagement",
-          "profileVisits",
-          "followersEOM",
-          "followersGained",
-          "jmlPost"
-        ],
-        "_weeks": "1/4",
         "erPct": 6.96
       }
     ],
@@ -1393,17 +1378,6 @@
         "totalEngagement": 79394,
         "profileVisits": 584,
         "followersEOM": 62259,
-        "followersGained": 298,
-        "jmlPost": 70,
-        "erPct": 6.96
-      },
-      {
-        "week": "2026-W47",
-        "totalViews": 1140471,
-        "totalReach": 66016,
-        "totalEngagement": 79394,
-        "profileVisits": 584,
-        "followersEOM": 62557,
         "followersGained": 298,
         "jmlPost": 70,
         "erPct": 6.96
