@@ -881,7 +881,7 @@
         "totalViews": 3347102,
         "totalEngagement": 119600,
         "erPct": 3.57,
-        "profileVisits": 9432,
+        "profileVisits": 12599,
         "_fromWeekly": [
           "profileVisits"
         ],
@@ -1206,7 +1206,7 @@
         "updatedBy": "Admin"
       },
       "facebook": {
-        "updatedAt": "2026-11-20T06:32:54.595Z",
+        "updatedAt": "2026-11-20T06:33:34.354Z",
         "updatedBy": "Admin"
       },
       "youtube": {
@@ -1383,12 +1383,13 @@
       },
       {
         "week": "2026-W31",
+        "totalViews": 1000658,
+        "totalViewers": 571637,
+        "totalEngagement": 29924,
+        "profileVisits": 3167,
         "pageFollowers": 165036,
         "followersGained": 1026,
-        "totalPost": 40,
-        "totalViews": 985509,
-        "totalEngagement": 29394,
-        "erPct": 2.98
+        "erPct": 2.99
       },
       {
         "week": "2026-W32",
