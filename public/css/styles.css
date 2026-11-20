@@ -4166,25 +4166,6 @@ ul { list-style: none; }
 .sc-chip-locked { cursor: pointer; }
 .program-row .program-weeks { flex: 0 0 auto; width: 190px; padding-top: 6px; padding-bottom: 6px; }
 @media (max-width: 680px) { .program-row .program-weeks { width: 100%; } }
-/* Stock Contents: Daftar Tayang & Daftar Produksi bulan ini */
-.sc-month-lists { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; margin-top: 12px; }
-.sc-ml-col { border: 1px solid var(--bd); border-radius: 12px; background: var(--surface); overflow: hidden; min-width: 0; }
-.sc-ml-head { display: flex; align-items: center; gap: 6px; padding: 9px 12px; font-size: .78rem; font-weight: 800; border-bottom: 1px solid var(--bd); background: var(--bg, #f8fafc); }
-.sc-ml-head span { margin-left: auto; font-size: .68rem; background: var(--blue-lt, #eff6ff); color: var(--blue); padding: 1px 8px; border-radius: 999px; }
-.sc-ml-list { max-height: 340px; overflow-y: auto; }
-.sc-ml-row { display: flex; align-items: center; gap: 8px; padding: 7px 12px; border-bottom: 1px solid var(--bd); font-size: .78rem; cursor: pointer; min-width: 0; }
-.sc-ml-row:last-child { border-bottom: none; }
-.sc-ml-row:hover { background: var(--blue-lt, #eff6ff); }
-.sc-ml-date { flex: 0 0 auto; min-width: 92px; font-weight: 700; color: var(--muted); font-variant-numeric: tabular-nums; display: flex; flex-direction: column; line-height: 1.25; }
-.sc-ml-date small { font-weight: 600; font-size: .68rem; color: var(--blue); }
-.sc-ml-cat { flex: 0 0 auto; font-size: .64rem; font-weight: 700; color: #fff; background: var(--c); padding: 2px 7px; border-radius: 999px; max-width: 130px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.sc-ml-title { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.sc-ml-st { flex: 0 0 auto; }
-.sc-ml-slot { opacity: .75; }
-.sc-ml-slot .sc-ml-cat { background: transparent; color: var(--c); border: 1.5px dashed var(--c); }
-.sc-ml-slot .sc-ml-title { color: var(--muted); font-style: italic; }
-.sc-ml-empty { font-size: .78rem; color: var(--muted); padding: 10px 12px; margin: 0; }
-@media (max-width: 760px) { .sc-month-lists { grid-template-columns: 1fr; } .sc-ml-cat { max-width: 90px; } }
 /* Daftar Program: nama di baris 1, jadwal tayang & tombol di baris 2 */
 #programList .program-row { flex-wrap: wrap; row-gap: 6px; padding-bottom: 8px; border-bottom: 1px solid var(--bd); }
 #programList .program-row:last-child { border-bottom: none; }
@@ -4193,3 +4174,9 @@ ul { list-style: none; }
 #programList .program-row .program-weeks { width: 235px; }
 #programList .program-row .program-used { margin-left: auto; }
 @media (max-width: 680px) { #programList .program-row .program-day, #programList .program-row .program-weeks { margin-left: 0; width: calc(50% - 3px); } }
+
+/* Stock Contents: filter kalender Semua / Tayang / Produksi */
+.sc-filter { display: inline-flex; padding: 3px; gap: 2px; border: 1px solid var(--bd); border-radius: 10px; background: var(--bg, #f8fafc); }
+.sc-filter button { border: none; background: transparent; padding: 5px 11px; border-radius: 7px; font: inherit; font-size: .76rem; font-weight: 700; color: var(--muted); cursor: pointer; }
+.sc-filter button:hover { color: var(--text); }
+.sc-filter button.active { background: var(--surface); color: var(--blue); box-shadow: 0 1px 3px rgba(15,23,42,.12); }

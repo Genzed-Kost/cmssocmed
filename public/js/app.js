@@ -4005,18 +4005,17 @@ function renderStockCalendar() {
       ymd === today ? 'sc-day-today' : '',
       evs.length ? '' : 'sc-day-empty',
       canEdit ? 'sc-day-edit' : ''].filter(Boolean).join(' ');
-    const chips = evs.map(ev => scChipHtml(ev, canEdit)).join('');
+    const chips = evs.filter(scFilterEv).map(ev => scChipHtml(ev, canEdit)).join('');
     html.push(`<div class="${cls}" data-date="${ymd}">
       <div class="sc-day-num"><span class="sc-day-dow">${d.toLocaleDateString('id-ID',{weekday:'short'})}</span>${d.getDate()}${inMonth ? '' : ' ' + SC_MONTHS[d.getMonth()].slice(0,3)}</div>
       <div class="sc-day-items">${chips}</div>
     </div>`);
   }
   const monthKey  = scYmd(first).slice(0, 7);
-  const hasEvents = Object.keys(byDay).some(k => k.startsWith(monthKey));
+  const hasEvents = Object.entries(byDay).some(([k, evs]) => k.startsWith(monthKey) && evs.some(scFilterEv));
   grid.innerHTML = html.join('') +
-    (hasEvents ? '' : `<div class="sc-cal-empty">Belum ada jadwal produksi / tayang di bulan ini.</div>`);
-
-  scRenderMonthLists(items, byDay, canEdit);
+    (hasEvents ? '' : `<div class="sc-cal-empty">Belum ada jadwal ${{ air: 'tayang', prod: 'produksi' }[scFilter()] || 'produksi / tayang'} di bulan ini.</div>`);
+  document.querySelectorAll('#scFilter button').forEach(b => b.classList.toggle('active', b.dataset.f === scFilter()));
 
   // Belum ada tanggal tayang
   const unsched = items.filter(it => !it.airDate)
@@ -4035,60 +4034,12 @@ function renderStockCalendar() {
   scBindCalendar(grid, ul, canEdit);
 }
 
-/* Daftar Tayang & Daftar Produksi untuk bulan yang sedang dilihat */
-function scRenderMonthLists(items, byDay, canEdit) {
-  const box = $('scMonthLists');
-  if (!box) return;
-  const m = state.scMonth, ym = scYmd(m).slice(0, 7), today = scYmd(new Date());
-  const monthName = `${SC_MONTHS[m.getMonth()]} ${m.getFullYear()}`;
-  const dShort = ymd => new Date(ymd + 'T00:00:00').toLocaleDateString('id-ID', { weekday: 'short', day: 'numeric', month: 'short' });
-  const badge = cat => `<span class="sc-ml-cat" style="--c:${scColor(cat)}">${esc(cat || 'Tanpa kelompok')}</span>`;
-
-  // Tayang: konten bertanggal tayang + slot kosong yang belum lewat
-  const air = items.filter(it => (it.airDate || '').startsWith(ym)).map(it => ({ date: it.airDate, it }));
-  Object.entries(byDay).forEach(([ymd, evs]) => evs.forEach(ev => {
-    if (ev.kind === 'slot' && ymd.startsWith(ym) && ymd >= today) air.push({ date: ymd, slot: ev.cat });
-  }));
-  air.sort((a, b) => a.date.localeCompare(b.date) || scCatOrder(a.it?.category ?? a.slot) - scCatOrder(b.it?.category ?? b.slot));
-  const airRow = r => {
-    if (r.slot) return `<div class="sc-ml-row sc-ml-slot" ${canEdit ? `data-slot="${esc(r.slot)}" data-date="${r.date}"` : ''}>
-        <span class="sc-ml-date">${dShort(r.date)}</span>${badge(r.slot)}<span class="sc-ml-title">📺 belum ada konten${canEdit ? ' — pilih' : ''}</span></div>`;
-    const st = r.date < today ? ['✅', 'sudah tayang'] : r.date === today ? ['🔴', 'tayang hari ini'] : ['⏳', 'akan tayang'];
-    return `<div class="sc-ml-row" data-id="${esc(r.it.id)}">
-        <span class="sc-ml-date">${dShort(r.date)}</span>${badge(r.it.category)}
-        <span class="sc-ml-title">${esc(r.it.title || '(tanpa judul)')}${r.it.ytUrl ? ' <span class="sc-chip-yt">▶</span>' : ''}</span>
-        <span class="sc-ml-st" title="${st[1]}">${st[0]}</span></div>`;
-  };
-
-  // Produksi: rentang produksi yang bersinggungan dengan bulan ini
-  const mStart = ym + '-01', mEnd = scYmd(new Date(m.getFullYear(), m.getMonth() + 1, 0));
-  const prod = items.filter(it => it.prodDate).map(it => ({ it, start: it.prodDate, end: it.prodDateEnd && it.prodDateEnd >= it.prodDate ? it.prodDateEnd : it.prodDate }))
-    .filter(r => r.start <= mEnd && r.end >= mStart)
-    .sort((a, b) => a.start.localeCompare(b.start) || (a.it.prodTime || '99').localeCompare(b.it.prodTime || '99'));
-  const prodRow = r => {
-    const st = r.end < today ? ['✅', 'produksi selesai'] : r.start <= today ? ['🎬', 'sedang produksi'] : ['⏳', 'akan produksi'];
-    const time = [r.it.prodTime, r.it.prodTimeEnd].filter(Boolean).join('–');
-    return `<div class="sc-ml-row" data-id="${esc(r.it.id)}">
-        <span class="sc-ml-date">${dShort(r.start)}${r.end !== r.start ? ' – ' + dShort(r.end) : ''}${time ? `<small>${esc(time)}</small>` : ''}</span>${badge(r.it.category)}
-        <span class="sc-ml-title">${esc(r.it.title || '(tanpa judul)')}</span>
-        <span class="sc-ml-st" title="${st[1]}">${st[0]}</span></div>`;
-  };
-  const airCount = air.filter(r => !r.slot).length;
-  box.innerHTML = `
-    <div class="sc-ml-col">
-      <div class="sc-ml-head">📅 Daftar Tayang · ${monthName} <span>${airCount}</span></div>
-      <div class="sc-ml-list">${air.length ? air.map(airRow).join('') : '<p class="sc-ml-empty">Belum ada jadwal tayang.</p>'}</div>
-    </div>
-    <div class="sc-ml-col">
-      <div class="sc-ml-head">🎬 Daftar Produksi · ${monthName} <span>${prod.length}</span></div>
-      <div class="sc-ml-list">${prod.length ? prod.map(prodRow).join('') : '<p class="sc-ml-empty">Belum ada jadwal produksi.</p>'}</div>
-    </div>`;
-  box.onclick = e => {
-    const row = e.target.closest('.sc-ml-row');
-    if (!row) return;
-    if (row.dataset.slot) { scOpenSlotPicker(row.dataset.slot, row.dataset.date); return; }
-    if (row.dataset.id) scOpenModal(row.dataset.id);
-  };
+/* Filter kalender: semua / tayang (termasuk slot tayang) / produksi — diingat per perangkat */
+function scFilter() { try { return localStorage.getItem('cms_sc_filter') || 'all'; } catch { return 'all'; } }
+function scSetFilter(f) { try { localStorage.setItem('cms_sc_filter', f); } catch {} renderStockCalendar(); }
+function scFilterEv(ev) {
+  const f = scFilter();
+  return f === 'all' || (f === 'air' ? ev.kind === 'air' || ev.kind === 'slot' : ev.kind === 'prod');
 }
 
 function scBindCalendar(grid, ul, canEdit) {
@@ -9770,6 +9721,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   window.scShiftMonth           = scShiftMonth;
   window.scOpenModal            = scOpenModal;
   window.scOpenSlotPicker       = scOpenSlotPicker;
+  window.scSetFilter            = scSetFilter;
   window.scPickForSlot          = scPickForSlot;
   window.scCloseModal           = scCloseModal;
   window.scSaveModal            = scSaveModal;

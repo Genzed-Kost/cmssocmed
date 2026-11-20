@@ -13,7 +13,7 @@ window.APP_INFO = {
       version: '2.6.5', date: '2026-11-19',
       items: [
         '📺 Stock Contents: slot tayang tiap program otomatis muncul di kalender sesuai hari tayangnya',
-        '📋 Stock Contents: Daftar Tayang & Daftar Produksi bulan berjalan di bawah kalender',
+        '🔎 Stock Contents: filter kalender Semua / Tayang / Produksi',
         '📰 Info Presiden kini 20 berita: 15 berita presiden + 5 berita teknologi global (prioritas China)',
       ],
       adminItems: [
