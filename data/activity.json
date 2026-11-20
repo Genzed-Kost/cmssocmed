@@ -1,5 +1,13 @@
 [
   {
+    "id": "mwok3idw38k55",
+    "user": "Admin",
+    "role": "Admin",
+    "action": "ubah status",
+    "target": "\"Mekanisme MPR, Benarkah Suara Rakyat Tetap Terwakili?\" menjadi Published",
+    "timestamp": "2026-11-20T05:46:29.204Z"
+  },
+  {
     "id": "mwoh3aangw26f",
     "user": "Admin",
     "role": "Admin",
@@ -3990,13 +3998,5 @@
     "action": "hapus anggota",
     "target": "Om Yudi",
     "timestamp": "2026-07-16T14:40:27.091Z"
-  },
-  {
-    "id": "mrnm8cjk9m3ce",
-    "user": "Admin",
-    "role": "Admin",
-    "action": "login",
-    "target": "masuk ke sistem sebagai Admin",
-    "timestamp": "2026-07-16T14:39:56.288Z"
   }
 ]
