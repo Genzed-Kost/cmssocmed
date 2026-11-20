@@ -1231,11 +1231,11 @@
         "followersGained": 1365,
         "totalEngagement": 169236,
         "erPct": 5.32,
-        "profileVisits": 1459,
+        "profileVisits": 2043,
         "_fromWeekly": [
           "profileVisits"
         ],
-        "_weeks": "2/4"
+        "_weeks": "3/4"
       },
       {
         "month": "2026-09",
@@ -1250,7 +1250,7 @@
         "totalViews": 1140471,
         "totalEngagement": 79394,
         "profileVisits": 584,
-        "followersEOM": 62259,
+        "followersEOM": 62557,
         "followersGained": 298,
         "jmlPost": 70,
         "_fromWeekly": [
@@ -1267,7 +1267,7 @@
     ],
     "_meta": {
       "instagram": {
-        "updatedAt": "2026-11-20T06:56:05.706Z",
+        "updatedAt": "2026-11-20T06:56:23.699Z",
         "updatedBy": "Admin"
       },
       "facebook": {
@@ -1387,12 +1387,23 @@
         "erPct": 4.91
       },
       {
-        "week": "2026-W47",
+        "week": "2026-W34",
         "totalViews": 1140471,
         "totalReach": 66016,
         "totalEngagement": 79394,
         "profileVisits": 584,
         "followersEOM": 62259,
+        "followersGained": 298,
+        "jmlPost": 70,
+        "erPct": 6.96
+      },
+      {
+        "week": "2026-W47",
+        "totalViews": 1140471,
+        "totalReach": 66016,
+        "totalEngagement": 79394,
+        "profileVisits": 584,
+        "followersEOM": 62557,
         "followersGained": 298,
         "jmlPost": 70,
         "erPct": 6.96
