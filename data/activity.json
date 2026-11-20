@@ -1,5 +1,13 @@
 [
   {
+    "id": "mwoh1viuapja1",
+    "user": "Admin",
+    "role": "Admin",
+    "action": "ubah Stock Contents",
+    "target": "\"Sejarah Makam Guru Abdul Karim\" — Liputan JA",
+    "timestamp": "2026-11-20T04:21:14.070Z"
+  },
+  {
     "id": "mwoh0r8rsuhzq",
     "user": "Admin",
     "role": "Admin",
@@ -3990,13 +3998,5 @@
     "action": "Hapus Bank Konten",
     "target": "\"tanpa judul\"",
     "timestamp": "2026-07-16T10:54:21.824Z"
-  },
-  {
-    "id": "mrne2tp2gl3we",
-    "user": "Admin",
-    "role": "Admin",
-    "action": "logout",
-    "target": "keluar dari sistem",
-    "timestamp": "2026-07-16T10:51:41.654Z"
   }
 ]
