@@ -1,5 +1,13 @@
 [
   {
+    "id": "mwovt1zgqfiwk",
+    "user": "Admin",
+    "role": "Admin",
+    "action": "ubah Stock Contents",
+    "target": "\"Jenis-Jenis Koperasi\" — Belajar Koperasi",
+    "timestamp": "2026-11-20T11:14:16.780Z"
+  },
+  {
     "id": "mwovsrrqmj5py",
     "user": "Admin",
     "role": "Admin",
@@ -3990,13 +3998,5 @@
     "action": "login",
     "target": "masuk ke sistem sebagai Admin",
     "timestamp": "2026-07-28T07:26:30.396Z"
-  },
-  {
-    "id": "mryfyq455vsmw",
-    "user": "Admin",
-    "role": "Admin",
-    "action": "login",
-    "target": "masuk ke sistem sebagai Admin",
-    "timestamp": "2026-07-24T04:29:57.557Z"
   }
 ]
