@@ -1,5 +1,13 @@
 [
   {
+    "id": "mwpyt6qyccofb",
+    "user": "Umar",
+    "role": "Publisher",
+    "action": "login",
+    "target": "masuk ke sistem sebagai Publisher",
+    "timestamp": "2026-11-21T05:26:07.978Z"
+  },
+  {
     "id": "mwp4daxxmwz1c",
     "user": "Admin",
     "role": "Admin",
@@ -3990,13 +3998,5 @@
     "action": "Kirim WA Stock Contents",
     "target": "ke Idham — 22 item",
     "timestamp": "2026-07-28T11:01:43.976Z"
-  },
-  {
-    "id": "ms4caadu6c035",
-    "user": "Admin",
-    "role": "Admin",
-    "action": "login",
-    "target": "masuk ke sistem sebagai Admin",
-    "timestamp": "2026-07-28T07:33:35.634Z"
   }
 ]
