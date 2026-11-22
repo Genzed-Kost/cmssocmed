@@ -1,5 +1,13 @@
 [
   {
+    "id": "mwra8df8ccv28",
+    "user": "Umar",
+    "role": "Publisher",
+    "action": "login",
+    "target": "masuk ke sistem sebagai Publisher",
+    "timestamp": "2026-11-22T03:33:38.420Z"
+  },
+  {
     "id": "mwpyt6qyccofb",
     "user": "Umar",
     "role": "Publisher",
@@ -3990,13 +3998,5 @@
     "action": "Kirim WA Stock Contents",
     "target": "ke Umar — 22 item",
     "timestamp": "2026-07-28T11:01:48.419Z"
-  },
-  {
-    "id": "ms4jpyg8um5lb",
-    "user": "Admin",
-    "role": "Admin",
-    "action": "Kirim WA Stock Contents",
-    "target": "ke Idham — 22 item",
-    "timestamp": "2026-07-28T11:01:43.976Z"
   }
 ]
