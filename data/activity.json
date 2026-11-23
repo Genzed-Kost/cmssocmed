@@ -1,5 +1,13 @@
 [
   {
+    "id": "mwt5p0kaok7pl",
+    "user": "Admin",
+    "role": "Admin",
+    "action": "ubah status",
+    "target": "\"Mengapa Tidak Pemilu Ulang? Ini Alasan Konstitusionalnya\" menjadi Published",
+    "timestamp": "2026-11-23T11:02:09.178Z"
+  },
+  {
     "id": "mwswx1lmwu5bo",
     "user": "Admin",
     "role": "Admin",
@@ -3990,13 +3998,5 @@
     "action": "update statistik",
     "target": "Penjaga Harapan YouTube — Jul 2026",
     "timestamp": "2026-08-02T15:24:11.036Z"
-  },
-  {
-    "id": "msbn2khuqqjjj",
-    "user": "Admin",
-    "role": "Admin",
-    "action": "login",
-    "target": "masuk ke sistem sebagai Admin",
-    "timestamp": "2026-08-02T10:09:54.498Z"
   }
 ]
