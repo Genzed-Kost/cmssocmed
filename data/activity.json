@@ -1,5 +1,21 @@
 [
   {
+    "id": "mwssmeimkuzna",
+    "user": "Admin",
+    "role": "Admin",
+    "action": "lengkapi judul video YouTube",
+    "target": "1 Stock Content",
+    "timestamp": "2026-11-23T04:56:12.286Z"
+  },
+  {
+    "id": "mwssmd9t82s6d",
+    "user": "Admin",
+    "role": "Admin",
+    "action": "ubah Stock Contents",
+    "target": "\"Podcast Pak Arul\" — Productive Hangout",
+    "timestamp": "2026-11-23T04:56:10.673Z"
+  },
+  {
     "id": "mwsr9hrzpfwfl",
     "user": "Umar",
     "role": "Publisher",
@@ -3982,21 +3998,5 @@
     "action": "Kirim WA Stock Contents",
     "target": "ke Idham — 22 item",
     "timestamp": "2026-07-28T11:03:02.019Z"
-  },
-  {
-    "id": "ms4jrk7ibq5p3",
-    "user": "Admin",
-    "role": "Admin",
-    "action": "Kirim WA Stock Contents",
-    "target": "ke Umar — 22 item",
-    "timestamp": "2026-07-28T11:02:58.830Z"
-  },
-  {
-    "id": "ms4jq4mlps538",
-    "user": "Admin",
-    "role": "Admin",
-    "action": "Kirim WA Stock Contents",
-    "target": "ke Umar — 22 item",
-    "timestamp": "2026-07-28T11:01:51.981Z"
   }
 ]
