@@ -1,5 +1,13 @@
 [
   {
+    "id": "mwswx1lmwu5bo",
+    "user": "Admin",
+    "role": "Admin",
+    "action": "ubah status",
+    "target": "\"Presiden Punya Hak Prerogatif Mengusulkan Dua Nama\" menjadi Published",
+    "timestamp": "2026-11-23T06:56:27.226Z"
+  },
+  {
     "id": "mwswww6kfy2o2",
     "user": "Admin",
     "role": "Admin",
@@ -3990,13 +3998,5 @@
     "action": "login",
     "target": "masuk ke sistem sebagai Admin",
     "timestamp": "2026-08-02T10:09:54.498Z"
-  },
-  {
-    "id": "ms5sqp6bq32jb",
-    "user": "Admin",
-    "role": "Admin",
-    "action": "login",
-    "target": "masuk ke sistem sebagai Admin",
-    "timestamp": "2026-07-29T08:02:01.331Z"
   }
 ]
