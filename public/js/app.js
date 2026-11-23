@@ -3885,7 +3885,7 @@ function scChipHtml(ev, canEdit) {
     (ev.kind === 'air' ? 'Tayang' : 'Produksi ' + scProdText(it));
   const locked = ev.kind === 'air' && scAired(it);
   return `<div class="sc-chip sc-chip-${ev.kind}${locked ? ' sc-chip-locked' : ''}" style="--c:${col}" data-id="${esc(it.id)}" data-kind="${ev.kind}"
-    ${canEdit && !locked ? 'draggable="true"' : ''} title="${esc(tip)}${locked ? ' · sudah tayang (tidak bisa dipindah)' : ''}${ev.kind === 'air' && it.ytUrl ? ' · ▶ ada di YouTube' : ''}">${label} ${timeHtml}${esc(it.title || '(tanpa judul)')}${extra}${ev.kind === 'air' && it.ytUrl ? '<span class="sc-chip-yt" aria-label="Ada di YouTube">▶</span>' : ''}</div>`;
+    ${canEdit && !locked ? 'draggable="true"' : ''} title="${esc(tip)}${ev.kind === 'air' && it.ytUrl ? ' · ▶ ada di YouTube' : ''}">${label} ${timeHtml}${esc(it.title || '(tanpa judul)')}${extra}${ev.kind === 'air' && it.ytUrl ? '<span class="sc-chip-yt" aria-label="Ada di YouTube">▶</span>' : ''}</div>`;
 }
 
 /* Item yang punya jadwal (tayang atau produksi) di bulan ym "YYYY-MM". */
@@ -4085,7 +4085,7 @@ function scBindCalendar(grid, ul, canEdit) {
     const before = { ...it };
     if (data.kind === 'air') {
       if (it.airDate === to) return;
-      if (scAired(it)) { toast('Konten yang sudah tayang tidak bisa dipindah', 'error'); return; }
+      if (scAired(it)) return;   // sudah tayang: tidak bisa dipindah (tanpa pemberitahuan)
       it.airDate = to;
     } else {
       // Geser seluruh rentang produksi, durasi tetap
@@ -4162,8 +4162,7 @@ function scOpenModal(id = null, date = '', cat = '') {
       </div>
       <div class="form-group">
         <label class="form-label" for="scfAir">📅 Tanggal Tayang</label>
-        <input id="scfAir" type="date" class="form-inp" value="${esc(v.airDate || '')}" ${scAired(it) ? 'disabled title="Sudah tayang — tanggal tayang dikunci"' : ''} />
-        ${scAired(it) ? '<div class="sc-yt-hint">🔒 Sudah tayang — tanggal tayang tidak bisa dipindah.</div>' : ''}
+        <input id="scfAir" type="date" class="form-inp" value="${esc(v.airDate || '')}" ${scAired(it) ? 'disabled' : ''} />
       </div>
       <div class="form-group">
         <label class="form-label" for="scfYt">▶️ Link YouTube <span style="font-weight:400;color:var(--muted)">(otomatis setelah tayang — bisa diubah manual)</span></label>
@@ -4197,7 +4196,6 @@ function scOpenSlotPicker(cat, date) {
   $('scModalBody').innerHTML = `
     <div class="sc-slot-head"><span class="sc-badge" style="--c:${scColor(cat)}">${esc(cat)}</span>
       <b>${esc(scFmtLong(date))}</b></div>
-    ${date < scYmd(new Date()) ? '<p class="sc-pick-empty">⚠️ Tanggal ini sudah lewat — konten yang dipilih akan tercatat sudah tayang dan tidak bisa dipindah lagi.</p>' : ''}
     <div class="sc-pick-title">Stok belum dijadwalkan (${free.length})</div>
     <div class="sc-pick-list">${free.length ? free.map(row).join('') : '<p class="sc-pick-empty">Tidak ada stok program ini yang belum dijadwalkan.</p>'}</div>
     ${other.length ? `<details class="sc-pick-more"><summary>Konten ${esc(cat)} yang terjadwal & belum tayang (${other.length})</summary>
@@ -4211,7 +4209,7 @@ async function scPickForSlot(id, date) {
   if (!isAdmin()) return;
   const it = (state.stockContents || []).find(x => x.id === id);
   if (!it) return;
-  if (scAired(it)) { toast('Konten yang sudah tayang tidak bisa dipindah', 'error'); return; }
+  if (scAired(it)) return;
   const before = it.airDate;
   it.airDate = date;
   scCloseModal();
