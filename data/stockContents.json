@@ -310,7 +310,12 @@
     "prodTime": "13:00",
     "prodDateEnd": "",
     "prodTimeEnd": "",
-    "airDate": "2026-11-21"
+    "airDate": "2026-11-21",
+    "ytUrl": "https://youtu.be/Tlh34PlO1Qg",
+    "ytTitle": "",
+    "ytChannel": "",
+    "ytAuto": false,
+    "ytSkip": false
   },
   {
     "id": "sc_1794820537259",
