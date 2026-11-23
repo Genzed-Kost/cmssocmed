@@ -198,7 +198,7 @@
     "creator": "Umar",
     "editor": "",
     "account": "33-official",
-    "status": "Plan",
+    "status": "Published",
     "theme": "Podcast Pakar HTN",
     "format": "Short",
     "script": "14:26–16:36 | Kalau MPR Deadlock, Presiden Punya Jalan Keluar\n\nFahri menjelaskan mekanisme dalam tata tertib MPR: jika dua kali pemungutan suara tetap menghasilkan kebuntuan, penentuan akhir dari dua calon dikembalikan kepada Presiden.\n\nHook: “Bagaimana kalau MPR gagal memilih pengganti Wapres? Ternyata sudah ada jalan keluarnya!”",
@@ -207,7 +207,8 @@
     "notes": "",
     "platformLinks": {},
     "createdBy": "Umar",
-    "createdAt": "2026-11-18T03:29:44.769Z"
+    "createdAt": "2026-11-18T03:29:44.769Z",
+    "updatedAt": "2026-11-23T06:56:17.088Z"
   },
   {
     "id": "mwlkamuxjyj10",
