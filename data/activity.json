@@ -1,5 +1,13 @@
 [
   {
+    "id": "mwuj07bz76761",
+    "user": "Admin",
+    "role": "Admin",
+    "action": "ubah status",
+    "target": "\"Kompromi Politik Dibutuhkan untuk Menjalankan Agenda Negara\" menjadi Published",
+    "timestamp": "2026-11-24T10:02:32.351Z"
+  },
+  {
     "id": "mwugf6utux429",
     "user": "Admin",
     "role": "Admin",
@@ -3990,13 +3998,5 @@
     "action": "update statistik",
     "target": "Penjaga Harapan TikTok — 27 Jul-2 Agt '26",
     "timestamp": "2026-08-03T04:40:47.394Z"
-  },
-  {
-    "id": "mscqlj7dt0ndo",
-    "user": "Admin",
-    "role": "Admin",
-    "action": "update statistik",
-    "target": "Penjaga Harapan TikTok — 20-26 Jul '26",
-    "timestamp": "2026-08-03T04:36:24.313Z"
   }
 ]
