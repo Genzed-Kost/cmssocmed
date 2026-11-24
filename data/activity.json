@@ -1,5 +1,13 @@
 [
   {
+    "id": "mwuamw1hoogh8",
+    "user": "Admin",
+    "role": "Admin",
+    "action": "jadwalkan tayang Stock Contents",
+    "target": "\"Stafsus Kemenag\" — Productive Hangout Sabtu, 28 November 2026",
+    "timestamp": "2026-11-24T06:08:14.261Z"
+  },
+  {
     "id": "mwu5ct6ztawuc",
     "user": "Admin",
     "role": "Admin",
@@ -3990,13 +3998,5 @@
     "action": "logout",
     "target": "keluar dari sistem",
     "timestamp": "2026-08-03T03:54:44.922Z"
-  },
-  {
-    "id": "mscp3jeeeacjj",
-    "user": "Admin",
-    "role": "Admin",
-    "action": "update statistik",
-    "target": "Jejak Data Instagram — Jul 2026",
-    "timestamp": "2026-08-03T03:54:25.142Z"
   }
 ]
