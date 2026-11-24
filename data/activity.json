@@ -1,5 +1,13 @@
 [
   {
+    "id": "mwuamzuwn6ubr",
+    "user": "Admin",
+    "role": "Admin",
+    "action": "jadwalkan tayang Stock Contents",
+    "target": "\"Sandwich Generation - Dr. Moh. Faiz Maulana, M.Si.\" — Konsultasi Hukum Keluarga Minggu, 29 November 2026",
+    "timestamp": "2026-11-24T06:08:19.208Z"
+  },
+  {
     "id": "mwuamw1hoogh8",
     "user": "Admin",
     "role": "Admin",
@@ -3990,13 +3998,5 @@
     "action": "login",
     "target": "masuk ke sistem sebagai Admin",
     "timestamp": "2026-08-03T04:04:13.811Z"
-  },
-  {
-    "id": "mscp3ynuesqm1",
-    "user": "Admin",
-    "role": "Admin",
-    "action": "logout",
-    "target": "keluar dari sistem",
-    "timestamp": "2026-08-03T03:54:44.922Z"
   }
 ]
