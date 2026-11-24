@@ -1,5 +1,13 @@
 [
   {
+    "id": "mwu564070zev3",
+    "user": "Admin",
+    "role": "Admin",
+    "action": "tambah Stock Contents",
+    "target": "\"Dimensi Koperasi\" — Belajar Koperasi",
+    "timestamp": "2026-11-24T03:35:13.351Z"
+  },
+  {
     "id": "mwu4q6m2jooqe",
     "user": "Admin",
     "role": "Admin",
@@ -3990,13 +3998,5 @@
     "action": "update statistik",
     "target": "Penjaga Harapan Instagram — Jul 2026",
     "timestamp": "2026-08-02T15:44:23.310Z"
-  },
-  {
-    "id": "msbyzbnixroge",
-    "user": "Admin",
-    "role": "Admin",
-    "action": "update statistik",
-    "target": "Penjaga Harapan Facebook — Jul 2026",
-    "timestamp": "2026-08-02T15:43:18.462Z"
   }
 ]
