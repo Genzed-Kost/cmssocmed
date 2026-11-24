@@ -1,5 +1,13 @@
 [
   {
+    "id": "mwuemi9kkbeez",
+    "user": "Admin",
+    "role": "Admin",
+    "action": "jadwalkan tayang Stock Contents",
+    "target": "\"Stafsus Kemensos\" — Productive Hangout Sabtu, 12 Desember 2026",
+    "timestamp": "2026-11-24T07:59:54.872Z"
+  },
+  {
     "id": "mwuemfghlc3nz",
     "user": "Admin",
     "role": "Admin",
@@ -3990,13 +3998,5 @@
     "action": "update statistik",
     "target": "Penjaga Harapan YouTube — 27 Jul-2 Agt '26",
     "timestamp": "2026-08-03T04:29:28.580Z"
-  },
-  {
-    "id": "mscq825q918ih",
-    "user": "Admin",
-    "role": "Admin",
-    "action": "update statistik",
-    "target": "Penjaga Harapan YouTube — 20-26 Jul '26",
-    "timestamp": "2026-08-03T04:25:55.694Z"
   }
 ]
