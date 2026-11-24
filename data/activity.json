@@ -1,5 +1,13 @@
 [
   {
+    "id": "mwugf6utux429",
+    "user": "Admin",
+    "role": "Admin",
+    "action": "ubah status",
+    "target": "\"Hati-Hati! Banyak Rentenir Berbaju Koperasi\" menjadi Published",
+    "timestamp": "2026-11-24T08:50:12.725Z"
+  },
+  {
     "id": "mwuemi9kkbeez",
     "user": "Admin",
     "role": "Admin",
@@ -3990,13 +3998,5 @@
     "action": "update statistik",
     "target": "Penjaga Harapan TikTok — 20-26 Jul '26",
     "timestamp": "2026-08-03T04:36:24.313Z"
-  },
-  {
-    "id": "mscqcmf8h1qfy",
-    "user": "Admin",
-    "role": "Admin",
-    "action": "update statistik",
-    "target": "Penjaga Harapan YouTube — 27 Jul-2 Agt '26",
-    "timestamp": "2026-08-03T04:29:28.580Z"
   }
 ]
