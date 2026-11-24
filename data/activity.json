@@ -1,5 +1,13 @@
 [
   {
+    "id": "mwu5amp6ozhol",
+    "user": "Admin",
+    "role": "Admin",
+    "action": "hapus Stock Contents",
+    "target": "\"Podcast TAM Menpan RB\"",
+    "timestamp": "2026-11-24T03:38:44.202Z"
+  },
+  {
     "id": "mwu59ivxyy21a",
     "user": "Admin",
     "role": "Admin",
@@ -3990,13 +3998,5 @@
     "action": "update statistik",
     "target": "Warga Negara Instagram — Jul 2026",
     "timestamp": "2026-08-03T03:50:44.860Z"
-  },
-  {
-    "id": "mscor1rqxfltt",
-    "user": "Admin",
-    "role": "Admin",
-    "action": "login",
-    "target": "masuk ke sistem sebagai Admin",
-    "timestamp": "2026-08-03T03:44:42.422Z"
   }
 ]
