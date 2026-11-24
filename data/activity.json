@@ -1,5 +1,13 @@
 [
   {
+    "id": "mwu5ct6ztawuc",
+    "user": "Admin",
+    "role": "Admin",
+    "action": "tambah Stock Contents",
+    "target": "\"Sandwich Generation - Dr. Moh. Faiz Maulana, M.Si.\" — Konsultasi Hukum Keluarga",
+    "timestamp": "2026-11-24T03:40:25.931Z"
+  },
+  {
     "id": "mwu5bv6geb86z",
     "user": "Admin",
     "role": "Admin",
@@ -3990,13 +3998,5 @@
     "action": "update statistik",
     "target": "Jejak Data Instagram — Jul 2026",
     "timestamp": "2026-08-03T03:54:25.142Z"
-  },
-  {
-    "id": "mscp1kspl0y7s",
-    "user": "Admin",
-    "role": "Admin",
-    "action": "update statistik",
-    "target": "Republik Receh Instagram — Jul 2026",
-    "timestamp": "2026-08-03T03:52:53.641Z"
   }
 ]
