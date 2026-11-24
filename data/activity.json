@@ -1,5 +1,13 @@
 [
   {
+    "id": "mwuj0eom3zhug",
+    "user": "Admin",
+    "role": "Admin",
+    "action": "Tautkan link YouTube otomatis",
+    "target": "\"Podcast Menko PM (Cak Imin)\"",
+    "timestamp": "2026-11-24T10:02:41.878Z"
+  },
+  {
     "id": "mwuj07bz76761",
     "user": "Admin",
     "role": "Admin",
@@ -3990,13 +3998,5 @@
     "action": "update statistik",
     "target": "33 Official TikTok — 20-26 Jul '26",
     "timestamp": "2026-08-03T04:48:14.936Z"
-  },
-  {
-    "id": "mscqr676hwsda",
-    "user": "Admin",
-    "role": "Admin",
-    "action": "update statistik",
-    "target": "Penjaga Harapan TikTok — 27 Jul-2 Agt '26",
-    "timestamp": "2026-08-03T04:40:47.394Z"
   }
 ]
