@@ -1,5 +1,13 @@
 [
   {
+    "id": "mwupag43zxn1a",
+    "user": "Admin",
+    "role": "Admin",
+    "action": "generate caption AI",
+    "target": "\"Kemiskinan Ekstrem Turun dari 3 Juta Jadi 1,8 Juta Jiwa!\" — INSTAGRAM, TIKTOK",
+    "timestamp": "2026-11-24T12:58:27.987Z"
+  },
+  {
     "id": "mwuj0hk2k0xos",
     "user": "Admin",
     "role": "Admin",
@@ -3990,13 +3998,5 @@
     "action": "update statistik",
     "target": "33 Official TikTok — 27 Jul-2 Agt '26",
     "timestamp": "2026-08-03T05:07:31.085Z"
-  },
-  {
-    "id": "mscr0riw91ix7",
-    "user": "Admin",
-    "role": "Admin",
-    "action": "update statistik",
-    "target": "33 Official TikTok — 20-26 Jul '26",
-    "timestamp": "2026-08-03T04:48:14.936Z"
   }
 ]
