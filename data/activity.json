@@ -1,5 +1,13 @@
 [
   {
+    "id": "mwuc22mv5uz65",
+    "user": "Admin",
+    "role": "Admin",
+    "action": "hapus Stock Contents",
+    "target": "\"Stafsus Kemensos\"",
+    "timestamp": "2026-11-24T06:48:02.263Z"
+  },
+  {
     "id": "mwuan4fts2ncx",
     "user": "Admin",
     "role": "Admin",
@@ -3990,13 +3998,5 @@
     "action": "update statistik",
     "target": "Penjaga Harapan Instagram — 20-26 Jul '26",
     "timestamp": "2026-08-03T04:12:19.793Z"
-  },
-  {
-    "id": "mscpo9xvf7dqq",
-    "user": "Admin",
-    "role": "Admin",
-    "action": "update statistik",
-    "target": "Penjaga Harapan Instagram — 20-26 Jul '26",
-    "timestamp": "2026-08-03T04:10:32.659Z"
   }
 ]
