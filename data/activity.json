@@ -1,5 +1,13 @@
 [
   {
+    "id": "mwuem6ac97aco",
+    "user": "Admin",
+    "role": "Admin",
+    "action": "tambah Stock Contents",
+    "target": "\"TAM Menpan RB\" — Productive Hangout",
+    "timestamp": "2026-11-24T07:59:39.348Z"
+  },
+  {
     "id": "mwuejd7kcrs0m",
     "user": "Admin",
     "role": "Admin",
@@ -3990,13 +3998,5 @@
     "action": "update statistik",
     "target": "Penjaga Harapan Facebook — 20-26 Jul '26",
     "timestamp": "2026-08-03T04:18:38.014Z"
-  },
-  {
-    "id": "mscpwjjyhgxql",
-    "user": "Admin",
-    "role": "Admin",
-    "action": "update statistik",
-    "target": "Penjaga Harapan Facebook — 27 Jul-2 Agt '26",
-    "timestamp": "2026-08-03T04:16:58.367Z"
   }
 ]
