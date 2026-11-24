@@ -1,5 +1,13 @@
 [
   {
+    "id": "mwu59ivxyy21a",
+    "user": "Admin",
+    "role": "Admin",
+    "action": "tambah Stock Contents",
+    "target": "\"Stafsus Kemensos\" — Podcast JA",
+    "timestamp": "2026-11-24T03:37:52.605Z"
+  },
+  {
     "id": "mwu58ol81uf1o",
     "user": "Admin",
     "role": "Admin",
@@ -3990,13 +3998,5 @@
     "action": "login",
     "target": "masuk ke sistem sebagai Admin",
     "timestamp": "2026-08-03T03:44:42.422Z"
-  },
-  {
-    "id": "msbz3y1i5udma",
-    "user": "Admin",
-    "role": "Admin",
-    "action": "update statistik",
-    "target": "Jaga Asa TikTok — Agt 2026",
-    "timestamp": "2026-08-02T15:46:54.102Z"
   }
 ]
