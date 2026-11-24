@@ -1,5 +1,13 @@
 [
   {
+    "id": "mwuej7qcqmqcs",
+    "user": "Admin",
+    "role": "Admin",
+    "action": "ubah Stock Contents",
+    "target": "\"Stafsus Kemenag\" — Productive Hangout",
+    "timestamp": "2026-11-24T07:57:21.252Z"
+  },
+  {
     "id": "mwuc22mv5uz65",
     "user": "Admin",
     "role": "Admin",
@@ -3990,13 +3998,5 @@
     "action": "update statistik",
     "target": "Penjaga Harapan Instagram — 27 Jul-2 Agt '26",
     "timestamp": "2026-08-03T04:13:50.543Z"
-  },
-  {
-    "id": "mscpqkltgny66",
-    "user": "Admin",
-    "role": "Admin",
-    "action": "update statistik",
-    "target": "Penjaga Harapan Instagram — 20-26 Jul '26",
-    "timestamp": "2026-08-03T04:12:19.793Z"
   }
 ]
