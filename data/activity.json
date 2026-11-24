@@ -1,5 +1,13 @@
 [
   {
+    "id": "mwu5bv6geb86z",
+    "user": "Admin",
+    "role": "Admin",
+    "action": "tambah Stock Contents",
+    "target": "\"Stafsus Kemensos\" — Productive Hangout",
+    "timestamp": "2026-11-24T03:39:41.848Z"
+  },
+  {
     "id": "mwu5amp6ozhol",
     "user": "Admin",
     "role": "Admin",
@@ -3990,13 +3998,5 @@
     "action": "update statistik",
     "target": "Republik Receh Instagram — Jul 2026",
     "timestamp": "2026-08-03T03:52:53.641Z"
-  },
-  {
-    "id": "mscoytfgmx3vh",
-    "user": "Admin",
-    "role": "Admin",
-    "action": "update statistik",
-    "target": "Warga Negara Instagram — Jul 2026",
-    "timestamp": "2026-08-03T03:50:44.860Z"
   }
 ]
