@@ -1,5 +1,13 @@
 [
   {
+    "id": "mwvw54wacf961",
+    "user": "Admin",
+    "role": "Admin",
+    "action": "generate caption AI",
+    "target": "\"Penerima Bansos Dilatih Kerja Lewat Program MBG!\" — INSTAGRAM, TIKTOK",
+    "timestamp": "2026-11-25T08:58:03.658Z"
+  },
+  {
     "id": "mwvoyge664fnz",
     "user": "Admin",
     "role": "Admin",
@@ -3990,13 +3998,5 @@
     "action": "update statistik",
     "target": "Penjaga Harapan TikTok — Agt 2026",
     "timestamp": "2026-09-04T09:32:05.347Z"
-  },
-  {
-    "id": "mtmr4v4tgueur",
-    "user": "Admin",
-    "role": "Admin",
-    "action": "login",
-    "target": "masuk ke sistem sebagai Admin",
-    "timestamp": "2026-09-04T09:28:50.333Z"
   }
 ]
