@@ -1,5 +1,13 @@
 [
   {
+    "id": "mwvw7s0o0bx25",
+    "user": "Admin",
+    "role": "Admin",
+    "action": "tambah konten",
+    "target": "berjudul \"774 Ribu Keluarga Miskin Belum Tersentuh Bantuan!\" (tema: Podcast Menko PM) untuk akun 33 Official dijadwalkan 28 Nov 2026",
+    "timestamp": "2026-11-25T09:00:06.936Z"
+  },
+  {
     "id": "mwvw78vwjw2f8",
     "user": "Admin",
     "role": "Admin",
@@ -3990,13 +3998,5 @@
     "action": "tambah konten",
     "target": "berjudul \"UTAMAKAN KEAMANAN & KESELAMATAN JAMAAH\" (tema: Kementerian Haji) untuk akun 33 Official dijadwalkan 18 Sep 2026",
     "timestamp": "2026-09-12T15:38:53.990Z"
-  },
-  {
-    "id": "mtyjrk7h2yt05",
-    "user": "Admin",
-    "role": "Admin",
-    "action": "login",
-    "target": "masuk ke sistem sebagai Admin",
-    "timestamp": "2026-09-12T15:35:46.445Z"
   }
 ]
