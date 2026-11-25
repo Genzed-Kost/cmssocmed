@@ -1,5 +1,13 @@
 [
   {
+    "id": "mwvosmlp4oym6",
+    "user": "Umar",
+    "role": "Publisher",
+    "action": "login",
+    "target": "masuk ke sistem sebagai Publisher",
+    "timestamp": "2026-11-25T05:32:22.765Z"
+  },
+  {
     "id": "mwvk71w2z2etc",
     "user": "Admin",
     "role": "Admin",
@@ -3990,13 +3998,5 @@
     "action": "hapus statistik",
     "target": "Jaga Asa tiktok — Agt 2026",
     "timestamp": "2026-08-03T09:43:04.602Z"
-  },
-  {
-    "id": "msd1jpyv637sj",
-    "user": "Admin",
-    "role": "Admin",
-    "action": "update statistik",
-    "target": "Jaga Asa TikTok — Jul 2026",
-    "timestamp": "2026-08-03T09:42:55.543Z"
   }
 ]
