@@ -1,5 +1,13 @@
 [
   {
+    "id": "mwvw9xpxjpcie",
+    "user": "Admin",
+    "role": "Admin",
+    "action": "tambah konten",
+    "target": "berjudul \"Bansos Bukan untuk Membuat Rakyat Bergantung Selamanya!\" (tema: Podcast Menko PM) untuk akun 33 Official dijadwalkan 30 Nov 2026",
+    "timestamp": "2026-11-25T09:01:47.637Z"
+  },
+  {
     "id": "mwvw9pvj4fgle",
     "user": "Admin",
     "role": "Admin",
@@ -3990,13 +3998,5 @@
     "action": "tambah konten",
     "target": "berjudul \"Permintaan Presiden Menjaga Istiqlal & Hubungan Historis\" (tema: Podcast Menteri Agama) untuk akun 33 Official dijadwalkan 19 Sep 2026",
     "timestamp": "2026-09-16T11:54:26.323Z"
-  },
-  {
-    "id": "mu2o15qppvysl",
-    "user": "Admin",
-    "role": "Admin",
-    "action": "login",
-    "target": "masuk ke sistem sebagai Admin",
-    "timestamp": "2026-09-15T12:46:17.425Z"
   }
 ]
