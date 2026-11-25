@@ -1,5 +1,13 @@
 [
   {
+    "id": "mwvw8evusfe6m",
+    "user": "Admin",
+    "role": "Admin",
+    "action": "generate caption AI",
+    "target": "\"500 Ribu Lulusan SMK Ditargetkan Bisa Bekerja!\" — INSTAGRAM, TIKTOK",
+    "timestamp": "2026-11-25T09:00:36.570Z"
+  },
+  {
     "id": "mwvw7s0o0bx25",
     "user": "Admin",
     "role": "Admin",
@@ -3990,13 +3998,5 @@
     "action": "tambah konten",
     "target": "berjudul \"JUJUR ISI DATA UNTUK KEBIJAKAN NEGARA\" (tema: Podcast Ketua BPS) untuk akun 33 Official dijadwalkan 17 Sep 2026",
     "timestamp": "2026-09-12T15:43:21.705Z"
-  },
-  {
-    "id": "mtyjvkx2f02ly",
-    "user": "Admin",
-    "role": "Admin",
-    "action": "tambah konten",
-    "target": "berjudul \"UTAMAKAN KEAMANAN & KESELAMATAN JAMAAH\" (tema: Kementerian Haji) untuk akun 33 Official dijadwalkan 18 Sep 2026",
-    "timestamp": "2026-09-12T15:38:53.990Z"
   }
 ]
