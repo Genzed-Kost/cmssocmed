@@ -1,5 +1,13 @@
 [
   {
+    "id": "mwvowg4bbv4kc",
+    "user": "Admin",
+    "role": "Admin",
+    "action": "hapus Stock Contents",
+    "target": "\"Stafsus Kemenag\"",
+    "timestamp": "2026-11-25T05:35:20.987Z"
+  },
+  {
     "id": "mwvounzcuh4sx",
     "user": "Admin",
     "role": "Admin",
@@ -3990,13 +3998,5 @@
     "action": "login",
     "target": "masuk ke sistem sebagai Admin",
     "timestamp": "2026-08-21T06:05:55.408Z"
-  },
-  {
-    "id": "msd1ntzte8t4s",
-    "user": "Admin",
-    "role": "Admin",
-    "action": "update statistik",
-    "target": "33 Official Instagram — Jul 2026",
-    "timestamp": "2026-08-03T09:46:07.385Z"
   }
 ]
