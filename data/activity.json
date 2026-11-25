@@ -1,5 +1,13 @@
 [
   {
+    "id": "mwvwbw4zzs97v",
+    "user": "Admin",
+    "role": "Admin",
+    "action": "tambah konten",
+    "target": "berjudul \"Prabowo Ingin Indonesia Mandiri Pangan dan Energi!\" (tema: Podcast Menko PM) untuk akun 33 Official dijadwalkan 01 Des 2026",
+    "timestamp": "2026-11-25T09:03:18.899Z"
+  },
+  {
     "id": "mwvwb4wdpm33a",
     "user": "Admin",
     "role": "Admin",
@@ -3990,13 +3998,5 @@
     "action": "edit konten",
     "target": "\"Tenang Data BPS Aman dan Rahasia\"",
     "timestamp": "2026-09-16T11:56:24.665Z"
-  },
-  {
-    "id": "mu41o3s6w7vjh",
-    "user": "Admin",
-    "role": "Admin",
-    "action": "tambah konten",
-    "target": "berjudul \"Gagasan Cerdas Presiden Prabowo Menyatukan Pundi-Pundi Dana Umat\" (tema: Podcast Menteri Agama) untuk akun 33 Official dijadwalkan 17 Sep 2026",
-    "timestamp": "2026-09-16T11:55:49.158Z"
   }
 ]
