@@ -1,5 +1,13 @@
 [
   {
+    "id": "mww207832qqrj",
+    "user": "Admin",
+    "role": "Admin",
+    "action": "ubah status",
+    "target": "\"Petani dan Mahasiswa Bisa Menggugat Undang-Undang ke MK\" menjadi Published",
+    "timestamp": "2026-11-25T11:42:11.091Z"
+  },
+  {
     "id": "mwvwbw4zzs97v",
     "user": "Admin",
     "role": "Admin",
@@ -3990,13 +3998,5 @@
     "action": "logout",
     "target": "keluar dari sistem",
     "timestamp": "2026-09-17T02:17:05.419Z"
-  },
-  {
-    "id": "mu41ov6hsyyly",
-    "user": "Admin",
-    "role": "Admin",
-    "action": "edit konten",
-    "target": "\"Tenang Data BPS Aman dan Rahasia\"",
-    "timestamp": "2026-09-16T11:56:24.665Z"
   }
 ]
