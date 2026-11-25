@@ -1,5 +1,13 @@
 [
   {
+    "id": "mwvk71w2z2etc",
+    "user": "Admin",
+    "role": "Admin",
+    "action": "ubah status",
+    "target": "\"Kemiskinan Ekstrem Turun dari 3 Juta Jadi 1,8 Juta Jiwa!\" menjadi Published",
+    "timestamp": "2026-11-25T03:23:37.682Z"
+  },
+  {
     "id": "mwupaqj9q3k79",
     "user": "Admin",
     "role": "Admin",
@@ -3990,13 +3998,5 @@
     "action": "update statistik",
     "target": "Jaga Asa TikTok — Jul 2026",
     "timestamp": "2026-08-03T09:42:55.543Z"
-  },
-  {
-    "id": "msd1j8iceobxb",
-    "user": "Admin",
-    "role": "Admin",
-    "action": "update statistik",
-    "target": "Jaga Asa Instagram — Jul 2026",
-    "timestamp": "2026-08-03T09:42:32.916Z"
   }
 ]
