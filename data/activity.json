@@ -1,5 +1,13 @@
 [
   {
+    "id": "mwvowsk6leqtk",
+    "user": "Admin",
+    "role": "Admin",
+    "action": "ubah Stock Contents",
+    "target": "\"Sandwich Generation - Dr. Moh. Faiz Maulana, M.Si.\" — Konsultasi Hukum Keluarga",
+    "timestamp": "2026-11-25T05:35:37.110Z"
+  },
+  {
     "id": "mwvowkmzu81ap",
     "user": "Admin",
     "role": "Admin",
@@ -3990,13 +3998,5 @@
     "action": "Kirim WA Stock Contents",
     "target": "ke Umar — 22 item",
     "timestamp": "2026-08-21T06:11:53.790Z"
-  },
-  {
-    "id": "mt2ju568j6suo",
-    "user": "Admin",
-    "role": "Admin",
-    "action": "login",
-    "target": "masuk ke sistem sebagai Admin",
-    "timestamp": "2026-08-21T06:09:09.296Z"
   }
 ]
