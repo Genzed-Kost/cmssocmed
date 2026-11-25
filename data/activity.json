@@ -1,5 +1,13 @@
 [
   {
+    "id": "mwvoy7rghb8x4",
+    "user": "Admin",
+    "role": "Admin",
+    "action": "tambah Stock Contents",
+    "target": "\"Menyembuhkan Inner Child\" — Konsultasi Hukum Keluarga",
+    "timestamp": "2026-11-25T05:36:43.468Z"
+  },
+  {
     "id": "mwvowsk6leqtk",
     "user": "Admin",
     "role": "Admin",
@@ -3990,13 +3998,5 @@
     "action": "logout",
     "target": "keluar dari sistem",
     "timestamp": "2026-08-21T07:11:05.244Z"
-  },
-  {
-    "id": "mt2jxo3i2rq7h",
-    "user": "Admin",
-    "role": "Admin",
-    "action": "Kirim WA Stock Contents",
-    "target": "ke Umar — 22 item",
-    "timestamp": "2026-08-21T06:11:53.790Z"
   }
 ]
