@@ -1,5 +1,13 @@
 [
   {
+    "id": "mwvowkmzu81ap",
+    "user": "Admin",
+    "role": "Admin",
+    "action": "hapus Stock Contents",
+    "target": "\"Stafsus Kemensos\"",
+    "timestamp": "2026-11-25T05:35:26.843Z"
+  },
+  {
     "id": "mwvowg4bbv4kc",
     "user": "Admin",
     "role": "Admin",
@@ -3990,13 +3998,5 @@
     "action": "login",
     "target": "masuk ke sistem sebagai Admin",
     "timestamp": "2026-08-21T06:09:09.296Z"
-  },
-  {
-    "id": "mt2jpzkg0x5zb",
-    "user": "Admin",
-    "role": "Admin",
-    "action": "login",
-    "target": "masuk ke sistem sebagai Admin",
-    "timestamp": "2026-08-21T06:05:55.408Z"
   }
 ]
