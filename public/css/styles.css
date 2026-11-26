@@ -4185,3 +4185,6 @@ ul { list-style: none; }
 body:not(.is-admin) #statDataTable,
 body:not(.is-admin) #statInputCard,
 body:not(.is-admin) #btnStatImportFile { display: none !important; }
+
+/* Dropdown unduhan: judul kelompok */
+.stat-dl-head { padding: 6px 12px 4px; font-size: .64rem; font-weight: 800; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); }

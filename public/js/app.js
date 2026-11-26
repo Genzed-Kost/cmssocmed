@@ -7545,7 +7545,28 @@ function reportSummary(D, prevMonthName) {
     (best && D.plats.length > 1 ? ` ER terbaik di ${best.label}.` : '');
 }
 
-async function downloadStatJpg() {
+/* Tabel Ringkasan Akun (JPG): satu baris per platform untuk rentang filter */
+async function downloadAcctTableJpg() {
+  const acctId = state.statActiveAcct;
+  const acct = getAccounts().find(a => a.id === acctId) || { name: acctId, color: '#7c3aed' };
+  const R = reportRange(acctId);
+  const D = R && reportRangeData(acctId, R);
+  if (!D || !D.plats.length) { toast('Belum ada data statistik pada filter ini', 'error'); return; }
+  const RN = reportRangeNames(R);
+  const data = D.plats.map(p => ({ label: p.label, color: p.color, views: p.views, eng: p.eng, gained: p.gained, fol: p.fol, er: p.er }));
+  const sum = k => { const a = data.map(d => d[k]).filter(x => x !== null); return a.length ? a.reduce((x, y) => x + y, 0) : null; };
+  const tot = { views: sum('views'), eng: sum('eng'), gained: sum('gained'), fol: sum('fol') };
+  tot.er = tot.views && tot.eng !== null ? tot.eng / tot.views * 100 : null;
+  await drawReportTableJpg({
+    heading: 'RINGKASAN AKUN', kind: RN.type, platId: null, acct, title: acct.name,
+    sub: `${RN.long}${R.count > 1 ? `  ·  ${R.count} ${RN.unit}` : ''}  ·  semua platform`,
+    firstCol: 'Platform', viewsTitle: 'Views', data, tot, totLabel: 'Semua platform', barColor: acct.color || '#7c3aed',
+    file: `Ringkasan ${acct.name} - ${RN.short}${R.isW ? ' (mingguan)' : ''}`,
+    logAction: 'unduh tabel ringkasan akun', log: `${acct.name} — ${RN.label}`,
+  });
+}
+
+async function downloadAcctReportJpg() {
   const acctId = state.statActiveAcct;
   const acct   = getAccounts().find(a => a.id === acctId) || { name: acctId, color: '#7c3aed' };
   const R      = reportRange(acctId);
@@ -7728,6 +7749,158 @@ async function downloadStatJpg() {
   actLog('unduh laporan akun (JPG)', `${acct.name} — ${rangeLabel}`);
 }
 
+/* ── Grafik Platform (JPG HD): 3 grafik batang — Views, Followers, Engagement ──────────
+   Satu grafik per metrik (skala masing-masing, tanpa sumbu ganda), batang tipis
+   ujung membulat 4px dari satu garis dasar, grid hairline, label nilai hanya pada
+   periode terakhir & tertinggi. Periode mengikuti filter yang sedang tampil. */
+function downloadStatJpg() {   // Grafik platform
+  const v = window._statView;
+  const acctId = state.statActiveAcct, platId = state.statActivePlat || 'youtube';
+  if (!v || v.acctId !== acctId || v.platId !== platId || !v.rows.length) {
+    toast('Tidak ada data untuk didownload', 'error'); return;
+  }
+  const platM   = PLATFORM_FIELDS[platId];
+  const acctObj = getAccounts().find(a => a.id === acctId);
+  const isW     = v.isWeekly;
+  const pKey    = isW ? 'week' : 'month';
+  const rows    = v.rows;
+  const first   = rows[0][pKey], last = rows[rows.length - 1][pKey];
+  const fmtP    = x => isW ? fmtWeek(x) : fmtMonth(x);
+  const rangeLabel = first === last ? fmtP(first) : `${fmtP(first)} – ${fmtP(last)}`;
+  const fileTag = first === last ? first : `${first}_${last}`;
+
+  const num = (r, k) => (r && r[k] !== undefined && r[k] !== null && r[k] !== '' && !isNaN(+r[k]) && +r[k] !== 0) ? +r[k] : null;
+  const METRICS = [
+    { key: platM.viewKey,      title: platM.fields.find(f => f.key === platM.viewKey)?.label || 'Views', sum: true },
+    { key: platM.followerKey,  title: 'Followers', sum: false },
+    { key: 'totalEngagement',  title: 'Engagement', sum: true },
+  ].map(m => ({ ...m, vals: rows.map(r => num(r, m.key)) }));
+
+  // Warna & tinta (tinta teks tidak pernah memakai warna data)
+  const SURF = '#ffffff', PAGE = '#f8fafc', INK = '#191919', INK2 = '#666666', GRID = '#e7e7e7', BASE = '#c2c2c2';
+  const COL  = platM.color || '#2563eb';
+  const F    = 'Inter, "Segoe UI", Arial, sans-serif';
+
+  // Tata letak (koordinat logis; digambar 2× untuk HD)
+  const DPR = 2, W = 1200, PAD = 40, HEAD = 112, PANEL_H = 300, GAP = 20, FOOT = 50;
+  const H = HEAD + METRICS.length * (PANEL_H + GAP) + FOOT;
+  const cv = document.createElement('canvas');
+  cv.width = W * DPR; cv.height = H * DPR;
+  const ctx = cv.getContext('2d');
+  ctx.scale(DPR, DPR);
+  ctx.fillStyle = PAGE; ctx.fillRect(0, 0, W, H);
+
+  // Header
+  ctx.fillStyle = COL; ctx.fillRect(0, 0, W, 5);
+  drawPlatformBadge(ctx, platId, PAD + 20, 54, 40);
+  ctx.textBaseline = 'alphabetic';
+  ctx.fillStyle = INK; ctx.font = `800 26px ${F}`;
+  ctx.fillText(`${platM.label} — ${acctObj?.name || acctId}`, PAD + 54, 50);
+  ctx.fillStyle = INK2; ctx.font = `500 15px ${F}`;
+  ctx.fillText(`${isW ? 'Data mingguan' : 'Data bulanan'} · ${rangeLabel} · ${rows.length} ${isW ? 'minggu' : 'bulan'}`, PAD + 54, 76);
+
+  const fmtFull  = n => Math.round(n).toLocaleString('id-ID');
+  const fmtShort = n => fmtNum(n);
+  // Angka sumbu yang bulat: 0 / 10K / 20K …
+  const niceStep = max => {
+    const raw = max / 4, mag = Math.pow(10, Math.floor(Math.log10(raw || 1)));
+    const f = raw / mag;
+    return (f <= 1 ? 1 : f <= 2 ? 2 : f <= 2.5 ? 2.5 : f <= 5 ? 5 : 10) * mag;
+  };
+  const rr = (x, y, w, h, r) => {   // ujung atas membulat, dasar persegi
+    r = Math.min(r, w / 2, h);
+    ctx.beginPath();
+    ctx.moveTo(x, y + h); ctx.lineTo(x, y + r); ctx.arcTo(x, y, x + r, y, r);
+    ctx.lineTo(x + w - r, y); ctx.arcTo(x + w, y, x + w, y + r, r); ctx.lineTo(x + w, y + h); ctx.closePath();
+  };
+
+  METRICS.forEach((m, mi) => {
+    const top = HEAD + mi * (PANEL_H + GAP);
+    // Panel
+    ctx.fillStyle = SURF; ctx.strokeStyle = 'rgba(11,11,11,0.10)'; ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.roundRect ? ctx.roundRect(PAD, top, W - PAD * 2, PANEL_H, 16) : ctx.rect(PAD, top, W - PAD * 2, PANEL_H);
+    ctx.fill(); ctx.stroke();
+
+    // Judul + angka kunci
+    const have = m.vals.filter(x => x !== null);
+    ctx.fillStyle = COL; ctx.beginPath(); ctx.arc(PAD + 28, top + 34, 6, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = INK; ctx.font = `800 20px ${F}`; ctx.fillText(m.title, PAD + 42, top + 41);
+    let headline = '—', sub = '';
+    if (have.length) {
+      if (m.sum) { headline = fmtFull(have.reduce((a, b) => a + b, 0)); sub = `total ${rows.length} ${isW ? 'minggu' : 'bulan'}`; }
+      else {
+        headline = fmtFull(have[have.length - 1]); sub = 'terakhir';
+        if (have.length > 1) { const d = have[have.length - 1] - have[0]; sub = `terakhir · ${d >= 0 ? '+' : '−'}${fmtFull(Math.abs(d))} sejak ${fmtP(rows[m.vals.indexOf(have[0])][pKey])}`; }
+      }
+    }
+    ctx.textAlign = 'right';
+    ctx.fillStyle = INK; ctx.font = `800 24px ${F}`; ctx.fillText(headline, W - PAD - 24, top + 40);
+    ctx.fillStyle = INK2; ctx.font = `500 13px ${F}`; ctx.fillText(sub, W - PAD - 24, top + 60);
+    ctx.textAlign = 'left';
+
+    // Area plot
+    const pl = PAD + 78, pr = W - PAD - 24, pt = top + 84, pb = top + PANEL_H - 44;
+    if (!have.length) {
+      ctx.fillStyle = INK2; ctx.font = `500 15px ${F}`;
+      ctx.fillText('Belum ada data pada periode ini', pl, (pt + pb) / 2);
+      return;
+    }
+    const max = Math.max(...have), step = niceStep(max), yMax = Math.ceil(max / step) * step || step;
+    const y = val => pb - (val / yMax) * (pb - pt);
+    // Grid hairline + angka sumbu
+    ctx.font = `500 12px ${F}`; ctx.fillStyle = INK2; ctx.textAlign = 'right'; ctx.textBaseline = 'middle';
+    for (let t = 0; t <= yMax + 1e-9; t += step) {
+      const yy = Math.round(y(t)) + 0.5;
+      ctx.strokeStyle = t === 0 ? BASE : GRID; ctx.lineWidth = 1;
+      ctx.beginPath(); ctx.moveTo(pl, yy); ctx.lineTo(pr, yy); ctx.stroke();
+      ctx.fillText(yMax >= 10000 ? fmtShort(t) : fmtFull(t), pl - 10, yy);
+    }
+    ctx.textAlign = 'left'; ctx.textBaseline = 'alphabetic';
+
+    // Batang
+    const n = rows.length, slot = (pr - pl) / n;
+    const bw = Math.min(24, Math.max(6, slot - 2));
+    const iMax = m.vals.indexOf(max);
+    let iLast = -1; m.vals.forEach((x, i) => { if (x !== null) iLast = i; });
+    const labelEvery = Math.ceil(n / Math.floor((pr - pl) / 64));   // label sumbu-x tidak bertabrakan
+    m.vals.forEach((val, i) => {
+      const cx = pl + slot * i + slot / 2;
+      if (val !== null) {
+        const yt = y(val);
+        ctx.fillStyle = COL; ctx.globalAlpha = (i === iLast || i === iMax) ? 1 : 0.78;
+        rr(cx - bw / 2, yt, bw, pb - yt, 4); ctx.fill(); ctx.globalAlpha = 1;
+        // Label nilai hanya pada batang terakhir & tertinggi
+        if (i === iLast || i === iMax) {
+          ctx.fillStyle = INK; ctx.font = `700 13px ${F}`; ctx.textAlign = 'center';
+          ctx.fillText(fmtShort(val), cx, yt - 8); ctx.textAlign = 'left';
+        }
+      }
+      if (i % labelEvery === 0 || i === n - 1) {
+        ctx.fillStyle = INK2; ctx.font = `500 12px ${F}`; ctx.textAlign = 'center';
+        ctx.fillText(isW ? fmtWeek(rows[i][pKey]).replace(/\s'\d\d$/, '') : fmtMonth(rows[i][pKey]), cx, pb + 22);
+        ctx.textAlign = 'left';
+      }
+    });
+  });
+
+  // Footer
+  ctx.fillStyle = INK2; ctx.font = `500 13px ${F}`;
+  ctx.fillText('Penjaga Harapan CMS', PAD, H - 20);
+  ctx.textAlign = 'right';
+  ctx.fillText(`Diekspor ${new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}`, W - PAD, H - 20);
+  ctx.textAlign = 'left';
+
+  const link = document.createElement('a');
+  { const RNg = reportRangeNames({ isW, from: first, to: last, count: rows.length });
+    link.download = reportSafe(`Grafik ${platM.label} ${acctObj?.name || acctId} - ${RNg.short}${isW ? ' (mingguan)' : ''}`) + '.jpg'; }
+  link.href = cv.toDataURL('image/jpeg', 0.95);
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  toast('Grafik berhasil didownload ✓', 'success');
+  actLog('unduh grafik statistik', `${getAcctName(acctId)} ${platM.label} — ${rangeLabel}`);
+}
+
 /* ── Tabel (JPG): Views, Interaksi, Followers Baru, Total Followers, ER per periode ──
    Sesuai filter yang tampil. Angka rata kanan, batang data hanya di kolom Views,
    nilai tertinggi tiap kolom ditandai, baris Total di bawah, zebra hanya bila tabel padat. */
@@ -7758,15 +7931,27 @@ async function downloadStatTableJpg() {
   const lastFol = [...data].reverse().find(d => d.fol !== null)?.fol ?? null;
   const tot = { views: sum('views'), eng: sum('eng'), gained: sum('gained'), fol: lastFol };
   tot.er = tot.views && tot.eng !== null ? tot.eng / tot.views * 100 : null;
+  await drawReportTableJpg({
+    kind: RN.type, platId, acct, title: `${platM.label} — ${acct.name}`,
+    sub: `${RN.long}${R.count > 1 ? `  ·  ${R.count} ${RN.unit}` : ''}`,
+    firstCol: isW ? 'Minggu' : 'Bulan', viewsTitle: platM.fields.find(f => f.key === platM.viewKey)?.label || 'Views',
+    data, tot, totLabel: data.length > 1 ? 'Total' : 'Ringkasan', barColor: REPORT_DARK_COLOR[platId] || platM.color,
+    file: `Tabel ${platM.label} ${acct.name} - ${RN.short}${isW ? ' (mingguan)' : ''}`,
+    log: `${acct.name} ${platM.label} — ${RN.label}`,
+  });
+}
 
+/* Penggambar tabel JPG (dipakai Tabel Platform & Tabel Ringkasan Akun) */
+async function drawReportTableJpg(o) {
+  const { platId, acct, data, tot } = o;
   // Tema (sama dengan laporan JPG)
   const BG = '#0a0f1c', CARD = '#111827', STRIPE = '#0f1626', LINE = 'rgba(255,255,255,0.08)';
   const INK = '#f1f5f9', INK2 = '#94a3b8', INK3 = '#64748b', GOOD = '#22c55e', WARN = '#f59e0b', BAD = '#ef4444';
-  const COL = REPORT_DARK_COLOR[platId] || platM.color;
+  const COL = o.barColor;
   const F = 'Inter, "Segoe UI", Arial, sans-serif';
   const COLS = [
-    { k: 'label',  t: isW ? 'Minggu' : 'Bulan',  w: 230, align: 'left' },
-    { k: 'views',  t: platM.fields.find(f => f.key === platM.viewKey)?.label || 'Views', w: 400, bar: true },
+    { k: 'label',  t: o.firstCol,  w: 230, align: 'left' },
+    { k: 'views',  t: o.viewsTitle, w: 400, bar: true },
     { k: 'eng',    t: 'Interaksi',       w: 190 },
     { k: 'gained', t: 'Followers Baru',  w: 190, sign: true },
     { k: 'fol',    t: 'Total Followers', w: 210 },
@@ -7791,10 +7976,11 @@ async function downloadStatTableJpg() {
   const g = ctx.createLinearGradient(PAD, y, W - PAD, y + HEAD);
   g.addColorStop(0, '#111c34'); g.addColorStop(1, acct.color || '#7c3aed');
   rr(PAD, y, W - PAD * 2, HEAD, 22); ctx.fillStyle = g; ctx.fill();
-  drawPlatformBadge(ctx, platId, PAD + 66, y + HEAD / 2, 52);
-  text(`TABEL DATA ${RN.type.toUpperCase()}`, PAD + 112, y + 44, `700 16px ${F}`, 'rgba(255,255,255,0.7)');
-  text(`${platM.label} — ${acct.name}`, PAD + 112, y + 82, `800 34px ${F}`, '#ffffff');
-  text(`${RN.long}${R.count > 1 ? `  ·  ${R.count} ${RN.unit}` : ''}`, PAD + 112, y + 118, `600 19px ${F}`, 'rgba(255,255,255,0.85)');
+  if (platId) drawPlatformBadge(ctx, platId, PAD + 66, y + HEAD / 2, 52);
+  else { const lg = await reportImg('logo.png'); if (lg) { const lh = 56, lw = lg.width * lh / lg.height; ctx.drawImage(lg, PAD + 66 - lw / 2, y + HEAD / 2 - lh / 2, lw, lh); } }
+  text(`${o.heading || 'TABEL DATA'} ${o.kind.toUpperCase()}`, PAD + 112, y + 44, `700 16px ${F}`, 'rgba(255,255,255,0.7)');
+  text(o.title, PAD + 112, y + 82, `800 34px ${F}`, '#ffffff');
+  text(o.sub, PAD + 112, y + 118, `600 19px ${F}`, 'rgba(255,255,255,0.85)');
   y += HEAD + 24;
 
   // Kartu tabel
@@ -7814,13 +8000,17 @@ async function downloadStatTableJpg() {
     if (zebra && i % 2 === 1) { ctx.fillStyle = STRIPE; ctx.fillRect(PAD + 1, ry, TW - 2, ROW); }
     COLS.forEach((c, ci) => {
       const x = colX[ci], xr = x + c.w - 16, v = d[c.k];
-      if (c.k === 'label') { text(v, x, cy, `600 17px ${F}`, INK); return; }
+      if (c.k === 'label') {
+        if (d.color) { ctx.fillStyle = d.color; ctx.beginPath(); ctx.arc(x + 6, cy, 6, 0, Math.PI * 2); ctx.fill(); text(v, x + 20, cy, `600 17px ${F}`, INK); }
+        else text(v, x, cy, `600 17px ${F}`, INK);
+        return;
+      }
       if (v === null) { text('—', xr, cy, `500 17px ${F}`, INK3, 'right'); return; }
       const top = maxes[c.k] !== null && v === maxes[c.k] && data.length > 1 && !c.er;
       if (c.bar) {   // batang data hanya di kolom utama
         const bw = c.w - 150, bx = x, frac = maxes[c.k] ? v / maxes[c.k] : 0;
         rr(bx, cy - 7, bw, 14, 7); ctx.fillStyle = 'rgba(255,255,255,0.05)'; ctx.fill();
-        rr(bx, cy - 7, Math.max(6, bw * frac), 14, 7); ctx.fillStyle = COL; ctx.globalAlpha = top ? 1 : 0.75; ctx.fill(); ctx.globalAlpha = 1;
+        rr(bx, cy - 7, Math.max(6, bw * frac), 14, 7); ctx.fillStyle = d.color || COL; ctx.globalAlpha = top ? 1 : 0.75; ctx.fill(); ctx.globalAlpha = 1;
       }
       const s = c.er ? v.toFixed(1).replace('.', ',') + '%' : (c.sign && v > 0 ? '+' : '') + full(v);
       text(s, xr, cy, `${top ? 800 : 500} 17px ${F}`, INK, 'right');
@@ -7834,12 +8024,12 @@ async function downloadStatTableJpg() {
   const tcy = ty + ROW / 2 + 2;
   COLS.forEach((c, ci) => {
     const x = colX[ci], xr = x + c.w - 16;
-    if (c.k === 'label') { text(data.length > 1 ? 'Total' : 'Ringkasan', x, tcy, `800 17px ${F}`, INK); return; }
+    if (c.k === 'label') { text(o.totLabel, x, tcy, `800 17px ${F}`, INK); return; }
     const v = tot[c.k];
     if (v === null) { text('—', xr, tcy, `700 17px ${F}`, INK3, 'right'); return; }
     const s = c.er ? v.toFixed(1).replace('.', ',') + '%' : (c.sign && v > 0 ? '+' : '') + full(v);
     text(s, xr, tcy, `800 18px ${F}`, INK, 'right');
-    if (c.k === 'fol') text('terakhir', xr, tcy + 20, `500 12px ${F}`, INK3, 'right');
+    if (c.k === 'fol') text(o.platId ? 'terakhir' : 'gabungan', xr, tcy + 20, `500 12px ${F}`, INK3, 'right');
     if (c.er) text(erSt(v)[0], xr, tcy + 20, `600 12px ${F}`, erSt(v)[1] === BAD ? '#f87171' : erSt(v)[1] === WARN ? '#fbbf24' : '#4ade80', 'right');
   });
   // Footer
@@ -7856,11 +8046,11 @@ async function downloadStatTableJpg() {
   text(`Dibuat ${new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}`, W - PAD, H - PAD + 4, `600 14px ${F}`, INK3, 'right');
 
   const link = document.createElement('a');
-  link.download = reportSafe(`Tabel ${platM.label} ${acct.name} - ${RN.short}${isW ? ' (mingguan)' : ''}`) + '.jpg';
+  link.download = reportSafe(o.file) + '.jpg';
   link.href = cv.toDataURL('image/jpeg', 0.95);
   document.body.appendChild(link); link.click(); document.body.removeChild(link);
   toast('Tabel berhasil didownload ✓', 'success');
-  actLog('unduh tabel statistik', `${acct.name} ${platM.label} — ${RN.label}`);
+  actLog(o.logAction || 'unduh tabel statistik', o.log);
 }
 
 /* ── Top 3 per-bulan — semua user bisa edit ─────────────────────────────── */
@@ -9813,10 +10003,17 @@ document.addEventListener('DOMContentLoaded', async () => {
   /* ── Statistics download dropdown ───────────────────────────── */
   $('btnDlDropdown')?.addEventListener('click', e => {
     e.stopPropagation();
+    $('statAcctDlMenu')?.classList.add('hidden');
     $('statDlMenu')?.classList.toggle('hidden');
+  });
+  $('btnAcctDlDropdown')?.addEventListener('click', e => {
+    e.stopPropagation();
+    $('statDlMenu')?.classList.add('hidden');
+    $('statAcctDlMenu')?.classList.toggle('hidden');
   });
   document.addEventListener('click', e => {
     $('statDlMenu')?.classList.add('hidden');
+    $('statAcctDlMenu')?.classList.add('hidden');
     // Toggle info tooltip on tap (mobile) — posisi fixed berdasarkan bounding rect
     const wrap = e.target.closest('.stat-info-wrap');
     $$('.stat-info-wrap.open').forEach(el => { if (el !== wrap) el.classList.remove('open'); });
@@ -9952,6 +10149,8 @@ document.addEventListener('DOMContentLoaded', async () => {
   window.scOpenModal            = scOpenModal;
   window.scOpenSlotPicker       = scOpenSlotPicker;
   window.scSetFilter            = scSetFilter;
+  window.downloadAcctReportJpg  = downloadAcctReportJpg;
+  window.downloadAcctTableJpg   = downloadAcctTableJpg;
   window.scPickForSlot          = scPickForSlot;
   window.scCloseModal           = scCloseModal;
   window.scSaveModal            = scSaveModal;
