@@ -1,5 +1,13 @@
 [
   {
+    "id": "mwy0jtmdb92br",
+    "user": "Umar",
+    "role": "Publisher",
+    "action": "unduh laporan bulanan akun (JPG)",
+    "target": "Penjaga Harapan — November 2026",
+    "timestamp": "2026-11-26T20:36:59.701Z"
+  },
+  {
     "id": "mwxzt9lq0qol0",
     "user": "Umar",
     "role": "Publisher",
@@ -3990,13 +3998,5 @@
     "action": "ubah status",
     "target": "\"Kekaguman Menag pada Gaya Komunikasi Multigenerasi Presiden Prabowo\" menjadi Published",
     "timestamp": "2026-09-24T11:58:25.355Z"
-  },
-  {
-    "id": "mufewr34c9v3q",
-    "user": "Umar",
-    "role": "Publisher",
-    "action": "ubah status",
-    "target": "\"Kisah Momen Diselamatkan Prabowo di Masa Kritis\" menjadi Published",
-    "timestamp": "2026-09-24T10:51:55.552Z"
   }
 ]
