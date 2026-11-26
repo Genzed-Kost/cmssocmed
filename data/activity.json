@@ -1,5 +1,13 @@
 [
   {
+    "id": "mwy17qwsmrvv5",
+    "user": "Umar",
+    "role": "Publisher",
+    "action": "unduh laporan akun (JPG)",
+    "target": "Penjaga Harapan — Bulanan · September – November 2026 (3 bulan)",
+    "timestamp": "2026-11-26T20:55:35.932Z"
+  },
+  {
     "id": "mwy17j66vkyhs",
     "user": "Umar",
     "role": "Publisher",
@@ -3990,13 +3998,5 @@
     "action": "login",
     "target": "masuk ke sistem sebagai Publisher",
     "timestamp": "2026-09-29T04:40:35.576Z"
-  },
-  {
-    "id": "mukznhmpu10mj",
-    "user": "Umar",
-    "role": "Publisher",
-    "action": "edit konten",
-    "target": "\"Transformasi Sektor Supply & Tantangan Penurunan Kelas Menengah\"",
-    "timestamp": "2026-09-28T08:31:26.209Z"
   }
 ]
