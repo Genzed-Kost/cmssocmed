@@ -1,5 +1,13 @@
 [
   {
+    "id": "mwy17j66vkyhs",
+    "user": "Umar",
+    "role": "Publisher",
+    "action": "unduh grafik statistik",
+    "target": "Penjaga Harapan YouTube — Sep 2026 – Nov 2026",
+    "timestamp": "2026-11-26T20:55:25.902Z"
+  },
+  {
     "id": "mwy0wtfp9r8mo",
     "user": "Umar",
     "role": "Publisher",
@@ -3990,13 +3998,5 @@
     "action": "edit konten",
     "target": "\"Transformasi Sektor Supply & Tantangan Penurunan Kelas Menengah\"",
     "timestamp": "2026-09-28T08:31:26.209Z"
-  },
-  {
-    "id": "mukzlzv6fkqbj",
-    "user": "Umar",
-    "role": "Publisher",
-    "action": "ubah status",
-    "target": "\"Trilogi Pembangunan sebagai Patron Presiden Prabowo\" menjadi Drop",
-    "timestamp": "2026-09-28T08:30:16.530Z"
   }
 ]
