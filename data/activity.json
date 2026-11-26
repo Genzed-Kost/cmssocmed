@@ -1,5 +1,13 @@
 [
   {
+    "id": "mwy1e9c7531r2",
+    "user": "Umar",
+    "role": "Publisher",
+    "action": "unduh grafik statistik",
+    "target": "Penjaga Harapan TikTok — Agt 2026 – Sep 2026",
+    "timestamp": "2026-11-26T21:00:39.751Z"
+  },
+  {
     "id": "mwy1e3h7uhgxc",
     "user": "Umar",
     "role": "Publisher",
@@ -3990,13 +3998,5 @@
     "action": "logout",
     "target": "keluar dari sistem",
     "timestamp": "2026-09-30T04:34:02.288Z"
-  },
-  {
-    "id": "mumpqwvsumxwb",
-    "user": "Umar",
-    "role": "Publisher",
-    "action": "ubah status",
-    "target": "\"Ketegasan Mengubah Aturan Birokrasi Demi Rakyat Kecil & UMKM\" menjadi Published",
-    "timestamp": "2026-09-29T13:29:42.136Z"
   }
 ]
