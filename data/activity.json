@@ -1,5 +1,13 @@
 [
   {
+    "id": "mwy0w6icbuqnx",
+    "user": "Umar",
+    "role": "Publisher",
+    "action": "unduh tabel statistik",
+    "target": "Penjaga Harapan YouTube — Bulanan · September 2026",
+    "timestamp": "2026-11-26T20:46:36.276Z"
+  },
+  {
     "id": "mwy0vxr0l0bju",
     "user": "Umar",
     "role": "Publisher",
@@ -3990,13 +3998,5 @@
     "action": "ubah status",
     "target": "\"Dukungan Penuh pada Ketegasan Presiden Prabowo Soal Pengembalian Uang Korupsi\" menjadi Published",
     "timestamp": "2026-09-28T05:47:22.101Z"
-  },
-  {
-    "id": "muktrwg80j8kz",
-    "user": "Umar",
-    "role": "Publisher",
-    "action": "login",
-    "target": "masuk ke sistem sebagai Publisher",
-    "timestamp": "2026-09-28T05:46:54.344Z"
   }
 ]
