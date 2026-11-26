@@ -1,5 +1,13 @@
 [
   {
+    "id": "mwxev2c0oqddo",
+    "user": "Lisa",
+    "role": "Administrator",
+    "action": "logout",
+    "target": "keluar dari sistem",
+    "timestamp": "2026-11-26T10:29:52.656Z"
+  },
+  {
     "id": "mwxet4ny2su7s",
     "user": "Lisa",
     "role": "Administrator",
@@ -3990,13 +3998,5 @@
     "action": "tambah konten",
     "target": "berjudul \"Pesan Khusus Presiden Prabowo: \"Jangan Timbulkan Kegaduhan\"\" (tema: Podcast Babe Haikal) untuk akun 33 Official dijadwalkan 27 Sep 2026",
     "timestamp": "2026-09-22T10:18:19.987Z"
-  },
-  {
-    "id": "mucisfkf5vm6e",
-    "user": "Umar",
-    "role": "Publisher",
-    "action": "tambah konten",
-    "target": "berjudul \"Dukungan Penuh pada Ketegasan Presiden Prabowo Soal Pengembalian Uang Korupsi\" (tema: Podcast Babe Haikal) untuk akun 33 Official dijadwalkan 26 Sep 2026",
-    "timestamp": "2026-09-22T10:17:13.935Z"
   }
 ]
