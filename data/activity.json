@@ -1,5 +1,13 @@
 [
   {
+    "id": "mwy1d5o8fpwaj",
+    "user": "Umar",
+    "role": "Publisher",
+    "action": "unduh grafik statistik",
+    "target": "Penjaga Harapan YouTube — Sep 2026",
+    "timestamp": "2026-11-26T20:59:48.344Z"
+  },
+  {
     "id": "mwy18gqomcb95",
     "user": "Umar",
     "role": "Publisher",
@@ -3990,13 +3998,5 @@
     "action": "ubah status",
     "target": "\"Evaluasi Kualitas Pekerjaan & Pengentasan Kemiskinan\" menjadi Published",
     "timestamp": "2026-09-29T10:12:04.903Z"
-  },
-  {
-    "id": "mum7dupbuvz92",
-    "user": "Umar",
-    "role": "Publisher",
-    "action": "ubah status",
-    "target": "\"Pesan Khusus Presiden Prabowo: \"Jangan Timbulkan Kegaduhan\"\" menjadi Published",
-    "timestamp": "2026-09-29T04:55:39.695Z"
   }
 ]
