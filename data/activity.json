@@ -1,5 +1,13 @@
 [
   {
+    "id": "mwy1e3h7uhgxc",
+    "user": "Umar",
+    "role": "Publisher",
+    "action": "unduh grafik statistik",
+    "target": "Penjaga Harapan TikTok — Sep 2026",
+    "timestamp": "2026-11-26T21:00:32.155Z"
+  },
+  {
     "id": "mwy1d5o8fpwaj",
     "user": "Umar",
     "role": "Publisher",
@@ -3990,13 +3998,5 @@
     "action": "ubah status",
     "target": "\"Ketegasan Mengubah Aturan Birokrasi Demi Rakyat Kecil & UMKM\" menjadi Published",
     "timestamp": "2026-09-29T13:29:42.136Z"
-  },
-  {
-    "id": "mumiors7cwgix",
-    "user": "Umar",
-    "role": "Publisher",
-    "action": "ubah status",
-    "target": "\"Evaluasi Kualitas Pekerjaan & Pengentasan Kemiskinan\" menjadi Published",
-    "timestamp": "2026-09-29T10:12:04.903Z"
   }
 ]
