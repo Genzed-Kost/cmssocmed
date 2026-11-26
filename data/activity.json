@@ -1,5 +1,13 @@
 [
   {
+    "id": "mwxenexysrcqy",
+    "user": "Admin",
+    "role": "Admin",
+    "action": "ubah status",
+    "target": "\"Penerima Bansos Dilatih Kerja Lewat Program MBG!\" menjadi Published",
+    "timestamp": "2026-11-26T10:23:55.750Z"
+  },
+  {
     "id": "mwxekjpal8nre",
     "user": "Admin",
     "role": "Admin",
@@ -3990,13 +3998,5 @@
     "action": "tambah konten",
     "target": "berjudul \"Inisiasi Fikih Lingkungan & Ekoteologi\" (tema: Podcast Menteri Agama) untuk akun 33 Official dijadwalkan 23 Sep 2026",
     "timestamp": "2026-09-21T08:56:25.676Z"
-  },
-  {
-    "id": "mub0f6qx923q8",
-    "user": "Umar",
-    "role": "Publisher",
-    "action": "edit konten",
-    "target": "\"Permintaan Presiden Menjaga Istiqlal & Hubungan Historis\"",
-    "timestamp": "2026-09-21T08:55:16.713Z"
   }
 ]
