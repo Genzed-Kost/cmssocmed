@@ -1,5 +1,13 @@
 [
   {
+    "id": "mwxfaisz8zlv6",
+    "user": "Umar",
+    "role": "Publisher",
+    "action": "unduh grafik statistik",
+    "target": "Penjaga Harapan YouTube — Des 2025 – Nov 2026",
+    "timestamp": "2026-11-26T10:41:53.843Z"
+  },
+  {
     "id": "mwxezrkhlo8c2",
     "user": "Umar",
     "role": "Publisher",
@@ -3990,13 +3998,5 @@
     "action": "logout",
     "target": "keluar dari sistem",
     "timestamp": "2026-09-23T10:04:20.190Z"
-  },
-  {
-    "id": "mudtl544hcat4",
-    "user": "Admin",
-    "role": "Admin",
-    "action": "login",
-    "target": "masuk ke sistem sebagai Admin",
-    "timestamp": "2026-09-23T08:07:15.748Z"
   }
 ]
