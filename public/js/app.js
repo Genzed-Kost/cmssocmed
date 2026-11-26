@@ -672,6 +672,13 @@ function applyAuthState() {
 
   // Statistik: tombol Import hanya untuk Admin
   if ($('btnStatImportFile')) $('btnStatImportFile').style.display = canEditStats() ? '' : 'none';
+  // Tabel Data Bulanan/Mingguan & form isian statistik: hanya Admin.
+  // Bersihkan sisa tampilan sesi Admin sebelumnya di perangkat yang sama.
+  document.body.classList.toggle('is-admin', !!admin);
+  if (!canEditStats()) {
+    if ($('statDataTable')) $('statDataTable').innerHTML = '';
+    $('statInputCard')?.classList.add('hidden');
+  }
 
   // API Setup nav: hanya admin/Admin (bukan Administrator)
   const apiNav = document.querySelector('.nav-item[data-page="apisetup"]');

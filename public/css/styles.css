@@ -4180,3 +4180,8 @@ ul { list-style: none; }
 .sc-filter button { border: none; background: transparent; padding: 5px 11px; border-radius: 7px; font: inherit; font-size: .76rem; font-weight: 700; color: var(--muted); cursor: pointer; }
 .sc-filter button:hover { color: var(--text); }
 .sc-filter button.active { background: var(--surface); color: var(--blue); box-shadow: 0 1px 3px rgba(15,23,42,.12); }
+
+/* Data statistik (tabel Data Bulanan/Mingguan, Tambah Bulan, form isian): hanya Admin */
+body:not(.is-admin) #statDataTable,
+body:not(.is-admin) #statInputCard,
+body:not(.is-admin) #btnStatImportFile { display: none !important; }
