@@ -7473,6 +7473,25 @@ function reportImg(src) {
   return new Promise(res => { const i = new Image(); i.onload = () => res(i); i.onerror = () => res(null); i.src = src; });
 }
 
+/* Ringkasan singkat performa bulan ini dibanding bulan lalu — kata-kata, tanpa persentase */
+function reportSummary(D, prevMonthName) {
+  const tr = (c, p, tol = 0.03) => (c === null || p === null || !p) ? null
+    : Math.abs(c - p) / Math.abs(p) <= tol ? 'stabil' : c > p ? 'naik' : 'turun';
+  const erT = (c, p) => (c === null || p === null) ? null : Math.abs(c - p) < 0.2 ? 'stabil' : c > p ? 'naik' : 'turun';
+  const items = [
+    ['views', tr(D.kpi.views, D.kpiPrev.views)],
+    ['interaksi', tr(D.kpi.eng, D.kpiPrev.eng)],
+    ['followers baru', tr(D.kpi.gained, D.kpiPrev.gained)],
+    ['ER', erT(D.kpi.er, D.kpiPrev.er)],
+  ].filter(x => x[1]);
+  if (!items.length) return '';
+  const up = items.filter(x => x[1] === 'naik').length, down = items.filter(x => x[1] === 'turun').length;
+  const verdict = up > down ? 'Performa membaik' : down > up ? 'Performa menurun' : 'Performa stabil';
+  const best = D.plats.filter(p => p.er !== null).sort((a, b) => b.er - a.er)[0];
+  return `${verdict} dibanding ${prevMonthName}: ${items.map(x => `${x[0]} ${x[1]}`).join(', ')}.` +
+    (best && D.plats.length > 1 ? ` ER terbaik di ${best.label}.` : '');
+}
+
 async function downloadStatJpg() {
   const acctId = state.statActiveAcct;
   const acct   = getAccounts().find(a => a.id === acctId) || { name: acctId, color: '#7c3aed' };
@@ -7524,16 +7543,31 @@ async function downloadStatJpg() {
   if (logo) { const lh = 72, lw = logo.width * lh / logo.height; ctx.drawImage(logo, tx, y + 40, lw, lh); tx += lw + 28; }
   text('LAPORAN MEDIA SOSIAL BULANAN', tx, y + 58, `700 17px ${F}`, 'rgba(255,255,255,0.7)');
   text(acct.name, tx, y + 108, `800 46px ${F}`, '#ffffff');
-  text(`${monthName(ym)}  ·  dibanding ${monthName(D.pm)}`, tx, y + 146, `600 20px ${F}`, 'rgba(255,255,255,0.85)');
-  // chip platform
-  let cx = W - PAD - 40;
+  // Bulan + ringkasan singkat performa dibanding bulan lalu (tanpa persentase)
+  ctx.font = `700 22px ${F}`;
+  const mTxt = monthName(ym), mW = ctx.measureText(mTxt).width;
+  text(mTxt, tx, y + 152, `700 22px ${F}`, '#ffffff');
+  const summary = reportSummary(D, monthName(D.pm).split(' ')[0]);
+  if (summary) {
+    const sx = tx + mW + 22, sw = W - PAD - 36 - sx;
+    ctx.font = `500 17px ${F}`;
+    const lines = []; let line = '';
+    summary.split(' ').forEach(w => { const t = line ? line + ' ' + w : w; if (ctx.measureText(t).width > sw - 36 && line) { lines.push(line); line = w; } else line = t; });
+    if (line) lines.push(line);
+    const show = lines.slice(0, 2), ph = show.length > 1 ? 64 : 40;
+    const py = y + 145 - ph / 2;
+    rr(sx, py, sw, ph, 14); ctx.fillStyle = 'rgba(255,255,255,0.12)'; ctx.fill();
+    show.forEach((l, i) => text(l, sx + 18, py + (show.length > 1 ? 26 + i * 24 : 26), `500 17px ${F}`, '#ffffff'));
+  }
+  // chip platform (kanan atas)
+  let cx = W - PAD - 36;
   ctx.font = `700 15px ${F}`;
   [...D.plats].reverse().forEach(p => {
     const w = ctx.measureText(p.label).width + 42;
     cx -= w;
-    rr(cx, y + HEAD - 62, w, 34, 17); ctx.fillStyle = 'rgba(255,255,255,0.12)'; ctx.fill();
-    ctx.fillStyle = p.color; ctx.beginPath(); ctx.arc(cx + 18, y + HEAD - 45, 6, 0, Math.PI * 2); ctx.fill();
-    text(p.label, cx + 30, y + HEAD - 39, `700 15px ${F}`, '#ffffff');
+    rr(cx, y + 30, w, 34, 17); ctx.fillStyle = 'rgba(255,255,255,0.12)'; ctx.fill();
+    ctx.fillStyle = p.color; ctx.beginPath(); ctx.arc(cx + 18, y + 47, 6, 0, Math.PI * 2); ctx.fill();
+    text(p.label, cx + 30, y + 53, `700 15px ${F}`, '#ffffff');
     cx -= 10;
   });
   y += HEAD + GAP;
@@ -7552,14 +7586,6 @@ async function downloadStatJpg() {
     card(x, y, kw, KPI_H);
     text(k.label.toUpperCase(), x + 26, y + 40, `700 15px ${F}`, INK2);
     text(k.v === null ? '—' : k.fmt(k.v), x + 26, y + 98, `800 44px ${F}`, INK);
-    const d = k.label === 'Engagement Rate' ? (k.v !== null && k.p !== null ? k.v - k.p : null) : delta(k.v, k.p);
-    if (d !== null) {
-      const up = d >= 0, t = `${up ? '▲' : '▼'} ${k.label === 'Engagement Rate' ? Math.abs(d).toFixed(1).replace('.', ',') + ' poin' : Math.abs(d).toFixed(1).replace('.', ',') + '%'}`;
-      ctx.font = `800 15px ${F}`;
-      const tw = ctx.measureText(t).width + 22;
-      rr(x + kw - tw - 22, y + 22, tw, 30, 15); ctx.fillStyle = up ? 'rgba(34,197,94,0.15)' : 'rgba(239,68,68,0.15)'; ctx.fill();
-      text(t, x + kw - 33, y + 43, `800 15px ${F}`, up ? '#4ade80' : '#f87171', 'right');
-    }
     if (k.status) {
       ctx.fillStyle = k.status[1]; ctx.beginPath(); ctx.arc(x + 32, y + 128, 6, 0, Math.PI * 2); ctx.fill();
       text(k.sub, x + 46, y + 134, `700 16px ${F}`, INK);
@@ -7630,7 +7656,7 @@ async function downloadStatJpg() {
   // ── Footer ──
   card(PAD, y, W - PAD * 2, FOOT - 30, CARD2);
   text('Cara membaca', PAD + 26, y + 38, `800 17px ${F}`, INK);
-  text('ER = Interaksi ÷ Views × 100   ·   ER ≥ 5% Bagus   ·   2–5% Cukup   ·   < 2% Perlu perbaikan   ·   ▲▼ dibanding ' + monthName(D.pm), PAD + 26, y + 70, `500 16px ${F}`, INK2);
+  text('ER = Interaksi ÷ Views × 100   ·   ER ≥ 5% Bagus   ·   2–5% Cukup   ·   < 2% Perlu perbaikan', PAD + 26, y + 70, `500 16px ${F}`, INK2);
   text(`Followers Baru memakai isian "Follows"/"Subs Gained"; bila kosong, selisih followers dengan bulan lalu.`, PAD + 26, y + 98, `500 15px ${F}`, INK3);
   text('Penjaga Harapan CMS', PAD, H - PAD + 4, `600 15px ${F}`, INK3);
   text(`Dibuat ${new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}`, W - PAD, H - PAD + 4, `600 15px ${F}`, INK3, 'right');
