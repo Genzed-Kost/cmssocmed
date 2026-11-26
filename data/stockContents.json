@@ -551,7 +551,14 @@
     "title": "KKP Sukabumi",
     "prodDate": "",
     "prodDateEnd": "",
-    "airDate": "2026-11-26"
+    "airDate": "2026-11-26",
+    "prodTime": "",
+    "prodTimeEnd": "",
+    "ytUrl": "https://youtu.be/-ydPg2TnNg4?si=bYw5lSDvl15PN91e",
+    "ytTitle": "",
+    "ytChannel": "",
+    "ytAuto": false,
+    "ytSkip": false
   },
   {
     "id": "sc_1794817855153",
