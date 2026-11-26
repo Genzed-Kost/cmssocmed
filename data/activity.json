@@ -1,5 +1,13 @@
 [
   {
+    "id": "mwy0qjzt6xzgh",
+    "user": "Umar",
+    "role": "Publisher",
+    "action": "unduh tabel statistik",
+    "target": "Penjaga Harapan YouTube — 2026-10_2026-10",
+    "timestamp": "2026-11-26T20:42:13.817Z"
+  },
+  {
     "id": "mwy0owrjq1rsb",
     "user": "Umar",
     "role": "Publisher",
@@ -3990,13 +3998,5 @@
     "action": "ubah status",
     "target": "\"Awal Mula Penugasan & Perintah \"5 Detik\" Menjadi Pusat Halal Dunia\" menjadi Published",
     "timestamp": "2026-09-26T02:11:47.591Z"
-  },
-  {
-    "id": "mugsv2vctet3j",
-    "user": "Umar",
-    "role": "Publisher",
-    "action": "ubah status",
-    "target": "\"Analogi Pergantian Menteri Keuangan & Hak Prerogatif Presiden\" menjadi Published",
-    "timestamp": "2026-09-25T10:10:18.312Z"
   }
 ]
