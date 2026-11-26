@@ -1,5 +1,13 @@
 [
   {
+    "id": "mwxeszws69ahs",
+    "user": "Admin",
+    "role": "Admin",
+    "action": "logout",
+    "target": "keluar dari sistem",
+    "timestamp": "2026-11-26T10:28:16.204Z"
+  },
+  {
     "id": "mwxesuus36k72",
     "user": "Admin",
     "role": "Admin",
@@ -3990,13 +3998,5 @@
     "action": "tambah konten",
     "target": "berjudul \"Awal Mula Penugasan & Perintah \"5 Detik\" Menjadi Pusat Halal Dunia\" (tema: Podcast Babe Haikal) untuk akun 33 Official dijadwalkan 25 Sep 2026",
     "timestamp": "2026-09-22T10:16:08.904Z"
-  },
-  {
-    "id": "mucip3icxlj2e",
-    "user": "Umar",
-    "role": "Publisher",
-    "action": "ubah status",
-    "target": "\"Tindakan Berlapis Mencegah Kekerasan Seksual & Rencana Dirjen Pesantren\" menjadi Published",
-    "timestamp": "2026-09-22T10:14:38.340Z"
   }
 ]
