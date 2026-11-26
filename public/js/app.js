@@ -600,6 +600,13 @@ function isFirstRun() { return !getAuth(); }
 function isLoggedIn() { return !!getSess(); }
 function isAdmin()         { return getSess()?.role?.toLowerCase() === 'admin'; }
 function isAdministrator() { return getSess()?.role?.toLowerCase() === 'administrator'; }
+/* Tambah/edit/import/hapus data statistik: hanya Admin (role Administrator & lainnya hanya melihat) */
+function canEditStats() { return isAdmin(); }
+function statEditGuard() {
+  if (canEditStats()) return true;
+  toast('Hanya Admin yang dapat menambah atau mengubah data statistik', 'error');
+  return false;
+}
 function currentUser(){ return getSess()?.name || 'Creator'; }
 
 function getPubUsers() {
@@ -662,6 +669,9 @@ function applyAuthState() {
     // (tombol sync/logout/menu admin tidak diperbarui) untuk user tanpa role.
     if (admin || roleEl.textContent) roleEl.classList.toggle('hidden', !admin && !getUserRole((state.settings?.users || []).find(u => getUserName(u) === name) || null));
   }
+
+  // Statistik: tombol Import hanya untuk Admin
+  if ($('btnStatImportFile')) $('btnStatImportFile').style.display = canEditStats() ? '' : 'none';
 
   // API Setup nav: hanya admin/Admin (bukan Administrator)
   const apiNav = document.querySelector('.nav-item[data-page="apisetup"]');
@@ -6055,6 +6065,7 @@ function parseCSVDirect(csvText, platM, acctUsername = '', platId = '', groupBy 
 
 /* ── Import file: CSV → parse langsung; gambar/PDF → Gemini AI ──────────── */
 async function importStatFromFile(input) {
+  if (!statEditGuard()) { if (input) input.value = ''; return; }
   const file = input?.files?.[0];
   if (!file) return;
   input.value = '';
@@ -6242,6 +6253,7 @@ function closeImportPreview() {
 }
 
 async function confirmImportPreview() {
+  if (!statEditGuard()) return;
   const prev = state._importPreview;
   if (!prev) return;
   const btn = $('btnConfirmImport');
@@ -6315,6 +6327,7 @@ function downloadStatTemplate() {
 
 /* Simpan banyak baris CSV langsung ke state & GitHub */
 async function importMultiRowsDirectly(acctId, platId, rows) {
+  if (!statEditGuard()) return;
   // Deteksi apakah data weekly (punya field 'week') atau monthly
   const isWeeklyData = rows.some(r => r.week && !r.month);
   const storeKey = isWeeklyData ? platId + '_w' : platId;
@@ -6377,6 +6390,7 @@ Contoh output yang benar:
 }
 
 async function openStatInputForImport(acctId, platId, periodVal, data) {
+  if (!statEditGuard()) return;
   // Deteksi apakah data weekly atau monthly
   const isWeeklyData = !!(data.week && !data.month);
   const storeKey     = isWeeklyData ? platId + '_w' : platId;
@@ -6645,7 +6659,7 @@ function renderStatChart() {
     if (chartWrap)   chartWrap.innerHTML = `<div class="stat-no-data">
       <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="color:var(--muted-lt)"><rect x="18" y="3" width="4" height="18" rx="1"/><rect x="10" y="8" width="4" height="13" rx="1"/><rect x="2" y="13" width="4" height="8" rx="1"/></svg>
       <p>Belum ada data <strong>${isWeekly?'mingguan':''} ${platM.label}</strong> untuk <strong>${getAcctName(acctId)}</strong></p>
-      <button class="btn-sm blue" onclick="addStatRowFromTable()">+ Input Data Pertama</button>
+      ${canEditStats() ? '<button class="btn-sm blue" onclick="addStatRowFromTable()">+ Input Data Pertama</button>' : ''}
     </div>`;
     if (window._statChart) { window._statChart.destroy(); window._statChart = null; }
     const dt = $('statDataTable'); if (dt) dt.innerHTML = '';
@@ -7274,6 +7288,7 @@ function exportStatCSV(acctId, platId) {
 }
 
 function addStatRowFromTable() {
+  if (!statEditGuard()) return;
   const isWeekly = state.statViewMode === 'weekly';
   const platM    = PLATFORM_FIELDS[state.statActivePlat || 'youtube'];
   const inp      = $('statMonth');
@@ -7298,6 +7313,7 @@ function addStatRowFromTable() {
 
 /* Hapus satu baris data */
 async function deleteStatRow(periodKey) {
+  if (!statEditGuard()) return;
   const acctId   = state.statActiveAcct;
   const platId   = state.statActivePlat || 'youtube';
   const isWeekly = state.statViewMode === 'weekly';
@@ -7940,6 +7956,7 @@ function updateTopSlot(acctId, platId, type, idx, field, val, month) {
 }
 
 async function saveTopContent(acctId, platId, month) {
+  if (!statEditGuard()) return;
   if (!state.settings) return;
   const p = platId || state.statActivePlat || 'youtube';
   const m = month  || state.top3Month     || getCurrentYM();
@@ -8303,6 +8320,7 @@ function closeCntPreview() {
 }
 
 function openStatEdit(periodKey) {
+  if (!statEditGuard()) return;
   const isWeekly  = state.statViewMode === 'weekly';
   const platId    = state.statActivePlat || 'youtube';
   const acctId    = state.statActiveAcct;
@@ -8407,6 +8425,7 @@ function statEditCount() {
 }
 
 async function saveAnalyticsEntry() {
+  if (!statEditGuard()) return;
   const isWeekly = state.statViewMode === 'weekly';
   const periodVal = gv('statMonth');   // bisa YYYY-MM atau YYYY-Www
   const acctId    = state.statActiveAcct;

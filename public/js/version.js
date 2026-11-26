@@ -22,6 +22,7 @@ window.APP_INFO = {
         '👆 Klik slot untuk memilih konten tayang dari stok program itu, atau buat konten baru',
         '🗓 Hari tayang & pola minggu (setiap minggu / 2 minggu sekali) tiap program bisa diubah di API Setup → Daftar Program; Rabu: Belajar Koperasi & Situation Room selang-seling',
         '🔒 Konten yang sudah tayang tidak bisa dipindah tanggal tayangnya',
+        '🔐 Tambah, edit, import & hapus data Statistik kini hanya untuk Admin — role Administrator (dan role tim lain) hanya bisa melihat',
       ],
     },
     {
