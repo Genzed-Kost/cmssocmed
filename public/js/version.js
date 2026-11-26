@@ -7,8 +7,18 @@
 window.APP_INFO = {
   name: 'Penjaga Harapan CMS',
   tagline: 'Platform manajemen konten tim',
-  version: '2.6.5',
+  version: '2.7.0',
   changelog: [
+    {
+      version: '2.7.0', date: '2026-11-26',
+      items: [
+        '📑 Laporan Bulanan: gambar laporan per akun + CSV semua akun (Statistik → Download → Laporan Bulanan)',
+      ],
+      adminItems: [
+        '📑 Laporan Bulanan otomatis: gambar per akun (semua platform, dibanding bulan lalu) + CSV semua akun, bisa diunduh sekaligus dalam ZIP',
+        '🔔 Di awal bulan, Admin otomatis diingatkan bahwa laporan bulan lalu siap diunduh',
+      ],
+    },
     {
       version: '2.6.5', date: '2026-11-19',
       items: [

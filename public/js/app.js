@@ -213,6 +213,39 @@ const PAGE_TITLES = {
 const chartInstances = {};   // canvasId → Chart instance
 const DRAFT_KEY = 'cmsph_newpost_draft_v1'; // autosave draft
 
+/* Kartu ringkasan per platform (Statistik & Laporan Bulanan). eom=true → nilai akhir periode, bukan jumlah */
+const STAT_SUMMARY_CARDS = {
+  youtube:   [
+    { key:'watchHours',      label:'Total Watch Hours',   eom:false },
+    { key:'totalViews',      label:'Total Views',         eom:false },
+    { key:'totalEngagement', label:'Total Engagement',    eom:false },
+    { key:'subsEOM',         label:'Subscribers (EOM)',   eom:true  },
+  ],
+  tiktok:    [
+    { key:'jmlVideo',        label:'Total Video',         eom:false },
+    { key:'totalVideoViews', label:'Total Vid Views',     eom:false },
+    { key:'totalEngagement', label:'Total Engagement',    eom:false },
+    { key:'followersEOM',    label:'Followers (EOM)',     eom:true  },
+  ],
+  facebook:  [
+    { key:'totalViews',      label:'Views',               eom:false },
+    { key:'totalEngagement', label:'Total Eng/Reactions', eom:false },
+    { key:'profileVisits',   label:'Visits Profile',      eom:false },
+    { key:'pageFollowers',   label:'Followers',           eom:true  },
+  ],
+  instagram: [
+    { key:'totalViews',      label:'Views',               eom:false },
+    { key:'totalReach',      label:'Reach',               eom:false },
+    { key:'totalEngagement', label:'Total Eng/Reactions', eom:false },
+    { key:'followersEOM',    label:'Followers',           eom:true  },
+  ],
+  twitter:   [
+    { key:'followers',       label:'Followers',           eom:true  },
+    { key:'impressions',     label:'Impressions',         eom:false },
+    { key:'totalEngagement', label:'Total Engagement',    eom:false },
+    { key:'erPct',           label:'ER %',                eom:false, fmt:'pct' },
+  ],
+  };
 /* ── Platform rich-data field definitions ───────────────────────────────── */
 const PLATFORM_FIELDS = {
   youtube: {
@@ -1338,6 +1371,7 @@ async function loadAllData(force = false) {
     saveDataCache();
     setSyncStatus(true, `Sinkron ${new Date().toLocaleTimeString('id-ID',{hour:'2-digit',minute:'2-digit'})}`);
     renderCurrentPage();
+    setTimeout(() => { try { maybeShowMonthlyReportReminder(); } catch (_) {} }, 1500);
   } catch (e) {
     setSyncStatus(false, 'Error sinkronisasi');
     toast('Gagal memuat data: ' + e.message, 'error');
@@ -6690,38 +6724,8 @@ function renderStatChart() {
   ──────────────────────────────────────────────────────────────── */
   // Definisi 4 kartu per platform: { key, label, eom? }
   // eom=true → tampilkan nilai bulan terakhir (point-in-time), bukan sum
-  const SUMMARY_CARDS = {
-    youtube:   [
-      { key:'watchHours',      label:'Total Watch Hours',   eom:false },
-      { key:'totalViews',      label:'Total Views',         eom:false },
-      { key:'totalEngagement', label:'Total Engagement',    eom:false },
-      { key:'subsEOM',         label:'Subscribers (EOM)',   eom:true  },
-    ],
-    tiktok:    [
-      { key:'jmlVideo',        label:'Total Video',         eom:false },
-      { key:'totalVideoViews', label:'Total Vid Views',     eom:false },
-      { key:'totalEngagement', label:'Total Engagement',    eom:false },
-      { key:'followersEOM',    label:'Followers (EOM)',     eom:true  },
-    ],
-    facebook:  [
-      { key:'totalViews',      label:'Views',               eom:false },
-      { key:'totalEngagement', label:'Total Eng/Reactions', eom:false },
-      { key:'profileVisits',   label:'Visits Profile',      eom:false },
-      { key:'pageFollowers',   label:'Followers',           eom:true  },
-    ],
-    instagram: [
-      { key:'totalViews',      label:'Views',               eom:false },
-      { key:'totalReach',      label:'Reach',               eom:false },
-      { key:'totalEngagement', label:'Total Eng/Reactions', eom:false },
-      { key:'followersEOM',    label:'Followers',           eom:true  },
-    ],
-    twitter:   [
-      { key:'followers',       label:'Followers',           eom:true  },
-      { key:'impressions',     label:'Impressions',         eom:false },
-      { key:'totalEngagement', label:'Total Engagement',    eom:false },
-      { key:'erPct',           label:'ER %',                eom:false, fmt:'pct' },
-    ],
-  };
+  const SUMMARY_CARDS = STAT_SUMMARY_CARDS;
+
   const summaryDefs = SUMMARY_CARDS[platId] || SUMMARY_CARDS.youtube;
   const latestRow   = displayRows[displayRows.length - 1];
   const fmtPeriod   = v => isWeekly ? fmtWeek(v) : fmtMonth(v);
@@ -9148,6 +9152,300 @@ function renderNewsItems(items, ts) {
 }
 
 /* ══════════════════════════════════════════════════════════════════════════
+   LAPORAN BULANAN — gambar per akun (PNG) + CSV semua akun
+   Data diambil dari Data Bulanan statistik (state.analytics[akun][platform]).
+   Admin otomatis diingatkan di awal bulan bahwa laporan bulan lalu siap.
+   ══════════════════════════════════════════════════════════════════════════ */
+const REPORT_PLAT_ORDER = ['youtube', 'tiktok', 'instagram', 'facebook', 'twitter'];
+const REPORT_SEEN_KEY   = 'cms_monthly_report_seen';
+
+function reportPrevMonth(ym) {
+  const [y, m] = ym.split('-').map(Number);
+  const d = new Date(y, m - 2, 1);
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+}
+function reportFullMonth(ym) {
+  const [y, m] = ym.split('-').map(Number);
+  return new Date(y, m - 1, 1).toLocaleDateString('id-ID', { month: 'long', year: 'numeric' });
+}
+/* Bulan yang punya data bulanan di akun mana pun (terbaru dulu) */
+function reportMonths() {
+  const set = new Set();
+  Object.values(state.analytics || {}).forEach(acct => {
+    if (!acct || typeof acct !== 'object') return;
+    Object.entries(acct).forEach(([k, rows]) => {
+      if (k.endsWith('_w') || !Array.isArray(rows)) return;
+      rows.forEach(r => r?.month && set.add(r.month));
+    });
+  });
+  return [...set].sort().reverse();
+}
+/* Bulan laporan bawaan: bulan lalu (bulan lengkap terakhir) bila ada datanya */
+function reportDefaultMonth() {
+  const now = new Date();
+  const last = scYmd(new Date(now.getFullYear(), now.getMonth() - 1, 1)).slice(0, 7);
+  const months = reportMonths();
+  return months.includes(last) ? last : (months.find(m => m <= last) || months[0] || last);
+}
+function reportChange(cur, prev) {
+  if (cur === null || prev === null || !isFinite(cur) || !isFinite(prev) || !prev) return null;
+  return (cur - prev) / Math.abs(prev) * 100;
+}
+/* Ringkasan satu akun untuk bulan ym */
+function buildAccountReport(acctId, ym) {
+  const acct = getAccounts().find(a => a.id === acctId) || { id: acctId, name: acctId, color: '#64748b' };
+  const pm = reportPrevMonth(ym);
+  const platforms = [];
+  REPORT_PLAT_ORDER.filter(p => PLATFORM_FIELDS[p]).forEach(platId => {
+    applyAutoER(acctId, platId);
+    const rows = state.analytics?.[acctId]?.[platId];
+    if (!Array.isArray(rows)) return;
+    const row = rows.find(r => r.month === ym);
+    if (!row) return;
+    const prev = rows.find(r => r.month === pm) || null;
+    const platM = PLATFORM_FIELDS[platId];
+    const num = (r, k) => (r && r[k] !== undefined && r[k] !== null && r[k] !== '' && !isNaN(+r[k])) ? +r[k] : null;
+    const defs = [...(STAT_SUMMARY_CARDS[platId] || [])];
+    if (!defs.some(d => d.key === 'erPct') && platM.fields.some(f => f.key === 'erPct')) defs.push({ key: 'erPct', label: 'ER %', fmt: 'pct' });
+    const metrics = defs.map(d => {
+      const f = platM.fields.find(x => x.key === d.key);
+      const val = num(row, d.key), pv = num(prev, d.key);
+      return { key: d.key, label: d.label, fmt: d.fmt || f?.fmt || 'num', val, prev: pv, chg: reportChange(val, pv) };
+    });
+    // Semua kolom (untuk CSV)
+    const all = platM.fields.map(f => {
+      const val = num(row, f.key), pv = num(prev, f.key);
+      return { key: f.key, label: f.label, fmt: f.fmt, val, prev: pv, chg: reportChange(val, pv) };
+    }).filter(m => m.val !== null || m.prev !== null);
+    platforms.push({ platId, label: platM.label, color: platM.color, metrics, all });
+  });
+  return { acct, ym, pm, platforms };
+}
+
+/* ── Gambar laporan satu akun (PNG 1080 px) ── */
+let _reportLogo = null;
+function reportLogo() {
+  if (_reportLogo) return _reportLogo;
+  _reportLogo = new Promise(res => {
+    const img = new Image();
+    img.onload = () => res(img); img.onerror = () => res(null);
+    img.src = 'logo.png';
+  });
+  return _reportLogo;
+}
+function reportRoundRect(ctx, x, y, w, h, r) {
+  ctx.beginPath();
+  ctx.moveTo(x + r, y); ctx.arcTo(x + w, y, x + w, y + h, r); ctx.arcTo(x + w, y + h, x, y + h, r);
+  ctx.arcTo(x, y + h, x, y, r); ctx.arcTo(x, y, x + w, y, r); ctx.closePath();
+}
+function reportFmt(v, fmt) {
+  if (v === null) return '—';
+  if (fmt === 'pct') return v.toFixed(2).replace('.', ',') + '%';
+  return fmtNum(v);
+}
+async function drawAccountReport(rep) {
+  const W = 1080, PAD = 56, HEAD = 250, CARD_H = 138, GAP = 16, BLOCK_HEAD = 58, FOOT = 90;
+  const blocks = rep.platforms.map(p => ({ ...p, rows: Math.ceil(p.metrics.length / 2) }));
+  const bodyH = blocks.reduce((s, b) => s + BLOCK_HEAD + b.rows * (CARD_H + GAP) + 26, 0) || 160;
+  const H = HEAD + bodyH + FOOT;
+  const cv = document.createElement('canvas');
+  cv.width = W; cv.height = H;
+  const ctx = cv.getContext('2d');
+  const F = 'Inter, "Segoe UI", Arial, sans-serif';
+  const col = rep.acct.color || '#7c3aed';
+
+  ctx.fillStyle = '#f8fafc'; ctx.fillRect(0, 0, W, H);
+  // Header berwarna akun
+  const g = ctx.createLinearGradient(0, 0, W, HEAD);
+  g.addColorStop(0, '#0f172a'); g.addColorStop(1, col);
+  ctx.fillStyle = g; ctx.fillRect(0, 0, W, HEAD - 20);
+  const logo = await reportLogo();
+  if (logo) { const lh = 64, lw = logo.width * lh / logo.height; ctx.drawImage(logo, W - PAD - lw, 48, lw, lh); }
+  ctx.fillStyle = 'rgba(255,255,255,.75)'; ctx.font = `700 22px ${F}`; ctx.textBaseline = 'alphabetic';
+  ctx.fillText('LAPORAN BULANAN MEDIA SOSIAL', PAD, 78);
+  ctx.fillStyle = '#fff'; ctx.font = `800 54px ${F}`;
+  ctx.fillText(rep.acct.name, PAD, 142);
+  ctx.font = `600 28px ${F}`; ctx.fillStyle = 'rgba(255,255,255,.9)';
+  ctx.fillText(`${reportFullMonth(rep.ym)}  ·  dibanding ${reportFullMonth(rep.pm)}`, PAD, 190);
+
+  let y = HEAD + 10;
+  if (!blocks.length) {
+    ctx.fillStyle = '#64748b'; ctx.font = `600 28px ${F}`;
+    ctx.fillText('Belum ada data statistik bulan ini.', PAD, y + 60);
+  }
+  const cw = (W - PAD * 2 - GAP) / 2;
+  blocks.forEach(b => {
+    // Judul platform
+    ctx.fillStyle = b.color; reportRoundRect(ctx, PAD, y + 8, 10, 34, 5); ctx.fill();
+    ctx.fillStyle = '#0f172a'; ctx.font = `800 32px ${F}`; ctx.fillText(b.label, PAD + 24, y + 38);
+    y += BLOCK_HEAD;
+    b.metrics.forEach((m, i) => {
+      const cx = PAD + (i % 2) * (cw + GAP), cy = y + Math.floor(i / 2) * (CARD_H + GAP);
+      ctx.fillStyle = '#fff'; reportRoundRect(ctx, cx, cy, cw, CARD_H, 18); ctx.fill();
+      ctx.strokeStyle = '#e2e8f0'; ctx.lineWidth = 2; ctx.stroke();
+      ctx.fillStyle = '#64748b'; ctx.font = `700 20px ${F}`; ctx.fillText(m.label.toUpperCase(), cx + 24, cy + 40);
+      ctx.fillStyle = '#0f172a'; ctx.font = `800 46px ${F}`; ctx.fillText(reportFmt(m.val, m.fmt), cx + 24, cy + 96);
+      if (m.chg !== null) {
+        const up = m.chg >= 0, txt = `${up ? '▲' : '▼'} ${Math.abs(m.chg).toFixed(1).replace('.', ',')}%`;
+        ctx.font = `800 22px ${F}`;
+        const tw = ctx.measureText(txt).width + 24;
+        ctx.fillStyle = up ? '#dcfce7' : '#fee2e2'; reportRoundRect(ctx, cx + cw - tw - 20, cy + 64, tw, 38, 19); ctx.fill();
+        ctx.fillStyle = up ? '#15803d' : '#b91c1c'; ctx.fillText(txt, cx + cw - tw - 8, cy + 91);
+      }
+      if (m.prev !== null) {
+        ctx.fillStyle = '#94a3b8'; ctx.font = `500 18px ${F}`;
+        ctx.fillText(`bulan lalu ${reportFmt(m.prev, m.fmt)}`, cx + 24, cy + 124);
+      }
+    });
+    y += b.rows * (CARD_H + GAP) + 26;
+  });
+  // Footer
+  ctx.fillStyle = '#e2e8f0'; ctx.fillRect(PAD, H - FOOT + 10, W - PAD * 2, 2);
+  ctx.fillStyle = '#94a3b8'; ctx.font = `600 20px ${F}`;
+  ctx.fillText('Penjaga Harapan CMS', PAD, H - 34);
+  const gen = `Dibuat ${new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}`;
+  ctx.textAlign = 'right'; ctx.fillText(gen, W - PAD, H - 34); ctx.textAlign = 'left';
+  return cv;
+}
+
+/* ── CSV semua akun ── */
+function buildReportCsv(ym, acctIds) {
+  const pm = reportPrevMonth(ym);
+  const q = v => { const s = String(v ?? ''); return /[",;\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s; };
+  const n = (v, fmt) => v === null ? '' : (fmt === 'pct' ? v.toFixed(2) : String(Math.round(v * 100) / 100));
+  const lines = [['Akun', 'Platform', 'Metrik', `${fmtMonth(ym)}`, `${fmtMonth(pm)}`, 'Perubahan (%)'].map(q).join(',')];
+  acctIds.forEach(id => {
+    const rep = buildAccountReport(id, ym);
+    rep.platforms.forEach(p => p.all.forEach(m => {
+      lines.push([rep.acct.name, p.label, m.label, n(m.val, m.fmt), n(m.prev, m.fmt), m.chg === null ? '' : m.chg.toFixed(1)].map(q).join(','));
+    }));
+  });
+  return '﻿' + lines.join('\n');
+}
+
+/* ── Unduhan ── */
+function reportFileName(name) { return String(name).replace(/[^\w-]+/g, '-').replace(/^-|-$/g, ''); }
+function reportSaveBlob(blob, filename) {
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob); a.download = filename;
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(a.href), 5000);
+}
+const canvasBlob = cv => new Promise(res => cv.toBlob(res, 'image/png'));
+async function downloadAccountReportImg(acctId) {
+  const ym = $('reportMonth')?.value || reportDefaultMonth();
+  const rep = buildAccountReport(acctId, ym);
+  reportSaveBlob(await canvasBlob(await drawAccountReport(rep)), `Laporan-${reportFileName(rep.acct.name)}-${ym}.png`);
+  actLog('unduh laporan bulanan (gambar)', `${rep.acct.name} — ${fmtMonth(ym)}`);
+}
+function downloadReportCsv() {
+  const ym = $('reportMonth')?.value || reportDefaultMonth();
+  const ids = reportAccountIds(ym);
+  reportSaveBlob(new Blob([buildReportCsv(ym, ids)], { type: 'text/csv;charset=utf-8' }), `Laporan-Bulanan-${ym}.csv`);
+  actLog('unduh laporan bulanan (CSV)', `${fmtMonth(ym)} — ${ids.length} akun`);
+}
+function loadJsZip() {
+  if (window.JSZip) return Promise.resolve(window.JSZip);
+  return new Promise((res, rej) => {
+    const s = document.createElement('script');
+    s.src = 'https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js';
+    s.onload = () => res(window.JSZip); s.onerror = () => rej(new Error('gagal memuat JSZip'));
+    document.head.appendChild(s);
+  });
+}
+async function downloadReportZip() {
+  const ym = $('reportMonth')?.value || reportDefaultMonth();
+  const btn = $('reportZipBtn'); const orig = btn?.textContent;
+  if (btn) { btn.disabled = true; btn.textContent = '⏳ Menyiapkan…'; }
+  try {
+    const JSZip = await loadJsZip();
+    const zip = new JSZip();
+    const ids = reportAccountIds(ym);
+    for (const id of ids) {
+      const rep = buildAccountReport(id, ym);
+      zip.file(`Laporan-${reportFileName(rep.acct.name)}-${ym}.png`, await canvasBlob(await drawAccountReport(rep)));
+    }
+    zip.file(`Laporan-Bulanan-${ym}.csv`, buildReportCsv(ym, ids));
+    reportSaveBlob(await zip.generateAsync({ type: 'blob' }), `Laporan-Bulanan-${ym}.zip`);
+    actLog('unduh laporan bulanan (ZIP)', `${fmtMonth(ym)} — ${ids.length} akun`);
+  } catch (e) { toast('Gagal membuat ZIP: ' + e.message, 'error'); }
+  finally { if (btn) { btn.disabled = false; btn.textContent = orig; } }
+}
+/* Akun yang punya data di bulan itu */
+function reportAccountIds(ym) {
+  return getAccounts().map(a => a.id).filter(id => buildAccountReport(id, ym).platforms.length);
+}
+
+/* ── Modal Laporan Bulanan ── */
+function openMonthlyReport(ym) {
+  $('statDlMenu')?.classList.add('hidden');
+  const months = reportMonths();
+  ym = ym || reportDefaultMonth();
+  let ov = $('reportModal');
+  if (!ov) {
+    ov = document.createElement('div');
+    ov.id = 'reportModal'; ov.className = 'modal-overlay';
+    ov.innerHTML = `<div class="modal report-modal" role="dialog" aria-labelledby="reportTitle">
+        <div class="modal-head" style="display:flex;align-items:center;justify-content:space-between">
+          <span class="modal-title" id="reportTitle">📑 Laporan Bulanan</span>
+          <button type="button" class="modal-close-btn" onclick="closeMonthlyReport()" aria-label="Tutup">✕</button></div>
+        <div class="modal-body">
+          <div class="report-bar">
+            <label for="reportMonth">Bulan</label>
+            <select id="reportMonth" class="inp-sm" onchange="renderMonthlyReport()"></select>
+            <span class="report-note">Gambar per akun + CSV semua akun, dibanding bulan sebelumnya</span>
+          </div>
+          <div id="reportGrid" class="report-grid"></div>
+        </div>
+        <div class="modal-foot" style="display:flex;gap:8px;justify-content:flex-end">
+          <button type="button" class="btn-sm" onclick="downloadReportCsv()">📄 Unduh CSV</button>
+          <button type="button" class="btn-sm blue" id="reportZipBtn" onclick="downloadReportZip()">🗂 Unduh Semua (ZIP)</button>
+        </div>
+      </div>`;
+    ov.addEventListener('click', e => { if (e.target === ov) closeMonthlyReport(); });
+    document.body.appendChild(ov);
+  }
+  const sel = $('reportMonth');
+  const opts = months.includes(ym) ? months : [ym, ...months];
+  sel.innerHTML = opts.map(m => `<option value="${m}" ${m === ym ? 'selected' : ''}>${reportFullMonth(m)}</option>`).join('');
+  ov.classList.remove('hidden');
+  renderMonthlyReport();
+}
+function closeMonthlyReport() { $('reportModal')?.classList.add('hidden'); }
+async function renderMonthlyReport() {
+  const ym = $('reportMonth').value;
+  const grid = $('reportGrid');
+  const ids = reportAccountIds(ym);
+  if (!ids.length) { grid.innerHTML = `<p class="report-empty">Belum ada Data Bulanan statistik untuk ${reportFullMonth(ym)}.</p>`; return; }
+  grid.innerHTML = ids.map(id => `<div class="report-card" data-id="${esc(id)}"><div class="report-thumb"><div class="spinner"></div></div>
+      <button type="button" class="btn-sm" onclick="downloadAccountReportImg('${esc(id)}')">⬇ ${esc(getAcctName(id))}</button></div>`).join('');
+  for (const id of ids) {
+    if ($('reportMonth').value !== ym) return;   // bulan diganti di tengah jalan
+    const cv = await drawAccountReport(buildAccountReport(id, ym));
+    const box = grid.querySelector(`.report-card[data-id="${CSS.escape(id)}"] .report-thumb`);
+    if (box) { box.innerHTML = ''; const img = new Image(); img.src = cv.toDataURL('image/png'); img.alt = `Laporan ${getAcctName(id)}`; box.appendChild(img); }
+  }
+}
+/* Otomatis: di awal bulan, Admin diingatkan sekali bahwa laporan bulan lalu siap */
+function maybeShowMonthlyReportReminder() {
+  if (!getSess() || !isAdmin()) return;
+  const now = new Date();
+  const last = scYmd(new Date(now.getFullYear(), now.getMonth() - 1, 1)).slice(0, 7);
+  try { if (localStorage.getItem(REPORT_SEEN_KEY) === last) return; } catch {}
+  if (!reportAccountIds(last).length) return;   // belum ada data bulan lalu
+  if ($('reportRemind')) return;
+  const el = document.createElement('div');
+  el.id = 'reportRemind'; el.className = 'report-remind';
+  el.innerHTML = `<span>📑 Laporan bulanan <b>${esc(reportFullMonth(last))}</b> siap diunduh</span>
+    <button type="button" class="btn-sm blue" id="reportRemindOpen">Buka</button>
+    <button type="button" class="report-remind-x" aria-label="Tutup">✕</button>`;
+  const done = () => { el.remove(); try { localStorage.setItem(REPORT_SEEN_KEY, last); } catch {} };
+  el.querySelector('#reportRemindOpen').onclick = () => { done(); openMonthlyReport(last); };
+  el.querySelector('.report-remind-x').onclick = done;
+  document.body.appendChild(el);
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
    PDF EXPORT
    ══════════════════════════════════════════════════════════════════════════ */
 
@@ -9720,6 +10018,12 @@ document.addEventListener('DOMContentLoaded', async () => {
   window.scOpenModal            = scOpenModal;
   window.scOpenSlotPicker       = scOpenSlotPicker;
   window.scSetFilter            = scSetFilter;
+  window.openMonthlyReport      = openMonthlyReport;
+  window.closeMonthlyReport     = closeMonthlyReport;
+  window.renderMonthlyReport    = renderMonthlyReport;
+  window.downloadReportCsv      = downloadReportCsv;
+  window.downloadReportZip      = downloadReportZip;
+  window.downloadAccountReportImg = downloadAccountReportImg;
   window.scPickForSlot          = scPickForSlot;
   window.scCloseModal           = scCloseModal;
   window.scSaveModal            = scSaveModal;
