@@ -10,7 +10,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="css/styles.css?v=20261127e" />
+  <link rel="stylesheet" href="css/styles.css?v=20261127g" />
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 </head>
 <body>
@@ -675,23 +675,15 @@
                   <span class="btn-text">Download</span> ▾
                 </button>
                 <div class="stat-dl-menu hidden" id="statDlMenu">
-                  <div class="stat-dl-head">Platform yang dipilih</div>
-                  <button onclick="downloadStatJpg()">📊 Grafik Platform (JPG)</button>
-                  <button onclick="downloadStatTableJpg()">📋 Tabel Platform (JPG)</button>
+                  <div class="stat-dl-head">Platform</div>
+                  <button onclick="downloadStatJpg()">📊 Grafik</button>
+                  <button onclick="downloadStatTableJpg()">📋 Tabel</button>
+                  <div class="stat-dl-divider"></div>
+                  <div class="stat-dl-head">Akun · semua platform</div>
+                  <button onclick="downloadAcctReportJpg()">📑 Laporan</button>
+                  <button onclick="downloadAcctTableJpg()">🗂 Ringkasan</button>
                   <div class="stat-dl-divider"></div>
                   <button onclick="downloadStatTemplate()">📄 Template CSV</button>
-                </div>
-              </div>
-              <!-- Dropdown khusus akun (semua platform) -->
-              <div class="stat-dl-dropdown" id="statAcctDlWrap">
-                <button class="btn-sm" id="btnAcctDlDropdown" title="Unduh laporan gabungan semua platform di akun ini">
-                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
-                  <span class="btn-text">Laporan Akun</span> ▾
-                </button>
-                <div class="stat-dl-menu hidden" id="statAcctDlMenu">
-                  <div class="stat-dl-head">Akun · semua platform</div>
-                  <button onclick="downloadAcctReportJpg()">📊 Laporan Akun (JPG)</button>
-                  <button onclick="downloadAcctTableJpg()">📋 Tabel Ringkasan Akun (JPG)</button>
                 </div>
               </div>
               <button class="btn-sm stat-ai-btn" id="btnStatAnalyze" onclick="analyzeContentWithAI()" title="Analisis performa konten dengan AI">
@@ -1693,8 +1685,8 @@
 <!-- Scripts -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 <script src="js/github-db.js?v=20261118"></script>
-<script src="js/version.js?v=2.6.5j"></script>
-<script src="js/app.js?v=20261127f"></script>
+<script src="js/version.js?v=2.6.5k"></script>
+<script src="js/app.js?v=20261127g"></script>
 <script src="js/chat.js?v=20261116d"></script>
 </body>
 </html>

@@ -4188,3 +4188,5 @@ body:not(.is-admin) #btnStatImportFile { display: none !important; }
 
 /* Dropdown unduhan: judul kelompok */
 .stat-dl-head { padding: 6px 12px 4px; font-size: .64rem; font-weight: 800; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); }
+/* Menu Download tidak tertutup kartu di bawahnya (kartu header membentuk stacking context) */
+.stat-header-card { position: relative; z-index: 30; }

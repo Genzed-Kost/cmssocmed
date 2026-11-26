@@ -14,7 +14,7 @@ window.APP_INFO = {
       items: [
         '📺 Stock Contents: slot tayang tiap program otomatis muncul di kalender sesuai hari tayangnya',
         '🔎 Stock Contents: filter kalender Semua / Tayang / Produksi',
-        '📊 Statistik: Download (per platform) berisi Grafik & Tabel Platform; dropdown baru Laporan Akun berisi Laporan Akun & Tabel Ringkasan Akun (semua platform) — semuanya sesuai filter',
+        '📊 Statistik → Download: Platform (Grafik, Tabel) & Akun semua platform (Laporan, Ringkasan) — semuanya sesuai filter',
         '📰 Info Presiden kini 20 berita: 15 berita presiden + 5 berita teknologi global (prioritas China)',
       ],
       adminItems: [
