@@ -7782,8 +7782,9 @@ function downloadStatJpg() {   // Grafik platform
   const F    = 'Inter, "Segoe UI", Arial, sans-serif';
 
   // Tata letak (koordinat logis; digambar 2× untuk HD)
-  const DPR = 2, W = 1200, PAD = 40, HEAD = 112, PANEL_H = 300, GAP = 20, FOOT = 50;
-  const H = HEAD + METRICS.length * (PANEL_H + GAP) + FOOT;
+  const DPR = 2, W = 1200, PAD = 40, HEAD = 112, PANEL_H = 300, GAP = 20, FOOT = 50, TILE_H = 250;
+  const single = rows.length === 1;
+  const H = HEAD + (single ? 2 * (TILE_H + GAP) : METRICS.length * (PANEL_H + GAP)) + FOOT;
   const cv = document.createElement('canvas');
   cv.width = W * DPR; cv.height = H * DPR;
   const ctx = cv.getContext('2d');
@@ -7797,7 +7798,7 @@ function downloadStatJpg() {   // Grafik platform
   ctx.fillStyle = INK; ctx.font = `800 26px ${F}`;
   ctx.fillText(`${platM.label} — ${acctObj?.name || acctId}`, PAD + 54, 50);
   ctx.fillStyle = INK2; ctx.font = `500 15px ${F}`;
-  ctx.fillText(`${isW ? 'Data mingguan' : 'Data bulanan'} · ${rangeLabel} · ${rows.length} ${isW ? 'minggu' : 'bulan'}`, PAD + 54, 76);
+  ctx.fillText(`${isW ? 'Data mingguan' : 'Data bulanan'} · ${rangeLabel}${single ? '' : ` · ${rows.length} ${isW ? 'minggu' : 'bulan'}`}`, PAD + 54, 76);
 
   const fmtFull  = n => Math.round(n).toLocaleString('id-ID');
   const fmtShort = n => fmtNum(n);
@@ -7814,6 +7815,51 @@ function downloadStatJpg() {   // Grafik platform
     ctx.lineTo(x + w - r, y); ctx.arcTo(x + w, y, x + w, y + r, r); ctx.lineTo(x + w, y + h); ctx.closePath();
   };
 
+  if (single) {
+    // 1 periode: satu angka per metrik lebih jelas sebagai kartu angka (bukan 1 batang),
+    // dengan pembanding periode sebelumnya & sparkline 6 periode terakhir sebagai konteks.
+    const hist = (state.analytics?.[acctId]?.[isW ? platId + '_w' : platId] || [])
+      .filter(r => r?.[pKey] && r[pKey] <= first).sort((a, b) => a[pKey].localeCompare(b[pKey])).slice(-6);
+    const prevRow = hist.length > 1 ? hist[hist.length - 2] : null;
+    const tiles = [...METRICS.map(m => ({ title: m.title, key: m.key, v: m.vals[0], fmt: x => fmtFull(x) })),
+      { title: 'Engagement Rate', key: '__er', fmt: x => x.toFixed(1).replace('.', ',') + '%' }];
+    const erOf = r => { const vv = num(r, platM.viewKey), ee = num(r, 'totalEngagement'); return vv && ee !== null ? ee / vv * 100 : num(r, 'erPct'); };
+    tiles[3].v = erOf(rows[0]);
+    const tw = (W - PAD * 2 - GAP) / 2;
+    tiles.forEach((t, i) => {
+      const x = PAD + (i % 2) * (tw + GAP), top = HEAD + Math.floor(i / 2) * (TILE_H + GAP);
+      ctx.fillStyle = SURF; ctx.strokeStyle = 'rgba(11,11,11,0.10)'; ctx.lineWidth = 1;
+      ctx.beginPath(); ctx.roundRect ? ctx.roundRect(x, top, tw, TILE_H, 16) : ctx.rect(x, top, tw, TILE_H); ctx.fill(); ctx.stroke();
+      ctx.fillStyle = COL; ctx.beginPath(); ctx.arc(x + 28, top + 34, 6, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = INK2; ctx.font = `700 16px ${F}`; ctx.fillText(t.title, x + 42, top + 40);
+      ctx.fillStyle = INK; ctx.font = `800 46px ${F}`; ctx.fillText(t.v === null ? '—' : t.fmt(t.v), x + 24, top + 102);
+      const pv = prevRow ? (t.key === '__er' ? erOf(prevRow) : num(prevRow, t.key)) : null;
+      if (pv !== null) {
+        ctx.fillStyle = INK2; ctx.font = `500 14px ${F}`;
+        ctx.fillText(`${isW ? 'minggu' : 'bulan'} sebelumnya: ${t.fmt(pv)}`, x + 24, top + 130);
+      }
+      // Sparkline: titik lama abu-abu, periode ini warna platform
+      const sv = hist.map(r => t.key === '__er' ? erOf(r) : num(r, t.key));
+      const pts = sv.map((val, j) => ({ val, j })).filter(o => o.val !== null);
+      if (pts.length >= 2) {
+        const sl = x + 24, sr = x + tw - 24, st = top + 152, sb = top + TILE_H - 38;
+        const mn = Math.min(...pts.map(o => o.val)), mx = Math.max(...pts.map(o => o.val)), span = mx - mn || 1;
+        const X = j => sl + (sr - sl) * (sv.length === 1 ? 0.5 : j / (sv.length - 1));
+        const Y = val => sb - (val - mn) / span * (sb - st);
+        ctx.strokeStyle = '#c2c2c2'; ctx.lineWidth = 2; ctx.lineJoin = ctx.lineCap = 'round';
+        ctx.beginPath(); pts.forEach((o, k) => k ? ctx.lineTo(X(o.j), Y(o.val)) : ctx.moveTo(X(o.j), Y(o.val))); ctx.stroke();
+        pts.forEach(o => {
+          const cur = o.j === sv.length - 1;
+          ctx.fillStyle = SURF; ctx.beginPath(); ctx.arc(X(o.j), Y(o.val), cur ? 7 : 5, 0, Math.PI * 2); ctx.fill();
+          ctx.fillStyle = cur ? COL : '#a3a3a3'; ctx.beginPath(); ctx.arc(X(o.j), Y(o.val), cur ? 5 : 3.5, 0, Math.PI * 2); ctx.fill();
+        });
+        ctx.fillStyle = INK2; ctx.font = `500 12px ${F}`;
+        const lbl = k => isW ? fmtWeek(hist[k][pKey]).replace(/\s'\d\d$/, '') : fmtMonth(hist[k][pKey]);
+        ctx.fillText(lbl(0), sl, sb + 24);
+        ctx.textAlign = 'right'; ctx.fillText(lbl(hist.length - 1), sr, sb + 24); ctx.textAlign = 'left';
+      }
+    });
+  } else
   METRICS.forEach((m, mi) => {
     const top = HEAD + mi * (PANEL_H + GAP);
     // Panel
@@ -7845,13 +7891,18 @@ function downloadStatJpg() {   // Grafik platform
       ctx.fillText('Belum ada data pada periode ini', pl, (pt + pb) / 2);
       return;
     }
-    const max = Math.max(...have), step = niceStep(max), yMax = Math.ceil(max / step) * step || step;
-    const y = val => pb - (val / yMax) * (pb - pt);
+    const asLine = !m.sum;   // Followers = akumulasi → garis tren
+    const max = Math.max(...have), lo = asLine ? Math.min(...have) : 0;
+    const step = niceStep(asLine ? (max - lo || max) : max);
+    const yMin = asLine ? Math.max(0, Math.floor(lo / step) * step - (max === lo ? step : 0)) : 0;
+    let yMax = Math.ceil(max / step) * step || step;
+    if (asLine && (yMax - max) < 0.2 * (yMax - yMin)) yMax += step;   // ruang untuk label di ujung garis
+    const y = val => pb - ((val - yMin) / (yMax - yMin)) * (pb - pt);
     // Grid hairline + angka sumbu
     ctx.font = `500 12px ${F}`; ctx.fillStyle = INK2; ctx.textAlign = 'right'; ctx.textBaseline = 'middle';
-    for (let t = 0; t <= yMax + 1e-9; t += step) {
+    for (let t = yMin; t <= yMax + 1e-9; t += step) {
       const yy = Math.round(y(t)) + 0.5;
-      ctx.strokeStyle = t === 0 ? BASE : GRID; ctx.lineWidth = 1;
+      ctx.strokeStyle = t === yMin ? BASE : GRID; ctx.lineWidth = 1;
       ctx.beginPath(); ctx.moveTo(pl, yy); ctx.lineTo(pr, yy); ctx.stroke();
       ctx.fillText(yMax >= 10000 ? fmtShort(t) : fmtFull(t), pl - 10, yy);
     }
@@ -7863,9 +7914,23 @@ function downloadStatJpg() {   // Grafik platform
     const iMax = m.vals.indexOf(max);
     let iLast = -1; m.vals.forEach((x, i) => { if (x !== null) iLast = i; });
     const labelEvery = Math.ceil(n / Math.floor((pr - pl) / 64));   // label sumbu-x tidak bertabrakan
+    if (asLine) {
+      // area tipis + garis 2px + titik bercincin
+      const P = m.vals.map((val, i) => val === null ? null : [pl + slot * i + slot / 2, y(val)]).filter(Boolean);
+      ctx.beginPath(); P.forEach(([px, py], k) => k ? ctx.lineTo(px, py) : ctx.moveTo(px, py));
+      ctx.lineTo(P[P.length - 1][0], pb); ctx.lineTo(P[0][0], pb); ctx.closePath();
+      ctx.fillStyle = COL; ctx.globalAlpha = 0.1; ctx.fill(); ctx.globalAlpha = 1;
+      ctx.strokeStyle = COL; ctx.lineWidth = 2; ctx.lineJoin = ctx.lineCap = 'round';
+      ctx.beginPath(); P.forEach(([px, py], k) => k ? ctx.lineTo(px, py) : ctx.moveTo(px, py)); ctx.stroke();
+    }
     m.vals.forEach((val, i) => {
       const cx = pl + slot * i + slot / 2;
-      if (val !== null) {
+      if (val !== null && asLine) {
+        const yt = y(val), key = i === iLast || i === iMax;
+        ctx.fillStyle = SURF; ctx.beginPath(); ctx.arc(cx, yt, key ? 7 : 5, 0, Math.PI * 2); ctx.fill();
+        ctx.fillStyle = COL; ctx.beginPath(); ctx.arc(cx, yt, key ? 5 : 3.5, 0, Math.PI * 2); ctx.fill();
+        if (i === iLast) { ctx.fillStyle = INK; ctx.font = `700 13px ${F}`; ctx.textAlign = 'center'; ctx.fillText(fmtShort(val), cx, yt - 14); ctx.textAlign = 'left'; }
+      } else if (val !== null) {
         const yt = y(val);
         ctx.fillStyle = COL; ctx.globalAlpha = (i === iLast || i === iMax) ? 1 : 0.78;
         rr(cx - bw / 2, yt, bw, pb - yt, 4); ctx.fill(); ctx.globalAlpha = 1;
