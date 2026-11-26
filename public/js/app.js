@@ -7420,155 +7420,227 @@ function drawPlatformBadge(ctx, platId, cx, cy, size) {
   ctx.restore();
 }
 
-/* ── Grafik (JPG HD): 3 grafik batang — Views, Followers, Engagement ──────────
-   Satu grafik per metrik (skala masing-masing, tanpa sumbu ganda), batang tipis
-   ujung membulat 4px dari satu garis dasar, grid hairline, label nilai hanya pada
-   periode terakhir & tertinggi. Periode mengikuti filter yang sedang tampil. */
-function downloadStatJpg() {
+/* ── Laporan Bulanan Akun (JPG) ───────────────────────────────────────────────
+   Satu gambar per akun untuk satu bulan: kartu KPI (dibanding bulan lalu), lalu
+   grafik batang horizontal per platform — Views, Interaksi, Followers Baru,
+   Total Followers — dan Engagement Rate dengan ambang Cukup (2%) & Bagus (5%).
+   Bulan = bulan terakhir pada rentang yang sedang tampil (atau data terbaru akun). */
+const REPORT_PLATS = ['instagram', 'facebook', 'tiktok', 'youtube', 'twitter'];
+const REPORT_DARK_COLOR = { youtube: '#ff4d4d', tiktok: '#25f4ee', facebook: '#4c8dff', instagram: '#f0407f', twitter: '#38bdf8' };
+function reportMonthData(acctId, ym) {
+  const [y, m] = ym.split('-').map(Number);
+  const pd = new Date(y, m - 2, 1);
+  const pm = `${pd.getFullYear()}-${String(pd.getMonth() + 1).padStart(2, '0')}`;
+  const num = (r, k) => (r && k && r[k] !== undefined && r[k] !== null && r[k] !== '' && !isNaN(+r[k]) && +r[k] !== 0) ? +r[k] : null;
+  const one = (platId, mo) => {
+    const platM = PLATFORM_FIELDS[platId];
+    const rows  = state.analytics?.[acctId]?.[platId];
+    if (!platM || !Array.isArray(rows)) return null;
+    applyAutoER(acctId, platId);
+    const r = rows.find(x => x.month === mo);
+    if (!r) return null;
+    const prevR = rows.find(x => x.month === (mo === ym ? pm : '')) || null;
+    const views = num(r, platM.viewKey), eng = num(r, 'totalEngagement'), fol = num(r, platM.followerKey);
+    let gained = num(r, platId === 'youtube' ? 'subsGained' : 'followersGained');
+    if (gained === null && fol !== null && num(prevR, platM.followerKey) !== null) gained = fol - num(prevR, platM.followerKey);
+    let er = num(r, 'erPct');
+    if (er === null && views && eng !== null) er = eng / views * 100;
+    return { platId, label: platM.label, color: REPORT_DARK_COLOR[platId] || platM.color, views, eng, fol, gained, er };
+  };
+  const cur  = REPORT_PLATS.map(p => one(p, ym)).filter(Boolean);
+  const prev = REPORT_PLATS.map(p => one(p, pm)).filter(Boolean);
+  const sum = (list, k) => { const v = list.map(x => x[k]).filter(x => x !== null); return v.length ? v.reduce((a, b) => a + b, 0) : null; };
+  const kpi = list => {
+    const views = sum(list, 'views'), eng = sum(list, 'eng');
+    return { views, eng, gained: sum(list, 'gained'), er: views && eng !== null ? eng / views * 100 : null };
+  };
+  return { ym, pm, plats: cur, kpi: kpi(cur), kpiPrev: kpi(prev.filter(p => cur.some(c => c.platId === p.platId))) };
+}
+function reportTargetMonth(acctId) {
   const v = window._statView;
-  const acctId = state.statActiveAcct, platId = state.statActivePlat || 'youtube';
-  if (!v || v.acctId !== acctId || v.platId !== platId || !v.rows.length) {
-    toast('Tidak ada data untuk didownload', 'error'); return;
+  const months = new Set();
+  REPORT_PLATS.forEach(p => (state.analytics?.[acctId]?.[p] || []).forEach(r => r?.month && months.add(r.month)));
+  const sorted = [...months].sort();
+  if (!sorted.length) return '';
+  if (v && v.acctId === acctId && !v.isWeekly && v.rows.length) {
+    const inRange = sorted.filter(m => m >= v.rows[0].month && m <= v.rows[v.rows.length - 1].month);
+    if (inRange.length) return inRange[inRange.length - 1];
   }
-  const platM   = PLATFORM_FIELDS[platId];
-  const acctObj = getAccounts().find(a => a.id === acctId);
-  const isW     = v.isWeekly;
-  const pKey    = isW ? 'week' : 'month';
-  const rows    = v.rows;
-  const first   = rows[0][pKey], last = rows[rows.length - 1][pKey];
-  const fmtP    = x => isW ? fmtWeek(x) : fmtMonth(x);
-  const rangeLabel = first === last ? fmtP(first) : `${fmtP(first)} – ${fmtP(last)}`;
-  const fileTag = first === last ? first : `${first}_${last}`;
+  const cur = getCurrentYM();
+  return sorted.filter(m => m <= cur).pop() || sorted[sorted.length - 1];
+}
+function reportImg(src) {
+  return new Promise(res => { const i = new Image(); i.onload = () => res(i); i.onerror = () => res(null); i.src = src; });
+}
 
-  const num = (r, k) => (r && r[k] !== undefined && r[k] !== null && r[k] !== '' && !isNaN(+r[k]) && +r[k] !== 0) ? +r[k] : null;
-  const METRICS = [
-    { key: platM.viewKey,      title: platM.fields.find(f => f.key === platM.viewKey)?.label || 'Views', sum: true },
-    { key: platM.followerKey,  title: 'Followers', sum: false },
-    { key: 'totalEngagement',  title: 'Engagement', sum: true },
-  ].map(m => ({ ...m, vals: rows.map(r => num(r, m.key)) }));
+async function downloadStatJpg() {
+  const acctId = state.statActiveAcct;
+  const acct   = getAccounts().find(a => a.id === acctId) || { name: acctId, color: '#7c3aed' };
+  const ym     = reportTargetMonth(acctId);
+  if (!ym) { toast('Belum ada Data Bulanan untuk akun ini', 'error'); return; }
+  const D = reportMonthData(acctId, ym);
+  if (!D.plats.length) { toast('Belum ada Data Bulanan untuk akun ini', 'error'); return; }
+  const monthName = x => { const [yy, mm] = x.split('-').map(Number); return new Date(yy, mm - 1, 1).toLocaleDateString('id-ID', { month: 'long', year: 'numeric' }); };
 
-  // Warna & tinta (tinta teks tidak pernah memakai warna data)
-  const SURF = '#ffffff', PAGE = '#f8fafc', INK = '#191919', INK2 = '#666666', GRID = '#e7e7e7', BASE = '#c2c2c2';
-  const COL  = platM.color || '#2563eb';
-  const F    = 'Inter, "Segoe UI", Arial, sans-serif';
+  // Tema gelap modern
+  const BG = '#0a0f1c', CARD = '#111827', CARD2 = '#0f172a', LINE = 'rgba(255,255,255,0.08)';
+  const INK = '#f1f5f9', INK2 = '#94a3b8', INK3 = '#64748b', GRID = '#1f2937', BASE = '#334155';
+  const GOOD = '#22c55e', WARN = '#f59e0b', BAD = '#ef4444';
+  const F = 'Inter, "Segoe UI", Arial, sans-serif';
+  const W = 1600, PAD = 48, GAP = 24, DPR = 1.5;
+  const n = D.plats.length, ROW = 54;
+  const chartH = 92 + n * ROW + 34;
+  const HEAD = 200, KPI_H = 158, FOOT = 150;
+  const H = PAD + HEAD + GAP + KPI_H + GAP + (chartH + GAP) * 2 + chartH + GAP + FOOT + PAD;
 
-  // Tata letak (koordinat logis; digambar 2× untuk HD)
-  const DPR = 2, W = 1200, PAD = 40, HEAD = 112, PANEL_H = 300, GAP = 20, FOOT = 50;
-  const H = HEAD + METRICS.length * (PANEL_H + GAP) + FOOT;
   const cv = document.createElement('canvas');
   cv.width = W * DPR; cv.height = H * DPR;
   const ctx = cv.getContext('2d');
   ctx.scale(DPR, DPR);
-  ctx.fillStyle = PAGE; ctx.fillRect(0, 0, W, H);
-
-  // Header
-  ctx.fillStyle = COL; ctx.fillRect(0, 0, W, 5);
-  drawPlatformBadge(ctx, platId, PAD + 20, 54, 40);
+  ctx.fillStyle = BG; ctx.fillRect(0, 0, W, H);
+  const rr = (x, y, w, h, r) => { ctx.beginPath(); ctx.roundRect ? ctx.roundRect(x, y, w, h, r) : ctx.rect(x, y, w, h); };
+  const card = (x, y, w, h, fill = CARD) => { rr(x, y, w, h, 20); ctx.fillStyle = fill; ctx.fill(); ctx.strokeStyle = LINE; ctx.lineWidth = 1; ctx.stroke(); };
+  const text = (t, x, y, font, color, align = 'left') => { ctx.font = font; ctx.fillStyle = color; ctx.textAlign = align; ctx.fillText(t, x, y); ctx.textAlign = 'left'; };
+  const fmtFull = v => Math.round(v).toLocaleString('id-ID');
+  const fmtPct = v => v.toFixed(1).replace('.', ',') + '%';
+  const delta = (cur, prev) => (cur === null || prev === null || !prev) ? null : (cur - prev) / Math.abs(prev) * 100;
+  // Status dari angka yang ditampilkan (1 desimal), agar 4,98% → "5,0% · Bagus" konsisten
+  const erStatus = er => { if (er === null) return null; const r = Math.round(er * 10) / 10;
+    return r >= 5 ? ['Bagus', GOOD] : r >= 2 ? ['Cukup', WARN] : ['Perlu perbaikan', BAD]; };
   ctx.textBaseline = 'alphabetic';
-  ctx.fillStyle = INK; ctx.font = `800 26px ${F}`;
-  ctx.fillText(`${platM.label} — ${acctObj?.name || acctId}`, PAD + 54, 50);
-  ctx.fillStyle = INK2; ctx.font = `500 15px ${F}`;
-  ctx.fillText(`${isW ? 'Data mingguan' : 'Data bulanan'} · ${rangeLabel} · ${rows.length} ${isW ? 'minggu' : 'bulan'}`, PAD + 54, 76);
 
-  const fmtFull  = n => Math.round(n).toLocaleString('id-ID');
-  const fmtShort = n => fmtNum(n);
-  // Angka sumbu yang bulat: 0 / 10K / 20K …
-  const niceStep = max => {
-    const raw = max / 4, mag = Math.pow(10, Math.floor(Math.log10(raw || 1)));
-    const f = raw / mag;
-    return (f <= 1 ? 1 : f <= 2 ? 2 : f <= 2.5 ? 2.5 : f <= 5 ? 5 : 10) * mag;
-  };
-  const rr = (x, y, w, h, r) => {   // ujung atas membulat, dasar persegi
-    r = Math.min(r, w / 2, h);
-    ctx.beginPath();
-    ctx.moveTo(x, y + h); ctx.lineTo(x, y + r); ctx.arcTo(x, y, x + r, y, r);
-    ctx.lineTo(x + w - r, y); ctx.arcTo(x + w, y, x + w, y + r, r); ctx.lineTo(x + w, y + h); ctx.closePath();
-  };
-
-  METRICS.forEach((m, mi) => {
-    const top = HEAD + mi * (PANEL_H + GAP);
-    // Panel
-    ctx.fillStyle = SURF; ctx.strokeStyle = 'rgba(11,11,11,0.10)'; ctx.lineWidth = 1;
-    ctx.beginPath(); ctx.roundRect ? ctx.roundRect(PAD, top, W - PAD * 2, PANEL_H, 16) : ctx.rect(PAD, top, W - PAD * 2, PANEL_H);
-    ctx.fill(); ctx.stroke();
-
-    // Judul + angka kunci
-    const have = m.vals.filter(x => x !== null);
-    ctx.fillStyle = COL; ctx.beginPath(); ctx.arc(PAD + 28, top + 34, 6, 0, Math.PI * 2); ctx.fill();
-    ctx.fillStyle = INK; ctx.font = `800 20px ${F}`; ctx.fillText(m.title, PAD + 42, top + 41);
-    let headline = '—', sub = '';
-    if (have.length) {
-      if (m.sum) { headline = fmtFull(have.reduce((a, b) => a + b, 0)); sub = `total ${rows.length} ${isW ? 'minggu' : 'bulan'}`; }
-      else {
-        headline = fmtFull(have[have.length - 1]); sub = 'terakhir';
-        if (have.length > 1) { const d = have[have.length - 1] - have[0]; sub = `terakhir · ${d >= 0 ? '+' : '−'}${fmtFull(Math.abs(d))} sejak ${fmtP(rows[m.vals.indexOf(have[0])][pKey])}`; }
-      }
-    }
-    ctx.textAlign = 'right';
-    ctx.fillStyle = INK; ctx.font = `800 24px ${F}`; ctx.fillText(headline, W - PAD - 24, top + 40);
-    ctx.fillStyle = INK2; ctx.font = `500 13px ${F}`; ctx.fillText(sub, W - PAD - 24, top + 60);
-    ctx.textAlign = 'left';
-
-    // Area plot
-    const pl = PAD + 78, pr = W - PAD - 24, pt = top + 84, pb = top + PANEL_H - 44;
-    if (!have.length) {
-      ctx.fillStyle = INK2; ctx.font = `500 15px ${F}`;
-      ctx.fillText('Belum ada data pada periode ini', pl, (pt + pb) / 2);
-      return;
-    }
-    const max = Math.max(...have), step = niceStep(max), yMax = Math.ceil(max / step) * step || step;
-    const y = val => pb - (val / yMax) * (pb - pt);
-    // Grid hairline + angka sumbu
-    ctx.font = `500 12px ${F}`; ctx.fillStyle = INK2; ctx.textAlign = 'right'; ctx.textBaseline = 'middle';
-    for (let t = 0; t <= yMax + 1e-9; t += step) {
-      const yy = Math.round(y(t)) + 0.5;
-      ctx.strokeStyle = t === 0 ? BASE : GRID; ctx.lineWidth = 1;
-      ctx.beginPath(); ctx.moveTo(pl, yy); ctx.lineTo(pr, yy); ctx.stroke();
-      ctx.fillText(yMax >= 10000 ? fmtShort(t) : fmtFull(t), pl - 10, yy);
-    }
-    ctx.textAlign = 'left'; ctx.textBaseline = 'alphabetic';
-
-    // Batang
-    const n = rows.length, slot = (pr - pl) / n;
-    const bw = Math.min(24, Math.max(6, slot - 2));
-    const iMax = m.vals.indexOf(max);
-    let iLast = -1; m.vals.forEach((x, i) => { if (x !== null) iLast = i; });
-    const labelEvery = Math.ceil(n / Math.floor((pr - pl) / 64));   // label sumbu-x tidak bertabrakan
-    m.vals.forEach((val, i) => {
-      const cx = pl + slot * i + slot / 2;
-      if (val !== null) {
-        const yt = y(val);
-        ctx.fillStyle = COL; ctx.globalAlpha = (i === iLast || i === iMax) ? 1 : 0.78;
-        rr(cx - bw / 2, yt, bw, pb - yt, 4); ctx.fill(); ctx.globalAlpha = 1;
-        // Label nilai hanya pada batang terakhir & tertinggi
-        if (i === iLast || i === iMax) {
-          ctx.fillStyle = INK; ctx.font = `700 13px ${F}`; ctx.textAlign = 'center';
-          ctx.fillText(fmtShort(val), cx, yt - 8); ctx.textAlign = 'left';
-        }
-      }
-      if (i % labelEvery === 0 || i === n - 1) {
-        ctx.fillStyle = INK2; ctx.font = `500 12px ${F}`; ctx.textAlign = 'center';
-        ctx.fillText(isW ? fmtWeek(rows[i][pKey]).replace(/\s'\d\d$/, '') : fmtMonth(rows[i][pKey]), cx, pb + 22);
-        ctx.textAlign = 'left';
-      }
-    });
+  // ── Header ──
+  let y = PAD;
+  const g = ctx.createLinearGradient(PAD, y, W - PAD, y + HEAD);
+  g.addColorStop(0, '#111c34'); g.addColorStop(1, acct.color || '#7c3aed');
+  rr(PAD, y, W - PAD * 2, HEAD, 24); ctx.fillStyle = g; ctx.fill();
+  // ornamen lingkaran halus
+  ctx.save(); rr(PAD, y, W - PAD * 2, HEAD, 24); ctx.clip();
+  ctx.fillStyle = 'rgba(255,255,255,0.06)'; ctx.beginPath(); ctx.arc(W - PAD - 120, y + 30, 160, 0, Math.PI * 2); ctx.fill();
+  ctx.fillStyle = 'rgba(255,255,255,0.04)'; ctx.beginPath(); ctx.arc(W - PAD - 330, y + HEAD + 40, 120, 0, Math.PI * 2); ctx.fill();
+  ctx.restore();
+  const logo = await reportImg('logo.png');
+  let tx = PAD + 40;
+  if (logo) { const lh = 72, lw = logo.width * lh / logo.height; ctx.drawImage(logo, tx, y + 40, lw, lh); tx += lw + 28; }
+  text('LAPORAN MEDIA SOSIAL BULANAN', tx, y + 58, `700 17px ${F}`, 'rgba(255,255,255,0.7)');
+  text(acct.name, tx, y + 108, `800 46px ${F}`, '#ffffff');
+  text(`${monthName(ym)}  ·  dibanding ${monthName(D.pm)}`, tx, y + 146, `600 20px ${F}`, 'rgba(255,255,255,0.85)');
+  // chip platform
+  let cx = W - PAD - 40;
+  ctx.font = `700 15px ${F}`;
+  [...D.plats].reverse().forEach(p => {
+    const w = ctx.measureText(p.label).width + 42;
+    cx -= w;
+    rr(cx, y + HEAD - 62, w, 34, 17); ctx.fillStyle = 'rgba(255,255,255,0.12)'; ctx.fill();
+    ctx.fillStyle = p.color; ctx.beginPath(); ctx.arc(cx + 18, y + HEAD - 45, 6, 0, Math.PI * 2); ctx.fill();
+    text(p.label, cx + 30, y + HEAD - 39, `700 15px ${F}`, '#ffffff');
+    cx -= 10;
   });
+  y += HEAD + GAP;
 
-  // Footer
-  ctx.fillStyle = INK2; ctx.font = `500 13px ${F}`;
-  ctx.fillText('Penjaga Harapan CMS', PAD, H - 20);
-  ctx.textAlign = 'right';
-  ctx.fillText(`Diekspor ${new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}`, W - PAD, H - 20);
-  ctx.textAlign = 'left';
+  // ── Kartu KPI ──
+  const st = erStatus(D.kpi.er);
+  const KPIS = [
+    { label: 'Total Views', v: D.kpi.views, p: D.kpiPrev.views, sub: 'semua platform', fmt: fmtNum },
+    { label: 'Total Interaksi', v: D.kpi.eng, p: D.kpiPrev.eng, sub: 'like, komentar, share', fmt: fmtNum },
+    { label: 'Followers Baru', v: D.kpi.gained, p: D.kpiPrev.gained, sub: 'pertambahan bulan ini', fmt: x => (x >= 0 ? '+' : '') + fmtNum(x) },
+    { label: 'Engagement Rate', v: D.kpi.er, p: D.kpiPrev.er, sub: st ? st[0] : '—', fmt: fmtPct, status: st },
+  ];
+  const kw = (W - PAD * 2 - GAP * 3) / 4;
+  KPIS.forEach((k, i) => {
+    const x = PAD + i * (kw + GAP);
+    card(x, y, kw, KPI_H);
+    text(k.label.toUpperCase(), x + 26, y + 40, `700 15px ${F}`, INK2);
+    text(k.v === null ? '—' : k.fmt(k.v), x + 26, y + 98, `800 44px ${F}`, INK);
+    const d = k.label === 'Engagement Rate' ? (k.v !== null && k.p !== null ? k.v - k.p : null) : delta(k.v, k.p);
+    if (d !== null) {
+      const up = d >= 0, t = `${up ? '▲' : '▼'} ${k.label === 'Engagement Rate' ? Math.abs(d).toFixed(1).replace('.', ',') + ' poin' : Math.abs(d).toFixed(1).replace('.', ',') + '%'}`;
+      ctx.font = `800 15px ${F}`;
+      const tw = ctx.measureText(t).width + 22;
+      rr(x + kw - tw - 22, y + 22, tw, 30, 15); ctx.fillStyle = up ? 'rgba(34,197,94,0.15)' : 'rgba(239,68,68,0.15)'; ctx.fill();
+      text(t, x + kw - 33, y + 43, `800 15px ${F}`, up ? '#4ade80' : '#f87171', 'right');
+    }
+    if (k.status) {
+      ctx.fillStyle = k.status[1]; ctx.beginPath(); ctx.arc(x + 32, y + 128, 6, 0, Math.PI * 2); ctx.fill();
+      text(k.sub, x + 46, y + 134, `700 16px ${F}`, INK);
+    } else text(k.sub, x + 26, y + 134, `500 16px ${F}`, INK3);
+  });
+  y += KPI_H + GAP;
+
+  // ── Grafik batang horizontal ──
+  const niceStep = max => { const raw = max / 4, mag = Math.pow(10, Math.floor(Math.log10(raw || 1))), f = raw / mag; return (f <= 1 ? 1 : f <= 2 ? 2 : f <= 2.5 ? 2.5 : f <= 5 ? 5 : 10) * mag; };
+  const barChart = (x, yy, w, title, sub, key, opts = {}) => {
+    card(x, yy, w, chartH);
+    text(title, x + 26, yy + 42, `800 22px ${F}`, INK);
+    text(sub, x + 26, yy + 66, `500 15px ${F}`, INK3);
+    const vals = D.plats.map(p => p[key]);
+    const have = vals.filter(v => v !== null);
+    const total = opts.total ?? (have.length ? have.reduce((a, b) => a + b, 0) : null);
+    if (total !== null && !opts.noTotal) text(opts.totalFmt ? opts.totalFmt(total) : `Total ${fmtNum(total)}`, x + w - 26, yy + 42, `800 18px ${F}`, INK2, 'right');
+    const pl = x + 150, pr = x + w - 110, pt = yy + 92, pb = pt + n * ROW;
+    const maxV = Math.max(opts.minMax || 0, ...have.map(Math.abs), 0) || 1;
+    const step = opts.step || niceStep(maxV), xMax = opts.xMax || (Math.ceil(maxV / step) * step);
+    const X = v => pl + (Math.max(0, v) / xMax) * (pr - pl);
+    // grid + angka sumbu
+    for (let t = 0; t <= xMax + 1e-9; t += step) {
+      const gx = Math.round(X(t)) + 0.5;
+      ctx.strokeStyle = t === 0 ? BASE : GRID; ctx.lineWidth = 1;
+      ctx.beginPath(); ctx.moveTo(gx, pt - 6); ctx.lineTo(gx, pb + 4); ctx.stroke();
+      text(opts.tick ? opts.tick(t) : (xMax >= 10000 ? fmtNum(t) : fmtFull(t)), gx, pb + 26, `500 13px ${F}`, INK3, 'center');
+    }
+    (opts.refs || []).forEach(rf => {
+      const gx = X(rf.v);
+      ctx.save(); ctx.setLineDash([6, 6]); ctx.strokeStyle = rf.color; ctx.lineWidth = 1.5;
+      ctx.beginPath(); ctx.moveTo(gx, pt - 14); ctx.lineTo(gx, pb + 4); ctx.stroke(); ctx.restore();
+      text(rf.label, gx + 6, pt - 4, `700 13px ${F}`, INK2);
+    });
+    D.plats.forEach((p, i) => {
+      const cy = pt + i * ROW + ROW / 2;
+      ctx.fillStyle = p.color; ctx.beginPath(); ctx.arc(x + 32, cy, 6, 0, Math.PI * 2); ctx.fill();
+      text(p.label, x + 46, cy + 6, `600 17px ${F}`, INK);
+      const v = vals[i];
+      if (v === null) { text('N/A', pl + 8, cy + 6, `600 15px ${F}`, INK3); return; }
+      const bh = 22, bw = Math.max(4, X(v) - pl), col = opts.colorOf ? opts.colorOf(v) : p.color;
+      ctx.fillStyle = col;
+      ctx.beginPath(); ctx.moveTo(pl, cy - bh / 2); ctx.lineTo(pl + bw - 6, cy - bh / 2);
+      ctx.arcTo(pl + bw, cy - bh / 2, pl + bw, cy, 6); ctx.arcTo(pl + bw, cy + bh / 2, pl + bw - 6, cy + bh / 2, 6);
+      ctx.lineTo(pl, cy + bh / 2); ctx.closePath(); ctx.fill();
+      const lbl = opts.valFmt ? opts.valFmt(v) : fmtNum(v);
+      ctx.font = `800 17px ${F}`;
+      ctx.fillStyle = CARD; ctx.fillRect(pl + bw + 6, cy - 14, ctx.measureText(lbl).width + 12, 28);  // garis acuan tidak menembus label
+      text(lbl, pl + bw + 12, cy + 6, `800 17px ${F}`, INK);
+    });
+  };
+  const half = (W - PAD * 2 - GAP) / 2;
+  barChart(PAD, y, half, 'Views', 'Jumlah tayangan per platform', 'views');
+  barChart(PAD + half + GAP, y, half, 'Interaksi', 'Like + komentar + share', 'eng');
+  y += chartH + GAP;
+  barChart(PAD, y, half, 'Followers Baru', 'Pertambahan bulan ini', 'gained', { valFmt: v => (v >= 0 ? '+' : '') + fmtNum(v), totalFmt: t => `Total ${t >= 0 ? '+' : ''}${fmtNum(t)}` });
+  barChart(PAD + half + GAP, y, half, 'Total Followers', 'Akumulasi hingga akhir bulan', 'fol');
+  y += chartH + GAP;
+  const erMax = Math.max(6, ...D.plats.map(p => p.er || 0));
+  barChart(PAD, y, W - PAD * 2, 'Engagement Rate (ER)', 'Interaksi ÷ Views × 100 · warna batang = status', 'er', {
+    noTotal: true, xMax: Math.ceil(erMax), step: 1, tick: t => t + '%',
+    valFmt: v => `${fmtPct(v)}  ·  ${erStatus(v)[0]}`,
+    colorOf: v => erStatus(v)[1],
+    refs: [{ v: 2, label: 'Cukup ≥ 2%', color: WARN }, { v: 5, label: 'Bagus ≥ 5%', color: GOOD }],
+  });
+  y += chartH + GAP;
+
+  // ── Footer ──
+  card(PAD, y, W - PAD * 2, FOOT - 30, CARD2);
+  text('Cara membaca', PAD + 26, y + 38, `800 17px ${F}`, INK);
+  text('ER = Interaksi ÷ Views × 100   ·   ER ≥ 5% Bagus   ·   2–5% Cukup   ·   < 2% Perlu perbaikan   ·   ▲▼ dibanding ' + monthName(D.pm), PAD + 26, y + 70, `500 16px ${F}`, INK2);
+  text(`Followers Baru memakai isian "Follows"/"Subs Gained"; bila kosong, selisih followers dengan bulan lalu.`, PAD + 26, y + 98, `500 15px ${F}`, INK3);
+  text('Penjaga Harapan CMS', PAD, H - PAD + 4, `600 15px ${F}`, INK3);
+  text(`Dibuat ${new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}`, W - PAD, H - PAD + 4, `600 15px ${F}`, INK3, 'right');
 
   const link = document.createElement('a');
-  link.download = `grafik-${acctId}-${platId}-${fileTag}.jpg`;
+  link.download = `Laporan-${String(acct.name).replace(/[^\w-]+/g, '-')}-${ym}.jpg`;
   link.href = cv.toDataURL('image/jpeg', 0.95);
-  document.body.appendChild(link);
-  link.click();
-  document.body.removeChild(link);
-  toast('Grafik berhasil didownload ✓', 'success');
-  actLog('unduh grafik statistik', `${getAcctName(acctId)} ${platM.label} — ${rangeLabel}`);
+  document.body.appendChild(link); link.click(); document.body.removeChild(link);
+  toast('Laporan berhasil didownload ✓', 'success');
+  actLog('unduh laporan bulanan akun (JPG)', `${acct.name} — ${monthName(ym)}`);
 }
 
 function downloadStatTableJpg() {
