@@ -1,5 +1,13 @@
 [
   {
+    "id": "mwx2gabcnfb2g",
+    "user": "Admin",
+    "role": "Admin",
+    "action": "jadwalkan tayang Stock Contents",
+    "target": "\"Podcast Heroik Kemenangan Pangeran Jayakarta 22 Juni 1527 H\" — Podcast JA Selasa, 22 Desember 2026",
+    "timestamp": "2026-11-26T04:42:27.768Z"
+  },
+  {
     "id": "mwx2fx4oxjxga",
     "user": "Admin",
     "role": "Admin",
@@ -3990,13 +3998,5 @@
     "action": "ubah status",
     "target": "\"Tenang Data BPS Aman dan Rahasia\" menjadi Published",
     "timestamp": "2026-09-21T06:39:05.166Z"
-  },
-  {
-    "id": "muavjusbymx9e",
-    "user": "Umar",
-    "role": "Publisher",
-    "action": "ubah status",
-    "target": "\"UTAMAKAN KEAMANAN & KESELAMATAN JAMAAH\" menjadi Published",
-    "timestamp": "2026-09-21T06:38:56.411Z"
   }
 ]
