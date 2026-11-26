@@ -1,5 +1,13 @@
 [
   {
+    "id": "mwy0obhh2xodj",
+    "user": "Umar",
+    "role": "Publisher",
+    "action": "unduh laporan akun (JPG)",
+    "target": "Penjaga Harapan — Agustus 2026 – Oktober 2026",
+    "timestamp": "2026-11-26T20:40:29.477Z"
+  },
+  {
     "id": "mwy0jtmdb92br",
     "user": "Umar",
     "role": "Publisher",
@@ -3990,13 +3998,5 @@
     "action": "edit konten",
     "target": "\"Kekaguman Menag pada Gaya Komunikasi Multigenerasi Presiden Prabowo\"",
     "timestamp": "2026-09-24T11:58:51.431Z"
-  },
-  {
-    "id": "mufha9mz28m9d",
-    "user": "Umar",
-    "role": "Publisher",
-    "action": "ubah status",
-    "target": "\"Kekaguman Menag pada Gaya Komunikasi Multigenerasi Presiden Prabowo\" menjadi Published",
-    "timestamp": "2026-09-24T11:58:25.355Z"
   }
 ]
