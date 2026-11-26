@@ -1,5 +1,13 @@
 [
   {
+    "id": "mwy0wtfp9r8mo",
+    "user": "Umar",
+    "role": "Publisher",
+    "action": "unduh laporan akun (JPG)",
+    "target": "Penjaga Harapan — Bulanan · September 2026",
+    "timestamp": "2026-11-26T20:47:05.989Z"
+  },
+  {
     "id": "mwy0w6icbuqnx",
     "user": "Umar",
     "role": "Publisher",
@@ -3990,13 +3998,5 @@
     "action": "ubah status",
     "target": "\"Trilogi Pembangunan sebagai Patron Presiden Prabowo\" menjadi Drop",
     "timestamp": "2026-09-28T08:30:16.530Z"
-  },
-  {
-    "id": "muktshv92f8t7",
-    "user": "Umar",
-    "role": "Publisher",
-    "action": "ubah status",
-    "target": "\"Dukungan Penuh pada Ketegasan Presiden Prabowo Soal Pengembalian Uang Korupsi\" menjadi Published",
-    "timestamp": "2026-09-28T05:47:22.101Z"
   }
 ]
