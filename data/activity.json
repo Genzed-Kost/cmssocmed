@@ -1,5 +1,13 @@
 [
   {
+    "id": "mwxenu2396m2m",
+    "user": "Admin",
+    "role": "Admin",
+    "action": "logout",
+    "target": "keluar dari sistem",
+    "timestamp": "2026-11-26T10:24:15.339Z"
+  },
+  {
     "id": "mwxenexysrcqy",
     "user": "Admin",
     "role": "Admin",
@@ -3990,13 +3998,5 @@
     "action": "edit konten",
     "target": "\"Kekaguman Menag pada Gaya Komunikasi Multigenerasi Presiden Prabowo\"",
     "timestamp": "2026-09-21T08:56:44.335Z"
-  },
-  {
-    "id": "mub0gnyk9j1ta",
-    "user": "Umar",
-    "role": "Publisher",
-    "action": "tambah konten",
-    "target": "berjudul \"Inisiasi Fikih Lingkungan & Ekoteologi\" (tema: Podcast Menteri Agama) untuk akun 33 Official dijadwalkan 23 Sep 2026",
-    "timestamp": "2026-09-21T08:56:25.676Z"
   }
 ]
