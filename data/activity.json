@@ -1,5 +1,13 @@
 [
   {
+    "id": "mwx2fx4oxjxga",
+    "user": "Admin",
+    "role": "Admin",
+    "action": "ubah Stock Contents",
+    "target": "\"Podcast Lenong Betawi\" — Podcast JA",
+    "timestamp": "2026-11-26T04:42:10.680Z"
+  },
+  {
     "id": "mwx2f6e79r36z",
     "user": "Admin",
     "role": "Admin",
@@ -3990,13 +3998,5 @@
     "action": "ubah status",
     "target": "\"UTAMAKAN KEAMANAN & KESELAMATAN JAMAAH\" menjadi Published",
     "timestamp": "2026-09-21T06:38:56.411Z"
-  },
-  {
-    "id": "muavjre75d1e0",
-    "user": "Umar",
-    "role": "Publisher",
-    "action": "ubah status",
-    "target": "\"JUJUR ISI DATA UNTUK KEBIJAKAN NEGARA\" menjadi Published",
-    "timestamp": "2026-09-21T06:38:52.015Z"
   }
 ]
