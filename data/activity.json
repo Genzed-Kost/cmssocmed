@@ -1,5 +1,13 @@
 [
   {
+    "id": "mwxesuus36k72",
+    "user": "Admin",
+    "role": "Admin",
+    "action": "tambah konten",
+    "target": "berjudul \"Bareng mas Idham\" (tema: Podcast) untuk akun Penjaga Harapan dijadwalkan 10 Des 2026",
+    "timestamp": "2026-11-26T10:28:09.652Z"
+  },
+  {
     "id": "mwxeq9wrjhr4l",
     "user": "Admin",
     "role": "Admin",
@@ -3990,13 +3998,5 @@
     "action": "ubah status",
     "target": "\"Tindakan Berlapis Mencegah Kekerasan Seksual & Rencana Dirjen Pesantren\" menjadi Published",
     "timestamp": "2026-09-22T10:14:38.340Z"
-  },
-  {
-    "id": "muciohhcafy2k",
-    "user": "Umar",
-    "role": "Publisher",
-    "action": "tambah konten",
-    "target": "berjudul \"Kisah Momen Diselamatkan Prabowo di Masa Kritis\" (tema: Podcast Babe Haikal) untuk akun 33 Official dijadwalkan 24 Sep 2026",
-    "timestamp": "2026-09-22T10:14:09.792Z"
   }
 ]
