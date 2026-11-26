@@ -1,5 +1,13 @@
 [
   {
+    "id": "mwxectrkjs99x",
+    "user": "Admin",
+    "role": "Admin",
+    "action": "unduh grafik statistik",
+    "target": "Penjaga Harapan YouTube — 2025-12_2026-11",
+    "timestamp": "2026-11-26T10:15:41.744Z"
+  },
+  {
     "id": "mwxe360856siu",
     "user": "Admin",
     "role": "Admin",
@@ -3990,13 +3998,5 @@
     "action": "tambah konten",
     "target": "berjudul \"Kekaguman Menag pada Gaya Komunikasi Multigenerasi Presiden Prabowo\" (tema: Podcast Menteri Agama) untuk akun 33 Official dijadwalkan 21 Sep 2026",
     "timestamp": "2026-09-21T08:53:54.885Z"
-  },
-  {
-    "id": "mub0ck4acy6du",
-    "user": "Umar",
-    "role": "Publisher",
-    "action": "ubah status",
-    "target": "\"Permintaan Presiden Menjaga Istiqlal & Hubungan Historis\" menjadi Published",
-    "timestamp": "2026-09-21T08:53:14.074Z"
   }
 ]
