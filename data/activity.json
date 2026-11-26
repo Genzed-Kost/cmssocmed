@@ -1,5 +1,13 @@
 [
   {
+    "id": "mwxzt30n15emo",
+    "user": "Umar",
+    "role": "Publisher",
+    "action": "login",
+    "target": "masuk ke sistem sebagai Publisher",
+    "timestamp": "2026-11-26T20:16:12.167Z"
+  },
+  {
     "id": "mwxzswnwvmuzo",
     "user": "Admin",
     "role": "Admin",
@@ -3990,13 +3998,5 @@
     "action": "tambah konten",
     "target": "berjudul \"Peran Negara & Konsep Ekonomi Jalan Tengah (Ekonomi Pancasila)\" (tema: Podcast Fithra Faisa) untuk akun 33 Official dijadwalkan 30 Sep 2026",
     "timestamp": "2026-09-23T12:36:36.653Z"
-  },
-  {
-    "id": "mue36jy55c455",
-    "user": "Umar",
-    "role": "Publisher",
-    "action": "tambah konten",
-    "target": "berjudul \"Asta Cita Nomor 6: Pembangunan Bottom-Up dari Desa dan Daerah\" (tema: Podcast Fithra Faisa) untuk akun 33 Official dijadwalkan 29 Sep 2026",
-    "timestamp": "2026-09-23T12:35:51.293Z"
   }
 ]
