@@ -1,5 +1,13 @@
 [
   {
+    "id": "mwx2dz7xkxdfv",
+    "user": "Admin",
+    "role": "Admin",
+    "action": "ubah Stock Contents",
+    "target": "\"Podcast Juragan Kontrakan Betawi\" — Podcast JA",
+    "timestamp": "2026-11-26T04:40:40.077Z"
+  },
+  {
     "id": "mwx2dcj8reot6",
     "user": "Admin",
     "role": "Admin",
@@ -3990,13 +3998,5 @@
     "action": "login",
     "target": "masuk ke sistem sebagai Publisher",
     "timestamp": "2026-09-21T06:38:41.938Z"
-  },
-  {
-    "id": "muavje55npe7o",
-    "user": "Admin",
-    "role": "Admin",
-    "action": "logout",
-    "target": "keluar dari sistem",
-    "timestamp": "2026-09-21T06:38:34.841Z"
   }
 ]
