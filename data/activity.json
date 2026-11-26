@@ -1,5 +1,13 @@
 [
   {
+    "id": "mwxet4ny2su7s",
+    "user": "Lisa",
+    "role": "Administrator",
+    "action": "login",
+    "target": "masuk ke sistem sebagai Administrator",
+    "timestamp": "2026-11-26T10:28:22.366Z"
+  },
+  {
     "id": "mwxeszws69ahs",
     "user": "Admin",
     "role": "Admin",
@@ -3990,13 +3998,5 @@
     "action": "tambah konten",
     "target": "berjudul \"Dukungan Penuh pada Ketegasan Presiden Prabowo Soal Pengembalian Uang Korupsi\" (tema: Podcast Babe Haikal) untuk akun 33 Official dijadwalkan 26 Sep 2026",
     "timestamp": "2026-09-22T10:17:13.935Z"
-  },
-  {
-    "id": "mucir1e0y4rr7",
-    "user": "Umar",
-    "role": "Publisher",
-    "action": "tambah konten",
-    "target": "berjudul \"Awal Mula Penugasan & Perintah \"5 Detik\" Menjadi Pusat Halal Dunia\" (tema: Podcast Babe Haikal) untuk akun 33 Official dijadwalkan 25 Sep 2026",
-    "timestamp": "2026-09-22T10:16:08.904Z"
   }
 ]
