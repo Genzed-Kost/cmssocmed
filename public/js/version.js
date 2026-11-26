@@ -14,7 +14,7 @@ window.APP_INFO = {
       items: [
         '📺 Stock Contents: slot tayang tiap program otomatis muncul di kalender sesuai hari tayangnya',
         '🔎 Stock Contents: filter kalender Semua / Tayang / Produksi',
-        '📊 Statistik: unduh Laporan Bulanan Akun (JPG) — kartu KPI + grafik batang Views, Interaksi, Followers & Engagement Rate per platform',
+        '📊 Statistik: unduh Laporan Akun (JPG) sesuai filter (bulanan/mingguan, 1 atau beberapa periode) — kartu KPI, ringkasan performa & grafik batang per platform',
         '📰 Info Presiden kini 20 berita: 15 berita presiden + 5 berita teknologi global (prioritas China)',
       ],
       adminItems: [

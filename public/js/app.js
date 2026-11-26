@@ -7427,47 +7427,71 @@ function drawPlatformBadge(ctx, platId, cx, cy, size) {
    Bulan = bulan terakhir pada rentang yang sedang tampil (atau data terbaru akun). */
 const REPORT_PLATS = ['instagram', 'facebook', 'tiktok', 'youtube', 'twitter'];
 const REPORT_DARK_COLOR = { youtube: '#ff4d4d', tiktok: '#25f4ee', facebook: '#4c8dff', instagram: '#f0407f', twitter: '#38bdf8' };
-function reportMonthData(acctId, ym) {
-  const [y, m] = ym.split('-').map(Number);
-  const pd = new Date(y, m - 2, 1);
-  const pm = `${pd.getFullYear()}-${String(pd.getMonth() + 1).padStart(2, '0')}`;
+/* Rentang laporan mengikuti filter Statistik yang sedang tampil (bulanan/mingguan, 1 atau banyak periode).
+   Periode pembanding = periode sebelumnya dengan panjang yang sama. */
+function reportShiftKey(key, isW, n) {
+  if (isW) {
+    const [y, w] = key.split('-W').map(Number);
+    const jan4 = new Date(y, 0, 4);
+    const mon = new Date(jan4.getTime() + ((w - 1) * 7 - (jan4.getDay() + 6) % 7) * 86400000);
+    mon.setDate(mon.getDate() + 7 * n);
+    return dateToISOWeek(mon);
+  }
+  const [y, m] = key.split('-').map(Number);
+  const d = new Date(y, m - 1 + n, 1);
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+}
+function reportRange(acctId) {
+  const v = window._statView;
+  const isW = state.statViewMode === 'weekly';
+  const pKey = isW ? 'week' : 'month';
+  let from = '', to = '';
+  if (v && v.acctId === acctId && v.isWeekly === isW && v.rows.length) {
+    from = v.fromM && /W/.test(v.fromM) === isW ? v.fromM : '';
+    to   = v.toM   && /W/.test(v.toM)   === isW ? v.toM   : '';
+    if (!from && !to && v.rows.length) { /* Semua Data: pakai batas data yang tampil */ }
+  }
+  // Semua kunci periode yang ada di akun ini (semua platform) dalam rentang
+  const keys = new Set();
+  REPORT_PLATS.forEach(p => (state.analytics?.[acctId]?.[isW ? p + '_w' : p] || []).forEach(r => {
+    const k = r?.[pKey]; if (k && (!from || k >= from) && (!to || k <= to)) keys.add(k);
+  }));
+  const sorted = [...keys].sort();
+  if (!sorted.length) return null;
+  from = from || sorted[0]; to = to || sorted[sorted.length - 1];
+  // jumlah periode (inklusif) untuk menentukan periode pembanding
+  let count = 1, k = from;
+  while (k < to && count < 600) { k = reportShiftKey(k, isW, 1); count++; }
+  const prevTo = reportShiftKey(from, isW, -1), prevFrom = reportShiftKey(from, isW, -count);
+  return { isW, pKey, from, to, count, prevFrom, prevTo, allData: !v?.fromM && !v?.toM };
+}
+function reportRangeData(acctId, R) {
   const num = (r, k) => (r && k && r[k] !== undefined && r[k] !== null && r[k] !== '' && !isNaN(+r[k]) && +r[k] !== 0) ? +r[k] : null;
-  const one = (platId, mo) => {
+  const agg = (platId, from, to) => {
     const platM = PLATFORM_FIELDS[platId];
-    const rows  = state.analytics?.[acctId]?.[platId];
-    if (!platM || !Array.isArray(rows)) return null;
-    applyAutoER(acctId, platId);
-    const r = rows.find(x => x.month === mo);
-    if (!r) return null;
-    const prevR = rows.find(x => x.month === (mo === ym ? pm : '')) || null;
-    const views = num(r, platM.viewKey), eng = num(r, 'totalEngagement'), fol = num(r, platM.followerKey);
-    let gained = num(r, platId === 'youtube' ? 'subsGained' : 'followersGained');
-    if (gained === null && fol !== null && num(prevR, platM.followerKey) !== null) gained = fol - num(prevR, platM.followerKey);
-    let er = num(r, 'erPct');
-    if (er === null && views && eng !== null) er = eng / views * 100;
+    const all = state.analytics?.[acctId]?.[R.isW ? platId + '_w' : platId];
+    if (!platM || !Array.isArray(all)) return null;
+    if (!R.isW) applyAutoER(acctId, platId);
+    const sorted = all.filter(r => r?.[R.pKey]).sort((a, b) => a[R.pKey].localeCompare(b[R.pKey]));
+    const rows = sorted.filter(r => r[R.pKey] >= from && r[R.pKey] <= to);
+    if (!rows.length) return null;
+    const sum = k => { const v = rows.map(r => num(r, k)).filter(x => x !== null); return v.length ? v.reduce((a, b) => a + b, 0) : null; };
+    const lastOf = k => { for (let i = rows.length - 1; i >= 0; i--) { const v = num(rows[i], k); if (v !== null) return v; } return null; };
+    const views = sum(platM.viewKey), eng = sum('totalEngagement'), fol = lastOf(platM.followerKey);
+    let gained = sum(platId === 'youtube' ? 'subsGained' : 'followersGained');
+    if (gained === null && fol !== null) {   // tanpa isian Follows: selisih followers dengan sebelum rentang
+      const before = sorted.filter(r => r[R.pKey] < from && num(r, platM.followerKey) !== null).pop();
+      if (before) gained = fol - num(before, platM.followerKey);
+    }
+    let er = views && eng !== null ? eng / views * 100 : null;
+    if (er === null && rows.length === 1) er = num(rows[0], 'erPct');
     return { platId, label: platM.label, color: REPORT_DARK_COLOR[platId] || platM.color, views, eng, fol, gained, er };
   };
-  const cur  = REPORT_PLATS.map(p => one(p, ym)).filter(Boolean);
-  const prev = REPORT_PLATS.map(p => one(p, pm)).filter(Boolean);
+  const cur  = REPORT_PLATS.map(p => agg(p, R.from, R.to)).filter(Boolean);
+  const prev = R.allData ? [] : REPORT_PLATS.map(p => agg(p, R.prevFrom, R.prevTo)).filter(Boolean);
   const sum = (list, k) => { const v = list.map(x => x[k]).filter(x => x !== null); return v.length ? v.reduce((a, b) => a + b, 0) : null; };
-  const kpi = list => {
-    const views = sum(list, 'views'), eng = sum(list, 'eng');
-    return { views, eng, gained: sum(list, 'gained'), er: views && eng !== null ? eng / views * 100 : null };
-  };
-  return { ym, pm, plats: cur, kpi: kpi(cur), kpiPrev: kpi(prev.filter(p => cur.some(c => c.platId === p.platId))) };
-}
-function reportTargetMonth(acctId) {
-  const v = window._statView;
-  const months = new Set();
-  REPORT_PLATS.forEach(p => (state.analytics?.[acctId]?.[p] || []).forEach(r => r?.month && months.add(r.month)));
-  const sorted = [...months].sort();
-  if (!sorted.length) return '';
-  if (v && v.acctId === acctId && !v.isWeekly && v.rows.length) {
-    const inRange = sorted.filter(m => m >= v.rows[0].month && m <= v.rows[v.rows.length - 1].month);
-    if (inRange.length) return inRange[inRange.length - 1];
-  }
-  const cur = getCurrentYM();
-  return sorted.filter(m => m <= cur).pop() || sorted[sorted.length - 1];
+  const kpi = list => { const views = sum(list, 'views'), eng = sum(list, 'eng'); return { views, eng, gained: sum(list, 'gained'), er: views && eng !== null ? eng / views * 100 : null }; };
+  return { plats: cur, kpi: kpi(cur), kpiPrev: kpi(prev.filter(p => cur.some(c => c.platId === p.platId))) };
 }
 function reportImg(src) {
   return new Promise(res => { const i = new Image(); i.onload = () => res(i); i.onerror = () => res(null); i.src = src; });
@@ -7495,11 +7519,16 @@ function reportSummary(D, prevMonthName) {
 async function downloadStatJpg() {
   const acctId = state.statActiveAcct;
   const acct   = getAccounts().find(a => a.id === acctId) || { name: acctId, color: '#7c3aed' };
-  const ym     = reportTargetMonth(acctId);
-  if (!ym) { toast('Belum ada Data Bulanan untuk akun ini', 'error'); return; }
-  const D = reportMonthData(acctId, ym);
-  if (!D.plats.length) { toast('Belum ada Data Bulanan untuk akun ini', 'error'); return; }
+  const R      = reportRange(acctId);
+  const D      = R && reportRangeData(acctId, R);
+  if (!D || !D.plats.length) { toast('Belum ada data statistik pada filter ini', 'error'); return; }
   const monthName = x => { const [yy, mm] = x.split('-').map(Number); return new Date(yy, mm - 1, 1).toLocaleDateString('id-ID', { month: 'long', year: 'numeric' }); };
+  const pName  = k => R.isW ? fmtWeek(k) : monthName(k);
+  const single = R.from === R.to;
+  const unit   = R.isW ? 'minggu' : 'bulan';
+  const rangeLabel = single ? pName(R.from) : `${pName(R.from)} – ${pName(R.to)}`;
+  const prevName = R.allData ? '' : single ? (R.isW ? 'minggu lalu' : monthName(R.prevFrom).split(' ')[0]) : `${R.count} ${unit} sebelumnya`;
+  const perTxt = single ? `${unit} ini` : 'periode ini';
 
   // Tema gelap modern
   const BG = '#0a0f1c', CARD = '#111827', CARD2 = '#0f172a', LINE = 'rgba(255,255,255,0.08)';
@@ -7509,7 +7538,7 @@ async function downloadStatJpg() {
   const W = 1600, PAD = 48, GAP = 24, DPR = 1.5;
   const n = D.plats.length, ROW = 54;
   const chartH = 92 + n * ROW + 34;
-  const HEAD = 200, KPI_H = 158, FOOT = 150;
+  const HEAD = 220, KPI_H = 158, FOOT = 150;
   const H = PAD + HEAD + GAP + KPI_H + GAP + (chartH + GAP) * 2 + chartH + GAP + FOOT + PAD;
 
   const cv = document.createElement('canvas');
@@ -7541,13 +7570,13 @@ async function downloadStatJpg() {
   const logo = await reportImg('logo.png');
   let tx = PAD + 40;
   if (logo) { const lh = 72, lw = logo.width * lh / logo.height; ctx.drawImage(logo, tx, y + 40, lw, lh); tx += lw + 28; }
-  text('LAPORAN MEDIA SOSIAL BULANAN', tx, y + 58, `700 17px ${F}`, 'rgba(255,255,255,0.7)');
+  text(`LAPORAN MEDIA SOSIAL ${R.isW ? 'MINGGUAN' : 'BULANAN'}${single ? '' : ` · ${R.count} ${unit.toUpperCase()}`}`, tx, y + 58, `700 17px ${F}`, 'rgba(255,255,255,0.7)');
   text(acct.name, tx, y + 108, `800 46px ${F}`, '#ffffff');
   // Bulan + ringkasan singkat performa dibanding bulan lalu (tanpa persentase)
   ctx.font = `700 22px ${F}`;
-  const mTxt = monthName(ym), mW = ctx.measureText(mTxt).width;
-  text(mTxt, tx, y + 152, `700 22px ${F}`, '#ffffff');
-  const summary = reportSummary(D, monthName(D.pm).split(' ')[0]);
+  const mTxt = rangeLabel, mW = ctx.measureText(mTxt).width;
+  text(mTxt, tx, y + 170, `700 22px ${F}`, '#ffffff');
+  const summary = prevName ? reportSummary(D, prevName) : '';
   if (summary) {
     const sx = tx + mW + 22, sw = W - PAD - 36 - sx;
     ctx.font = `500 17px ${F}`;
@@ -7555,7 +7584,7 @@ async function downloadStatJpg() {
     summary.split(' ').forEach(w => { const t = line ? line + ' ' + w : w; if (ctx.measureText(t).width > sw - 36 && line) { lines.push(line); line = w; } else line = t; });
     if (line) lines.push(line);
     const show = lines.slice(0, 2), ph = show.length > 1 ? 64 : 40;
-    const py = y + 145 - ph / 2;
+    const py = y + 163 - ph / 2;
     rr(sx, py, sw, ph, 14); ctx.fillStyle = 'rgba(255,255,255,0.12)'; ctx.fill();
     show.forEach((l, i) => text(l, sx + 18, py + (show.length > 1 ? 26 + i * 24 : 26), `500 17px ${F}`, '#ffffff'));
   }
@@ -7577,7 +7606,7 @@ async function downloadStatJpg() {
   const KPIS = [
     { label: 'Total Views', v: D.kpi.views, p: D.kpiPrev.views, sub: 'semua platform', fmt: fmtNum },
     { label: 'Total Interaksi', v: D.kpi.eng, p: D.kpiPrev.eng, sub: 'like, komentar, share', fmt: fmtNum },
-    { label: 'Followers Baru', v: D.kpi.gained, p: D.kpiPrev.gained, sub: 'pertambahan bulan ini', fmt: x => (x >= 0 ? '+' : '') + fmtNum(x) },
+    { label: 'Followers Baru', v: D.kpi.gained, p: D.kpiPrev.gained, sub: `pertambahan ${perTxt}`, fmt: x => (x >= 0 ? '+' : '') + fmtNum(x) },
     { label: 'Engagement Rate', v: D.kpi.er, p: D.kpiPrev.er, sub: st ? st[0] : '—', fmt: fmtPct, status: st },
   ];
   const kw = (W - PAD * 2 - GAP * 3) / 4;
@@ -7641,8 +7670,8 @@ async function downloadStatJpg() {
   barChart(PAD, y, half, 'Views', 'Jumlah tayangan per platform', 'views');
   barChart(PAD + half + GAP, y, half, 'Interaksi', 'Like + komentar + share', 'eng');
   y += chartH + GAP;
-  barChart(PAD, y, half, 'Followers Baru', 'Pertambahan bulan ini', 'gained', { valFmt: v => (v >= 0 ? '+' : '') + fmtNum(v), totalFmt: t => `Total ${t >= 0 ? '+' : ''}${fmtNum(t)}` });
-  barChart(PAD + half + GAP, y, half, 'Total Followers', 'Akumulasi hingga akhir bulan', 'fol');
+  barChart(PAD, y, half, 'Followers Baru', `Pertambahan ${perTxt}`, 'gained', { valFmt: v => (v >= 0 ? '+' : '') + fmtNum(v), totalFmt: t => `Total ${t >= 0 ? '+' : ''}${fmtNum(t)}` });
+  barChart(PAD + half + GAP, y, half, 'Total Followers', `Akumulasi hingga akhir ${single ? unit + ' ini' : 'periode'}`, 'fol');
   y += chartH + GAP;
   const erMax = Math.max(6, ...D.plats.map(p => p.er || 0));
   barChart(PAD, y, W - PAD * 2, 'Engagement Rate (ER)', 'Interaksi ÷ Views × 100 · warna batang = status', 'er', {
@@ -7657,16 +7686,16 @@ async function downloadStatJpg() {
   card(PAD, y, W - PAD * 2, FOOT - 30, CARD2);
   text('Cara membaca', PAD + 26, y + 38, `800 17px ${F}`, INK);
   text('ER = Interaksi ÷ Views × 100   ·   ER ≥ 5% Bagus   ·   2–5% Cukup   ·   < 2% Perlu perbaikan', PAD + 26, y + 70, `500 16px ${F}`, INK2);
-  text(`Followers Baru memakai isian "Follows"/"Subs Gained"; bila kosong, selisih followers dengan bulan lalu.`, PAD + 26, y + 98, `500 15px ${F}`, INK3);
+  text(`Followers Baru memakai isian "Follows"/"Subs Gained"; bila kosong, selisih followers dengan sebelum periode ini. Total Followers = angka terakhir pada periode.`, PAD + 26, y + 98, `500 15px ${F}`, INK3);
   text('Penjaga Harapan CMS', PAD, H - PAD + 4, `600 15px ${F}`, INK3);
   text(`Dibuat ${new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}`, W - PAD, H - PAD + 4, `600 15px ${F}`, INK3, 'right');
 
   const link = document.createElement('a');
-  link.download = `Laporan-${String(acct.name).replace(/[^\w-]+/g, '-')}-${ym}.jpg`;
+  link.download = `Laporan-${String(acct.name).replace(/[^\w-]+/g, '-')}-${single ? R.from : R.from + '_' + R.to}.jpg`;
   link.href = cv.toDataURL('image/jpeg', 0.95);
   document.body.appendChild(link); link.click(); document.body.removeChild(link);
   toast('Laporan berhasil didownload ✓', 'success');
-  actLog('unduh laporan bulanan akun (JPG)', `${acct.name} — ${monthName(ym)}`);
+  actLog('unduh laporan akun (JPG)', `${acct.name} — ${rangeLabel}`);
 }
 
 function downloadStatTableJpg() {
