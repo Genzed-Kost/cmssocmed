@@ -1,5 +1,13 @@
 [
   {
+    "id": "mwx2cndj6r8q5",
+    "user": "Admin",
+    "role": "Admin",
+    "action": "ubah Stock Contents",
+    "target": "\"Menyembuhkan Inner Child\" — Konsultasi Hukum Keluarga",
+    "timestamp": "2026-11-26T04:39:38.071Z"
+  },
+  {
     "id": "mwx2c8bt917gq",
     "user": "Admin",
     "role": "Admin",
@@ -3990,13 +3998,5 @@
     "action": "login",
     "target": "masuk ke sistem sebagai Admin",
     "timestamp": "2026-09-21T06:37:37.770Z"
-  },
-  {
-    "id": "mu5ste30v1dua",
-    "user": "Umar",
-    "role": "Publisher",
-    "action": "ubah status",
-    "target": "\"JUJUR ISI DATA UNTUK KEBIJAKAN NEGARA\" menjadi Done",
-    "timestamp": "2026-09-17T17:23:31.596Z"
   }
 ]
