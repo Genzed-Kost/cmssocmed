@@ -1,5 +1,13 @@
 [
   {
+    "id": "mwx2c8bt917gq",
+    "user": "Admin",
+    "role": "Admin",
+    "action": "Tautkan link YouTube otomatis",
+    "target": "\"Master Saeful\"",
+    "timestamp": "2026-11-26T04:39:18.569Z"
+  },
+  {
     "id": "mwx2bzzywmwu8",
     "user": "Admin",
     "role": "Admin",
@@ -3990,13 +3998,5 @@
     "action": "ubah status",
     "target": "\"JUJUR ISI DATA UNTUK KEBIJAKAN NEGARA\" menjadi Done",
     "timestamp": "2026-09-17T17:23:31.596Z"
-  },
-  {
-    "id": "mu5ss2zss08wg",
-    "user": "Umar",
-    "role": "Publisher",
-    "action": "ubah status",
-    "target": "\"Gagasan Cerdas Presiden Prabowo Menyatukan Pundi-Pundi Dana Umat\" menjadi Published",
-    "timestamp": "2026-09-17T17:22:30.568Z"
   }
 ]
