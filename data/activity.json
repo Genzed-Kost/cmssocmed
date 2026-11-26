@@ -1,5 +1,13 @@
 [
   {
+    "id": "mwxeoodnm09vm",
+    "user": "Admin",
+    "role": "Admin",
+    "action": "logout",
+    "target": "keluar dari sistem",
+    "timestamp": "2026-11-26T10:24:54.635Z"
+  },
+  {
     "id": "mwxeonmqoxp5t",
     "user": "Admin",
     "role": "Admin",
@@ -3990,13 +3998,5 @@
     "action": "ubah status",
     "target": "\"Sikap Presiden Prabowo Terhadap Kritik dan Penghinaan\" menjadi Published",
     "timestamp": "2026-09-22T04:58:56.316Z"
-  },
-  {
-    "id": "mub178kj7m4d0",
-    "user": "Umar",
-    "role": "Publisher",
-    "action": "tambah konten",
-    "target": "berjudul \"Sikap Presiden Prabowo Terhadap Kritik dan Penghinaan\" (tema: Podcast Menteri Hukum) untuk akun 33 Official dijadwalkan 21 Sep 2026",
-    "timestamp": "2026-09-21T09:17:05.443Z"
   }
 ]
