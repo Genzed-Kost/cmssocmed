@@ -1,5 +1,13 @@
 [
   {
+    "id": "mwx2dcj8reot6",
+    "user": "Admin",
+    "role": "Admin",
+    "action": "jadwalkan tayang Stock Contents",
+    "target": "\"Sejarah Makam Raden Ateng\" — Liputan JA Jumat, 27 November 2026",
+    "timestamp": "2026-11-26T04:40:10.676Z"
+  },
+  {
     "id": "mwx2cndj6r8q5",
     "user": "Admin",
     "role": "Admin",
@@ -3990,13 +3998,5 @@
     "action": "logout",
     "target": "keluar dari sistem",
     "timestamp": "2026-09-21T06:38:34.841Z"
-  },
-  {
-    "id": "muavi63u9xqie",
-    "user": "Admin",
-    "role": "Admin",
-    "action": "login",
-    "target": "masuk ke sistem sebagai Admin",
-    "timestamp": "2026-09-21T06:37:37.770Z"
   }
 ]
