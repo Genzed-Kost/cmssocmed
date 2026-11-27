@@ -1,5 +1,21 @@
 [
   {
+    "id": "mwyspu5piozmv",
+    "user": "Admin",
+    "role": "Admin",
+    "action": "lengkapi judul video YouTube",
+    "target": "1 Stock Content",
+    "timestamp": "2026-11-27T09:45:29.581Z"
+  },
+  {
+    "id": "mwyspsscy80rn",
+    "user": "Admin",
+    "role": "Admin",
+    "action": "ubah Stock Contents",
+    "target": "\"Sejarah Makam Raden Ateng\" — Liputan JA",
+    "timestamp": "2026-11-27T09:45:27.804Z"
+  },
+  {
     "id": "mwyso932026ev",
     "user": "Admin",
     "role": "Admin",
@@ -3982,21 +3998,5 @@
     "action": "logout",
     "target": "keluar dari sistem",
     "timestamp": "2026-09-30T04:34:28.127Z"
-  },
-  {
-    "id": "munm2f2zqwnns",
-    "user": "Admin",
-    "role": "Admin",
-    "action": "hapus konten",
-    "target": "Transformasi Sektor Supply & Tantangan Penurunan Kelas Menengah",
-    "timestamp": "2026-09-30T04:34:26.651Z"
-  },
-  {
-    "id": "munm21hto9phi",
-    "user": "Admin",
-    "role": "Admin",
-    "action": "login",
-    "target": "masuk ke sistem sebagai Admin",
-    "timestamp": "2026-09-30T04:34:09.041Z"
   }
 ]
