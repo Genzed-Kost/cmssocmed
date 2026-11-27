@@ -368,7 +368,12 @@
     "prodTime": "10:00",
     "prodDateEnd": "",
     "prodTimeEnd": "",
-    "airDate": "2026-11-27"
+    "airDate": "2026-11-27",
+    "ytUrl": "https://youtu.be/XayPKQuDBFQ?si=tPJaYRxKoDMP022d",
+    "ytTitle": "",
+    "ytChannel": "",
+    "ytAuto": false,
+    "ytSkip": false
   },
   {
     "id": "sc_1794820568994",
